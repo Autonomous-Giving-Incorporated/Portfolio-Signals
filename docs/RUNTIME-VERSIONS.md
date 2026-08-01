@@ -5,6 +5,7 @@ The repository and staging procedures use the following tested versions:
 | Runtime | Pinned version | Authority |
 |---|---:|---|
 | Node.js | `22.18.0` | `.nvmrc`, `.tool-versions`, GitHub Actions |
+| Deno | `2.2.7` | `.tool-versions`, GitHub Actions edge-function check |
 | Supabase CLI | `2.31.8` | GitHub Actions and `scripts/staging/bootstrap.env.example` |
 | PostgreSQL | `15.8` (`major_version = 15`) | `.tool-versions` and `supabase/config.toml` |
 

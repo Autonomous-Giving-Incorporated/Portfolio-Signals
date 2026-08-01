@@ -15,6 +15,9 @@ jobs:
           node-version: '22.18.0'
           cache: npm
           cache-dependency-path: services/workbook-parser/package-lock.json
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.2.7
       - name: Install parser dependencies
         working-directory: services/workbook-parser
         run: npm ci --ignore-scripts
@@ -30,6 +33,8 @@ jobs:
       - name: Test import API authentication boundary
         working-directory: services/import-api
         run: npm test
+      - name: Type-check signed document edge function
+        run: deno check supabase/functions/signed-document-url/index.ts
       - name: Verify private storage controls
         shell: bash
         run: |
@@ -37,7 +42,10 @@ jobs:
           grep -q "campaign-private" supabase/migrations/006_private_storage.sql
           grep -q "public = false" tests/rls/role_matrix.sql
           grep -q "Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')" supabase/functions/signed-document-url/index.ts
-          grep -q "document_records" supabase/functions/signed-document-url/index.ts
+          grep -q "document_records" supabase/migrations/011_document_access_audit.sql
+          grep -q "record_document_access" supabase/functions/signed-document-url/index.ts
+          grep -q "expiresIn < 30 || expiresIn > 300" supabase/functions/signed-document-url/index.ts
+          grep -q "document_access_authorized" supabase/migrations/011_document_access_audit.sql
           grep -q "consent_candidate" import-review.js
           grep -q "approve_import_row" import-review.js
           grep -q "source_name" services/import-api/server.mjs
@@ -50,6 +58,7 @@ jobs:
           grep -q '"@e965/xlsx": "0.20.3"' services/workbook-parser/package.json
           grep -qx '22.18.0' .nvmrc
           grep -qx 'nodejs 22.18.0' .tool-versions
+          grep -qx 'deno 2.2.7' .tool-versions
           grep -qx 'postgres 15.8' .tool-versions
           grep -q 'version: 2.31.8' .github/workflows/local-supabase-tests.yml
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
