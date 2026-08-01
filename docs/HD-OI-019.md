@@ -64,6 +64,7 @@ Also delivered under HD-OI-019:
 | Auth MFA on host | VERIFIED — TOTP enabled; public signup disabled |
 | `signed-document-url` Edge Function | DEPLOYED |
 | Edge Function unauthenticated HTTP denial | PASS — `401 UNAUTHORIZED_NO_AUTH_HEADER` |
+| Edge Function authenticated HTTP issuance | FAIL — synthetic director received `403 forbidden` |
 | Seven-file synthetic hosted policy suite | PASS |
 | SSL enforcement | ENABLED — staging restart completed |
 | Staging platform hardening | FAIL — backups deferred, DB network unrestricted, staging URL unspecified |
@@ -76,6 +77,7 @@ Also delivered under HD-OI-019:
 - restrict database network access after trusted CIDRs are supplied;
 - reconcile the hosted API/storage configuration after an explicit staging application URL is named;
 - verify signed-URL edge function against staging with synthetic objects only;
+- scope the Edge Function profile lookup to the authenticated user before redeployment;
 - provision a separate production project or record an explicit single-project promotion decision.
 
 Hosted schema, RLS, storage, session, import, and document-audit controls were verified with

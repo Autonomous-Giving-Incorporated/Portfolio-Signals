@@ -42,7 +42,11 @@
     "unauthenticated_request_status": 401,
     "unauthenticated_error_code": "UNAUTHORIZED_NO_AUTH_HEADER",
     "unauthenticated_fail_closed": true,
-    "authenticated_positive_path": "NOT_COMPUTABLE_WITHOUT_SYNTHETIC_LOGIN_SESSION"
+    "authenticated_positive_path": "FAIL_403_FORBIDDEN",
+    "synthetic_probe_runs": 3,
+    "mutable_probe_records_cleaned": true,
+    "synthetic_probe_identities_disabled": true,
+    "inferred_root_cause": "Unfiltered profiles.select(...).single() conflicts with director visibility of multiple profiles."
   },
   "synthetic_policy_suite": {
     "suite_count": 7,
