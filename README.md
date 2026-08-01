@@ -82,6 +82,14 @@ expansion: 1200000
 transformation: 2000000
 ```
 
+## Public impact surface
+
+Live public donation progress, use-of-funds receipts, and event digests are published on **Impact Relay** (aggregate-only, no CRM data):
+
+https://scrimshawlife-ctrl.github.io/Impact-Relay/
+
+Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
+
 ## Privacy and authority boundary
 
 The repository must never contain:
