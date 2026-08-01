@@ -68,6 +68,12 @@ jobs:
           echo "GitHub Pages is unavailable for this repository plan or visibility."
           echo "Public portal validation still passed; deploy is skipped rather than failing the branch."
           echo "Enable Pages with GitHub Actions as the source when the plan supports it."
+      - name: Generate staging browser runtime config
+        if: steps.pages.outcome == 'success'
+        env:
+          STAGING_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
+          STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+        run: node scripts/staging/generate-runtime-config.mjs
       - name: Upload Pages artifact
         if: steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
@@ -77,3 +83,5 @@ jobs:
         id: deployment
         if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
