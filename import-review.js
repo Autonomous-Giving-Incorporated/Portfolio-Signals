@@ -214,7 +214,7 @@ async function handleRowAction(button) {
   }
 
   if (result.error) {
-    setActionMessage(result.error.message, true);
+    setActionMessage('The requested review action failed.', true);
     button.disabled = false;
     return;
   }
@@ -223,10 +223,10 @@ async function handleRowAction(button) {
   await load();
 }
 
-function showError(error) {
-  console.error(error);
+function showError() {
+  console.error({ event: 'import_review_load_failed' });
   text('batchState', 'Review error');
-  setActionMessage(error.message || String(error), true);
+  setActionMessage('Import review data could not be loaded.', true);
 }
 
 document.getElementById('refreshImport')?.addEventListener('click', () => {

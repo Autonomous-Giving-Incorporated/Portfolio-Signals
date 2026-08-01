@@ -20,7 +20,7 @@ outreach: BLOCKED
 | Supabase CLI (CI) | 2.31.8 |
 | Postgres major | 15 |
 | Node (parser CI) | 22.18.0 |
-| Signed URL TTL | 60 seconds |
+| Signed URL TTL | 30-300 seconds; 60-second default |
 | Private bucket | `campaign-private` (non-public) |
 
 Upgrade only through an explicit, tested PR. Do not drift production ahead of CI pins without re-running the disposable policy suite.
@@ -106,7 +106,7 @@ Production bucket checklist:
 - upload paths scoped by authenticated owner folder
 - signed URLs issued only through the edge function
 - every signed URL creates an `audit_log` event
-- retention, deletion, and legal-hold procedure approved outside this repository
+- retention, deletion, and legal-hold procedure approved using [RETENTION-LEGAL-HOLD.md](RETENTION-LEGAL-HOLD.md)
 
 ## Observability without personal data
 
@@ -149,3 +149,5 @@ HD-OI-019 is complete only when both of the following are true:
 2. Operators have completed the staging/production project checklist above in live managed environments (evidence recorded outside GitHub if it includes private project identifiers).
 
 Until both are true, production import remains blocked.
+
+Operational response and recovery evidence procedures are defined in [OPERATIONAL-CONTROLS.md](OPERATIONAL-CONTROLS.md) and [templates/RESTORE-DRILL-EVIDENCE.md](templates/RESTORE-DRILL-EVIDENCE.md).
