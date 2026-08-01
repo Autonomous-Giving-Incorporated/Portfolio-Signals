@@ -73,6 +73,8 @@ Also delivered under HD-OI-019:
 - verify signed-URL edge function against staging with synthetic objects only;
 - provision a separate production project or record an explicit single-project promotion decision.
 
+Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Supabase CLI, and PostgreSQL toolchain. Hosted provider configuration and staging evidence remain operator-owned.
+
 ## Non-goals
 
 - production data import;

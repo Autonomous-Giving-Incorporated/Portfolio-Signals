@@ -199,3 +199,5 @@ master_development_list: LOCAL_ONLY_INVENTORIED  # SHA-256 in docs/DATA-PLACEMEN
 ```
 
 See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
+
+Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIME-VERSIONS.md](docs/RUNTIME-VERSIONS.md).

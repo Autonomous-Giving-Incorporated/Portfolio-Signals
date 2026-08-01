@@ -112,6 +112,8 @@ production_data_used_in_tests: false
 Repository progress in this phase:
 
 - MFA / active-profile controls and expanded RLS suite;
+- fail-closed JWT expiration and immediate role-revocation checks;
+- pinned Node, Supabase CLI, and PostgreSQL versions;
 - import-review approve / reject / promote RPCs + UI;
 - storage matrix tests for private bucket and document metadata;
 - staging bootstrap scripts and docs;
