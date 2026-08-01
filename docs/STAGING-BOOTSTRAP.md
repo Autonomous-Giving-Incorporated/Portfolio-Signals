@@ -25,7 +25,21 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 
 - production import;
 - real member/donor workbook load;
-- committing service-role keys or encryption material.
+- committing service-role keys or encryption material;
+- using Notion as CRM storage for person-level rows.
+
+## Hosted staging project (current)
+
+| Field | Value | Status |
+|---|---|---|
+| Project ref | `ecxkhihlbrcwpavfoaoq` | OBSERVED |
+| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq | OBSERVED |
+| API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
+| Linked to GitHub repo | Yes (operator-reported) | OBSERVED |
+| Migrations applied | Operator action required | PENDING |
+| Real CRM data | Not loaded | REQUIRED |
+
+Private data placement: **local workbook + this Supabase project**. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 
 ## Prerequisites
 
@@ -50,21 +64,29 @@ Public config template:
 ```bash
 cp scripts/staging/bootstrap.env.example scripts/staging/bootstrap.env
 cp scripts/staging/runtime-config.staging.example.js runtime-config.js
-# edit public URL + anon key only
+# set SUPABASE_URL / anon key (staging host already filled in examples)
 ```
 
 `bootstrap.env` and `runtime-config.js` are operator-local and must not be committed.
 
 ## Remote staging project
 
-1. Create a new Supabase project named for staging.
+1. ~~Create a new Supabase project named for staging.~~ **Done** — ref `ecxkhihlbrcwpavfoaoq`.
 2. Enable Auth email OTP / SSO as approved by leadership.
 3. Enable MFA for privileged operators.
-4. Store service-role key in a secret manager.
-5. `supabase link --project-ref <staging-ref>` using operator credentials.
-6. `./scripts/staging/apply-migrations.sh remote-linked`
-7. Deploy edge function `signed-document-url` with server-only env vars.
-8. Configure private bucket policies by applying migrations (includes `campaign-private`).
+4. Store service-role key in a secret manager (never git, never chat logs).
+5. Link and push schema:
+
+```bash
+supabase login
+supabase link --project-ref ecxkhihlbrcwpavfoaoq
+./scripts/staging/apply-migrations.sh remote-linked
+# or: supabase db push
+```
+
+6. Deploy edge function `signed-document-url` with server-only env vars.
+7. Confirm Storage bucket `campaign-private` exists and is non-public (migrations).
+8. Load **synthetic** fixtures only; run import-gate / RLS / storage matrix before any real workbook.
 
 ## Browser wiring
 
@@ -83,7 +105,8 @@ Load public runtime config before modules:
 ## Verification gate
 
 ```yaml
-migrations_applied: true
+project_ref: ecxkhihlbrcwpavfoaoq
+migrations_applied: true          # after db push
 synthetic_fixtures_only: true
 import_gates: true
 import_review_actions: true
@@ -91,4 +114,16 @@ six_role_rls: true
 storage_matrix: true
 service_role_in_git: false
 production_data: false
+master_development_list_loaded: false
 ```
+
+## JCode / operator continue checklist
+
+When continuing in an interactive IDE (for example JCode):
+
+1. Authenticate Supabase CLI against the staging project.
+2. Apply migrations; confirm tables `import_batches`, `import_staging_rows`, `profiles`.
+3. Create gitignored `runtime-config.js` with URL + **anon** key.
+4. Provision operator profiles with roles; enforce MFA flags in schema.
+5. Keep Master Development List on local disk; inventory SHA-256 is in [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
+6. Do not promote production import until HD-OI-020 leadership gates pass.

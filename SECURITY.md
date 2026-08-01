@@ -2,18 +2,34 @@
 
 ## Scope
 
-This repository hosts a static director-facing campaign dashboard. It is not the system of record for members, donors, sponsors, grants, event attendance, or outreach operations.
+This repository hosts a static director-facing campaign dashboard and the **schema/code** for an authenticated campaign-control system. It is not the system of record for members, donors, sponsors, grants, event attendance, or outreach operations.
 
-## Allowed Data
+## Systems of record (placement)
+
+| Data class | Allowed location |
+|---|---|
+| Public aggregates | This repo + GitHub Pages + Impact Relay |
+| Source workbooks (PII) | Operator **local** disk until authorized quarantine upload |
+| Quarantine / CRM / consent / notes | **Supabase** Postgres under RLS |
+| Source objects / private docs | Supabase Storage bucket `campaign-private` |
+| Strategy / public evidence notes | Notion (aggregates and process only) |
+
+Notion is **not** the CRM system of record. Do not bulk-load donor or member rosters into Notion as a substitute for Supabase.
+
+Staging project (public ref only): `ecxkhihlbrcwpavfoaoq` — see [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md).
+
+## Allowed Data (in Git)
 
 - public organizational information;
 - public campaign targets approved for disclosure;
 - aggregate counts that cannot reasonably identify a person;
 - public sponsor and grant research;
 - planning states, decision gates, and governance controls;
-- synthetic examples clearly marked as examples.
+- synthetic examples clearly marked as examples;
+- project refs and non-secret runbook URLs;
+- workbook **SHA-256 digests and sheet counts** without cell values.
 
-## Prohibited Data
+## Prohibited Data (in Git)
 
 Do not commit:
 
@@ -23,8 +39,9 @@ Do not commit:
 - donation histories or capacity estimates;
 - attendance-level or RSVP histories;
 - relationship notes, contact scores, consent state, or suppression state;
-- identity-provider tokens, API keys, passwords, or database credentials;
-- spreadsheet or CSV exports containing campaign records.
+- identity-provider tokens, API keys, passwords, database credentials, or **service-role** keys;
+- spreadsheet or CSV exports containing campaign records;
+- NDJSON or parser output derived from real workbooks.
 
 ## Reporting
 
@@ -62,4 +79,4 @@ A report should include:
 
 ## Security Boundary
 
-GitHub Pages is a publication surface, not a privacy or authorization boundary. Restricted campaign operations must use a separately authenticated application and database.
+GitHub Pages is a publication surface, not a privacy or authorization boundary. Restricted campaign operations must use a separately authenticated application and database (Supabase). CI policy tests run only against **disposable local** stacks and synthetic fixtures—never against production personal data.

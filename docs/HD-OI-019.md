@@ -39,9 +39,9 @@ Observed drift repaired:
 
 ## Evidence boundary
 
-- No production Supabase project is created by this repository change.
-- No real identities, workbooks, or credentials are committed.
+- No real identities, workbooks, or credentials are committed to GitHub.
 - MFA provider enablement and live backup drills remain operator actions outside GitHub.
+- Hosted project creation is operator-owned (not performed by repository CI).
 
 ## Follow-on repository slice
 
@@ -50,17 +50,31 @@ Also delivered under HD-OI-019:
 - import-review approve / reject / promote RPCs and UI actions;
 - storage policy matrix tests with synthetic object metadata;
 - staging bootstrap scripts and operator docs (no secrets);
-- workspace decision queue and sponsor/grant pipeline modules wired to schema RPCs.
+- workspace decision queue and sponsor/grant pipeline modules wired to schema RPCs;
+- data-placement docs: local + Supabase; staging ref recorded.
+
+## Hosted staging progress
+
+| Item | State |
+|---|---|
+| Staging project `ecxkhihlbrcwpavfoaoq` | PROVISIONED (operator) |
+| GitHub association | OBSERVED (operator-reported) |
+| `supabase db push` / migrations on host | PENDING_OPERATOR |
+| Auth MFA on host | PENDING_OPERATOR |
+| Production project separation | PENDING |
+| Real workbook import | BLOCKED (HD-OI-020) |
 
 ## Remaining HD-OI-019 work
 
-- provision staging and production projects;
+- apply migrations to staging (`ecxkhihlbrcwpavfoaoq`);
 - enable Auth MFA in each managed project;
 - run backup/restore drill and record operator evidence;
-- verify signed-URL edge function against staging with synthetic objects only.
+- verify signed-URL edge function against staging with synthetic objects only;
+- provision a separate production project or record an explicit single-project promotion decision.
 
 ## Non-goals
 
 - production data import;
 - outreach activation;
-- leadership policy approval.
+- leadership policy approval;
+- Notion as CRM system of record.
