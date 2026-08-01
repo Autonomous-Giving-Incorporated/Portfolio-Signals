@@ -116,6 +116,7 @@ Repository progress in this phase:
 - pinned Node, Supabase CLI, and PostgreSQL versions;
 - bounded signed-document URLs with privacy-safe issuance audit evidence;
 - privacy-safe structured logging plus secret rotation, recovery, retention, and legal-hold runbooks;
+- fail-closed non-interactive hosted-staging migration and seven-suite verification runner;
 - import-review approve / reject / promote RPCs + UI;
 - storage matrix tests for private bucket and document metadata;
 - staging bootstrap scripts and docs;

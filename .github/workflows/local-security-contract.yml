@@ -67,6 +67,9 @@ jobs:
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
           test -f workspace/session.js
           test -f docs/STAGING-BOOTSTRAP.md
+          grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
+          grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
+          grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
           test -f docs/OPERATIONAL-CONTROLS.md
           test -f docs/RETENTION-LEGAL-HOLD.md
           test -f docs/templates/RESTORE-DRILL-EVIDENCE.md

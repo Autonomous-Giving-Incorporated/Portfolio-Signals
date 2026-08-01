@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Load synthetic six-role fixtures into a disposable/local database only.
+# Load synthetic six-role fixtures into the local database.
+# Hosted staging uses verify-policy-suite.sh remote-staging with explicit confirmation.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
