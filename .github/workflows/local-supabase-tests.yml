@@ -24,10 +24,17 @@ jobs:
         run: supabase start
       - name: Reset and apply migrations
         run: supabase db reset
+      - name: Resolve disposable database URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          test -n "${DB_URL:-}"
+          printf 'DB_URL=%s\n' "$DB_URL" >> "$GITHUB_ENV"
       - name: Load synthetic role fixtures
-        run: psql "$(supabase status -o env | sed -n 's/^DB_URL=//p')" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
       - name: Execute RLS acceptance checks
-        run: psql "$(supabase status -o env | sed -n 's/^DB_URL=//p')" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
