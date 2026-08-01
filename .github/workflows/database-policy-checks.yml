@@ -25,10 +25,33 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE '(BEGIN[[:space:]]+PRIVATE[[:space:]]+KEY|password[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|service_role[[:space:]]*:[[:space:]]*["'"']eyJ[A-Za-z0-9_-]+)' supabase tests || {
-            echo 'Potential embedded secret or privileged credential value found.'
-            exit 1
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          roots = [Path('supabase'), Path('tests')]
+          patterns = {
+              'private key': re.compile(r'BEGIN\s+PRIVATE\s+KEY', re.I),
+              'literal password': re.compile(r'password\s*=\s*["\'][^"\']+["\']', re.I),
+              'literal service key': re.compile(r'SUPABASE_SERVICE_ROLE_KEY\s*=\s*["\'][^"\']+["\']'),
+              'literal privileged jwt': re.compile(r'service_role\s*:\s*["\']eyJ[A-Za-z0-9_-]+', re.I),
           }
+          findings = []
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob('*'):
+                  if not path.is_file():
+                      continue
+                  try:
+                      text = path.read_text(encoding='utf-8')
+                  except UnicodeDecodeError:
+                      continue
+                  for label, pattern in patterns.items():
+                      if pattern.search(text):
+                          findings.append(f'{path}: {label}')
+          if findings:
+              raise SystemExit('Potential embedded secret content found:\n' + '\n'.join(findings))
+          PY
           ! grep -RniE 'drop[[:space:]]+(table|schema)[[:space:]]+.*cascade' supabase/migrations || {
             echo 'Destructive CASCADE migration requires separate operator review.'
             exit 1
@@ -74,8 +97,6 @@ jobs:
   local-supabase-tests:
     runs-on: ubuntu-latest
     if: ${{ false }}
-    # Superseded by the executable local Supabase workflow. Retained as a
-    # non-authoritative compatibility marker until all policy checks consolidate.
     steps:
       - uses: actions/checkout@v4
       - run: echo 'Executable role enforcement runs in the dedicated local Supabase workflow.'
