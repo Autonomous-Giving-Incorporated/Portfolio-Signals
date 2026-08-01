@@ -20,7 +20,11 @@ Deno.serve(async (req) => {
   const { data: userData } = await userClient.auth.getUser();
   if (!userData.user) return json({ error: 'unauthorized' }, 401);
 
-  const { data: profile } = await userClient.from('profiles').select('role,active').single();
+  const { data: profile } = await userClient
+    .from('profiles')
+    .select('role,active')
+    .eq('id', userData.user.id)
+    .single();
   if (!profile?.active || !['director','campaign_lead','development','data_steward','auditor'].includes(profile.role)) {
     return json({ error: 'forbidden' }, 403);
   }

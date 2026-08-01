@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Hacker Dojo — Donor Impact Receipts</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="section" id="donorApp">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">IMPACT RELAY · DONOR</p>
+        <h1>Fund timeline &amp; use-of-funds</h1>
+        <p class="lede" id="identityLine">Donor-scoped receipts from Impact Relay (staff view). Supabase auth when configured.</p>
+      </div>
+      <span class="status-pill status-blocked" id="apiStatus">API offline</span>
+    </div>
+    <script src="runtime-config.js"></script>
+
+    <section class="panel">
+      <div class="control-grid">
+        <label>API base <input id="apiBase" type="url" value="http://127.0.0.1:8787" style="min-width:16rem"></label>
+        <label>Donor id <input id="donorId" type="text" value="donor_alice" list="donorList"></label>
+        <datalist id="donorList">
+          <option value="donor_alice"></option>
+          <option value="donor_bob"></option>
+        </datalist>
+        <button type="button" class="button" id="btnLoad">Load dashboard</button>
+      </div>
+      <p id="actionMsg" class="note"></p>
+    </section>
+
+    <section class="metric-grid" id="balanceGrid" aria-label="Balances"></section>
+
+    <section class="panel">
+      <div class="panel-heading"><h2>Timeline</h2></div>
+      <div id="timeline" class="note">Load a donor to see fund timeline.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><h2>Receipts</h2></div>
+      <div id="receipts" class="note">—</div>
+    </section>
+
+    <section class="panel" id="detailPanel" hidden>
+      <div class="panel-heading"><h2>Receipt detail</h2></div>
+      <pre id="receiptDetail" class="note" style="white-space:pre-wrap;overflow:auto;max-height:28rem"></pre>
+    </section>
+  </main>
+  <script type="module" src="donor-impact.js"></script>
+</body>
+</html>

@@ -44,6 +44,7 @@ jobs:
           grep -q "Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')" supabase/functions/signed-document-url/index.ts
           grep -q "document_records" supabase/migrations/011_document_access_audit.sql
           grep -q "record_document_access" supabase/functions/signed-document-url/index.ts
+          grep -q ".eq('id', userData.user.id)" supabase/functions/signed-document-url/index.ts
           grep -q "expiresIn < 30 || expiresIn > 300" supabase/functions/signed-document-url/index.ts
           grep -q "document_access_authorized" supabase/migrations/011_document_access_audit.sql
           grep -q "consent_candidate" import-review.js
@@ -70,6 +71,12 @@ jobs:
           grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
           grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
           grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
+          test -f scripts/staging/generate-runtime-config.mjs
+          grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
+          grep -q "Refusing to emit runtime config for a non-staging Supabase project" scripts/staging/generate-runtime-config.mjs
+          ! grep -q "SUPABASE_SERVICE_ROLE_KEY" scripts/staging/generate-runtime-config.mjs
+          grep -B1 'src="workspace.js"' workspace.html | grep -q 'src="runtime-config.js"'
+          grep -B1 'src="import-review.js"' import-review.html | grep -q 'src="runtime-config.js"'
           test -f docs/OPERATIONAL-CONTROLS.md
           test -f docs/RETENTION-LEGAL-HOLD.md
           test -f docs/templates/RESTORE-DRILL-EVIDENCE.md
@@ -102,3 +109,5 @@ jobs:
         run: |
           grep -q "promotion_authority: false" services/workbook-parser/src/cli.js
           grep -q "only native .xlsx files are accepted" services/workbook-parser/src/cli.js
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac

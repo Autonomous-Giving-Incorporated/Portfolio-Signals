@@ -69,7 +69,17 @@ export function roleCan(role, capability) {
     claims: ['director', 'campaign_lead', 'development', 'data_steward', 'auditor'],
     imports: ['director', 'campaign_lead', 'data_steward'],
     imports_act: ['director', 'data_steward'],
-    audit: ['director', 'data_steward', 'auditor']
+    audit: ['director', 'data_steward', 'auditor'],
+    // Impact Relay host screens
+    impact_finance: ['director', 'campaign_lead', 'development'],
+    impact_donor_staff: [
+      'director',
+      'campaign_lead',
+      'development',
+      'data_steward',
+      'auditor',
+      'board_viewer'
+    ]
   };
   return (matrix[capability] || []).includes(role);
 }
