@@ -43,13 +43,21 @@ Observed drift repaired:
 - No real identities, workbooks, or credentials are committed.
 - MFA provider enablement and live backup drills remain operator actions outside GitHub.
 
+## Follow-on repository slice
+
+Also delivered under HD-OI-019:
+
+- import-review approve / reject / promote RPCs and UI actions;
+- storage policy matrix tests with synthetic object metadata;
+- staging bootstrap scripts and operator docs (no secrets);
+- workspace decision queue and sponsor/grant pipeline modules wired to schema RPCs.
+
 ## Remaining HD-OI-019 work
 
 - provision staging and production projects;
 - enable Auth MFA in each managed project;
 - run backup/restore drill and record operator evidence;
-- verify private storage and signed-URL audit in staging with synthetic objects;
-- expand storage action matrix tests if upload APIs are wired.
+- verify signed-URL edge function against staging with synthetic objects only.
 
 ## Non-goals
 

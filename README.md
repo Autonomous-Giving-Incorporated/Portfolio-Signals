@@ -53,7 +53,10 @@ services/import-api/                    Parser-to-import-batch service boundary
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
+docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
 docs/HD-OI-019.md                       Current hardening phase notes
+scripts/staging/                        Local/staging bootstrap helpers (no secrets)
+workspace/                              Authenticated decision and pipeline modules
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
 .github/workflows/                      Validation, security, Pages, and Supabase CI

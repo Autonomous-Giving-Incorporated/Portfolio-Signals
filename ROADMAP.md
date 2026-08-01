@@ -100,7 +100,15 @@ production_data_used_in_tests: false
 
 ## Active phase — production environment hardening (HD-OI-019)
 
-**Goal:** identity/MFA readiness, schema-aligned clients, operator hardening checklist, and expanded six-role executable matrix without enabling production import.
+**Goal:** identity/MFA readiness, schema-aligned clients, operator hardening checklist, expanded six-role matrix, import-review actions, storage matrix tests, staging bootstrap, and wired decision/pipeline modules — without enabling production import.
+
+Repository progress in this phase:
+
+- MFA / active-profile controls and expanded RLS suite;
+- import-review approve / reject / promote RPCs + UI;
+- storage matrix tests for private bucket and document metadata;
+- staging bootstrap scripts and docs;
+- decision queue and sponsor/grant pipeline modules mounted in the workspace shell.
 
 ### Infrastructure
 

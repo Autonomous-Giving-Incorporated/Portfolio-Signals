@@ -1,10 +1,12 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { createWorkspaceClient, clearWorkspaceSessionCache, roleCan } from './workspace/session.js';
+import { mountDecisionQueue } from './workspace/decisions.js';
+import { mountPipelineWorkspace } from './workspace/pipelines.js';
 
-const config = window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 const root = document.getElementById('workspaceRoot');
 const gate = document.getElementById('authGate');
 const workspace = document.getElementById('workspace');
 const message = document.getElementById('authMessage');
+const content = document.getElementById('workspaceContent');
 
 const PRIVILEGED_ROLES = new Set([
   'director',
@@ -14,41 +16,64 @@ const PRIVILEGED_ROLES = new Set([
   'auditor'
 ]);
 
-if (!config.supabaseUrl || !config.supabaseAnonKey) {
-  message.textContent = 'Workspace is not configured. Set runtime public Supabase values without committing server secrets.';
-  document.getElementById('loginForm').querySelector('button').disabled = true;
-} else {
-  const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
-    auth: { persistSession: true, detectSessionInUrl: true }
-  });
+let activeClient = null;
+let activeProfile = null;
 
+function showMessage(text) {
+  message.textContent = text;
+}
+
+function setBusy(isBusy) {
+  content?.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+}
+
+if (!document.getElementById('loginForm')) {
+  // Loaded outside the workspace shell.
+} else {
+  try {
+    activeClient = createWorkspaceClient();
+  } catch {
+    showMessage('Workspace is not configured. Set runtime public Supabase values without committing server secrets.');
+    document.getElementById('loginForm').querySelector('button').disabled = true;
+  }
+}
+
+if (activeClient) {
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('email').value.trim();
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await activeClient.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${location.origin}${location.pathname}` }
     });
-    message.textContent = error
-      ? error.message
-      : 'Check your email for the secure sign-in link.';
+    showMessage(error ? error.message : 'Check your email for the secure sign-in link.');
   });
 
-  document.getElementById('signOut').addEventListener('click', () => supabase.auth.signOut());
-  supabase.auth.onAuthStateChange((_event, session) => renderSession(supabase, session));
-  supabase.auth.getSession().then(({ data }) => renderSession(supabase, data.session));
+  document.getElementById('signOut').addEventListener('click', async () => {
+    clearWorkspaceSessionCache();
+    await activeClient.auth.signOut();
+  });
+
+  activeClient.auth.onAuthStateChange((_event, session) => {
+    renderSession(session).catch((error) => showMessage(error.message));
+  });
+  activeClient.auth.getSession().then(({ data }) => {
+    renderSession(data.session).catch((error) => showMessage(error.message));
+  });
 }
 
-async function renderSession(supabase, session) {
+async function renderSession(session) {
   if (!session) {
     gate.hidden = false;
     workspace.hidden = true;
+    activeProfile = null;
+    clearWorkspaceSessionCache();
     return;
   }
 
-  const { data: profile, error } = await supabase
+  const { data: profile, error } = await activeClient
     .from('profiles')
-    .select('display_name,role,mfa_enforced,active')
+    .select('id,display_name,role,mfa_enforced,active')
     .eq('id', session.user.id)
     .single();
 
@@ -56,35 +81,52 @@ async function renderSession(supabase, session) {
   if (error || !profile?.active || (mfaRequired && !profile.mfa_enforced)) {
     gate.hidden = false;
     workspace.hidden = true;
-    message.textContent = mfaRequired
-      ? 'Access blocked: active profile and enforced MFA are required for privileged roles.'
-      : 'Access blocked: an active campaign profile is required.';
+    showMessage(
+      mfaRequired
+        ? 'Access blocked: active profile and enforced MFA are required for privileged roles.'
+        : 'Access blocked: an active campaign profile is required.'
+    );
     return;
   }
 
+  activeProfile = profile;
   gate.hidden = true;
   workspace.hidden = false;
   document.getElementById('identityLine').textContent =
     `${profile.display_name || session.user.email} · ${profile.role}`;
   renderNavigation(profile.role);
-  await loadDashboard(supabase, profile.role);
+  await loadDashboard(profile.role);
 }
 
 function renderNavigation(role) {
-  const permissions = {
-    director: ['Decisions', 'Opportunities', 'Claims', 'Imports', 'Audit'],
-    campaign_lead: ['Decisions', 'Opportunities', 'Claims', 'Imports'],
-    development: ['Opportunities', 'Claims'],
-    data_steward: ['Claims', 'Imports', 'Audit'],
-    auditor: ['Claims', 'Audit'],
-    board_viewer: ['Decisions', 'Opportunities']
-  };
-  document.getElementById('roleNav').innerHTML = (permissions[role] || [])
-    .map(label => `<button class="workspace-nav-button" type="button">${label}</button>`)
-    .join('');
+  const items = [];
+  if (roleCan(role, 'decisions')) items.push({ id: 'decisions', label: 'Decisions' });
+  if (roleCan(role, 'opportunities')) {
+    items.push({ id: 'sponsors', label: 'Sponsors' });
+    items.push({ id: 'grants', label: 'Grants' });
+  }
+  if (roleCan(role, 'claims')) items.push({ id: 'claims', label: 'Claims' });
+  if (roleCan(role, 'imports')) items.push({ id: 'imports', label: 'Imports' });
+  if (roleCan(role, 'audit')) items.push({ id: 'audit', label: 'Audit' });
+
+  const nav = document.getElementById('roleNav');
+  nav.innerHTML = items.map(item => `
+    <button class="workspace-nav-button" type="button" data-section="${item.id}">
+      ${item.label}
+    </button>`).join('');
+
+  nav.querySelectorAll('button[data-section]').forEach(button => {
+    button.addEventListener('click', () => {
+      nav.querySelectorAll('button').forEach(node => node.classList.remove('is-active'));
+      button.classList.add('is-active');
+      openSection(button.dataset.section).catch(error => {
+        content.innerHTML = `<p class="note error">${error.message}</p>`;
+      });
+    });
+  });
 }
 
-async function loadDashboard(supabase, role) {
+async function loadDashboard(role) {
   const canReadConstituents = [
     'director',
     'campaign_lead',
@@ -94,14 +136,14 @@ async function loadDashboard(supabase, role) {
   ].includes(role);
 
   const [decisions, opportunities, confirmedConsent, exceptions] = await Promise.all([
-    supabase.from('decisions').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-    supabase.from('opportunities').select('*', { count: 'exact', head: true })
+    activeClient.from('decisions').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+    activeClient.from('opportunities').select('*', { count: 'exact', head: true })
       .in('stage', ['qualified', 'meeting', 'proposal', 'verbal']),
     canReadConstituents
-      ? supabase.from('constituents').select('*', { count: 'exact', head: true })
+      ? activeClient.from('constituents').select('*', { count: 'exact', head: true })
           .eq('consent_status', 'confirmed')
       : Promise.resolve({ count: 0 }),
-    supabase.from('import_exceptions').select('*', { count: 'exact', head: true })
+    activeClient.from('import_exceptions').select('*', { count: 'exact', head: true })
       .is('resolved_at', null)
   ]);
 
@@ -109,13 +151,108 @@ async function loadDashboard(supabase, role) {
   document.getElementById('opportunityCount').textContent = opportunities.count ?? 0;
   document.getElementById('authorizedCount').textContent = confirmedConsent.count ?? 0;
   document.getElementById('exceptionCount').textContent = exceptions.count ?? 0;
-  document.getElementById('workspaceContent').innerHTML = `
-    <h2>Workspace foundation active</h2>
-    <p>All data access is mediated by Supabase authentication and row-level security.
-    Confirmed-consent counts are not outreach authorization. Editing modules remain gated
-    behind production environment hardening and leadership approvals.</p>
-  `;
+
+  content.innerHTML = `
+    <h2>Campaign operations home</h2>
+    <p>
+      Use the role navigation to open decisions, sponsor/grant pipelines, import review,
+      claims, or audit views. All mutations run through authenticated Supabase sessions
+      and row-level security. Confirmed consent is not outreach authorization.
+    </p>
+    <div class="control-grid">
+      ${roleCan(role, 'decisions') ? '<button type="button" class="button secondary" data-jump="decisions">Open decisions</button>' : ''}
+      ${roleCan(role, 'opportunities') ? '<button type="button" class="button secondary" data-jump="sponsors">Open sponsor pipeline</button>' : ''}
+      ${roleCan(role, 'imports') ? '<button type="button" class="button secondary" data-jump="imports">Open imports</button>' : ''}
+    </div>`;
+
+  content.querySelectorAll('button[data-jump]').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelector(`.workspace-nav-button[data-section="${button.dataset.jump}"]`)?.click();
+    });
+  });
 }
 
-// Silence unused root warning in static analysis environments.
+async function openSection(section) {
+  if (!activeProfile) throw new Error('Authentication required.');
+  setBusy(true);
+
+  if (section === 'decisions') {
+    await mountDecisionQueue(content);
+  } else if (section === 'sponsors') {
+    await mountPipelineWorkspace(content, 'sponsorship');
+  } else if (section === 'grants') {
+    await mountPipelineWorkspace(content, 'grant');
+  } else if (section === 'imports') {
+    content.innerHTML = `
+      <div class="workspace-toolbar">
+        <div>
+          <strong>Import quarantine</strong>
+          <span>${roleCan(activeProfile.role, 'imports_act') ? 'approve / reject / promote available' : 'read-only access'}</span>
+        </div>
+      </div>
+      <p>
+        Open a specific batch with
+        <code>import-review.html?batch=&lt;import_batch_id&gt;</code>.
+        Actions execute <code>approve_import_row</code>, <code>reject_import_row</code>,
+        and <code>promote_import_row</code> under live RLS.
+      </p>
+      <label>Batch id
+        <input id="batchJump" type="text" placeholder="uuid" />
+      </label>
+      <button type="button" class="button" id="openBatch">Open import review</button>`;
+    content.querySelector('#openBatch')?.addEventListener('click', () => {
+      const batch = content.querySelector('#batchJump')?.value.trim();
+      if (!batch) {
+        alert('Enter an import batch id.');
+        return;
+      }
+      location.assign(`import-review.html?batch=${encodeURIComponent(batch)}`);
+    });
+  } else if (section === 'claims') {
+    const { data, error } = await activeClient
+      .from('claims')
+      .select('id,claim,state,verified_at,created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    content.innerHTML = `
+      <div class="workspace-toolbar"><div><strong>Claims registry</strong><span>${data.length} visible</span></div></div>
+      <div class="table-wrap"><table class="workspace-table">
+        <thead><tr><th>Claim</th><th>State</th><th>Verified</th></tr></thead>
+        <tbody>
+          ${data.map(row => `
+            <tr>
+              <td>${row.claim}</td>
+              <td>${row.state}</td>
+              <td>${row.verified_at || '—'}</td>
+            </tr>`).join('') || '<tr><td colspan="3">No claims visible.</td></tr>'}
+        </tbody>
+      </table></div>`;
+  } else if (section === 'audit') {
+    const { data, error } = await activeClient
+      .from('audit_log')
+      .select('id,action,entity_type,entity_id,occurred_at')
+      .order('occurred_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    content.innerHTML = `
+      <div class="workspace-toolbar"><div><strong>Audit log</strong><span>${data.length} recent events</span></div></div>
+      <div class="table-wrap"><table class="workspace-table">
+        <thead><tr><th>When</th><th>Action</th><th>Entity</th></tr></thead>
+        <tbody>
+          ${data.map(row => `
+            <tr>
+              <td>${row.occurred_at}</td>
+              <td>${row.action}</td>
+              <td>${row.entity_type}${row.entity_id ? `:${row.entity_id}` : ''}</td>
+            </tr>`).join('') || '<tr><td colspan="3">No audit events visible.</td></tr>'}
+        </tbody>
+      </table></div>`;
+  } else {
+    content.innerHTML = '<p class="note">Unknown workspace section.</p>';
+  }
+
+  setBusy(false);
+}
+
 void root;
