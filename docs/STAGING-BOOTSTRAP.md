@@ -36,7 +36,11 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq | OBSERVED |
 | API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
 | Linked to GitHub repo | Yes (operator-reported) | OBSERVED |
-| Migrations applied | Operator action required | PENDING |
+| Migrations applied | 10 migrations at `e3db304e9f992adbf11398a47a2a00e356d22abf` | VERIFIED |
+| Auth hardening | Public signup disabled; email confirmation and TOTP MFA enabled | VERIFIED |
+| Edge Function | `signed-document-url` deployed | VERIFIED |
+| Synthetic hosted policy suite | Seven repository SQL files | PASS |
+| Overall staging readiness | Backups unavailable; SSL enforcement off; DB network unrestricted | FAIL |
 | Real CRM data | Not loaded | REQUIRED |
 
 Private data placement: **local workbook + this Supabase project**. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
@@ -100,7 +104,7 @@ export EVIDENCE_FILE="$HOME/.local/state/hacker-dojo/staging-verification.json"
 unset STAGING_DB_URL
 ```
 
-Keep the evidence file outside the repository. It contains only timestamp, mode, repository commit, suite count, pass/fail state, and the explicit statement that production import remains unauthorized. The runner removes its temporary `test_set_user` security-definer helper on success or failure; synthetic role fixtures remain for operator verification.
+Keep the runner's raw evidence file outside the repository. A reviewed, secret-free projection receipt may be mirrored under `out/audit/`; it contains only bounded status and provenance. The runner removes its temporary `test_set_user` security-definer helper on success or failure; synthetic role fixtures remain for operator verification.
 
 ## Browser wiring
 
@@ -132,14 +136,23 @@ signed_document_access_audit: true
 service_role_in_git: false
 production_data: false
 master_development_list_loaded: false
+hosted_backups_available: false
+ssl_enforcement: false
+database_network_restricted: false
+staging_readiness: FAIL
 ```
+
+The application-control checks above were observed on 2026-08-01 against repository commit
+`e3db304e9f992adbf11398a47a2a00e356d22abf`. The complete projection-only receipt is
+[`out/audit/hd-oi-019-staging-readiness.latest.json`](../out/audit/hd-oi-019-staging-readiness.latest.json).
+This evidence does not authorize production activation or real-data import.
 
 ## JCode / operator continue checklist
 
 When continuing in an interactive IDE (for example JCode):
 
-1. Authenticate Supabase CLI against the staging project.
-2. Apply migrations; confirm tables `import_batches`, `import_staging_rows`, `profiles`.
+1. Verify the staging project identity and current `out/audit/` receipt.
+2. Use a migration dry-run before any later schema change; the current 10 migrations are applied.
 3. Create gitignored `runtime-config.js` with URL + **anon** key.
 4. Provision operator profiles with roles; enforce MFA flags in schema.
 5. Keep Master Development List on local disk; inventory SHA-256 is in [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
@@ -148,3 +161,5 @@ When continuing in an interactive IDE (for example JCode):
 ## Current automation access state
 
 The repository automation is ready for non-interactive hosted verification. A Supabase access token or an already authenticated dashboard session remains operator-owned. Absence of that credential is a hard stop, not permission to place it in Git, chat, shell history, or an evidence file.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf

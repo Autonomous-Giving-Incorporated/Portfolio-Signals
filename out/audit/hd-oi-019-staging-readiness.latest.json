@@ -1,0 +1,61 @@
+{
+  "receipt_type": "staging_readiness_verification",
+  "surface": "projection",
+  "governs_or_activates": false,
+  "project_ref": "ecxkhihlbrcwpavfoaoq",
+  "repository_commit": "e3db304e9f992adbf11398a47a2a00e356d22abf",
+  "verified_at": "2026-08-01T20:45:12.0960446Z",
+  "mode": "shadow_advisory",
+  "verdict": "FAIL",
+  "synthetic_data_only": true,
+  "boundary": {
+    "environment": "staging",
+    "production_activation": false,
+    "real_data_import": false,
+    "outreach": false,
+    "notion_writeback": false
+  },
+  "observed": {
+    "project_status": "ACTIVE_HEALTHY",
+    "hosted_postgresql": "17.6.1.155",
+    "repository_postgresql_pin": "15.8",
+    "migration_count": 10,
+    "expected_migrations_present": true,
+    "edge_function_signed_document_url_deployed": true,
+    "public_signup_enabled": false,
+    "email_confirmation_enabled": true,
+    "mfa_totp_enabled": true,
+    "synthetic_user_count": 6,
+    "synthetic_profile_count": 6,
+    "private_bucket_ok": true,
+    "atomic_import_function_ok": true,
+    "document_audit_function_ok": true,
+    "anon_rls_trigger_execute_revoked": true,
+    "authenticated_rls_trigger_execute_revoked": true,
+    "ensure_rls_trigger_enabled": true,
+    "temporary_test_helper_removed": true,
+    "hosted_backups_available": false,
+    "ssl_enforcement_enabled": false,
+    "database_network_restricted": false
+  },
+  "synthetic_policy_suite": {
+    "suite_count": 7,
+    "result": "PASS",
+    "tests": [
+      "supabase/tests/003_import_gate_cases.sql",
+      "supabase/tests/004_import_review_actions.sql",
+      "supabase/tests/005_atomic_import_creation.sql",
+      "supabase/tests/rls_e2e.sql",
+      "supabase/tests/rls_policy_matrix.sql",
+      "supabase/tests/storage_matrix.sql",
+      "supabase/tests/006_document_access_audit.sql"
+    ]
+  },
+  "unreconciled_configuration": [
+    "Hosted PostgreSQL 17 diverges from the repository PostgreSQL 15.8 pin.",
+    "Hosted API schema exposure differs from repository local configuration.",
+    "Hosted storage global file-size limit differs from repository local configuration.",
+    "Hosted site URL and redirect allowlist require an explicit staging application URL."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf"
+}

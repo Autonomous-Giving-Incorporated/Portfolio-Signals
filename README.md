@@ -20,7 +20,7 @@ As of 2026-08-01:
 | Authenticated database schema | Implemented |
 | Six application roles | Implemented |
 | Row-level-security policies | Implemented; six-role disposable suite green |
-| MFA / active-profile hardening | Implemented in schema; provider enablement is operator-owned |
+| MFA / active-profile hardening | Implemented; hosted TOTP MFA enabled and synthetic session controls verified |
 | Append-only audit model | Implemented |
 | Sponsor and grant workflow schema | Implemented |
 | Decision approval workflow | Implemented |
@@ -32,7 +32,7 @@ As of 2026-08-01:
 | Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
 | Production environment checklist | Documented |
-| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); migrations/MFA operator-owned |
+| Staging Supabase project | Application controls verified on `ecxkhihlbrcwpavfoaoq`; platform hardening remains blocked |
 | Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
 | Production data import | Blocked |
 | Outreach authority | Not granted |
@@ -53,6 +53,7 @@ services/workbook-parser/               Native XLSX quarantine parser
 services/import-api/                    Parser-to-import-batch service boundary
 
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
+docs/START_HERE.md                      Operator navigation and current evidence
 docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
@@ -63,6 +64,7 @@ workspace/                              Authenticated decision and pipeline modu
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
 .github/workflows/                      Validation, security, Pages, and Supabase CI
+out/audit/                              Projection-only verification receipts
 ```
 
 ## Campaign architecture
@@ -187,8 +189,8 @@ migration_chain: PASS
 synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
-identity_mfa_controls: IN_PROGRESS_HD_OI_019
-staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq; migrations operator-owned
+identity_mfa_controls: PASS_STAGING_SYNTHETIC
+staging_supabase_project: FAIL_PLATFORM_HARDENING  # app controls pass; backups/SSL/network gates remain
 private_data_placement: LOCAL_PLUS_SUPABASE
 notion_crm_sor: REJECTED
 production_supabase: NOT_SEPARATED_YET  # treat current project as staging until named
@@ -201,3 +203,5 @@ master_development_list: LOCAL_ONLY_INVENTORIED  # SHA-256 in docs/DATA-PLACEMEN
 See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
 
 Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIME-VERSIONS.md](docs/RUNTIME-VERSIONS.md).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf

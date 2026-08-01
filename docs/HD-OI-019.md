@@ -41,7 +41,7 @@ Observed drift repaired:
 ## Evidence boundary
 
 - No real identities, workbooks, or credentials are committed to GitHub.
-- MFA provider enablement and live backup drills remain operator actions outside GitHub.
+- Hosted provider reconciliation and live backup drills remain operator actions outside GitHub.
 - Hosted project creation is operator-owned (not performed by repository CI).
 
 ## Follow-on repository slice
@@ -60,18 +60,26 @@ Also delivered under HD-OI-019:
 |---|---|
 | Staging project `ecxkhihlbrcwpavfoaoq` | PROVISIONED (operator) |
 | GitHub association | OBSERVED (operator-reported) |
-| `supabase db push` / migrations on host | PENDING_OPERATOR |
-| Auth MFA on host | PENDING_OPERATOR |
+| `supabase db push` / migrations on host | VERIFIED — 10 migrations at `e3db304` |
+| Auth MFA on host | VERIFIED — TOTP enabled; public signup disabled |
+| `signed-document-url` Edge Function | DEPLOYED |
+| Seven-file synthetic hosted policy suite | PASS |
+| Staging platform hardening | FAIL — backups unavailable, SSL off, DB network unrestricted |
 | Production project separation | PENDING |
 | Real workbook import | BLOCKED (HD-OI-020) |
 
 ## Remaining HD-OI-019 work
 
-- apply migrations to staging (`ecxkhihlbrcwpavfoaoq`);
-- enable Auth MFA in each managed project;
 - run backup/restore drill and record operator evidence;
+- enable SSL enforcement and restrict database network access;
+- reconcile the hosted API/storage configuration after an explicit staging application URL is named;
 - verify signed-URL edge function against staging with synthetic objects only;
 - provision a separate production project or record an explicit single-project promotion decision.
+
+Hosted schema, RLS, storage, session, import, and document-audit controls were verified with
+synthetic fixtures on 2026-08-01. See
+[`out/audit/hd-oi-019-staging-readiness.latest.json`](../out/audit/hd-oi-019-staging-readiness.latest.json).
+The overall verdict remains `FAIL` until the platform-hardening items above are closed.
 
 Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Deno, Supabase CLI, and PostgreSQL toolchain. Signed document URLs are bounded to 30-300 seconds, read metadata through caller RLS, and fail closed unless privacy-safe access audit evidence is written. Hosted provider configuration and staging evidence remain operator-owned.
 
@@ -81,3 +89,5 @@ Repository-side session closure now fails closed for missing or expired JWT expi
 - outreach activation;
 - leadership policy approval;
 - Notion as CRM system of record.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf
