@@ -1,0 +1,17 @@
+# Operator-local configuration and secrets (never commit)
+.env
+.env.*
+!.env.example
+scripts/staging/bootstrap.env
+runtime-config.js
+**/runtime-config.js
+
+# Dependencies and local tooling
+node_modules/
+.supabase/
+.DS_Store
+
+# Editor / agent local state
+.idea/
+.vscode/
+*.swp

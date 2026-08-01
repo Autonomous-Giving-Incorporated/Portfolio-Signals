@@ -41,8 +41,12 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
       - name: Execute synthetic import-gate acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/003_import_gate_cases.sql
+      - name: Execute import-review action checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/004_import_review_actions.sql
       - name: Execute RLS acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+      - name: Execute storage matrix checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/storage_matrix.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then

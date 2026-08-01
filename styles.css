@@ -181,6 +181,31 @@ dialog form { padding: 1.5rem; }
   .progress-list > div { grid-template-columns: 100px 1fr; }
   .progress-list small { grid-column: 2; }
 }
+/* Authenticated workspace modules */
+.workspace-shell .primary-nav { display: flex; gap: .5rem; flex-wrap: wrap; margin: 0 clamp(1.25rem, 5vw, 5rem) 1rem; }
+.workspace-nav-button { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: .55rem .9rem; cursor: pointer; }
+.workspace-nav-button.is-active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.workspace-toolbar { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.workspace-toolbar span, .workspace-loading, .workspace-empty p { color: var(--muted); }
+.workspace-table small { display: block; color: var(--muted); margin-top: .25rem; }
+.workspace-table select, .workspace-table input, #batchJump {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: .55rem .7rem;
+  background: var(--bg); color: var(--text);
+}
+.decision-workspace { display: grid; gap: 1rem; }
+.decision-card { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-alt); }
+.decision-key { color: var(--accent); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.decision-state { justify-self: start; padding: .25rem .55rem; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .78rem; }
+.decision-actions, .row-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+.authorization { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.authorization-not_reviewed { color: var(--muted); }
+.authorization-approved { color: var(--accent); }
+.authorization-blocked, .authorization-suppressed { color: var(--danger); }
+.note.error, #actionMessage.error { color: var(--danger); font-style: normal; }
+.auth-form { display: grid; gap: .8rem; max-width: 420px; }
+.auth-form label { display: grid; gap: .35rem; }
+.auth-form input { border: 1px solid var(--line); border-radius: 10px; padding: .7rem .8rem; background: var(--bg); color: var(--text); }
+
 @media (max-width: 620px) {
   .site-header { padding-top: 2.5rem; }
   .metric-grid, .funding-ladder, .segment-grid, .risk-grid, .resource-grid, .control-grid, .pillar-grid { grid-template-columns: 1fr; }
@@ -189,4 +214,5 @@ dialog form { padding: 1.5rem; }
   footer { flex-direction: column; }
   .table-toolbar { align-items: stretch; flex-direction: column; }
   .table-toolbar input { min-width: 0; width: 100%; }
+  .workspace-toolbar, .decision-actions, .row-actions { flex-direction: column; align-items: stretch; }
 }

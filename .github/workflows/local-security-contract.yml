@@ -30,7 +30,11 @@ jobs:
           grep -q "Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')" supabase/functions/signed-document-url/index.ts
           grep -q "document_records" supabase/functions/signed-document-url/index.ts
           grep -q "consent_candidate" import-review.js
+          grep -q "approve_import_row" import-review.js
           grep -q "source_name" services/import-api/server.mjs
+          grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
+          test -f workspace/session.js
+          test -f docs/STAGING-BOOTSTRAP.md
           ! grep -q "private_documents" supabase/functions/signed-document-url/index.ts
           ! grep -q "outreach_authorized" workspace.js
           python3 - <<'PY'

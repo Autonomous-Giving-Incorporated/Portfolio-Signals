@@ -76,8 +76,11 @@ jobs:
           test -f "$file"
           test -f 'supabase/migrations/006_private_storage.sql'
           test -f 'supabase/migrations/007_identity_hardening.sql'
+          test -f 'supabase/migrations/008_import_review_actions.sql'
           grep -q 'mfa_enforced' supabase/migrations/007_identity_hardening.sql
           grep -q 'deactivate_profile' supabase/migrations/007_identity_hardening.sql
+          grep -q 'approve_import_row' supabase/migrations/008_import_review_actions.sql
+          grep -q 'reject_import_row' supabase/migrations/008_import_review_actions.sql
           grep -q 'alter table public.import_batches enable row level security' "$file"
           grep -q 'alter table public.import_staging_rows enable row level security' "$file"
           grep -q 'create table if not exists public.suppression_registry' "$file"
@@ -100,6 +103,15 @@ jobs:
           grep -q 'unauthorized promotion unexpectedly succeeded' supabase/tests/003_import_gate_cases.sql
           grep -q '00000000-0000-0000-0000-000000000101' supabase/tests/003_import_gate_cases.sql
           grep -q '003_import_gate_cases.sql' .github/workflows/local-supabase-tests.yml
+          test -f supabase/tests/004_import_review_actions.sql
+          test -f supabase/tests/storage_matrix.sql
+          grep -q '004_import_review_actions.sql' .github/workflows/local-supabase-tests.yml
+          grep -q 'storage_matrix.sql' .github/workflows/local-supabase-tests.yml
+          grep -q 'approve_import_row' import-review.js
+          grep -q 'mountDecisionQueue' workspace.js
+          grep -q 'mountPipelineWorkspace' workspace.js
+          test -f scripts/staging/bootstrap.sh
+          test -f scripts/staging/verify-policy-suite.sh
 
   local-supabase-tests:
     runs-on: ubuntu-latest
