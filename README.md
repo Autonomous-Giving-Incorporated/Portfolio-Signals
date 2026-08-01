@@ -34,6 +34,8 @@ As of 2026-08-01:
 | Production environment checklist | Documented |
 | Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); migrations/MFA operator-owned |
 | Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
+| Impact Relay finance/donor host screens | Implemented (console API + Supabase role/MFA bridge) |
+| Impact Relay shadow + live-cohort runbooks | Documented; live cohort execution operator-owned |
 | Production data import | Blocked |
 | Outreach authority | Not granted |
 
@@ -46,6 +48,13 @@ app.js                                  Client-side interactions
 data/public-campaign.json               Canonical public aggregate state
 schemas/public-campaign.schema.json     Public-data contract
 
+finance-impact.html / .js               Impact Relay L3 expense approval UI
+donor-impact.html / .js                 Impact Relay donor timeline / UOF detail
+import-review.html / .js                Import quarantine review UI
+workspace.html / workspace.js           Authenticated campaign workspace shell
+workspace/                              Session, decisions, pipelines, IR bridge
+  impact-relay-bridge.js                Supabase → Impact Relay console headers
+
 supabase/migrations/                    Governed database schema and controls
 supabase/functions/signed-document-url  Authenticated private-document access
 supabase/tests/                         Synthetic fixtures and policy checks
@@ -57,9 +66,11 @@ docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inven
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
 docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
+docs/IMPACT-RELAY.md                    Impact Relay host bridge runbook
+docs/IMPACT-RELAY-SHADOW.md             Finance shadow mode
+docs/IMPACT-RELAY-LIVE-COHORT.md        Limited live cohort
 docs/HD-OI-019.md                       Current hardening phase notes
 scripts/staging/                        Local/staging bootstrap helpers (no secrets)
-workspace/                              Authenticated decision and pipeline modules
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
 .github/workflows/                      Validation, security, Pages, and Supabase CI
@@ -85,7 +96,7 @@ expansion: 1200000
 transformation: 2000000
 ```
 
-## Public impact surface
+## Public impact surface and Impact Relay host
 
 Live public donation progress, use-of-funds receipts, and event digests are published on **Impact Relay** (aggregate-only, no CRM data):
 
@@ -93,19 +104,25 @@ https://scrimshawlife-ctrl.github.io/Impact-Relay/
 
 Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
 
-Host screens against the Impact Relay console API (local pilot):
+This repo is the **canonical host app** for Impact Relay (campaign UX + Supabase auth). The library owns ledger, durable workflows, and console APIs; this app owns screens and identity.
 
-| Page | Purpose |
-|------|---------|
+| Surface | Purpose |
+|---------|---------|
 | `finance-impact.html` | L3 expense approval queue |
 | `donor-impact.html` | Donor timeline / UOF receipt detail |
-| `docs/IMPACT-RELAY.md` | Bridge runbook |
+| `workspace/impact-relay-bridge.js` | Supabase session → IR request headers |
+| `docs/IMPACT-RELAY.md` | Bridge runbook (roles, MFA, auth modes) |
+| `docs/IMPACT-RELAY-SHADOW.md` | Finance shadow mode (no live notify) |
+| `docs/IMPACT-RELAY-LIVE-COHORT.md` | Limited live cohort procedure |
 
 ```bash
 # from Impact-Relay checkout
 python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --port 8787
-# open finance-impact.html / donor-impact.html from this repo
+# then open finance-impact.html / donor-impact.html from this repo
+# (fixture auth without runtime-config.js; Supabase OTP when configured)
 ```
+
+Privileged campaign roles must have MFA enforced before Impact Relay screens accept the session (same rule as director workspace).
 
 ## Privacy and authority boundary
 
@@ -202,6 +219,9 @@ synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
 identity_mfa_controls: IN_PROGRESS_HD_OI_019
+impact_relay_host_screens: PASS
+impact_relay_supabase_bridge: PASS
+impact_relay_live_cohort: RUNBOOK_READY  # execution operator-owned
 staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq; migrations operator-owned
 private_data_placement: LOCAL_PLUS_SUPABASE
 notion_crm_sor: REJECTED
