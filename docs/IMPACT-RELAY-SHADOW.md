@@ -17,6 +17,19 @@ Shadow mode runs Impact Relay money workflows against **copy / fixture data** wi
 | Auth | Supabase staging profile **or** fixture mode |
 | Notifications | never enable live Postmark/APNs |
 
+## Automated library rehearsal (optional first step)
+
+Synthetic principals only — proves host seed / role denial / approve / rehydrate without the browser:
+
+```bash
+cd ../Impact-Relay
+python -m impact_relay --shadow-rehearsal \
+  --data-dir .impact-relay/shadow-rehearsal \
+  --write-findings docs/pilot/FINDINGS.md
+```
+
+Still complete the human UI steps below before claiming shadow exit.
+
 ## Procedure
 
 ### 1. Start console (shadow data-dir)
