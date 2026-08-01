@@ -34,12 +34,24 @@ jobs:
             exit 1
           }
 
+      - name: Reject duplicate migration versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          versions=$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sed -E 's/^([0-9]+)_.*/\1/' | sort)
+          duplicates=$(printf '%s\n' "$versions" | uniq -d)
+          if [ -n "$duplicates" ]; then
+            echo "Duplicate migration versions: $duplicates"
+            exit 1
+          fi
+
       - name: Verify quarantine controls exist
         shell: bash
         run: |
           set -euo pipefail
           file='supabase/migrations/005_import_quarantine_and_suppression.sql'
           test -f "$file"
+          test -f 'supabase/migrations/006_private_storage.sql'
           grep -q 'alter table public.import_batches enable row level security' "$file"
           grep -q 'alter table public.import_staging_rows enable row level security' "$file"
           grep -q 'create table if not exists public.suppression_registry' "$file"
@@ -52,15 +64,18 @@ jobs:
         run: |
           set -euo pipefail
           test -f tests/rls/import_quarantine.sql
+          test -f supabase/tests/003_import_gate_cases.sql
           grep -q 'RLS disabled' tests/rls/import_quarantine.sql
           grep -q 'public must not execute promote_import_row' tests/rls/import_quarantine.sql
+          grep -q 'restricted-consent fixture missing' supabase/tests/003_import_gate_cases.sql
+          grep -q 'unresolved duplicate fixture missing' supabase/tests/003_import_gate_cases.sql
+          grep -q 'suppression fixture missing' supabase/tests/003_import_gate_cases.sql
 
   local-supabase-tests:
     runs-on: ubuntu-latest
     if: ${{ false }}
-    # Intentionally disabled until the repository has a pinned Supabase CLI config,
-    # seed users for every role, and a disposable test database. Enabling this job
-    # without those fixtures would create a false assurance signal.
+    # Superseded by the executable local Supabase workflow. Retained as a
+    # non-authoritative compatibility marker until all policy checks consolidate.
     steps:
       - uses: actions/checkout@v4
-      - run: echo 'Enable after local Supabase harness and role fixtures are committed.'
+      - run: echo 'Executable role enforcement runs in the dedicated local Supabase workflow.'
