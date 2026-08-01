@@ -13,18 +13,23 @@ The repository contains a privacy-safe static dashboard designed for GitHub Page
 - governance and privacy controls;
 - links to approved public resources;
 - canonical aggregate campaign data with JSON Schema validation;
-- automated validation and GitHub Pages deployment.
+- automated validation and GitHub Pages deployment;
+- an authenticated-workspace database foundation with roles, row-level security, consent controls, decisions, claims, opportunities, and audit logging.
 
 ## Repository map
 
 ```text
-index.html                         Director portal
-styles.css                        Visual system
-app.js                            Client-side interactions
-data/public-campaign.json         Canonical public aggregate state
+index.html                            Director portal
+styles.css                           Visual system
+app.js                               Client-side interactions
+data/public-campaign.json            Canonical public aggregate state
 schemas/public-campaign.schema.json  Public-data contract
-ROADMAP.md                        Production and backend plan
-SECURITY.md                       Data-handling boundary
+supabase/migrations/001_campaign_control.sql
+supabase/seed.sql                    Safe decision-gate seeds only
+docs/AUTHENTICATED-WORKSPACE.md      Private application boundary
+.env.example                         Deployment variable contract
+ROADMAP.md                           Production and backend plan
+SECURITY.md                          Data-handling boundary
 .github/workflows/validate-and-deploy.yml
 ```
 
@@ -34,16 +39,17 @@ The repository must **not** contain the raw member registry, personal emails, ad
 
 The source development list contains extensive personal information. This site therefore shows only aggregated counts and publicly safe planning data. Editable CRM functions require a separately authenticated backend with:
 
+- multifactor authentication;
 - role-based access control;
 - row-level security;
 - audit logs;
-- encrypted storage;
+- encrypted sensitive fields;
 - explicit consent and suppression fields;
 - retention rules;
 - relationship ownership;
 - human approval gates.
 
-See [SECURITY.md](SECURITY.md) for the enforced boundary and [ROADMAP.md](ROADMAP.md) for the authenticated-workspace plan.
+See [SECURITY.md](SECURITY.md), [ROADMAP.md](ROADMAP.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
 
 ## Local preview
 
@@ -74,6 +80,20 @@ Repository configuration still needs:
 
 GitHub Pages must not be treated as the access-control layer for private CRM data.
 
+## Authenticated environment
+
+The SQL migration is designed for a separate Supabase project. Applying it does not place private data in GitHub; it creates the controlled schema and policies that the future application will use.
+
+Required before production use:
+
+- separate staging and production projects;
+- MFA enforcement;
+- secret-manager configuration;
+- field-encryption implementation;
+- audit trigger implementation and verification;
+- native spreadsheet import through quarantine;
+- approved privacy, retention, and outreach policy.
+
 ## Campaign state
 
 ```yaml
@@ -84,7 +104,8 @@ campaign_architecture: complete
 field_materials: draft_complete
 public_data_contract: implemented
 pages_workflow: implemented
+authenticated_schema: drafted
 outreach_authority: not_granted
 sensitive_data_in_repo: prohibited
-next_backend_phase: authenticated_campaign_control_service
+next_backend_phase: director_application_shell_and_import_quarantine
 ```
