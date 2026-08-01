@@ -8,7 +8,7 @@ promote, activate, or authorize production or real-data use.
 - Hosted project: `ecxkhihlbrcwpavfoaoq`
 - Deployed staging commit: `964587d0bad540f1bd27f381f1d38fdf65ec986a`
 - GitHub Pages host: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
-- Application-control verification: `FAIL_LIVE_RUNTIME_WIRING` (repair staged in PR #33)
+- Application-control verification: `PASS`
 - Overall staging readiness: `FAIL`
 - Production import and outreach: `BLOCKED`
 

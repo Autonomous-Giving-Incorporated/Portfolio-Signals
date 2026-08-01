@@ -69,7 +69,7 @@ Also delivered under HD-OI-019:
 | SSL enforcement | ENABLED — staging restart completed |
 | GitHub Pages staging host | PASS — HTTPS site live from `964587d`; runtime config points to staging without service-role material |
 | Supabase Auth URL configuration | PASS — Pages root plus workspace and import-review redirects |
-| Authenticated Pages runtime wiring | FAIL — generated config is published but not loaded by either authenticated HTML entry point; repair in PR #33 |
+| Authenticated Pages runtime wiring | PASS — PR #33 merged as `32087fa`; canonical HTML loads runtime config before application modules |
 | Staging platform hardening | FAIL — backups deferred and DB network unrestricted |
 | Production project separation | PENDING |
 | Real workbook import | BLOCKED (HD-OI-020) |
@@ -79,7 +79,6 @@ Also delivered under HD-OI-019:
 - run backup/restore drill and record operator evidence;
 - restrict database network access after trusted CIDRs are supplied;
 - reconcile remaining hosted API/storage configuration drift;
-- merge and redeploy PR #33 after an explicit operator gate, then repeat the live synthetic browser check;
 - provision a separate production project or record an explicit single-project promotion decision.
 
 Hosted schema, RLS, storage, session, import, and document-audit controls were verified with
