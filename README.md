@@ -4,28 +4,46 @@ A director-facing campaign control portal for Hacker Dojo's **$420K minimum camp
 
 ## Current implementation
 
-This first version is a privacy-safe static dashboard designed for GitHub Pages. It includes:
+The repository contains a privacy-safe static dashboard designed for GitHub Pages. It includes:
 
 - executive campaign overview;
 - funding ladder and use-of-funds framework;
 - sponsor, grant, and member-segment views;
 - decision queue and launch gates;
 - governance and privacy controls;
-- links to approved public resources.
+- links to approved public resources;
+- canonical aggregate campaign data with JSON Schema validation;
+- automated validation and GitHub Pages deployment.
+
+## Repository map
+
+```text
+index.html                         Director portal
+styles.css                        Visual system
+app.js                            Client-side interactions
+data/public-campaign.json         Canonical public aggregate state
+schemas/public-campaign.schema.json  Public-data contract
+ROADMAP.md                        Production and backend plan
+SECURITY.md                       Data-handling boundary
+.github/workflows/validate-and-deploy.yml
+```
 
 ## Privacy boundary
 
-The repository must **not** contain the raw member registry, personal emails, addresses, attendance-level data, donor records, or other sensitive campaign data.
+The repository must **not** contain the raw member registry, personal emails, addresses, attendance-level data, donor records, private notes, or other sensitive campaign data.
 
-The uploaded source material contains extensive personal information. The static site therefore shows only aggregated counts and publicly safe planning data. Editable CRM functions require a separately authenticated backend with:
+The source development list contains extensive personal information. This site therefore shows only aggregated counts and publicly safe planning data. Editable CRM functions require a separately authenticated backend with:
 
 - role-based access control;
+- row-level security;
 - audit logs;
 - encrypted storage;
 - explicit consent and suppression fields;
 - retention rules;
 - relationship ownership;
 - human approval gates.
+
+See [SECURITY.md](SECURITY.md) for the enforced boundary and [ROADMAP.md](ROADMAP.md) for the authenticated-workspace plan.
 
 ## Local preview
 
@@ -35,16 +53,26 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080`.
 
+## Validate the public data contract
+
+```bash
+npx --yes ajv-cli@5 validate \
+  --spec=draft2020 \
+  -s schemas/public-campaign.schema.json \
+  -d data/public-campaign.json
+```
+
 ## GitHub Pages
 
-After merging the dashboard branch:
+The workflow in `.github/workflows/validate-and-deploy.yml` validates the data contract, checks for obvious restricted exports, and deploys `main` through GitHub Pages.
+
+Repository configuration still needs:
 
 1. Open **Settings → Pages**.
-2. Set the source to **Deploy from a branch**.
-3. Select `main` and `/ (root)`.
-4. Save.
+2. Select **GitHub Actions** as the source.
+3. Confirm the Pages environment is permitted for this private repository and account plan.
 
-Because this is currently a private repository, verify that the account and repository plan support the desired Pages visibility before treating it as an access-control mechanism. GitHub Pages alone is not the secure backend for private CRM data.
+GitHub Pages must not be treated as the access-control layer for private CRM data.
 
 ## Campaign state
 
@@ -54,6 +82,8 @@ stretch_target: 2000000
 public_evidence: complete
 campaign_architecture: complete
 field_materials: draft_complete
+public_data_contract: implemented
+pages_workflow: implemented
 outreach_authority: not_granted
 sensitive_data_in_repo: prohibited
 next_backend_phase: authenticated_campaign_control_service
