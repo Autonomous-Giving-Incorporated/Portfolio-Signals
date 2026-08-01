@@ -1,0 +1,66 @@
+name: Database Policy Checks
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'tests/rls/**'
+      - '.github/workflows/database-policy-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - 'tests/rls/**'
+
+permissions:
+  contents: read
+
+jobs:
+  static-policy-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject destructive or secret-bearing migration content
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RniE '(service_role|SUPABASE_SERVICE_ROLE_KEY|BEGIN[[:space:]]+PRIVATE[[:space:]]+KEY|password[[:space:]]*=)' supabase tests || {
+            echo 'Potential secret or privileged credential reference found.'
+            exit 1
+          }
+          ! grep -RniE 'drop[[:space:]]+(table|schema)[[:space:]]+.*cascade' supabase/migrations || {
+            echo 'Destructive CASCADE migration requires separate operator review.'
+            exit 1
+          }
+
+      - name: Verify quarantine controls exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='supabase/migrations/005_import_quarantine_and_suppression.sql'
+          test -f "$file"
+          grep -q 'alter table public.import_batches enable row level security' "$file"
+          grep -q 'alter table public.import_staging_rows enable row level security' "$file"
+          grep -q 'create table if not exists public.suppression_registry' "$file"
+          grep -q 'revoke all on function public.promote_import_row(bigint) from public' "$file"
+          grep -q 'consent_blocks_promotion' "$file"
+          grep -q 'unresolved_blocking_exception' "$file"
+
+      - name: Verify executable policy test contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tests/rls/import_quarantine.sql
+          grep -q 'RLS disabled' tests/rls/import_quarantine.sql
+          grep -q 'public must not execute promote_import_row' tests/rls/import_quarantine.sql
+
+  local-supabase-tests:
+    runs-on: ubuntu-latest
+    if: ${{ false }}
+    # Intentionally disabled until the repository has a pinned Supabase CLI config,
+    # seed users for every role, and a disposable test database. Enabling this job
+    # without those fixtures would create a false assurance signal.
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo 'Enable after local Supabase harness and role fixtures are committed.'
