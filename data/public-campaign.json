@@ -1,0 +1,45 @@
+{
+  "$schema": "../schemas/public-campaign.schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-07-31",
+  "authority": "advisory_only",
+  "campaign": {
+    "minimumTarget": 420000,
+    "stretchTarget": 2000000,
+    "currency": "USD",
+    "minimumCaseState": "requires_use_of_funds_approval",
+    "stretchCaseState": "requires_board_transformation_plan"
+  },
+  "registry": {
+    "normalizedMemberIds": 5212,
+    "bayAreaRecords": 1862,
+    "organizerLabels": 62,
+    "privateRelayOccurrences": 723,
+    "highEngagementRecords": 70,
+    "outreachReadyRecords": 0,
+    "qualification": "partial_pdf_derived_extract"
+  },
+  "execution": {
+    "state": "blocked",
+    "reason": "consent_list_authorization_and_use_of_funds_are_unresolved"
+  },
+  "gates": [
+    {"id": "campaign_target", "label": "Campaign target approved", "state": "pending"},
+    {"id": "use_of_funds", "label": "Use of funds approved", "state": "pending"},
+    {"id": "donation_system", "label": "Donation system tested", "state": "pending"},
+    {"id": "privacy_policy", "label": "Privacy and consent rules approved", "state": "pending"},
+    {"id": "sponsor_benefits", "label": "Sponsor benefits approved", "state": "pending"},
+    {"id": "claim_ledger", "label": "Claim ledger verified", "state": "pending"},
+    {"id": "relationship_owners", "label": "Relationship owners assigned", "state": "pending"},
+    {"id": "outreach_lists", "label": "Outreach lists authorized", "state": "pending"},
+    {"id": "event_tracking", "label": "Event tracking ready", "state": "pending"},
+    {"id": "stewardship", "label": "Stewardship owners assigned", "state": "pending"}
+  ],
+  "privacy": {
+    "classification": "public_aggregate_only",
+    "piiAllowed": false,
+    "rawRegistryAllowed": false,
+    "donorHistoryAllowed": false,
+    "privateNotesAllowed": false
+  }
+}
