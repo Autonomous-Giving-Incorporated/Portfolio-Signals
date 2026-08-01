@@ -8,6 +8,7 @@ as $$
 begin
   perform set_config('request.jwt.claim.sub', test_user::text, true);
   perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
 begin;
@@ -259,6 +260,61 @@ begin
   if v.active then
     raise exception 'director deactivation did not clear active flag';
   end if;
+end $$;
+
+-- An expired JWT loses role resolution and cannot pass privileged checks.
+select public.test_set_user('00000000-0000-0000-0000-000000000101');
+select set_config(
+  'request.jwt.claim.exp',
+  (extract(epoch from now())::bigint - 1)::text,
+  true
+);
+do $$
+begin
+  begin
+    perform public.current_role();
+    raise exception 'expired session unexpectedly resolved a role';
+  exception
+    when others then
+      if sqlerrm not like '%session_expired%' then raise; end if;
+  end;
+  begin
+    perform public.require_privileged_mfa();
+    raise exception 'expired session unexpectedly passed privileged MFA';
+  exception
+    when others then
+      if sqlerrm not like '%session_expired%' then raise; end if;
+  end;
+end $$;
+
+-- Role changes take effect immediately for an already-issued user session.
+reset role;
+update public.profiles
+   set role = 'board_viewer'
+ where id = '00000000-0000-0000-0000-000000000105';
+
+set local role authenticated;
+select public.test_set_user('00000000-0000-0000-0000-000000000105');
+do $$
+begin
+  if public.current_role() is distinct from 'board_viewer'::public.app_role then
+    raise exception 'role revocation was not reflected in the active session';
+  end if;
+  begin
+    perform public.create_import_batch(
+      jsonb_build_object(
+        'source_name', 'revoked-role.xlsx',
+        'source_sha256', repeat('f', 64),
+        'schema_version', 'synthetic-v1',
+        'storage_object_path', 'quarantine/revoked-role.xlsx'
+      ),
+      '[]'::jsonb
+    );
+    raise exception 'revoked data-steward role unexpectedly created an import';
+  exception
+    when others then
+      if sqlerrm not like '%insufficient_role%' then raise; end if;
+  end;
 end $$;
 
 rollback;

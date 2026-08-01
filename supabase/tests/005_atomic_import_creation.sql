@@ -7,6 +7,7 @@ as $$
 begin
   perform set_config('request.jwt.claim.sub', test_user::text, true);
   perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
 begin;

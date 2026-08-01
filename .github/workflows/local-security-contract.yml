@@ -42,10 +42,16 @@ jobs:
           grep -q "approve_import_row" import-review.js
           grep -q "source_name" services/import-api/server.mjs
           grep -q "create_import_batch" services/import-api/server.mjs
+          grep -q "require_unexpired_session" supabase/migrations/010_session_expiration.sql
+          grep -q "session_expired" supabase/tests/rls_e2e.sql
           grep -q "/auth/v1/user" services/import-api/server.mjs
           grep -q "require_privileged_mfa" services/import-api/server.mjs
           ! grep -q "x-authenticated-user" services/import-api/server.mjs
           grep -q '"@e965/xlsx": "0.20.3"' services/workbook-parser/package.json
+          grep -qx '22.18.0' .nvmrc
+          grep -qx 'nodejs 22.18.0' .tool-versions
+          grep -qx 'postgres 15.8' .tool-versions
+          grep -q 'version: 2.31.8' .github/workflows/local-supabase-tests.yml
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
           test -f workspace/session.js
           test -f docs/STAGING-BOOTSTRAP.md

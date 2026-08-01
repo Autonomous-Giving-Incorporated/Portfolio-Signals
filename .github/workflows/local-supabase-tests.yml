@@ -47,6 +47,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/005_atomic_import_creation.sql
       - name: Execute RLS acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+      - name: Execute six-role policy matrix
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_policy_matrix.sql
       - name: Execute storage matrix checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/storage_matrix.sql
       - name: Reject committed sensitive exports
