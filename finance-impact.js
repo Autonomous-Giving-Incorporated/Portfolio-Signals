@@ -1,58 +1,58 @@
 /**
- * Finance review UI backed by Impact Relay console_server.
- * See docs/IMPACT-RELAY.md
+ * Finance review UI — Supabase auth when configured; fixture pilot otherwise.
  */
+import {
+  impactRelayApiBase,
+  impactRelayFetch,
+  loadImpactRelaySession,
+  clearWorkspaceSessionCache,
+  createWorkspaceClient
+} from './workspace/impact-relay-bridge.js';
 
 const $ = (id) => document.getElementById(id);
 
-function apiBase() {
-  const fromInput = $("apiBase")?.value?.trim();
-  const fromStore = localStorage.getItem("IMPACT_RELAY_API");
-  return (fromInput || fromStore || "http://127.0.0.1:8787").replace(/\/$/, "");
-}
-
-function authHeaders() {
-  const email = $("approverEmail")?.value?.trim() || "finance.approver@hackersdojo.example";
-  return {
-    Authorization: `Bearer ${email}`,
-    "Content-Type": "application/json",
-  };
-}
-
-async function api(path, opts = {}) {
-  const res = await fetch(`${apiBase()}${path}`, {
-    ...opts,
-    headers: { ...authHeaders(), ...(opts.headers || {}) },
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok && body.ok !== true) {
-    throw new Error(body.message || body.error || res.statusText);
-  }
-  return body;
-}
-
 function setMsg(text, isError = false) {
   const el = $("actionMsg");
+  if (!el) return;
   el.textContent = text;
-  el.className = isError ? "note" : "note";
   el.style.color = isError ? "var(--danger, #b00)" : "";
+}
+
+function setIdentity(ctx) {
+  const line = $("identityLine");
+  if (!line) return;
+  if (ctx.mode === "fixture") {
+    line.textContent = "Local fixture mode (no Supabase config) · finance_approver pilot";
+  } else if (ctx.mode === "supabase") {
+    line.textContent = `${ctx.email} · ${ctx.role}`;
+  } else {
+    line.textContent = "Sign in required";
+  }
 }
 
 async function refresh() {
   try {
-    const health = await api("/api/health");
+    const { data: health } = await impactRelayFetch("/api/health");
     $("apiStatus").textContent = "API online";
     $("apiStatus").className = "status-pill";
-    const metrics = await api("/api/finance/metrics");
+    const ctx = await loadImpactRelaySession({ requireFinance: false });
+    setIdentity(ctx);
+
+    const { data: metrics } = await impactRelayFetch("/api/finance/metrics", {
+      requireFinance: false
+    });
     $("waitingCount").textContent = metrics.waiting_count ?? "—";
     $("attentionCount").textContent = metrics.attention_count ?? "—";
     $("ledgerCmds").textContent = metrics.ledger_commands ?? "—";
     $("expenseCount").textContent = metrics.expenses_in_ledger ?? "—";
 
-    const queue = await api("/api/finance/queue?filters=waiting,blocked,dead_letter,needs_information,failed");
+    const { data: queue } = await impactRelayFetch(
+      "/api/finance/queue?filters=waiting,blocked,dead_letter,needs_information,failed"
+    );
     const root = $("queueList");
     if (!queue.cases?.length) {
-      root.innerHTML = "<p class='note'>No open cases. Seed a pilot expense to create a waiting approval.</p>";
+      root.innerHTML =
+        "<p class='note'>No open cases. Seed a pilot expense to create a waiting approval.</p>";
       return;
     }
     root.innerHTML = "";
@@ -85,8 +85,14 @@ async function refresh() {
     root.querySelectorAll(".btn-approve").forEach((btn) => {
       btn.addEventListener("click", () => approve(btn.dataset.id));
     });
-    setMsg(`Loaded ${queue.count} case(s).`);
+    setMsg(`Loaded ${queue.count} case(s). API ${impactRelayApiBase()}`);
   } catch (err) {
+    if (err.code === "UNAUTHENTICATED") {
+      $("apiStatus").textContent = "Sign in required";
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+      return;
+    }
     $("apiStatus").textContent = "API offline";
     $("apiStatus").className = "status-pill status-blocked";
     setMsg(String(err.message || err), true);
@@ -95,7 +101,9 @@ async function refresh() {
 
 async function showDetail(workflowId) {
   try {
-    const detail = await api(`/api/finance/cases/${encodeURIComponent(workflowId)}`);
+    const { data: detail } = await impactRelayFetch(
+      `/api/finance/cases/${encodeURIComponent(workflowId)}`
+    );
     $("detailPanel").hidden = false;
     $("caseDetail").textContent = JSON.stringify(detail, null, 2);
   } catch (err) {
@@ -105,10 +113,10 @@ async function showDetail(workflowId) {
 
 async function approve(workflowId) {
   try {
-    const out = await api(`/api/finance/cases/${encodeURIComponent(workflowId)}/approve`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const { data: out } = await impactRelayFetch(
+      `/api/finance/cases/${encodeURIComponent(workflowId)}/approve`,
+      { method: "POST", body: {}, requireFinance: true }
+    );
     if (!out.ok) {
       setMsg(out.message || out.error || "approve failed", true);
       return;
@@ -122,7 +130,11 @@ async function approve(workflowId) {
 
 async function seed() {
   try {
-    const out = await api("/api/pilot/seed", { method: "POST", body: "{}" });
+    const { data: out } = await impactRelayFetch("/api/pilot/seed", {
+      method: "POST",
+      body: {},
+      requireFinance: true
+    });
     setMsg(out.ok ? `Seeded ${out.started?.length || 0} workflow(s).` : JSON.stringify(out));
     await refresh();
   } catch (err) {
@@ -130,9 +142,66 @@ async function seed() {
   }
 }
 
-$("btnRefresh").addEventListener("click", refresh);
-$("btnSeed").addEventListener("click", seed);
-$("apiBase").addEventListener("change", () => {
-  localStorage.setItem("IMPACT_RELAY_API", apiBase());
+function wireAuthGate() {
+  const form = $("loginForm");
+  if (!form) return;
+  let client;
+  try {
+    client = createWorkspaceClient();
+  } catch {
+    $("authGate").hidden = true;
+    $("mainApp").hidden = false;
+    return;
+  }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("email").value.trim();
+    const { error } = await client.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${location.origin}${location.pathname}` }
+    });
+    $("authMessage").textContent = error
+      ? error.message
+      : "Check your email for the secure sign-in link.";
+  });
+  $("signOut")?.addEventListener("click", async () => {
+    clearWorkspaceSessionCache();
+    await client.auth.signOut();
+    location.reload();
+  });
+  client.auth.onAuthStateChange(async (_e, session) => {
+    if (session) {
+      $("authGate").hidden = true;
+      $("mainApp").hidden = false;
+      await refresh();
+    } else {
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+    }
+  });
+  client.auth.getSession().then(async ({ data }) => {
+    if (data.session) {
+      $("authGate").hidden = true;
+      $("mainApp").hidden = false;
+      await refresh();
+    } else {
+      // Fixture mode if no runtime config
+      try {
+        createWorkspaceClient();
+        $("authGate").hidden = false;
+        $("mainApp").hidden = true;
+      } catch {
+        $("authGate").hidden = true;
+        $("mainApp").hidden = false;
+        await refresh();
+      }
+    }
+  });
+}
+
+$("btnRefresh")?.addEventListener("click", refresh);
+$("btnSeed")?.addEventListener("click", seed);
+$("apiBase")?.addEventListener("change", () => {
+  localStorage.setItem("IMPACT_RELAY_API", impactRelayApiBase());
 });
-refresh();
+wireAuthGate();
