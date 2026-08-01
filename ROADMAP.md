@@ -22,12 +22,14 @@ Historical attendance, membership, donor, sponsor, or relationship evidence does
 ```yaml
 public_portal: PASS
 public_data_schema: PASS
-pages_validation_and_deployment: PASS
+pages_validation: PASS
+pages_deployment: PLAN_GATED  # private free plan cannot host Pages; validate still required
 static_database_policy_checks: PASS
 local_security_contract: PASS
 full_migration_chain: PASS
-synthetic_fixture_connection: PR_14_PENDING
-six_role_rls_execution: PENDING
+synthetic_fixture_connection: PASS  # observed on PR #14 Actions run 30689212832
+six_role_rls_execution: PASS  # executable positive/negative checks observed green
+import_gate_execution: PASS  # observed on PR #15 Actions run 30689742284
 production_environment: NOT_CONFIGURED
 production_data_import: BLOCKED
 outreach_authority: NOT_GRANTED
@@ -80,14 +82,14 @@ outreach_authority: NOT_GRANTED
 
 ### Current observed position
 
-The complete migration chain now applies successfully. The latest failure occurred before fixture loading because the workflow failed to propagate the local `DB_URL` to `psql`.
+PR #14 established a green disposable Supabase run: migrations apply, six synthetic roles load, and RLS acceptance SQL completes without error (Actions run `30689212832`).
 
-PR #14:
+Remaining closure work in this patch:
 
-- resolves the trusted environment assignments emitted by the pinned Supabase CLI;
-- fails closed when `DB_URL` is absent;
-- exports the validated connection through `GITHUB_ENV`;
-- reuses the connection for role fixtures and RLS tests.
+- execute the synthetic import-gate corpus in CI (it was only statically asserted);
+- repair the gate fixture foreign key so `submitted_by` references the director fixture;
+- assert restricted/suppressed/unauthorized promotion fail closed and eligible promotion succeeds;
+- stop treating GitHub Pages host unavailability as a validation failure on private free plans.
 
 ### Exit gate
 
@@ -102,7 +104,7 @@ unauthorized_promotion: false
 production_data_used_in_tests: false
 ```
 
-No six-role enforcement claim is valid until this gate executes successfully in CI.
+HD-OI-018 completes only after this patch's local Supabase workflow is green with import-gate execution included.
 
 ## Next phase — production environment hardening
 
@@ -222,7 +224,7 @@ These decisions remain outside engineering authority:
 HD_OI_018:
   name: CI_and_policy_closure
   state: ACTIVE
-  completion: green_fixture_and_RLS_run
+  completion: green_fixture_RLS_and_import_gate_run
 
 HD_OI_019:
   name: production_environment_hardening

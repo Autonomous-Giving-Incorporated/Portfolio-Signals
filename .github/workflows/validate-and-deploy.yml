@@ -50,16 +50,30 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: validate
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Configure GitHub Pages
+        id: pages
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Skip deploy when Pages is unavailable
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "GitHub Pages is unavailable for this repository plan or visibility."
+          echo "Public portal validation still passed; deploy is skipped rather than failing the branch."
+          echo "Enable Pages with GitHub Actions as the source when the plan supports it."
+      - name: Upload Pages artifact
+        if: steps.pages.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: .
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4

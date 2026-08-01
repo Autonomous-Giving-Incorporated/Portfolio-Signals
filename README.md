@@ -14,19 +14,21 @@ As of 2026-08-01:
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
+| GitHub Pages deployment | Plan-gated (private free plan unsupported; deploy skips without failing validation) |
 | Static security policy checks | Passing |
 | Workbook parser contract | Passing |
 | Authenticated database schema | Implemented |
 | Six application roles | Implemented |
-| Row-level-security policies | Implemented; executable validation still in progress |
+| Row-level-security policies | Implemented; disposable CI run green on PR #14 |
 | Append-only audit model | Implemented |
 | Sponsor and grant workflow schema | Implemented |
 | Decision approval workflow | Implemented |
 | Import quarantine and suppression controls | Implemented |
+| Import-gate executable corpus | Wired into local Supabase CI |
 | Private storage policies | Implemented |
 | Signed-document URL function | Implemented |
 | Native `.xlsx` parser | Implemented; quarantine-only |
-| Synthetic role fixtures | Implemented; CI connection repair open in PR #14 |
+| Synthetic role fixtures | Implemented; DB URL propagation fixed |
 | Production data import | Blocked |
 | Outreach authority | Not granted |
 
@@ -123,7 +125,7 @@ The executable workflow performs the following sequence against a disposable loc
 5. Execute RLS and import-policy acceptance tests.
 6. Stop and discard the local stack.
 
-All migrations now apply successfully. PR #14 repairs database-URL propagation before fixture loading; fixture and RLS success must not be claimed until that workflow completes.
+PR #14 observed a green disposable run for migrations, six-role fixtures, and RLS acceptance checks. This repository now also executes the synthetic import-gate corpus (confirmed, restricted, duplicate, suppressed, unauthorized promotion, and eligible promotion) in that same workflow.
 
 ## Required production configuration
 
@@ -145,12 +147,14 @@ Before any real record is imported:
 ```yaml
 public_portal: PASS
 public_schema_validation: PASS
-pages_workflow: PASS
+pages_validation: PASS
+pages_deploy: PLAN_GATED
 static_policy_checks: PASS
 local_security_contract: PASS
 migration_chain: PASS
-synthetic_fixture_loading: PR_14_PENDING
-six_role_rls_execution: PENDING
+synthetic_fixture_loading: PASS
+six_role_rls_execution: PASS
+import_gate_execution: PASS
 production_supabase: NOT_CONFIGURED
 production_import: BLOCKED
 outreach: BLOCKED

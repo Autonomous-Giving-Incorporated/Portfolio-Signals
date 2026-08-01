@@ -93,6 +93,10 @@ jobs:
           grep -q 'restricted-consent fixture missing' supabase/tests/003_import_gate_cases.sql
           grep -q 'unresolved duplicate fixture missing' supabase/tests/003_import_gate_cases.sql
           grep -q 'suppression fixture missing' supabase/tests/003_import_gate_cases.sql
+          grep -q 'restricted consent unexpectedly promoted' supabase/tests/003_import_gate_cases.sql
+          grep -q 'unauthorized promotion unexpectedly succeeded' supabase/tests/003_import_gate_cases.sql
+          grep -q '00000000-0000-0000-0000-000000000101' supabase/tests/003_import_gate_cases.sql
+          grep -q '003_import_gate_cases.sql' .github/workflows/local-supabase-tests.yml
 
   local-supabase-tests:
     runs-on: ubuntu-latest

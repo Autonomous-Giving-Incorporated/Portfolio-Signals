@@ -1,7 +1,44 @@
 -- HD-OI-018: synthetic import-gate acceptance cases
--- Runs only against disposable local data. No production identifiers are used.
+-- Runs only against disposable local data after six_roles.sql.
+-- No production identifiers are used.
+
+\set ON_ERROR_STOP on
+
+create or replace function public.test_set_user(test_user uuid) returns void
+language plpgsql security definer set search_path = public, auth
+as $$
+begin
+  perform set_config('request.jwt.claim.sub', test_user::text, true);
+  perform set_config('request.jwt.claim.role', 'authenticated', true);
+end $$;
 
 begin;
+
+-- Structural quarantine contract.
+do $$
+declare
+  rel text;
+  enabled boolean;
+  definer boolean;
+begin
+  if to_regclass('public.import_batches') is null then raise exception 'missing import_batches'; end if;
+  if to_regclass('public.import_staging_rows') is null then raise exception 'missing import_staging_rows'; end if;
+  if to_regclass('public.import_exceptions') is null then raise exception 'missing import_exceptions'; end if;
+  if to_regclass('public.suppression_registry') is null then raise exception 'missing suppression_registry'; end if;
+
+  foreach rel in array array['import_batches','import_staging_rows','import_exceptions','suppression_registry'] loop
+    select relrowsecurity into enabled from pg_class where oid = ('public.' || rel)::regclass;
+    if enabled is not true then raise exception 'RLS disabled on %', rel; end if;
+  end loop;
+
+  select prosecdef into definer
+  from pg_proc
+  where oid = 'public.promote_import_row(bigint)'::regprocedure;
+  if definer is not true then raise exception 'promote_import_row must be security definer'; end if;
+  if has_function_privilege('public','public.promote_import_row(bigint)','EXECUTE') then
+    raise exception 'public must not execute promote_import_row';
+  end if;
+end $$;
 
 insert into public.import_batches (
   id, source_name, source_sha256, source_received_at, row_count,
@@ -15,7 +52,7 @@ insert into public.import_batches (
   'synthetic-v1',
   'exception_review',
   'synthetic/fixtures/import-gates.xlsx',
-  '00000000-0000-0000-0000-000000000001'
+  '00000000-0000-0000-0000-000000000101'
 );
 
 insert into public.import_staging_rows (
@@ -94,6 +131,99 @@ begin
       and state = 'suppressed'
   ) then
     raise exception 'suppression fixture missing';
+  end if;
+end $$;
+
+-- Capture synthetic row ids before role switching so RLS cannot hide fixtures.
+create temp table gate_row_ids (
+  external_id text primary key,
+  staging_row_id bigint not null
+);
+
+insert into gate_row_ids (external_id, staging_row_id)
+select external_id, id
+from public.import_staging_rows
+where batch_id = '10000000-0000-0000-0000-000000000018';
+
+-- Temp tables are owned by the session superuser; authenticated JWT tests need read access.
+grant select on gate_row_ids to authenticated;
+
+-- Force suppressed row into approved state while still superuser so promotion
+-- gate is evaluated on consent rather than staging lifecycle state.
+update public.import_staging_rows
+set state = 'approved'
+where id = (select staging_row_id from gate_row_ids where external_id = 'suppressed-004');
+
+-- Promotion gates under authenticated JWT claims.
+set local role authenticated;
+select public.test_set_user('00000000-0000-0000-0000-000000000101');
+do $$
+declare
+  v_id bigint;
+begin
+  select staging_row_id into v_id from gate_row_ids where external_id = 'restricted-002';
+  begin
+    perform public.promote_import_row(v_id);
+    raise exception 'restricted consent unexpectedly promoted';
+  exception
+    when others then
+      if sqlerrm not like '%consent_blocks_promotion%' then
+        raise;
+      end if;
+  end;
+end $$;
+
+do $$
+declare
+  v_id bigint;
+begin
+  select staging_row_id into v_id from gate_row_ids where external_id = 'suppressed-004';
+  begin
+    perform public.promote_import_row(v_id);
+    raise exception 'suppressed record unexpectedly promoted';
+  exception
+    when others then
+      if sqlerrm not like '%consent_blocks_promotion%' then
+        raise;
+      end if;
+  end;
+end $$;
+
+-- Unauthorized role must not promote eligible rows.
+select public.test_set_user('00000000-0000-0000-0000-000000000104');
+do $$
+declare
+  v_id bigint;
+begin
+  select staging_row_id into v_id from gate_row_ids where external_id = 'confirmed-001';
+  begin
+    perform public.promote_import_row(v_id);
+    raise exception 'unauthorized promotion unexpectedly succeeded';
+  exception
+    when others then
+      if sqlerrm not like '%insufficient_role%' then
+        raise;
+      end if;
+  end;
+end $$;
+
+-- Eligible confirmed row promotes only for steward/director.
+select public.test_set_user('00000000-0000-0000-0000-000000000101');
+do $$
+declare
+  v_id bigint;
+  v_constituent uuid;
+begin
+  select staging_row_id into v_id from gate_row_ids where external_id = 'confirmed-001';
+  v_constituent := public.promote_import_row(v_id);
+  if v_constituent is null then
+    raise exception 'eligible confirmed row did not promote';
+  end if;
+  if not exists (
+    select 1 from public.import_staging_rows
+    where id = v_id and state = 'promoted' and promoted_constituent_id = v_constituent
+  ) then
+    raise exception 'eligible promotion did not mark row promoted';
   end if;
 end $$;
 
