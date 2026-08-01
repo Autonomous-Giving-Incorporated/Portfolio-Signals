@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import * as XLSX from 'xlsx';
+import XLSX from '@e965/xlsx';
 import { z } from 'zod';
 
 const args = process.argv.slice(2);
@@ -16,8 +16,12 @@ if (!input || !output) throw new Error('input and output are required');
 if (path.extname(input).toLowerCase() !== '.xlsx') throw new Error('only native .xlsx files are accepted');
 
 const Cell = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-const workbook = XLSX.readFile(input, { cellDates: true, raw: false });
-const digest = crypto.createHash('sha256').update(fs.readFileSync(input)).digest('hex');
+const source = fs.readFileSync(input);
+if (source.length < 4 || source[0] !== 0x50 || source[1] !== 0x4b) {
+  throw new Error('invalid native .xlsx archive');
+}
+const workbook = XLSX.read(source, { type: 'buffer', cellDates: true, raw: false });
+const digest = crypto.createHash('sha256').update(source).digest('hex');
 const stream = fs.createWriteStream(output, { encoding: 'utf8', flags: 'wx' });
 
 let rowCount = 0;
