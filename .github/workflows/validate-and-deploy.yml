@@ -1,0 +1,59 @@
+name: Validate and deploy director portal
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate campaign data
+        run: npx --yes ajv-cli@5 validate --spec=draft2020 -s schemas/public-campaign.schema.json -d data/public-campaign.json
+      - name: Prohibit obvious sensitive-data files
+        shell: bash
+        run: |
+          set -euo pipefail
+          prohibited=$(find . -type f \
+            \( -iname '*member*registry*' -o -iname '*donor*export*' -o -iname '*contact*list*' -o -iname '*.xlsx' -o -iname '*.csv' \) \
+            -not -path './.git/*' -print)
+          if [[ -n "$prohibited" ]]; then
+            echo "Restricted or review-required data files detected:"
+            echo "$prohibited"
+            exit 1
+          fi
+      - name: Verify static entry points
+        run: test -f index.html && test -f styles.css && test -f app.js
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
