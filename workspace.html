@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Hacker Dojo Director Workspace</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="workspace-shell">
+  <main id="workspaceRoot" aria-live="polite">
+    <section class="section auth-gate" id="authGate">
+      <p class="eyebrow">RESTRICTED</p>
+      <h1>Director Workspace</h1>
+      <p>This surface requires an authenticated account, MFA, and an approved campaign role.</p>
+      <form id="loginForm" class="panel auth-form">
+        <label>Email <input id="email" type="email" autocomplete="email" required></label>
+        <button class="button" type="submit">Send secure sign-in link</button>
+        <p id="authMessage" class="note"></p>
+      </form>
+    </section>
+
+    <section id="workspace" hidden>
+      <header class="site-header">
+        <div><p class="eyebrow">HD-OI-013</p><h1>Campaign Operations</h1><p id="identityLine" class="lede"></p></div>
+        <button id="signOut" class="button secondary">Sign out</button>
+      </header>
+      <nav id="roleNav" class="primary-nav" aria-label="Workspace sections"></nav>
+      <section class="section">
+        <div class="metric-grid">
+          <article class="metric-card"><span class="metric-label">Open decisions</span><strong id="decisionCount">—</strong></article>
+          <article class="metric-card"><span class="metric-label">Active opportunities</span><strong id="opportunityCount">—</strong></article>
+          <article class="metric-card"><span class="metric-label">Authorized outreach</span><strong id="authorizedCount">—</strong></article>
+          <article class="metric-card"><span class="metric-label">Import exceptions</span><strong id="exceptionCount">—</strong></article>
+        </div>
+        <div id="workspaceContent" class="panel"><p>Loading authorized workspace…</p></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="workspace.js"></script>
+</body>
+</html>
