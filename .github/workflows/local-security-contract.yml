@@ -22,10 +22,13 @@ jobs:
         working-directory: services/workbook-parser
         run: npm run validate
       - name: Verify private storage controls
+        shell: bash
         run: |
-          grep -q "campaign-private" supabase/migrations/005_private_storage.sql
+          set -euo pipefail
+          grep -q "campaign-private" supabase/migrations/006_private_storage.sql
           grep -q "public = false" tests/rls/role_matrix.sql
-          ! grep -RIE "SUPABASE_SERVICE_ROLE_KEY|service_role[[:space:]]*=" --exclude='*.md' .
+          grep -q "Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')" supabase/functions/signed-document-url/index.ts
+          ! grep -RniE '(SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|service_role[[:space:]]*:[[:space:]]*["'"']eyJ[A-Za-z0-9_-]+|BEGIN[[:space:]]+PRIVATE[[:space:]]+KEY)' --exclude='*.md' .
       - name: Verify parser is quarantine-only
         run: |
           grep -q "promotion_authority: false" services/workbook-parser/src/cli.js
