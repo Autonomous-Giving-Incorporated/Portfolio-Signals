@@ -75,6 +75,9 @@ jobs:
           file='supabase/migrations/005_import_quarantine_and_suppression.sql'
           test -f "$file"
           test -f 'supabase/migrations/006_private_storage.sql'
+          test -f 'supabase/migrations/007_identity_hardening.sql'
+          grep -q 'mfa_enforced' supabase/migrations/007_identity_hardening.sql
+          grep -q 'deactivate_profile' supabase/migrations/007_identity_hardening.sql
           grep -q 'alter table public.import_batches enable row level security' "$file"
           grep -q 'alter table public.import_staging_rows enable row level security' "$file"
           grep -q 'create table if not exists public.suppression_registry' "$file"

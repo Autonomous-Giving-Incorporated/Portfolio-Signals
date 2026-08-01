@@ -11,12 +11,17 @@ values
 ('00000000-0000-0000-0000-000000000106','00000000-0000-0000-0000-000000000000','authenticated','authenticated','auditor@example.invalid','',now(),now(),now())
 on conflict (id) do nothing;
 
-insert into public.profiles (id, display_name, role, active)
+insert into public.profiles (id, display_name, role, active, mfa_enforced)
 values
-('00000000-0000-0000-0000-000000000101','Synthetic Director','director',true),
-('00000000-0000-0000-0000-000000000102','Synthetic Campaign Lead','campaign_lead',true),
-('00000000-0000-0000-0000-000000000103','Synthetic Development','development',true),
-('00000000-0000-0000-0000-000000000104','Synthetic Board Viewer','board_viewer',true),
-('00000000-0000-0000-0000-000000000105','Synthetic Data Steward','data_steward',true),
-('00000000-0000-0000-0000-000000000106','Synthetic Auditor','auditor',true)
-on conflict (id) do update set role = excluded.role, active = true;
+('00000000-0000-0000-0000-000000000101','Synthetic Director','director',true,true),
+('00000000-0000-0000-0000-000000000102','Synthetic Campaign Lead','campaign_lead',true,true),
+('00000000-0000-0000-0000-000000000103','Synthetic Development','development',true,true),
+('00000000-0000-0000-0000-000000000104','Synthetic Board Viewer','board_viewer',true,false),
+('00000000-0000-0000-0000-000000000105','Synthetic Data Steward','data_steward',true,true),
+('00000000-0000-0000-0000-000000000106','Synthetic Auditor','auditor',true,true)
+on conflict (id) do update
+  set role = excluded.role,
+      active = true,
+      mfa_enforced = excluded.mfa_enforced,
+      deactivated_at = null,
+      deactivation_reason = null;

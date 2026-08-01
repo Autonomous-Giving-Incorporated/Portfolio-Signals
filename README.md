@@ -19,16 +19,19 @@ As of 2026-08-01:
 | Workbook parser contract | Passing |
 | Authenticated database schema | Implemented |
 | Six application roles | Implemented |
-| Row-level-security policies | Implemented; disposable CI run green on PR #14 |
+| Row-level-security policies | Implemented; six-role disposable suite green |
+| MFA / active-profile hardening | Implemented in schema; provider enablement is operator-owned |
 | Append-only audit model | Implemented |
 | Sponsor and grant workflow schema | Implemented |
 | Decision approval workflow | Implemented |
 | Import quarantine and suppression controls | Implemented |
 | Import-gate executable corpus | Wired into local Supabase CI |
+| Client/schema alignment | Hardened in HD-OI-019 |
 | Private storage policies | Implemented |
-| Signed-document URL function | Implemented |
+| Signed-document URL function | Implemented against `document_records` |
 | Native `.xlsx` parser | Implemented; quarantine-only |
-| Synthetic role fixtures | Implemented; DB URL propagation fixed |
+| Synthetic role fixtures | Implemented with MFA flags |
+| Production environment checklist | Documented; live projects not yet configured |
 | Production data import | Blocked |
 | Outreach authority | Not granted |
 
@@ -49,7 +52,8 @@ services/import-api/                    Parser-to-import-batch service boundary
 
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
-docs/PRODUCTION-ACCEPTANCE.md            Production gate checklist
+docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
+docs/HD-OI-019.md                       Current hardening phase notes
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
 .github/workflows/                      Validation, security, Pages, and Supabase CI
@@ -155,6 +159,7 @@ migration_chain: PASS
 synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
+identity_mfa_controls: IN_PROGRESS_HD_OI_019
 production_supabase: NOT_CONFIGURED
 production_import: BLOCKED
 outreach: BLOCKED
