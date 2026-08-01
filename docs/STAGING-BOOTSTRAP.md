@@ -42,7 +42,9 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | Edge Function authenticated path | Version 2 from `abf1c1d`; synthetic director received `200`, downloaded the object, and produced audit event `18` without path leakage | PASS |
 | Synthetic hosted policy suite | Seven repository SQL files | PASS |
 | SSL enforcement | Enabled; staging restart completed | VERIFIED |
-| Overall staging readiness | Backups deferred; DB network unrestricted; staging URL unspecified | FAIL |
+| GitHub Pages staging host | `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` from `964587d` | PASS |
+| Auth site URL and redirects | Pages root, workspace, and import-review URLs configured | PASS |
+| Overall staging readiness | Backups deferred; DB network unrestricted | FAIL |
 | Real CRM data | Not loaded | REQUIRED |
 
 Private data placement: **local workbook + this Supabase project**. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
@@ -141,6 +143,9 @@ master_development_list_loaded: false
 hosted_backups_available: false
 ssl_enforcement: true
 database_network_restricted: false
+github_pages_staging_host: true
+github_pages_runtime_config: true
+auth_site_url_and_redirects: true
 edge_function_unauthenticated_denial: true
 edge_function_authenticated_signed_url: true
 staging_readiness: FAIL

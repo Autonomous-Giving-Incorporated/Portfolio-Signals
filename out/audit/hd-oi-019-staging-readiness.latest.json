@@ -3,8 +3,8 @@
   "surface": "projection",
   "governs_or_activates": false,
   "project_ref": "ecxkhihlbrcwpavfoaoq",
-  "repository_commit": "abf1c1daca761b961c9b41978532ce9e904c33ac",
-  "verified_at": "2026-08-01T21:31:00Z",
+  "repository_commit": "964587d0bad540f1bd27f381f1d38fdf65ec986a",
+  "verified_at": "2026-08-01T22:04:00Z",
   "mode": "shadow_advisory",
   "verdict": "FAIL",
   "synthetic_data_only": true,
@@ -38,7 +38,21 @@
     "temporary_test_helper_removed": true,
     "hosted_backups_available": false,
     "ssl_enforcement_enabled": true,
-    "database_network_restricted": false
+    "database_network_restricted": false,
+    "github_pages_active": true,
+    "github_pages_https_enforced": true,
+    "github_pages_url": "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/",
+    "github_pages_deployed_commit": "964587d0bad540f1bd27f381f1d38fdf65ec986a",
+    "github_pages_home_status": 200,
+    "github_pages_workspace_status": 200,
+    "github_pages_runtime_config_status": 200,
+    "github_pages_runtime_points_to_staging": true,
+    "github_pages_runtime_contains_service_role": false,
+    "auth_site_url": "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/",
+    "auth_redirect_urls": [
+      "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html",
+      "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/import-review.html"
+    ]
   },
   "edge_function_http": {
     "unauthenticated_request_status": 401,
@@ -73,8 +87,7 @@
   "unreconciled_configuration": [
     "Hosted PostgreSQL 17 diverges from the repository PostgreSQL 15.8 pin.",
     "Hosted API schema exposure differs from repository local configuration.",
-    "Hosted storage global file-size limit differs from repository local configuration.",
-    "Hosted site URL and redirect allowlist require an explicit staging application URL."
+    "Hosted storage global file-size limit differs from repository local configuration."
   ],
   "provenance": "Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf"
 }

@@ -67,7 +67,9 @@ Also delivered under HD-OI-019:
 | Edge Function authenticated HTTP issuance | PASS — synthetic director received `200`, downloaded the signed object, and produced audit event `18` without storage-path leakage |
 | Seven-file synthetic hosted policy suite | PASS |
 | SSL enforcement | ENABLED — staging restart completed |
-| Staging platform hardening | FAIL — backups deferred, DB network unrestricted, staging URL unspecified |
+| GitHub Pages staging host | PASS — HTTPS site live from `964587d`; runtime config points to staging without service-role material |
+| Supabase Auth URL configuration | PASS — Pages root plus workspace and import-review redirects |
+| Staging platform hardening | FAIL — backups deferred and DB network unrestricted |
 | Production project separation | PENDING |
 | Real workbook import | BLOCKED (HD-OI-020) |
 
@@ -75,7 +77,7 @@ Also delivered under HD-OI-019:
 
 - run backup/restore drill and record operator evidence;
 - restrict database network access after trusted CIDRs are supplied;
-- reconcile the hosted API/storage configuration after an explicit staging application URL is named;
+- reconcile remaining hosted API/storage configuration drift;
 - provision a separate production project or record an explicit single-project promotion decision.
 
 Hosted schema, RLS, storage, session, import, and document-audit controls were verified with

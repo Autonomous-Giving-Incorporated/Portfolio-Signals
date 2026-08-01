@@ -6,7 +6,8 @@ promote, activate, or authorize production or real-data use.
 ## Current staging state
 
 - Hosted project: `ecxkhihlbrcwpavfoaoq`
-- Deployed application-control commit: `abf1c1daca761b961c9b41978532ce9e904c33ac`
+- Deployed staging commit: `964587d0bad540f1bd27f381f1d38fdf65ec986a`
+- GitHub Pages host: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
 - Application-control verification: `PASS`
 - Overall staging readiness: `FAIL`
 - Production import and outreach: `BLOCKED`

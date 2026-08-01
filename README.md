@@ -14,7 +14,7 @@ As of 2026-08-01:
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
-| GitHub Pages deployment | Plan-gated (private free plan unsupported; deploy skips without failing validation) |
+| GitHub Pages deployment | Active staging host at `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` |
 | Static security policy checks | Passing |
 | Workbook parser contract | Passing; executable quarantine tests cover provenance, input rejection, fail-closed parsing, and overwrite protection |
 | Authenticated database schema | Implemented |
@@ -190,7 +190,7 @@ synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
 identity_mfa_controls: PASS_STAGING_SYNTHETIC
-staging_supabase_project: FAIL_PLATFORM_HARDENING  # app controls and SSL pass; backups/network/URL gates remain
+staging_supabase_project: FAIL_PLATFORM_HARDENING  # app controls, SSL, Pages, and Auth URLs pass; backups/network gates remain
 private_data_placement: LOCAL_PLUS_SUPABASE
 notion_crm_sor: REJECTED
 production_supabase: NOT_SEPARATED_YET  # treat current project as staging until named
