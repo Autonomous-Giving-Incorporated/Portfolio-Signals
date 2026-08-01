@@ -12,6 +12,10 @@ GitHub Pages
   aggregate evidence
   no private records
 
+Local operator storage
+  authorized source workbooks only
+  never committed to git
+
 Authenticated application
   identity + MFA
   director decisions
@@ -20,21 +24,28 @@ Authenticated application
   restricted notes
   audit trail
 
-Managed Postgres / object storage
-  row-level security
-  encrypted fields
-  controlled document room
+Supabase (staging ref ecxkhihlbrcwpavfoaoq until production split)
+  Postgres + row-level security
+  Storage campaign-private
+  encrypted fields / controlled document room
   backups and retention
+
+Notion
+  strategy + public evidence aggregates only
+  not CRM SoR
 ```
+
+Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md).
 
 ## Recommended implementation
 
-- **Frontend:** server-rendered TypeScript application deployed separately from GitHub Pages.
+- **Frontend:** server-rendered TypeScript application deployed separately from GitHub Pages (current shell: static workspace + runtime config).
 - **Identity and database:** Supabase Auth + Postgres with row-level security.
 - **MFA:** required for director, campaign lead, development, data steward, and auditor roles.
-- **Documents:** private object-storage bucket with time-limited signed URLs.
+- **Documents:** private object-storage bucket (`campaign-private`) with time-limited signed URLs.
 - **Email:** no bulk-send integration until consent and suppression rules are approved.
 - **Payments:** Every.org remains the donation processor; ingest reconciled transaction exports rather than handling card data.
+- **Source CRM files:** remain local until quarantine upload to Supabase; do not mirror person-level rosters into Notion.
 
 ## Roles
 

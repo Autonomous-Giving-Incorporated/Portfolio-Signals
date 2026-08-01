@@ -31,7 +31,9 @@ As of 2026-08-01:
 | Signed-document URL function | Implemented against `document_records` |
 | Native `.xlsx` parser | Implemented; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
-| Production environment checklist | Documented; live projects not yet configured |
+| Production environment checklist | Documented |
+| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); migrations/MFA operator-owned |
+| Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
 | Production data import | Blocked |
 | Outreach authority | Not granted |
 
@@ -51,6 +53,7 @@ services/workbook-parser/               Native XLSX quarantine parser
 services/import-api/                    Parser-to-import-batch service boundary
 
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
+docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
 docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
@@ -100,11 +103,14 @@ The repository must never contain:
 - relationship scores or contact recommendations;
 - consent, suppression, or outreach state tied to real people;
 - private campaign documents;
-- production credentials or service-role values.
+- production credentials or service-role values;
+- native development workbooks (`.xlsx` / `.csv` exports with campaign records).
 
-GitHub Pages is a public publishing surface, not a CRM access-control layer. Restricted records belong only in the authenticated application and private data service.
+GitHub Pages is a public publishing surface, not a CRM access-control layer. Restricted records belong only in **local operator custody** until upload, then in **Supabase** (Postgres RLS + `campaign-private` storage). Notion may hold strategy and aggregate public evidence; it is **not** the CRM system of record.
 
 The source development list is evidence, not outreach authorization. A historical relationship, attendance record, or Meetup export does not establish consent to fundraising contact.
+
+See [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md) for the placement matrix, staging project ref, and offline source inventory (hashes and counts only).
 
 ## Local public-portal preview
 
@@ -142,20 +148,31 @@ The executable workflow performs the following sequence against a disposable loc
 
 PR #14 observed a green disposable run for migrations, six-role fixtures, and RLS acceptance checks. This repository now also executes the synthetic import-gate corpus (confirmed, restricted, duplicate, suppressed, unauthorized promotion, and eligible promotion) in that same workflow.
 
-## Required production configuration
+## Staging Supabase project
 
-Before any real record is imported:
+| Field | Value |
+|---|---|
+| Project ref | `ecxkhihlbrcwpavfoaoq` |
+| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq |
+| API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` |
+| Role | Staging (default) until leadership names production |
+| Schema push | Operator: `supabase link --project-ref ecxkhihlbrcwpavfoaoq` then `supabase db push` |
+| Browser config | Gitignored `runtime-config.js` from `scripts/staging/runtime-config.staging.example.js` |
 
-- provision separate staging and production Supabase projects;
+CI continues to use a **disposable** local Supabase stack. Linking the hosted project does not apply migrations or load data by itself.
+
+## Required before any real record is imported
+
+- apply and verify migrations on staging (then production when approved);
 - enforce MFA for privileged roles;
-- configure deployment secrets and key rotation;
-- deploy and verify private object-storage policies;
+- configure deployment secrets and key rotation (never commit service-role keys);
+- deploy and verify private object-storage policies (`campaign-private`);
 - verify signed-URL expiration and audit events;
-- execute positive and negative tests for every role;
+- execute positive and negative tests for every role (synthetic fixtures only first);
 - approve privacy, consent, retention, suppression, and export rules;
 - approve the $420K use-of-funds schedule and sponsor benefits;
 - name accountable campaign and data owners;
-- supply a native spreadsheet export through the quarantine workflow.
+- authorize a specific native workbook (SHA-256) through the quarantine workflow.
 
 ## Current campaign-control state
 
@@ -171,10 +188,14 @@ synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
 identity_mfa_controls: IN_PROGRESS_HD_OI_019
-production_supabase: NOT_CONFIGURED
+staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq; migrations operator-owned
+private_data_placement: LOCAL_PLUS_SUPABASE
+notion_crm_sor: REJECTED
+production_supabase: NOT_SEPARATED_YET  # treat current project as staging until named
 production_import: BLOCKED
 outreach: BLOCKED
 sensitive_data_in_repo: PROHIBITED
+master_development_list: LOCAL_ONLY_INVENTORIED  # SHA-256 in docs/DATA-PLACEMENT.md
 ```
 
-See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
+See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).

@@ -32,13 +32,30 @@ Create **two** managed projects before any real data:
 1. **Staging** — synthetic fixtures only; full migration and RLS suite.
 2. **Production** — empty until a governed pilot import is approved.
 
-Both projects require:
+### Current hosted project
+
+| Field | Value |
+|---|---|
+| Ref | `ecxkhihlbrcwpavfoaoq` |
+| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq |
+| Default classification | **Staging** until leadership names production or creates a second project |
+| Real data | **Not authorized** |
+
+If only one project exists, do not load production CRM data into it until:
+
+- migrations + synthetic suite are green on that project;
+- MFA and roles are enforced;
+- leadership either (a) accepts this ref as production after hardening, or (b) provisions a separate production project.
+
+Both projects (when split) require:
 
 - separate service-role secrets;
 - separate anon keys;
 - separate storage buckets;
 - separate auth configuration;
 - no shared database URLs in client config.
+
+Private placement: **local + Supabase** only. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 
 ## Secret management
 

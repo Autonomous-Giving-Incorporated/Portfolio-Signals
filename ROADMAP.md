@@ -30,9 +30,16 @@ full_migration_chain: PASS
 synthetic_fixture_connection: PASS  # observed on PR #14 Actions run 30689212832
 six_role_rls_execution: PASS  # executable positive/negative checks observed green
 import_gate_execution: PASS  # observed on PR #15 Actions run 30689742284
-production_environment: NOT_CONFIGURED
+private_data_placement: LOCAL_PLUS_SUPABASE  # Notion not CRM SoR
+staging_supabase_project: PROVISIONED
+  ref: ecxkhihlbrcwpavfoaoq
+  host: https://ecxkhihlbrcwpavfoaoq.supabase.co
+  github_linked: OBSERVED  # operator-reported
+  migrations_on_hosted: OPERATOR_OWNED  # not verified by CI
+production_environment: NOT_SEPARATED_YET  # treat hosted project as staging until named
 production_data_import: BLOCKED
 outreach_authority: NOT_GRANTED
+source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.md
 ```
 
 ## Completed foundation
@@ -112,12 +119,15 @@ Repository progress in this phase:
 
 ### Infrastructure
 
-- create separate staging and production Supabase projects;
+- ~~create staging Supabase project~~ — **done** (`ecxkhihlbrcwpavfoaoq`, GitHub-linked);
+- apply repository migrations to the hosted staging project (`supabase db push`);
+- create a separate **production** project when leadership requires environment split;
 - pin supported CLI, database, and runtime versions;
 - configure backup, restore, and disaster-recovery procedures;
-- configure secret management and rotation;
+- configure secret management and rotation (no service-role in git);
 - configure deployment environments and protected branches;
-- enable structured observability without logging personal data.
+- enable structured observability without logging personal data;
+- keep private CRM on **local + Supabase** only ([docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md)).
 
 ### Identity and authorization
 
@@ -139,14 +149,24 @@ Repository progress in this phase:
 ### Exit gate
 
 ```yaml
-staging_environment: VERIFIED
-production_environment: VERIFIED
+staging_project_created: true  # ecxkhihlbrcwpavfoaoq
+staging_migrations_applied: OPERATOR  # required next
+staging_environment: VERIFIED  # after migrations + synthetic suite on staging
+production_environment: VERIFIED  # separate project or explicit promotion decision
 mfa_enforced: true
 secrets_committed: false
 backup_restore_tested: true
 private_storage_tested: true
 signed_url_audit_tested: true
 ```
+
+### Operator handoff (continue outside GitHub agent)
+
+1. Link CLI: `supabase link --project-ref ecxkhihlbrcwpavfoaoq`
+2. Push schema: `supabase db push` or `./scripts/staging/apply-migrations.sh remote-linked`
+3. Wire gitignored `runtime-config.js` (URL + anon key only)
+4. MFA + six synthetic roles on staging; run policy suite
+5. Do **not** load Master Development List until HD-OI-020 leadership gates
 
 ## Governed data-import phase
 
@@ -231,10 +251,16 @@ HD_OI_019:
   name: production_environment_hardening
   state: ACTIVE
   completion: identity_mfa_controls_client_schema_alignment_operator_checklist
+  progress:
+    staging_project: PROVISIONED
+    data_placement_docs: COMPLETE
+    hosted_migrations: PENDING_OPERATOR
+    mfa_provider: PENDING_OPERATOR
 
 HD_OI_020:
   name: governed_pilot_import
   state: BLOCKED_BY_POLICY_AND_LEADERSHIP_APPROVAL
+  candidate_source: Master Development List 1.2 (local; SHA-256 in docs/DATA-PLACEMENT.md)
 
 HD_OI_021:
   name: controlled_campaign_operations
@@ -243,6 +269,6 @@ HD_OI_021:
 
 ## Non-negotiable boundary
 
-GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal contact information, donation histories, attendance records, private notes, relationship assessments, consent state, suppression state, and private documents belong only in the authenticated data service.
+GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal contact information, donation histories, attendance records, private notes, relationship assessments, consent state, suppression state, and private documents belong only in **local custody and/or Supabase** (authenticated data service + private storage). Notion is not a substitute SoR for those records.
 
 Production import and outreach remain blocked until both technical and leadership gates are satisfied.

@@ -7,14 +7,19 @@
 
 This runbook converts a native workbook export into controlled campaign records without placing source files, contact details, attendance history, private notes, or credentials in Git.
 
+**Placement:** local source file → Supabase Storage `campaign-private` → quarantine tables. Notion is not an import target. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
+
+**Staging host:** project ref `ecxkhihlbrcwpavfoaoq` (treat as staging until production is named).
+
 ## Required flow
 
 ```text
-restricted upload
+local native .xlsx (operator custody)
+→ restricted upload to campaign-private
 → malware and file-type validation
 → SHA-256 receipt
 → schema detection
-→ staging rows
+→ staging rows (import_batches / import_staging_rows)
 → normalization
 → duplicate and suppression matching
 → exception review
@@ -25,6 +30,17 @@ restricted upload
 → reconciliation receipt
 → source retention or purge
 ```
+
+## Candidate source (not authorized)
+
+Offline inventory only — **do not import** until leadership authorizes this digest (or a successor export):
+
+| Field | Value |
+|---|---|
+| Filename pattern | `Master Development List 1.2 Hacker Dojo 2025.xlsx` |
+| SHA-256 | `53239b7ed197f59bc4219b7053aef3fd0471a9dbcab4f40b67e6fff04b48f97f` |
+| Sheets | 11 (aggregate inventory in DATA-PLACEMENT.md) |
+| Authority | **BLOCKED** |
 
 ## Accepted source formats
 
