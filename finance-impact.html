@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Hacker Dojo — Impact Relay Finance Review</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="section" id="financeApp">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">IMPACT RELAY · FINANCE</p>
+        <h1>Expense approval queue</h1>
+        <p class="lede">L3 human gates from Impact Relay durable workflows. Canonical tenant <code>org_hacker_dojo</code>.</p>
+      </div>
+      <span class="status-pill status-blocked" id="apiStatus">API offline</span>
+    </div>
+
+    <section class="metric-grid" aria-label="Queue metrics">
+      <article class="metric-card"><span class="metric-label">Waiting</span><strong id="waitingCount">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Needs attention</span><strong id="attentionCount">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Ledger commands</span><strong id="ledgerCmds">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Expenses tracked</span><strong id="expenseCount">—</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Controls</h2>
+        <span class="tag warning">HUMAN APPROVAL</span>
+      </div>
+      <div class="control-grid">
+        <label>API base <input id="apiBase" type="url" value="http://127.0.0.1:8787" style="min-width:16rem"></label>
+        <label>Approver email <input id="approverEmail" type="email" value="finance.approver@hackersdojo.example"></label>
+        <button type="button" class="button" id="btnSeed">Seed pilot expense</button>
+        <button type="button" class="button secondary" id="btnRefresh">Refresh queue</button>
+      </div>
+      <p id="actionMsg" class="note"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><h2>Queue</h2></div>
+      <div id="queueList"><p class="note">Start the Impact Relay console server, then refresh.</p></div>
+    </section>
+
+    <section class="panel" id="detailPanel" hidden>
+      <div class="panel-heading"><h2>Case detail</h2></div>
+      <pre id="caseDetail" class="note" style="white-space:pre-wrap;overflow:auto;max-height:24rem"></pre>
+    </section>
+  </main>
+  <script type="module" src="finance-impact.js"></script>
+</body>
+</html>
