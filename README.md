@@ -154,7 +154,7 @@ local_security_contract: PASS
 migration_chain: PASS
 synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
-import_gate_execution: IN_PROGRESS_THIS_BRANCH
+import_gate_execution: PASS
 production_supabase: NOT_CONFIGURED
 production_import: BLOCKED
 outreach: BLOCKED

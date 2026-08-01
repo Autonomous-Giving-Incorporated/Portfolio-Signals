@@ -29,7 +29,7 @@ local_security_contract: PASS
 full_migration_chain: PASS
 synthetic_fixture_connection: PASS  # observed on PR #14 Actions run 30689212832
 six_role_rls_execution: PASS  # executable positive/negative checks observed green
-import_gate_execution: PENDING_THIS_PATCH
+import_gate_execution: PASS  # observed on PR #15 Actions run 30689742284
 production_environment: NOT_CONFIGURED
 production_data_import: BLOCKED
 outreach_authority: NOT_GRANTED
