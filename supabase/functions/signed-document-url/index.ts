@@ -25,27 +25,29 @@ Deno.serve(async (req) => {
     return json({ error: 'forbidden' }, 403);
   }
 
-  const { documentId } = await req.json().catch(() => ({}));
+  const { documentId, expiresIn = 60 } = await req.json().catch(() => ({}));
   if (!documentId) return json({ error: 'document_id_required' }, 400);
+  if (!Number.isInteger(expiresIn) || expiresIn < 30 || expiresIn > 300) {
+    return json({ error: 'invalid_expiry' }, 400);
+  }
+
+  const { data: access, error: accessError } = await userClient.rpc('record_document_access', {
+    p_document_id: documentId,
+    p_ttl_seconds: expiresIn,
+  });
+  if (accessError) {
+    const notFound = accessError.message?.includes('document_not_found');
+    return json({ error: notFound ? 'not_found' : 'access_denied' }, notFound ? 404 : 403);
+  }
+  if (!access?.audit_id || !access?.storage_bucket || !access?.storage_path) {
+    return json({ error: 'audit_failed' }, 500);
+  }
 
   const admin = createClient(url, serviceKey);
-  const { data: doc, error: docError } = await admin.from('document_records')
-    .select('storage_path,storage_bucket,deleted_at')
-    .eq('id', documentId)
-    .single();
-  if (docError || !doc || doc.deleted_at) return json({ error: 'not_found' }, 404);
-
-  const bucket = doc.storage_bucket || 'campaign-private';
-  const { data, error } = await admin.storage.from(bucket).createSignedUrl(doc.storage_path, 60);
+  const { data, error } = await admin.storage
+    .from(access.storage_bucket)
+    .createSignedUrl(access.storage_path, expiresIn);
   if (error) return json({ error: 'signing_failed' }, 500);
 
-  await admin.from('audit_log').insert({
-    actor_id: userData.user.id,
-    action: 'signed_document_url_created',
-    entity_type: 'document_record',
-    entity_id: String(documentId),
-    after_state: { ttl_seconds: 60, storage_bucket: bucket },
-  });
-
-  return json({ signedUrl: data.signedUrl, expiresIn: 60 });
+  return json({ signedUrl: data.signedUrl, expiresIn, expiresAt: access.expires_at });
 });

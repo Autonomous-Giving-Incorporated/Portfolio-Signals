@@ -73,7 +73,7 @@ Also delivered under HD-OI-019:
 - verify signed-URL edge function against staging with synthetic objects only;
 - provision a separate production project or record an explicit single-project promotion decision.
 
-Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Supabase CLI, and PostgreSQL toolchain. Hosted provider configuration and staging evidence remain operator-owned.
+Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Deno, Supabase CLI, and PostgreSQL toolchain. Signed document URLs are bounded to 30-300 seconds, read metadata through caller RLS, and fail closed unless privacy-safe access audit evidence is written. Hosted provider configuration and staging evidence remain operator-owned.
 
 ## Non-goals
 

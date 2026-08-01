@@ -78,6 +78,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 - Suppressed records cannot be included in outreach exports.
 - Opportunity probability remains unset until a validated scoring model exists.
 - Every mutation writes an audit event.
+- Every returned private-document signed URL uses a 30-300 second TTL and has an append-only audit event containing the actor, document ID, bucket, TTL, and expiry without recording the object path or URL.
 - Board/advisor status cannot be granted automatically as a donor benefit.
 
 ## Import quarantine
