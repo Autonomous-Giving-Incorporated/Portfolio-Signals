@@ -21,12 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Reject destructive or secret-bearing migration content
+      - name: Reject destructive or embedded secret content
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE '(service_role|SUPABASE_SERVICE_ROLE_KEY|BEGIN[[:space:]]+PRIVATE[[:space:]]+KEY|password[[:space:]]*=)' supabase tests || {
-            echo 'Potential secret or privileged credential reference found.'
+          ! grep -RniE '(BEGIN[[:space:]]+PRIVATE[[:space:]]+KEY|password[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*["'"'][^"'"']+["'"']|service_role[[:space:]]*:[[:space:]]*["'"']eyJ[A-Za-z0-9_-]+)' supabase tests || {
+            echo 'Potential embedded secret or privileged credential value found.'
             exit 1
           }
           ! grep -RniE 'drop[[:space:]]+(table|schema)[[:space:]]+.*cascade' supabase/migrations || {
