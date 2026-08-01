@@ -1,57 +1,95 @@
 # Hacker Dojo Campaign Intelligence
 
-A director-facing campaign control portal for Hacker Dojo's **$420K minimum campaign** and **$2M transformation path**.
+A governed campaign-control system for Hacker Dojo's **$420K minimum campaign** and **$2M transformation path**.
 
-## Current implementation
+The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
-The repository contains a privacy-safe static dashboard designed for GitHub Pages. It includes:
+## Verified implementation state
 
-- executive campaign overview;
-- funding ladder and use-of-funds framework;
-- sponsor, grant, and member-segment views;
-- decision queue and launch gates;
-- governance and privacy controls;
-- links to approved public resources;
-- canonical aggregate campaign data with JSON Schema validation;
-- automated validation and GitHub Pages deployment;
-- an authenticated-workspace database foundation with roles, row-level security, consent controls, decisions, claims, opportunities, and audit logging.
+As of 2026-08-01:
+
+| Capability | State |
+|---|---|
+| Public director portal | Implemented |
+| Canonical public campaign data | Implemented |
+| JSON Schema validation | Passing |
+| GitHub Pages validation workflow | Passing |
+| Static security policy checks | Passing |
+| Workbook parser contract | Passing |
+| Authenticated database schema | Implemented |
+| Six application roles | Implemented |
+| Row-level-security policies | Implemented; executable validation still in progress |
+| Append-only audit model | Implemented |
+| Sponsor and grant workflow schema | Implemented |
+| Decision approval workflow | Implemented |
+| Import quarantine and suppression controls | Implemented |
+| Private storage policies | Implemented |
+| Signed-document URL function | Implemented |
+| Native `.xlsx` parser | Implemented; quarantine-only |
+| Synthetic role fixtures | Implemented; CI connection repair open in PR #14 |
+| Production data import | Blocked |
+| Outreach authority | Not granted |
 
 ## Repository map
 
 ```text
-index.html                            Director portal
-styles.css                           Visual system
-app.js                               Client-side interactions
-data/public-campaign.json            Canonical public aggregate state
-schemas/public-campaign.schema.json  Public-data contract
-supabase/migrations/001_campaign_control.sql
-supabase/seed.sql                    Safe decision-gate seeds only
-docs/AUTHENTICATED-WORKSPACE.md      Private application boundary
-.env.example                         Deployment variable contract
-ROADMAP.md                           Production and backend plan
-SECURITY.md                          Data-handling boundary
-.github/workflows/validate-and-deploy.yml
+index.html                               Public director portal
+styles.css                              Visual system
+app.js                                  Client-side interactions
+data/public-campaign.json               Canonical public aggregate state
+schemas/public-campaign.schema.json     Public-data contract
+
+supabase/migrations/                    Governed database schema and controls
+supabase/functions/signed-document-url  Authenticated private-document access
+supabase/tests/                         Synthetic fixtures and policy checks
+services/workbook-parser/               Native XLSX quarantine parser
+services/import-api/                    Parser-to-import-batch service boundary
+
+docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
+docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
+docs/PRODUCTION-ACCEPTANCE.md            Production gate checklist
+ROADMAP.md                              Current execution roadmap
+SECURITY.md                             Data-handling boundary
+.github/workflows/                      Validation, security, Pages, and Supabase CI
 ```
 
-## Privacy boundary
+## Campaign architecture
 
-The repository must **not** contain the raw member registry, personal emails, addresses, attendance-level data, donor records, private notes, or other sensitive campaign data.
+```yaml
+minimum_target: 420000
+stretch_target: 2000000
+campaign_event: SupperHappyFundHouse
+campaign_event_date: 2026-08-21
+proposition: Keep the room where builders become possible.
+call_to_action: Come home. Build something. Fund the next builder.
+```
 
-The source development list contains extensive personal information. This site therefore shows only aggregated counts and publicly safe planning data. Editable CRM functions require a separately authenticated backend with:
+Proposed funding thresholds remain subject to director and board approval:
 
-- multifactor authentication;
-- role-based access control;
-- row-level security;
-- audit logs;
-- encrypted sensitive fields;
-- explicit consent and suppression fields;
-- retention rules;
-- relationship ownership;
-- human approval gates.
+```yaml
+stabilization: 420000
+growth: 750000
+expansion: 1200000
+transformation: 2000000
+```
 
-See [SECURITY.md](SECURITY.md), [ROADMAP.md](ROADMAP.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
+## Privacy and authority boundary
 
-## Local preview
+The repository must never contain:
+
+- raw member or attendee registries;
+- personal email addresses, phone numbers, or street addresses;
+- donation histories or private donor notes;
+- relationship scores or contact recommendations;
+- consent, suppression, or outreach state tied to real people;
+- private campaign documents;
+- production credentials or service-role values.
+
+GitHub Pages is a public publishing surface, not a CRM access-control layer. Restricted records belong only in the authenticated application and private data service.
+
+The source development list is evidence, not outreach authorization. A historical relationship, attendance record, or Meetup export does not establish consent to fundraising contact.
+
+## Local public-portal preview
 
 ```bash
 python3 -m http.server 8080
@@ -59,53 +97,64 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080`.
 
-## Validate the public data contract
+## Validate the public campaign contract
+
+The CI workflow loads `ajv-formats` so the schema retains strict standard date validation.
 
 ```bash
-npx --yes ajv-cli@5 validate \
+npx --yes \
+  --package ajv-cli@5 \
+  --package ajv-formats@3 \
+  ajv validate \
   --spec=draft2020 \
+  -c ajv-formats \
   -s schemas/public-campaign.schema.json \
   -d data/public-campaign.json
 ```
 
-## GitHub Pages
+## Local Supabase policy validation
 
-The workflow in `.github/workflows/validate-and-deploy.yml` validates the data contract, checks for obvious restricted exports, and deploys `main` through GitHub Pages.
+The executable workflow performs the following sequence against a disposable local project:
 
-Repository configuration still needs:
+1. Start the pinned Supabase stack.
+2. Reset the database and apply the complete migration chain.
+3. Resolve and validate the local database URL.
+4. Load synthetic profiles for all six roles.
+5. Execute RLS and import-policy acceptance tests.
+6. Stop and discard the local stack.
 
-1. Open **Settings → Pages**.
-2. Select **GitHub Actions** as the source.
-3. Confirm the Pages environment is permitted for this private repository and account plan.
+All migrations now apply successfully. PR #14 repairs database-URL propagation before fixture loading; fixture and RLS success must not be claimed until that workflow completes.
 
-GitHub Pages must not be treated as the access-control layer for private CRM data.
+## Required production configuration
 
-## Authenticated environment
+Before any real record is imported:
 
-The SQL migration is designed for a separate Supabase project. Applying it does not place private data in GitHub; it creates the controlled schema and policies that the future application will use.
+- provision separate staging and production Supabase projects;
+- enforce MFA for privileged roles;
+- configure deployment secrets and key rotation;
+- deploy and verify private object-storage policies;
+- verify signed-URL expiration and audit events;
+- execute positive and negative tests for every role;
+- approve privacy, consent, retention, suppression, and export rules;
+- approve the $420K use-of-funds schedule and sponsor benefits;
+- name accountable campaign and data owners;
+- supply a native spreadsheet export through the quarantine workflow.
 
-Required before production use:
-
-- separate staging and production projects;
-- MFA enforcement;
-- secret-manager configuration;
-- field-encryption implementation;
-- audit trigger implementation and verification;
-- native spreadsheet import through quarantine;
-- approved privacy, retention, and outreach policy.
-
-## Campaign state
+## Current campaign-control state
 
 ```yaml
-minimum_target: 420000
-stretch_target: 2000000
-public_evidence: complete
-campaign_architecture: complete
-field_materials: draft_complete
-public_data_contract: implemented
-pages_workflow: implemented
-authenticated_schema: drafted
-outreach_authority: not_granted
-sensitive_data_in_repo: prohibited
-next_backend_phase: director_application_shell_and_import_quarantine
+public_portal: PASS
+public_schema_validation: PASS
+pages_workflow: PASS
+static_policy_checks: PASS
+local_security_contract: PASS
+migration_chain: PASS
+synthetic_fixture_loading: PR_14_PENDING
+six_role_rls_execution: PENDING
+production_supabase: NOT_CONFIGURED
+production_import: BLOCKED
+outreach: BLOCKED
+sensitive_data_in_repo: PROHIBITED
 ```
+
+See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
