@@ -76,20 +76,14 @@ outreach_authority: NOT_GRANTED
 - synthetic six-role fixtures and import-gate test corpus;
 - director import-review interface.
 
-## Active phase — executable policy closure
+## Completed phase — executable policy closure (HD-OI-018)
 
-**Goal:** obtain a reproducible green run proving that the disposable local database can apply every migration, load six synthetic roles, and execute positive and negative RLS assertions.
+**Goal:** reproducible green disposable run for migrations, six synthetic roles, RLS assertions, and import gates.
 
-### Current observed position
+### Observed completion
 
-PR #14 established a green disposable Supabase run: migrations apply, six synthetic roles load, and RLS acceptance SQL completes without error (Actions run `30689212832`).
-
-Remaining closure work in this patch:
-
-- execute the synthetic import-gate corpus in CI (it was only statically asserted);
-- repair the gate fixture foreign key so `submitted_by` references the director fixture;
-- assert restricted/suppressed/unauthorized promotion fail closed and eligible promotion succeeds;
-- stop treating GitHub Pages host unavailability as a validation failure on private free plans.
+- PR #14: migrations, fixtures, and RLS acceptance green (Actions run `30689212832`).
+- PR #15: import-gate execution, promotion fail-closed checks, and Pages plan gating green (Actions run `30689742284`).
 
 ### Exit gate
 
@@ -104,11 +98,9 @@ unauthorized_promotion: false
 production_data_used_in_tests: false
 ```
 
-HD-OI-018 completes only after this patch's local Supabase workflow is green with import-gate execution included.
+## Active phase — production environment hardening (HD-OI-019)
 
-## Next phase — production environment hardening
-
-Begin only after executable policy closure.
+**Goal:** identity/MFA readiness, schema-aligned clients, operator hardening checklist, and expanded six-role executable matrix without enabling production import.
 
 ### Infrastructure
 
@@ -223,12 +215,14 @@ These decisions remain outside engineering authority:
 ```yaml
 HD_OI_018:
   name: CI_and_policy_closure
-  state: ACTIVE
+  state: COMPLETE
   completion: green_fixture_RLS_and_import_gate_run
+  evidence: Actions runs 30689212832 and 30689742284
 
 HD_OI_019:
   name: production_environment_hardening
-  state: BLOCKED_BY_HD_OI_018
+  state: ACTIVE
+  completion: identity_mfa_controls_client_schema_alignment_operator_checklist
 
 HD_OI_020:
   name: governed_pilot_import

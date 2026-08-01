@@ -29,21 +29,22 @@ Deno.serve(async (req) => {
   if (!documentId) return json({ error: 'document_id_required' }, 400);
 
   const admin = createClient(url, serviceKey);
-  const { data: doc, error: docError } = await admin.from('private_documents')
-    .select('storage_path')
+  const { data: doc, error: docError } = await admin.from('document_records')
+    .select('storage_path,storage_bucket,deleted_at')
     .eq('id', documentId)
     .single();
-  if (docError || !doc) return json({ error: 'not_found' }, 404);
+  if (docError || !doc || doc.deleted_at) return json({ error: 'not_found' }, 404);
 
-  const { data, error } = await admin.storage.from('campaign-private').createSignedUrl(doc.storage_path, 60);
+  const bucket = doc.storage_bucket || 'campaign-private';
+  const { data, error } = await admin.storage.from(bucket).createSignedUrl(doc.storage_path, 60);
   if (error) return json({ error: 'signing_failed' }, 500);
 
   await admin.from('audit_log').insert({
     actor_id: userData.user.id,
     action: 'signed_document_url_created',
-    entity_type: 'private_document',
+    entity_type: 'document_record',
     entity_id: String(documentId),
-    after_state: { ttl_seconds: 60 },
+    after_state: { ttl_seconds: 60, storage_bucket: bucket },
   });
 
   return json({ signedUrl: data.signedUrl, expiresIn: 60 });
