@@ -36,10 +36,10 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq | OBSERVED |
 | API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
 | Linked to GitHub repo | Yes (operator-reported) | OBSERVED |
-| Migrations applied | 10 migrations at `e3db304e9f992adbf11398a47a2a00e356d22abf` | VERIFIED |
+| Migrations applied | 10 migrations from base `e3db304e9f992adbf11398a47a2a00e356d22abf` | VERIFIED |
 | Auth hardening | Public signup disabled; email confirmation and TOTP MFA enabled | VERIFIED |
 | Edge Function unauthenticated path | `401 UNAUTHORIZED_NO_AUTH_HEADER` | PASS |
-| Edge Function authenticated path | Synthetic director request returned `403 forbidden`; mutable probe records cleaned | FAIL |
+| Edge Function authenticated path | Version 2 from `abf1c1d`; synthetic director received `200`, downloaded the object, and produced audit event `18` without path leakage | PASS |
 | Synthetic hosted policy suite | Seven repository SQL files | PASS |
 | SSL enforcement | Enabled; staging restart completed | VERIFIED |
 | Overall staging readiness | Backups deferred; DB network unrestricted; staging URL unspecified | FAIL |
@@ -142,19 +142,21 @@ hosted_backups_available: false
 ssl_enforcement: true
 database_network_restricted: false
 edge_function_unauthenticated_denial: true
-edge_function_authenticated_signed_url: false
+edge_function_authenticated_signed_url: true
 staging_readiness: FAIL
 ```
 
-The application-control checks above were observed on 2026-08-01 against repository commit
-`e3db304e9f992adbf11398a47a2a00e356d22abf`. The complete projection-only receipt is
+The application-control checks above were observed on 2026-08-01, with migrations based at
+`e3db304e9f992adbf11398a47a2a00e356d22abf` and Edge Function version 2 deployed from merged
+commit `abf1c1daca761b961c9b41978532ce9e904c33ac`. The complete projection-only receipt is
 [`out/audit/hd-oi-019-staging-readiness.latest.json`](../out/audit/hd-oi-019-staging-readiness.latest.json).
 This evidence does not authorize production activation or real-data import.
 
-The authenticated HTTP probe exposed a fail-closed application defect: the function requests
-`.single()` from an unfiltered `profiles` query. Directors can read multiple profiles, so the
-query can reject a valid director session before document authorization. Repair and redeploy
-require a separate execution-surface gate.
+The original authenticated probe exposed a fail-closed application defect: `.single()` operated
+on an unfiltered `profiles` query while directors could read multiple profiles. PR #29 scoped the
+query to the authenticated user, merged under explicit operator approval, and was deployed only
+to staging. The successful post-deployment probe removed its mutable document and object, disabled
+its profile, and banned its synthetic Auth user.
 
 ## JCode / operator continue checklist
 

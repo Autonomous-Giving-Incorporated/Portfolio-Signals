@@ -62,9 +62,9 @@ Also delivered under HD-OI-019:
 | GitHub association | OBSERVED (operator-reported) |
 | `supabase db push` / migrations on host | VERIFIED — 10 migrations at `e3db304` |
 | Auth MFA on host | VERIFIED — TOTP enabled; public signup disabled |
-| `signed-document-url` Edge Function | DEPLOYED |
+| `signed-document-url` Edge Function | DEPLOYED — version 2 from merged commit `abf1c1d` |
 | Edge Function unauthenticated HTTP denial | PASS — `401 UNAUTHORIZED_NO_AUTH_HEADER` |
-| Edge Function authenticated HTTP issuance | FAIL — synthetic director received `403 forbidden` |
+| Edge Function authenticated HTTP issuance | PASS — synthetic director received `200`, downloaded the signed object, and produced audit event `18` without storage-path leakage |
 | Seven-file synthetic hosted policy suite | PASS |
 | SSL enforcement | ENABLED — staging restart completed |
 | Staging platform hardening | FAIL — backups deferred, DB network unrestricted, staging URL unspecified |
@@ -76,14 +76,16 @@ Also delivered under HD-OI-019:
 - run backup/restore drill and record operator evidence;
 - restrict database network access after trusted CIDRs are supplied;
 - reconcile the hosted API/storage configuration after an explicit staging application URL is named;
-- verify signed-URL edge function against staging with synthetic objects only;
-- scope the Edge Function profile lookup to the authenticated user before redeployment;
 - provision a separate production project or record an explicit single-project promotion decision.
 
 Hosted schema, RLS, storage, session, import, and document-audit controls were verified with
 synthetic fixtures on 2026-08-01. See
 [`out/audit/hd-oi-019-staging-readiness.latest.json`](../out/audit/hd-oi-019-staging-readiness.latest.json).
-The overall verdict remains `FAIL` until the platform-hardening items above are closed.
+PR #29 repaired the authenticated profile lookup and was merged as
+`abf1c1daca761b961c9b41978532ce9e904c33ac`. The function was deployed from a clean detached
+worktree at that commit. The bounded post-deployment probe deleted its temporary document and
+storage object, disabled its profile, and banned its synthetic Auth identity. The overall verdict
+remains `FAIL` until the platform-hardening items above are closed.
 
 Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Deno, Supabase CLI, and PostgreSQL toolchain. Signed document URLs are bounded to 30-300 seconds, read metadata through caller RLS, and fail closed unless privacy-safe access audit evidence is written. Hosted provider configuration and staging evidence remain operator-owned.
 

@@ -6,7 +6,7 @@ promote, activate, or authorize production or real-data use.
 ## Current staging state
 
 - Hosted project: `ecxkhihlbrcwpavfoaoq`
-- Repository evidence commit: `e3db304e9f992adbf11398a47a2a00e356d22abf`
+- Deployed application-control commit: `abf1c1daca761b961c9b41978532ce9e904c33ac`
 - Application-control verification: `PASS`
 - Overall staging readiness: `FAIL`
 - Production import and outreach: `BLOCKED`
