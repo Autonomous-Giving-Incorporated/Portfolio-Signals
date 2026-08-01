@@ -93,6 +93,20 @@ https://scrimshawlife-ctrl.github.io/Impact-Relay/
 
 Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
 
+Host screens against the Impact Relay console API (local pilot):
+
+| Page | Purpose |
+|------|---------|
+| `finance-impact.html` | L3 expense approval queue |
+| `donor-impact.html` | Donor timeline / UOF receipt detail |
+| `docs/IMPACT-RELAY.md` | Bridge runbook |
+
+```bash
+# from Impact-Relay checkout
+python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --port 8787
+# open finance-impact.html / donor-impact.html from this repo
+```
+
 ## Privacy and authority boundary
 
 The repository must never contain:
