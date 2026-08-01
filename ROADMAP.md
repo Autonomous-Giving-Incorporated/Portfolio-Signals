@@ -2,118 +2,243 @@
 
 ## Objective
 
-Turn the current privacy-safe static director dashboard into a governed campaign operating system without placing donor, member, attendance, or relationship-level personal data in GitHub.
+Deliver a governed campaign operating system for Hacker Dojo without placing donor, member, attendance, relationship, consent, suppression, or private-document data in GitHub.
 
-## Current State
+The operating target is a **$420K minimum campaign** with a separately governed **$2M transformation path** and an Aug. 21, 2026 SupperHappyFundHouse campaign event.
+
+## Evidence and authority model
+
+Every production decision must distinguish:
+
+- **OBSERVED** — directly supported by repository state, approved records, or executed tests;
+- **INFERRED** — a reasoned conclusion requiring review;
+- **SPECULATIVE** — a hypothesis or unapproved proposal;
+- **NOT_COMPUTABLE** — unavailable because required data or authority is missing.
+
+Historical attendance, membership, donor, sponsor, or relationship evidence does not by itself grant outreach authority.
+
+## Verified state — 2026-08-01
 
 ```yaml
-phase: 1_static_director_shell
-minimum_campaign: 420000
-stretch_campaign: 2000000
-public_dashboard: implemented
-public_data_contract: phase_2
-campaign_control_workbook: available_off_repo
-outreach_authority: not_granted
-sensitive_data_in_repository: prohibited
+public_portal: PASS
+public_data_schema: PASS
+pages_validation_and_deployment: PASS
+static_database_policy_checks: PASS
+local_security_contract: PASS
+full_migration_chain: PASS
+synthetic_fixture_connection: PR_14_PENDING
+six_role_rls_execution: PENDING
+production_environment: NOT_CONFIGURED
+production_data_import: BLOCKED
+outreach_authority: NOT_GRANTED
 ```
 
-## Phase 2 — Production-Ready Public Shell
+## Completed foundation
 
-**Status:** In progress
+### Public campaign surface
 
-Deliverables:
+- director-facing campaign overview;
+- $420K minimum and $2M stretch framing;
+- proposed funding ladder;
+- sponsor, grant, and aggregate member-segment views;
+- decision queue and governance controls;
+- canonical aggregate JSON data;
+- strict JSON Schema validation with standard date formats;
+- GitHub Pages validation and deployment workflow;
+- restricted-file checks.
 
-- canonical public campaign data file;
-- JSON Schema and automated validation;
-- GitHub Pages deployment workflow;
-- security and data-classification policy;
-- documented director review cadence;
-- clear boundary between public planning data and restricted CRM data.
+### Authenticated workspace foundation
 
-Exit gate:
+- six application roles: director, campaign lead, development, board viewer, data steward, and auditor;
+- active-profile and MFA-ready authentication boundary;
+- role-aware application navigation;
+- constituents, opportunities, decisions, evidence, and audit structures;
+- sponsor and grant pipeline workflows;
+- optimistic concurrency controls;
+- controlled decision transitions with rationale;
+- append-only audit-event model;
+- private opportunity notes and document metadata;
+- row-level-security policies.
+
+### Governed import foundation
+
+- batch and staging-row lifecycle;
+- quarantine-only native `.xlsx` parser;
+- SHA-256 source provenance;
+- duplicate and exception registry;
+- consent and suppression gates;
+- suppression propagation;
+- role-gated row promotion;
+- private storage bucket policies;
+- signed-document URL server function;
+- synthetic six-role fixtures and import-gate test corpus;
+- director import-review interface.
+
+## Active phase — executable policy closure
+
+**Goal:** obtain a reproducible green run proving that the disposable local database can apply every migration, load six synthetic roles, and execute positive and negative RLS assertions.
+
+### Current observed position
+
+The complete migration chain now applies successfully. The latest failure occurred before fixture loading because the workflow failed to propagate the local `DB_URL` to `psql`.
+
+PR #14:
+
+- resolves the trusted environment assignments emitted by the pinned Supabase CLI;
+- fails closed when `DB_URL` is absent;
+- exports the validated connection through `GITHUB_ENV`;
+- reuses the connection for role fixtures and RLS tests.
+
+### Exit gate
 
 ```yaml
-pages_deploys_from_main: true
-public_data_validates: true
-no_pii_committed: true
-director_can_review_decisions: true
+all_migrations_apply: true
+six_synthetic_roles_load: true
+rls_positive_cases_pass: true
+rls_negative_cases_pass: true
+import_gate_cases_pass: true
+suppression_bypass: false
+unauthorized_promotion: false
+production_data_used_in_tests: false
 ```
 
-## Phase 3 — Authenticated Director Workspace
+No six-role enforcement claim is valid until this gate executes successfully in CI.
 
-Recommended stack:
+## Next phase — production environment hardening
 
-- **Frontend:** Next.js or the existing static interface migrated incrementally.
-- **Authentication:** Clerk, Auth0, or Supabase Auth with enforced MFA for privileged roles.
-- **Database:** Supabase Postgres or managed PostgreSQL.
-- **Authorization:** Role-based access control plus row-level security.
-- **Audit:** append-only change log for approvals, outreach authorization, suppression, and exports.
-- **Secrets:** deployment-platform secret store; never client-side or committed.
+Begin only after executable policy closure.
 
-Required roles:
+### Infrastructure
 
-| Role | Access |
-|---|---|
-| Director | Full campaign review and approval |
-| Campaign lead | Pipeline operations and reporting |
-| Relationship owner | Assigned records only |
-| Grant lead | Grant pipeline and document room |
-| Data steward | Import, deduplication, consent and suppression |
-| Viewer | Aggregate dashboard only |
+- create separate staging and production Supabase projects;
+- pin supported CLI, database, and runtime versions;
+- configure backup, restore, and disaster-recovery procedures;
+- configure secret management and rotation;
+- configure deployment environments and protected branches;
+- enable structured observability without logging personal data.
 
-Exit gate:
+### Identity and authorization
+
+- enforce MFA for privileged roles;
+- verify inactive-user and revoked-role handling;
+- test every role against every protected table and storage action;
+- restrict service-role credentials to server runtimes;
+- verify session expiration and emergency access revocation.
+
+### Private storage
+
+- create the private production bucket;
+- validate allowed MIME types and file-size limits;
+- verify upload ownership constraints;
+- verify signed URLs expire as configured;
+- record every document-access event;
+- define retention, deletion, and legal-hold procedures.
+
+### Exit gate
 
 ```yaml
-mfa_enabled: true
-rbac_tested: true
-row_level_security_tested: true
-audit_log_immutable: true
+staging_environment: VERIFIED
+production_environment: VERIFIED
+mfa_enforced: true
+secrets_committed: false
 backup_restore_tested: true
+private_storage_tested: true
+signed_url_audit_tested: true
 ```
 
-## Phase 4 — Governed CRM Import
+## Governed data-import phase
 
-Inputs:
+No raw source file may enter the operating database outside this sequence:
 
-- native spreadsheet export of the Master Development List;
-- Every.org transaction export;
-- authorized donor and alumni records;
-- verified sponsor and grant histories;
-- suppression and consent records.
+1. Receive the authorized native source file through a private channel.
+2. Compute and record SHA-256 provenance.
+3. Store the source in private object storage.
+4. Parse into quarantine-only normalized rows.
+5. Validate schema and required fields.
+6. Detect duplicates without silently merging identities.
+7. Apply consent and suppression classification.
+8. Record unresolved exceptions.
+9. Require data-steward or director approval.
+10. Promote only eligible approved rows.
+11. Produce a batch receipt, reconciliation summary, and exception report.
+12. Purge temporary artifacts according to approved retention policy.
 
-Import controls:
+### Mandatory test corpus
 
-1. Land data in a quarantined staging area.
-2. Validate required fields and source provenance.
-3. Deduplicate without silently merging conflicting identities.
-4. Classify consent and contact authority.
-5. Assign relationship ownership.
-6. Promote only approved records into operating views.
-7. Generate an import receipt and exception report.
+- eligible confirmed-consent row;
+- unknown or restricted-consent row;
+- possible duplicate;
+- suppressed record;
+- unresolved critical exception;
+- unauthorized role attempting promotion;
+- repeated source hash;
+- source-row fingerprint collision.
 
-## Phase 5 — Campaign Operations
+### Exit gate
 
-Capabilities:
+```yaml
+native_xlsx_source: AUTHORIZED
+source_receipt: COMPLETE
+duplicate_resolution: REVIEWED
+consent_classification: REVIEWED
+suppression_registry: ACTIVE
+human_approval: RECORDED
+production_import_receipt: COMPLETE
+```
 
-- major-gift and sponsor pipeline;
-- grant calendar and qualification;
-- board decision log;
+## Campaign operations phase
+
+After leadership approvals and a controlled import:
+
+- sponsor pipeline and fulfillment tracking;
+- grant qualification and submission calendar;
+- major-gift relationship ownership;
+- board decision ledger;
 - claim-evidence registry;
 - Every.org reconciliation;
-- event registration and follow-up;
-- weekly operating-review dashboard;
-- stewardship and fulfillment tracking.
+- event registration and stewardship;
+- weekly operating review;
+- aggregate progress reporting;
+- consent-respecting follow-up controls.
 
-## Immediate Decision Queue
+## Leadership decision queue
+
+These decisions remain outside engineering authority:
 
 1. Approve the exact $420K use-of-funds schedule.
-2. Approve or defer the independent $2M transformation plan.
-3. Approve sponsor benefits, costs, exclusions, and fulfillment owners.
-4. Approve privacy, consent, suppression, retention, and export rules.
-5. Name the director, campaign lead, data steward, grant lead, and relationship owners.
-6. Select the authenticated application stack.
-7. Supply a native spreadsheet export for lossless ingestion.
+2. Approve, revise, or defer the $2M transformation case.
+3. Approve sponsor tiers, benefits, exclusions, cost limits, and fulfillment owners.
+4. Reject governance access or board influence as a donor benefit unless separately authorized through lawful governance procedure.
+5. Approve privacy, consent, suppression, retention, deletion, and export rules.
+6. Define what evidence constitutes lawful outreach authorization.
+7. Name the director, campaign lead, development owner, data steward, and auditor.
+8. Approve the production application and identity providers.
+9. Authorize a native source workbook for quarantine import.
+10. Approve the transition from internal testing to real campaign operations.
 
-## Non-Negotiable Boundary
+## Release sequence
 
-GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal email addresses, donation histories, attendance records, private notes, relationship scores, and consent state belong only in the authenticated data service.
+```yaml
+HD_OI_018:
+  name: CI_and_policy_closure
+  state: ACTIVE
+  completion: green_fixture_and_RLS_run
+
+HD_OI_019:
+  name: production_environment_hardening
+  state: BLOCKED_BY_HD_OI_018
+
+HD_OI_020:
+  name: governed_pilot_import
+  state: BLOCKED_BY_POLICY_AND_LEADERSHIP_APPROVAL
+
+HD_OI_021:
+  name: controlled_campaign_operations
+  state: BLOCKED_BY_PILOT_ACCEPTANCE
+```
+
+## Non-negotiable boundary
+
+GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal contact information, donation histories, attendance records, private notes, relationship assessments, consent state, suppression state, and private documents belong only in the authenticated data service.
+
+Production import and outreach remain blocked until both technical and leadership gates are satisfied.
