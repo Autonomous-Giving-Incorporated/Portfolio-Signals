@@ -1,34 +1,49 @@
-# HD-OI-018 — CI Migration Repair and Import-Gate Validation
+# HD-OI-018 — CI and Policy Closure
 
-## Observed failure
+## Observed progression
 
-The first executable local Supabase run failed before policy assertions because two migration files used version `005`:
+| Observation | Source | Status |
+|---|---|---|
+| Duplicate migration version `005` blocked startup | Actions logs on PR #8 | Repaired |
+| Legacy audit migration recreated quarantine tables | Actions logs on PR #10 | Repaired |
+| Secret scanners tripped on shell quoting / env names | Actions logs on PR #11–12 | Repaired |
+| Campaign schema date format unknown without `ajv-formats` | Actions logs on PR #13 | Repaired |
+| Fixture step received empty `DB_URL` | Actions logs before PR #14 | Repaired |
+| Migrations, six-role fixtures, and RLS e2e green | Actions run `30689212832` on PR #14 | Observed |
+| Import-gate corpus not executed by workflow | Workflow review | Repaired in this change |
+| Import-gate `submitted_by` used non-fixture UUID | Static review vs `six_roles.sql` | Repaired |
+| GitHub Pages deploy fails on private free plan | Actions main push; API 422 | Fail-closed skip |
 
-- `005_import_quarantine_and_suppression.sql`
-- `005_private_storage.sql`
+## Repairs in this closure patch
 
-Supabase stores migration versions as unique keys, so the second migration was rejected.
-
-## Repair
-
-- Renumber private storage to `006_private_storage.sql`.
-- Add CI rejection for duplicate migration prefixes.
-- Add a synthetic import-gate corpus covering:
-  - confirmed consent;
-  - restricted consent;
-  - unresolved duplicate exception;
-  - suppression match.
+1. Align synthetic import-gate `submitted_by` with the director fixture UUID.
+2. Expand import-gate SQL with structural quarantine assertions and promotion gates:
+   - restricted consent blocked;
+   - suppressed record blocked;
+   - board viewer cannot promote;
+   - director can promote eligible confirmed row.
+3. Execute `supabase/tests/003_import_gate_cases.sql` in the local Supabase workflow after fixtures.
+4. Run the local Supabase workflow on pushes to `main` that touch policy paths.
+5. Skip GitHub Pages deploy when the repository plan cannot host Pages, without failing portal validation.
 
 ## Evidence boundary
 
-This repair does not claim the full suite passes until GitHub Actions completes on this branch. All fixtures are synthetic. No member, donor, attendee, or private campaign record is present.
+- All fixtures remain synthetic.
+- No member, donor, attendee, workbook, or private campaign data is committed.
+- Production import and outreach remain blocked.
+- Full six-role matrix cells beyond the current executable checks remain a hardening backlog under HD-OI-019.
 
 ## Acceptance gates
 
-1. Local Supabase starts successfully.
-2. Full migration chain applies in order.
-3. Six-role fixtures load.
-4. RLS acceptance checks execute.
-5. Synthetic import-gate cases execute.
-6. Static CI confirms unique migration versions.
-7. No service-role secret or restricted export is committed.
+```yaml
+all_migrations_apply: true
+six_synthetic_roles_load: true
+rls_positive_cases_pass: true
+rls_negative_cases_pass: true
+import_gate_cases_pass: REQUIRED_ON_THIS_PR
+suppression_bypass: false
+unauthorized_promotion: false
+production_data_used_in_tests: false
+pages_validation: true
+pages_deploy: OPTIONAL_PLAN_DEPENDENT
+```

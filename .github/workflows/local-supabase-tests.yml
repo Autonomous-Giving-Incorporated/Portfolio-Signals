@@ -6,6 +6,12 @@ on:
       - 'supabase/**'
       - 'services/import-api/**'
       - '.github/workflows/local-supabase-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - 'services/import-api/**'
+      - '.github/workflows/local-supabase-tests.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +39,8 @@ jobs:
           printf 'DB_URL=%s\n' "$DB_URL" >> "$GITHUB_ENV"
       - name: Load synthetic role fixtures
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+      - name: Execute synthetic import-gate acceptance checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/003_import_gate_cases.sql
       - name: Execute RLS acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
       - name: Reject committed sensitive exports
