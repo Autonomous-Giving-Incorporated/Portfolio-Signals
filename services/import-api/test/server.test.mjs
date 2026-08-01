@@ -93,19 +93,20 @@ test('uses the verified Supabase user id and preserves quarantine-only writes', 
         role: 'data_steward'
       });
     }
-    if (url.endsWith('/rest/v1/import_batches')) {
-      const batch = JSON.parse(options.body);
-      assert.equal(batch.submitted_by, USER_ID);
+    if (url.endsWith('/rest/v1/rpc/create_import_batch')) {
+      assert.equal(options.headers.authorization, 'Bearer valid-user-token');
+      const { p_batch: batch, p_rows: rows } = JSON.parse(options.body);
+      assert.equal('submitted_by' in batch, false);
       assert.equal(batch.state, 'received');
       assert.equal(batch.receipt.promotion_authorized, false);
-      return Response.json([{ id: BATCH_ID, ...batch }]);
-    }
-    if (url.endsWith('/rest/v1/import_staging_rows')) {
-      const rows = JSON.parse(options.body);
       assert.equal(rows.length, 1);
-      assert.equal(rows[0].batch_id, BATCH_ID);
+      assert.equal('batch_id' in rows[0], false);
       assert.equal(rows[0].state, 'staged');
-      return Response.json(rows);
+      return Response.json({
+        batch: { id: BATCH_ID, submitted_by: USER_ID, ...batch },
+        staged_row_count: rows.length,
+        promotion_authorized: false
+      });
     }
     throw new Error(`Unexpected URL: ${url}`);
   });
@@ -131,7 +132,7 @@ test('uses the verified Supabase user id and preserves quarantine-only writes', 
   assert.equal(responseBody.batch.submitted_by, USER_ID);
   assert.equal(responseBody.staged_row_count, 1);
   assert.equal(responseBody.promotion_authorized, false);
-  assert.equal(requests.length, 4);
+  assert.equal(requests.length, 3);
 });
 
 test('does not leak persistence error details to callers', async () => {

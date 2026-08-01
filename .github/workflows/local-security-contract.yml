@@ -41,6 +41,7 @@ jobs:
           grep -q "consent_candidate" import-review.js
           grep -q "approve_import_row" import-review.js
           grep -q "source_name" services/import-api/server.mjs
+          grep -q "create_import_batch" services/import-api/server.mjs
           grep -q "/auth/v1/user" services/import-api/server.mjs
           grep -q "require_privileged_mfa" services/import-api/server.mjs
           ! grep -q "x-authenticated-user" services/import-api/server.mjs

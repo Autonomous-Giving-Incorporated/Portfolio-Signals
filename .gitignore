@@ -9,6 +9,8 @@ runtime-config.js
 # Dependencies and local tooling
 node_modules/
 .supabase/
+supabase/.branches/
+supabase/.temp/
 .DS_Store
 
 # Editor / agent local state

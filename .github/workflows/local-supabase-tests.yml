@@ -43,6 +43,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/003_import_gate_cases.sql
       - name: Execute import-review action checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/004_import_review_actions.sql
+      - name: Execute atomic import creation checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/005_atomic_import_creation.sql
       - name: Execute RLS acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
       - name: Execute storage matrix checks
