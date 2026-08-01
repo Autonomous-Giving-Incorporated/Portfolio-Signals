@@ -145,6 +145,9 @@ select external_id, id
 from public.import_staging_rows
 where batch_id = '10000000-0000-0000-0000-000000000018';
 
+-- Temp tables are owned by the session superuser; authenticated JWT tests need read access.
+grant select on gate_row_ids to authenticated;
+
 -- Force suppressed row into approved state while still superuser so promotion
 -- gate is evaluated on consent rather than staging lifecycle state.
 update public.import_staging_rows
