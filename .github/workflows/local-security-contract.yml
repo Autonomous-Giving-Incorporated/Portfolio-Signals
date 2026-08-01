@@ -1,0 +1,32 @@
+name: Local security contract
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: npm
+          cache-dependency-path: services/workbook-parser/package.json
+      - name: Install parser dependencies
+        working-directory: services/workbook-parser
+        run: npm install --ignore-scripts --package-lock=false
+      - name: Validate parser entrypoint
+        working-directory: services/workbook-parser
+        run: npm run validate
+      - name: Verify private storage controls
+        run: |
+          grep -q "campaign-private" supabase/migrations/005_private_storage.sql
+          grep -q "public = false" tests/rls/role_matrix.sql
+          ! grep -RIE "SUPABASE_SERVICE_ROLE_KEY|service_role[[:space:]]*=" --exclude='*.md' .
+      - name: Verify parser is quarantine-only
+        run: |
+          grep -q "promotion_authority: false" services/workbook-parser/src/cli.js
+          grep -q "only native .xlsx files are accepted" services/workbook-parser/src/cli.js
