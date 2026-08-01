@@ -137,18 +137,13 @@ begin
   if n <> 0 then raise exception 'board viewer unexpectedly read constituents'; end if;
   select count(*) into n from public.opportunities;
   if n < 1 then raise exception 'board viewer cannot read opportunities'; end if;
-  begin
-    update public.decisions set status = 'approved', rationale = 'blocked' where key = 'synthetic-decision';
+  -- RLS write denials often update zero rows rather than raising.
+  update public.decisions
+     set status = 'approved', rationale = 'blocked'
+   where key = 'synthetic-decision';
+  if found then
     raise exception 'board viewer decision write unexpectedly succeeded';
-  exception
-    when insufficient_privilege then null;
-    when others then
-      if sqlerrm like '%policy%' or sqlerrm like '%permission%' or sqlerrm like '%violates row-level security%' then
-        null;
-      else
-        raise;
-      end if;
-  end;
+  end if;
 end $$;
 
 -- Data steward: may manage constituents, may not write decisions.
@@ -158,18 +153,12 @@ declare n integer;
 begin
   select count(*) into n from public.constituents;
   if n < 1 then raise exception 'data steward cannot read constituents'; end if;
-  begin
-    update public.decisions set status = 'approved', rationale = 'blocked' where key = 'synthetic-decision';
+  update public.decisions
+     set status = 'approved', rationale = 'blocked'
+   where key = 'synthetic-decision';
+  if found then
     raise exception 'data steward decision write unexpectedly succeeded';
-  exception
-    when insufficient_privilege then null;
-    when others then
-      if sqlerrm like '%policy%' or sqlerrm like '%permission%' or sqlerrm like '%violates row-level security%' then
-        null;
-      else
-        raise;
-      end if;
-  end;
+  end if;
 end $$;
 
 -- Auditor: audit read allowed; direct audit insert forbidden.
