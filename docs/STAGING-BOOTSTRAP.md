@@ -44,6 +44,7 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | SSL enforcement | Enabled; staging restart completed | VERIFIED |
 | GitHub Pages staging host | `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` from `964587d` | PASS |
 | Auth site URL and redirects | Pages root, workspace, and import-review URLs configured | PASS |
+| Authenticated Pages runtime wiring | `runtime-config.js` is published but not loaded by the authenticated pages; repair in PR #33 | FAIL |
 | Overall staging readiness | Backups deferred; DB network unrestricted | FAIL |
 | Real CRM data | Not loaded | REQUIRED |
 
@@ -144,7 +145,8 @@ hosted_backups_available: false
 ssl_enforcement: true
 database_network_restricted: false
 github_pages_staging_host: true
-github_pages_runtime_config: true
+github_pages_runtime_config_published: true
+github_pages_runtime_config_loaded: false
 auth_site_url_and_redirects: true
 edge_function_unauthenticated_denial: true
 edge_function_authenticated_signed_url: true

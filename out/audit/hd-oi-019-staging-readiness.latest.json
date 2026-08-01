@@ -4,7 +4,7 @@
   "governs_or_activates": false,
   "project_ref": "ecxkhihlbrcwpavfoaoq",
   "repository_commit": "964587d0bad540f1bd27f381f1d38fdf65ec986a",
-  "verified_at": "2026-08-01T22:04:00Z",
+  "verified_at": "2026-08-01T22:18:00Z",
   "mode": "shadow_advisory",
   "verdict": "FAIL",
   "synthetic_data_only": true,
@@ -48,6 +48,10 @@
     "github_pages_runtime_config_status": 200,
     "github_pages_runtime_points_to_staging": true,
     "github_pages_runtime_contains_service_role": false,
+    "github_pages_workspace_loads_runtime_config": false,
+    "github_pages_import_review_loads_runtime_config": false,
+    "authenticated_workspace_ui": "FAIL_CONFIG_NOT_LOADED",
+    "runtime_load_repair_pr": 33,
     "auth_site_url": "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/",
     "auth_redirect_urls": [
       "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html",
@@ -87,7 +91,8 @@
   "unreconciled_configuration": [
     "Hosted PostgreSQL 17 diverges from the repository PostgreSQL 15.8 pin.",
     "Hosted API schema exposure differs from repository local configuration.",
-    "Hosted storage global file-size limit differs from repository local configuration."
+    "Hosted storage global file-size limit differs from repository local configuration.",
+    "The live authenticated HTML entry points do not load the generated runtime-config.js; repair is staged in PR #33."
   ],
   "provenance": "Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf"
 }
