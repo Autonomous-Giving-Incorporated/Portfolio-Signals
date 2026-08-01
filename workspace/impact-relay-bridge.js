@@ -34,6 +34,15 @@ export const DONOR_STAFF_ROLES = new Set([
   'board_viewer'
 ]);
 
+/** Same privileged set as workspace.js — MFA enforced when Supabase profile is used. */
+export const PRIVILEGED_ROLES = new Set([
+  'director',
+  'campaign_lead',
+  'development',
+  'data_steward',
+  'auditor'
+]);
+
 export function impactRelayApiBase() {
   const cfg = getRuntimeConfig();
   const fromCfg = cfg.impactRelayApiBase;
@@ -94,6 +103,14 @@ export async function loadImpactRelaySession({ requireFinance = false, requireSt
     .single();
   if (profileError) throw profileError;
   if (!profile?.active) throw new Error('Active campaign profile required.');
+
+  if (PRIVILEGED_ROLES.has(profile.role) && !profile.mfa_enforced) {
+    const err = new Error(
+      'Enforced MFA is required for privileged roles before using Impact Relay screens.'
+    );
+    err.code = 'MFA_REQUIRED';
+    throw err;
+  }
 
   if (requireFinance && !FINANCE_IMPACT_ROLES.has(profile.role)) {
     throw new Error(`Role ${profile.role} cannot approve Impact Relay expenses.`);

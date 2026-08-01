@@ -39,6 +39,10 @@ Supabase Auth must allow the following staging URLs after Pages is active:
 - site URL: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
 - workspace redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html`
 - import review redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/import-review.html`
+- Impact Relay finance: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/finance-impact.html`
+- Impact Relay donors: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/donor-impact.html`
+
+Impact Relay screens call a local/staging **console API** (not Supabase). See [IMPACT-RELAY.md](./IMPACT-RELAY.md). Privileged roles need `mfa_enforced` on the profile before those pages accept a Supabase session.
 
 This staging-host choice does not authorize production, real-data import, outreach, or Notion
 writeback.

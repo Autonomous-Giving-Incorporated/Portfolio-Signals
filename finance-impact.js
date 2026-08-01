@@ -93,6 +93,18 @@ async function refresh() {
       $("mainApp").hidden = true;
       return;
     }
+    if (err.code === "MFA_REQUIRED") {
+      $("apiStatus").textContent = "MFA required";
+      $("apiStatus").className = "status-pill status-blocked";
+      setMsg(String(err.message || err), true);
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+      if ($("authMessage")) {
+        $("authMessage").textContent =
+          "Privileged campaign roles need MFA enforced on the profile before finance approval.";
+      }
+      return;
+    }
     $("apiStatus").textContent = "API offline";
     $("apiStatus").className = "status-pill status-blocked";
     setMsg(String(err.message || err), true);

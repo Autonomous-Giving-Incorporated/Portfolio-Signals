@@ -108,6 +108,12 @@ function renderNavigation(role) {
   if (roleCan(role, 'claims')) items.push({ id: 'claims', label: 'Claims' });
   if (roleCan(role, 'imports')) items.push({ id: 'imports', label: 'Imports' });
   if (roleCan(role, 'audit')) items.push({ id: 'audit', label: 'Audit' });
+  if (roleCan(role, 'impact_finance')) {
+    items.push({ id: 'impact_finance', label: 'Impact finance' });
+  }
+  if (roleCan(role, 'impact_donor_staff')) {
+    items.push({ id: 'impact_donor', label: 'Impact donors' });
+  }
 
   const nav = document.getElementById('roleNav');
   nav.innerHTML = items.map(item => `
@@ -163,7 +169,10 @@ async function loadDashboard(role) {
       ${roleCan(role, 'decisions') ? '<button type="button" class="button secondary" data-jump="decisions">Open decisions</button>' : ''}
       ${roleCan(role, 'opportunities') ? '<button type="button" class="button secondary" data-jump="sponsors">Open sponsor pipeline</button>' : ''}
       ${roleCan(role, 'imports') ? '<button type="button" class="button secondary" data-jump="imports">Open imports</button>' : ''}
-    </div>`;
+      ${roleCan(role, 'impact_finance') ? '<a class="button secondary" href="finance-impact.html">Impact finance queue</a>' : ''}
+      ${roleCan(role, 'impact_donor_staff') ? '<a class="button secondary" href="donor-impact.html">Impact donor receipts</a>' : ''}
+    </div>
+    <p class="note">Impact Relay screens require the local console API (see docs/IMPACT-RELAY.md). Shadow mode: docs/IMPACT-RELAY-SHADOW.md.</p>`;
 
   content.querySelectorAll('button[data-jump]').forEach(button => {
     button.addEventListener('click', () => {
@@ -182,6 +191,17 @@ async function openSection(section) {
     await mountPipelineWorkspace(content, 'sponsorship');
   } else if (section === 'grants') {
     await mountPipelineWorkspace(content, 'grant');
+  } else if (section === 'impact_finance') {
+    content.innerHTML = `
+      <h2>Impact Relay finance</h2>
+      <p class="note">L3 expense approval queue (opens dedicated page; requires console_server).</p>
+      <p><a class="button" href="finance-impact.html">Open finance-impact.html</a></p>
+      <p class="note">Docs: <a href="docs/IMPACT-RELAY.md">IMPACT-RELAY.md</a> · <a href="docs/IMPACT-RELAY-SHADOW.md">shadow mode</a></p>`;
+  } else if (section === 'impact_donor') {
+    content.innerHTML = `
+      <h2>Impact Relay donors</h2>
+      <p class="note">Staff view of fund timeline and use-of-funds receipts (no CRM export in git).</p>
+      <p><a class="button" href="donor-impact.html">Open donor-impact.html</a></p>`;
   } else if (section === 'imports') {
     content.innerHTML = `
       <div class="workspace-toolbar">
