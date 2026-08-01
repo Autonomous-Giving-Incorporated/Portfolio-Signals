@@ -82,6 +82,8 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 
 ## Import quarantine
 
+The import API accepts a Supabase user access token in the standard `Authorization: Bearer <token>` header. It verifies the token with Supabase Auth, calls `require_privileged_mfa()` using that same user session, and permits writes only for active, MFA-enforced `director` or `data_steward` profiles. Caller-supplied identity headers are not trusted. The service-role credential remains server-only and is used only after those checks pass.
+
 ```text
 native workbook upload
 → malware and file-type validation

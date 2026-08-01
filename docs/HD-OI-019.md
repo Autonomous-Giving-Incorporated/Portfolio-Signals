@@ -31,6 +31,7 @@ Observed drift repaired:
 | `import-review.js` | Selected non-existent columns | Map to quarantine schema |
 | `workspace.js` | Queried non-existent constituent flags | Use `consent_status` aggregates |
 | `import-api/server.mjs` | Posted non-schema batch payload | Write canonical `import_batches` + staging rows |
+| `import-api/server.mjs` | Trusted a caller-supplied actor UUID | Verify Supabase bearer session, active profile, MFA, and import role before service-role writes |
 | `signed-document-url` | Read `private_documents` | Use `document_records` |
 
 ### Operator documentation
