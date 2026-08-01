@@ -82,7 +82,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 
 ## Import quarantine
 
-The import API accepts a Supabase user access token in the standard `Authorization: Bearer <token>` header. It verifies the token with Supabase Auth, calls `require_privileged_mfa()` using that same user session, and permits writes only for active, MFA-enforced `director` or `data_steward` profiles. Caller-supplied identity headers are not trusted. The service-role credential remains server-only and is used only after those checks pass.
+The import API accepts a Supabase user access token in the standard `Authorization: Bearer <token>` header. It verifies the token with Supabase Auth, calls `require_privileged_mfa()` using that same user session, and permits writes only for active, MFA-enforced `director` or `data_steward` profiles. Caller-supplied identity headers are not trusted. Batch metadata and staged rows are written through `create_import_batch()` in one database transaction under the caller's user session, so a rejected row cannot leave an orphaned batch. The service-role credential remains server-only and is used as the Supabase API key, not as the database authorization identity for this operation.
 
 ```text
 native workbook upload

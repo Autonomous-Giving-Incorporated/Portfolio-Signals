@@ -41,13 +41,6 @@ async function readBody(req) {
 }
 
 export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch, logger = console }) {
-  const restHeaders = {
-    apikey: serviceRoleKey,
-    authorization: `Bearer ${serviceRoleKey}`,
-    'content-type': 'application/json',
-    prefer: 'return=representation'
-  };
-
   async function authenticatedUser(req) {
     const token = bearerToken(req);
     if (!token) return null;
@@ -86,15 +79,19 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
       : null;
   }
 
-  async function insert(resource, payload, failureCode) {
-    const response = await fetchImpl(`${supabaseUrl}/rest/v1/${resource}`, {
+  async function createBatchTransaction(req, batch, rows) {
+    const response = await fetchImpl(`${supabaseUrl}/rest/v1/rpc/create_import_batch`, {
       method: 'POST',
-      headers: restHeaders,
-      body: JSON.stringify(payload)
+      headers: {
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${bearerToken(req)}`,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ p_batch: batch, p_rows: rows })
     });
     if (!response.ok) {
       const detail = await response.text();
-      throw new Error(`${failureCode}:${response.status}:${detail}`);
+      throw new Error(`atomic_import_failed:${response.status}:${detail}`);
     }
     return response.json();
   }
@@ -164,7 +161,6 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
       schema_version: body.schema_version || body.parser_version || 'parser-v1',
       state: 'received',
       storage_object_path: storagePath,
-      submitted_by: actor.id,
       receipt: {
         parsed_rows_sha256: computed,
         parser_version: body.parser_version || 'unknown',
@@ -173,12 +169,7 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
     };
 
     try {
-      const created = await insert('import_batches', batchPayload, 'batch_insert_failed');
-      const batch = created[0];
-      if (!isUuid(batch?.id)) throw new Error('batch_insert_failed:missing_batch_id');
-
       const stagingRows = body.rows.map((row, index) => ({
-        batch_id: batch.id,
         source_row_number: row.source_row_number || index + 1,
         external_source: row.external_source || 'native_workbook',
         external_id: row.external_id || null,
@@ -190,14 +181,13 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
         consent_candidate: row.consent_candidate || 'unknown',
         relationship_candidate: row.relationship_candidate || null
       }));
-      const insertedRows = stagingRows.length
-        ? await insert('import_staging_rows', stagingRows, 'row_insert_failed')
-        : [];
-      return send(res, 201, {
-        batch,
-        staged_row_count: insertedRows.length,
-        promotion_authorized: false
-      });
+      const result = await createBatchTransaction(req, batchPayload, stagingRows);
+      if (!isUuid(result?.batch?.id)
+          || result.staged_row_count !== stagingRows.length
+          || result.promotion_authorized !== false) {
+        throw new Error('atomic_import_failed:invalid_response');
+      }
+      return send(res, 201, result);
     } catch (error) {
       logger.error('Import batch creation failed', error);
       return send(res, 502, { error: 'import_persistence_failed' });
