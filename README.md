@@ -16,7 +16,7 @@ As of 2026-08-01:
 | GitHub Pages validation workflow | Passing |
 | GitHub Pages deployment | Plan-gated (private free plan unsupported; deploy skips without failing validation) |
 | Static security policy checks | Passing |
-| Workbook parser contract | Passing |
+| Workbook parser contract | Passing; executable quarantine tests cover provenance, input rejection, fail-closed parsing, and overwrite protection |
 | Authenticated database schema | Implemented |
 | Six application roles | Implemented |
 | Row-level-security policies | Implemented; six-role disposable suite green |
@@ -29,7 +29,7 @@ As of 2026-08-01:
 | Client/schema alignment | Hardened in HD-OI-019 |
 | Private storage policies | Implemented |
 | Signed-document URL function | Implemented against `document_records` |
-| Native `.xlsx` parser | Implemented; quarantine-only |
+| Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
 | Production environment checklist | Documented |
 | Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); migrations/MFA operator-owned |

@@ -14,13 +14,19 @@ jobs:
         with:
           node-version: '22.18.0'
           cache: npm
-          cache-dependency-path: services/workbook-parser/package.json
+          cache-dependency-path: services/workbook-parser/package-lock.json
       - name: Install parser dependencies
         working-directory: services/workbook-parser
-        run: npm install --ignore-scripts --package-lock=false
+        run: npm ci --ignore-scripts
+      - name: Audit parser dependencies
+        working-directory: services/workbook-parser
+        run: npm audit --audit-level=high
       - name: Validate parser entrypoint
         working-directory: services/workbook-parser
         run: npm run validate
+      - name: Test workbook parser quarantine contract
+        working-directory: services/workbook-parser
+        run: npm test
       - name: Test import API authentication boundary
         working-directory: services/import-api
         run: npm test
@@ -38,6 +44,7 @@ jobs:
           grep -q "/auth/v1/user" services/import-api/server.mjs
           grep -q "require_privileged_mfa" services/import-api/server.mjs
           ! grep -q "x-authenticated-user" services/import-api/server.mjs
+          grep -q '"@e965/xlsx": "0.20.3"' services/workbook-parser/package.json
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
           test -f workspace/session.js
           test -f docs/STAGING-BOOTSTRAP.md
