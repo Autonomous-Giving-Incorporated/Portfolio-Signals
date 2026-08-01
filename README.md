@@ -190,7 +190,7 @@ synthetic_fixture_loading: PASS
 six_role_rls_execution: PASS
 import_gate_execution: PASS
 identity_mfa_controls: PASS_STAGING_SYNTHETIC
-staging_supabase_project: FAIL_PLATFORM_HARDENING  # app controls pass; backups/SSL/network gates remain
+staging_supabase_project: FAIL_PLATFORM_HARDENING  # app controls and SSL pass; backups/network/URL gates remain
 private_data_placement: LOCAL_PLUS_SUPABASE
 notion_crm_sor: REJECTED
 production_supabase: NOT_SEPARATED_YET  # treat current project as staging until named

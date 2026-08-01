@@ -38,9 +38,10 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | Linked to GitHub repo | Yes (operator-reported) | OBSERVED |
 | Migrations applied | 10 migrations at `e3db304e9f992adbf11398a47a2a00e356d22abf` | VERIFIED |
 | Auth hardening | Public signup disabled; email confirmation and TOTP MFA enabled | VERIFIED |
-| Edge Function | `signed-document-url` deployed | VERIFIED |
+| Edge Function | `signed-document-url` deployed; unauthenticated HTTP request rejected | VERIFIED |
 | Synthetic hosted policy suite | Seven repository SQL files | PASS |
-| Overall staging readiness | Backups unavailable; SSL enforcement off; DB network unrestricted | FAIL |
+| SSL enforcement | Enabled; staging restart completed | VERIFIED |
+| Overall staging readiness | Backups deferred; DB network unrestricted; staging URL unspecified | FAIL |
 | Real CRM data | Not loaded | REQUIRED |
 
 Private data placement: **local workbook + this Supabase project**. See [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
@@ -137,8 +138,9 @@ service_role_in_git: false
 production_data: false
 master_development_list_loaded: false
 hosted_backups_available: false
-ssl_enforcement: false
+ssl_enforcement: true
 database_network_restricted: false
+edge_function_unauthenticated_denial: true
 staging_readiness: FAIL
 ```
 

@@ -63,15 +63,17 @@ Also delivered under HD-OI-019:
 | `supabase db push` / migrations on host | VERIFIED — 10 migrations at `e3db304` |
 | Auth MFA on host | VERIFIED — TOTP enabled; public signup disabled |
 | `signed-document-url` Edge Function | DEPLOYED |
+| Edge Function unauthenticated HTTP denial | PASS — `401 UNAUTHORIZED_NO_AUTH_HEADER` |
 | Seven-file synthetic hosted policy suite | PASS |
-| Staging platform hardening | FAIL — backups unavailable, SSL off, DB network unrestricted |
+| SSL enforcement | ENABLED — staging restart completed |
+| Staging platform hardening | FAIL — backups deferred, DB network unrestricted, staging URL unspecified |
 | Production project separation | PENDING |
 | Real workbook import | BLOCKED (HD-OI-020) |
 
 ## Remaining HD-OI-019 work
 
 - run backup/restore drill and record operator evidence;
-- enable SSL enforcement and restrict database network access;
+- restrict database network access after trusted CIDRs are supplied;
 - reconcile the hosted API/storage configuration after an explicit staging application URL is named;
 - verify signed-URL edge function against staging with synthetic objects only;
 - provision a separate production project or record an explicit single-project promotion decision.
