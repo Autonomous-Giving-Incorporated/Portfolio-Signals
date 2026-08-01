@@ -22,13 +22,13 @@ case "$MODE" in
     echo "Local migrations applied."
     ;;
   remote-linked)
-    echo "Pushing migrations to the currently linked Supabase project..."
-    echo "Confirm this is STAGING, not production, before continuing."
-    read -r -p "Type staging-confirmed to continue: " confirm
-    if [[ "$confirm" != "staging-confirmed" ]]; then
-      echo "Aborted."
+    expected_ref="ecxkhihlbrcwpavfoaoq"
+    linked_ref="$(cat supabase/.temp/project-ref 2>/dev/null || true)"
+    if [[ "${STAGING_CONFIRM_PROJECT_REF:-}" != "$expected_ref" || "$linked_ref" != "$expected_ref" ]]; then
+      echo "Remote migration requires a linked staging project and STAGING_CONFIRM_PROJECT_REF=$expected_ref" >&2
       exit 1
     fi
+    echo "Pushing migrations to confirmed staging project $expected_ref..."
     supabase db push
     ;;
   *)

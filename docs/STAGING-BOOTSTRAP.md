@@ -56,7 +56,7 @@ Private data placement: **local workbook + this Supabase project**. See [DATA-PL
 ./scripts/staging/bootstrap.sh
 ./scripts/staging/apply-migrations.sh local
 ./scripts/staging/load-synthetic-fixtures.sh
-./scripts/staging/verify-policy-suite.sh
+./scripts/staging/verify-policy-suite.sh local
 ```
 
 Public config template:
@@ -80,13 +80,27 @@ cp scripts/staging/runtime-config.staging.example.js runtime-config.js
 ```bash
 supabase login
 supabase link --project-ref ecxkhihlbrcwpavfoaoq
-./scripts/staging/apply-migrations.sh remote-linked
+STAGING_CONFIRM_PROJECT_REF=ecxkhihlbrcwpavfoaoq \
+  ./scripts/staging/apply-migrations.sh remote-linked
 # or: supabase db push
 ```
 
 6. Deploy edge function `signed-document-url` with server-only env vars.
 7. Confirm Storage bucket `campaign-private` exists and is non-public (migrations).
 8. Load **synthetic** fixtures only; run import-gate / RLS / storage matrix before any real workbook.
+
+Run the complete hosted suite with the database URL supplied directly from the operator secret manager. The script never prints the URL and fails unless both project-ref confirmations match staging:
+
+```bash
+export STAGING_PROJECT_REF=ecxkhihlbrcwpavfoaoq
+export STAGING_CONFIRM_PROJECT_REF=ecxkhihlbrcwpavfoaoq
+export STAGING_DB_URL='secret-manager-value'
+export EVIDENCE_FILE="$HOME/.local/state/hacker-dojo/staging-verification.json"
+./scripts/staging/verify-policy-suite.sh remote-staging
+unset STAGING_DB_URL
+```
+
+Keep the evidence file outside the repository. It contains only timestamp, mode, repository commit, suite count, pass/fail state, and the explicit statement that production import remains unauthorized. The runner removes its temporary `test_set_user` security-definer helper on success or failure; synthetic role fixtures remain for operator verification.
 
 ## Browser wiring
 
@@ -112,6 +126,9 @@ import_gates: true
 import_review_actions: true
 six_role_rls: true
 storage_matrix: true
+atomic_import_creation: true
+session_expiration_and_revocation: true
+signed_document_access_audit: true
 service_role_in_git: false
 production_data: false
 master_development_list_loaded: false
@@ -127,3 +144,7 @@ When continuing in an interactive IDE (for example JCode):
 4. Provision operator profiles with roles; enforce MFA flags in schema.
 5. Keep Master Development List on local disk; inventory SHA-256 is in [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 6. Do not promote production import until HD-OI-020 leadership gates pass.
+
+## Current automation access state
+
+The repository automation is ready for non-interactive hosted verification. A Supabase access token or an already authenticated dashboard session remains operator-owned. Absence of that credential is a hard stop, not permission to place it in Git, chat, shell history, or an evidence file.
