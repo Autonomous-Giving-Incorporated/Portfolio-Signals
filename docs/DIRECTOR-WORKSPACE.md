@@ -28,7 +28,7 @@
 
 ## Current staging host decision
 
-GitHub Pages is the selected staging web host. The expected URL is
+GitHub Pages is the active staging web host. The URL is
 `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`. GitHub Actions generates the gitignored
 `runtime-config.js` during deployment from repository variable `STAGING_SUPABASE_URL` and secret
 `STAGING_SUPABASE_ANON_KEY`. Only the browser-public anon key is permitted; the service-role key
@@ -39,6 +39,10 @@ Supabase Auth must allow the following staging URLs after Pages is active:
 - site URL: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
 - workspace redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html`
 - import review redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/import-review.html`
+
+The root, workspace, and import-review URLs above are verified. The following Impact Relay URLs
+are required before those screens use Supabase OTP, but remain pending allowlist verification:
+
 - Impact Relay finance: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/finance-impact.html`
 - Impact Relay donors: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/donor-impact.html`
 
@@ -65,4 +69,4 @@ writeback.
 - Every mutation to controlled entities creates an audit event.
 - A source SHA-256 cannot be imported twice without an explicit reviewed override.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

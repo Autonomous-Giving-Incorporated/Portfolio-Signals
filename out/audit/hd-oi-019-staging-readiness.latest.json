@@ -4,7 +4,7 @@
   "governs_or_activates": false,
   "project_ref": "ecxkhihlbrcwpavfoaoq",
   "repository_commit": "b573fe078296bcc02e9d4e21140cf777d9d050d2",
-  "verified_at": "2026-08-01T22:23:00Z",
+  "verified_at": "2026-08-01T22:30:00Z",
   "mode": "shadow_advisory",
   "verdict": "FAIL",
   "synthetic_data_only": true,
@@ -56,6 +56,10 @@
     "github_pages_cache_max_age_seconds": 600,
     "runtime_load_repair_pr": 33,
     "runtime_load_repair_pr_merged": true,
+    "impact_relay_host_screens_present": true,
+    "impact_relay_authority": "SHADOW_ONLY_NOT_ACTIVATED",
+    "impact_relay_auth_redirects_verified": false,
+    "pages_concurrency_group_shared_by_pr_and_deploy": true,
     "auth_site_url": "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/",
     "auth_redirect_urls": [
       "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html",
@@ -95,7 +99,9 @@
   "unreconciled_configuration": [
     "Hosted PostgreSQL 17 diverges from the repository PostgreSQL 15.8 pin.",
     "Hosted API schema exposure differs from repository local configuration.",
-    "Hosted storage global file-size limit differs from repository local configuration."
+    "Hosted storage global file-size limit differs from repository local configuration.",
+    "Impact Relay finance and donor Pages redirects are not present in the verified Supabase Auth allowlist.",
+    "Pull-request validation and Pages deployment share a concurrency group, so a newer run can cancel an active deployment."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2"
 }

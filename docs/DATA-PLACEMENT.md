@@ -39,11 +39,14 @@ See [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) and [STAGING-BOOTSTRAP.md](STAGING-BO
 | API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
 | GitHub link | Project associated with this repository | OBSERVED (operator-reported) |
 | Classification | Treat as **staging** until leadership names production | OPERATOR DEFAULT |
-| Migrations applied | Operator-owned; not verified from CI | NOT_COMPUTABLE here |
+| Migrations applied | 10 repository migrations verified on hosted staging | OBSERVED |
+| Pages runtime | Deploy-generated public URL + anon key; no service-role material | OBSERVED |
 | Production import | **BLOCKED** | POLICY |
 | Real workbook load | **BLOCKED** until HD-OI-020 gates | POLICY |
 
-Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only.
+Never commit service-role keys or database passwords. The browser-public anon key is stored as a
+masked Actions secret and emitted only into the deployed Pages artifact; local `runtime-config.js`
+copies remain gitignored. Supabase RLS, not key secrecy, is the browser data-access boundary.
 
 ## Master Development List (source inventory only)
 
@@ -64,9 +67,9 @@ Outreach from historical membership, attendance, or this list alone remains **no
 
 ## Operator continue path (outside this PR)
 
-1. `supabase link --project-ref ecxkhihlbrcwpavfoaoq`
-2. `supabase db push` (or `./scripts/staging/apply-migrations.sh remote-linked`)
-3. Wire gitignored `runtime-config.js` with URL + anon key
-4. Enable MFA; provision six roles with synthetic fixtures first
-5. Verify import gates / RLS / storage matrix (prefer disposable local, then staging)
-6. Only then consider HD-OI-020 quarantine import of the authorized workbook
+1. Preserve the verified staging migrations, MFA controls, Pages runtime, and private bucket.
+2. Supply trusted CIDRs and close the backup/restore gate.
+3. Keep all tests synthetic until HD-OI-020 leadership authorization.
+4. Only then consider quarantine import of an explicitly authorized workbook hash.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

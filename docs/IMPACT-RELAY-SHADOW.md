@@ -89,3 +89,5 @@ Do **not** configure real email/push adapters in shadow.
 
 Append date + outcomes to pilot sign-off section in Impact-Relay  
 `docs/pilot/HACKER-DOJO-PILOT.md`.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

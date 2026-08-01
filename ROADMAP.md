@@ -23,7 +23,8 @@ Historical attendance, membership, donor, sponsor, or relationship evidence does
 public_portal: PASS
 public_data_schema: PASS
 pages_validation: PASS
-pages_deployment: PLAN_GATED  # private free plan cannot host Pages; validate still required
+pages_deployment: PASS_STAGING  # HTTPS Pages host active
+pages_runtime_config: PASS  # PR #33 / 32087fa; verified in deployed main b573fe0
 static_database_policy_checks: PASS
 local_security_contract: PASS
 full_migration_chain: PASS
@@ -35,7 +36,8 @@ staging_supabase_project: PROVISIONED
   ref: ecxkhihlbrcwpavfoaoq
   host: https://ecxkhihlbrcwpavfoaoq.supabase.co
   github_linked: OBSERVED  # operator-reported
-  migrations_on_hosted: OPERATOR_OWNED  # not verified by CI
+  migrations_on_hosted: VERIFIED  # 10 migrations; synthetic hosted suite green
+  auth_controls: VERIFIED  # public signup disabled; email confirmation and TOTP enabled
 production_environment: NOT_SEPARATED_YET  # treat hosted project as staging until named
 production_data_import: BLOCKED
 outreach_authority: NOT_GRANTED
@@ -125,7 +127,7 @@ Repository progress in this phase:
 ### Infrastructure
 
 - ~~create staging Supabase project~~ — **done** (`ecxkhihlbrcwpavfoaoq`, GitHub-linked);
-- apply repository migrations to the hosted staging project (`supabase db push`);
+- ~~apply repository migrations to the hosted staging project (`supabase db push`)~~ — **verified**;
 - create a separate **production** project when leadership requires environment split;
 - pin supported CLI, database, and runtime versions;
 - configure backup, restore, and disaster-recovery procedures;
@@ -155,23 +157,23 @@ Repository progress in this phase:
 
 ```yaml
 staging_project_created: true  # ecxkhihlbrcwpavfoaoq
-staging_migrations_applied: OPERATOR  # required next
-staging_environment: VERIFIED  # after migrations + synthetic suite on staging
-production_environment: VERIFIED  # separate project or explicit promotion decision
+staging_migrations_applied: true
+staging_environment: FAIL_PLATFORM_HARDENING  # app controls pass; backups/network remain
+production_environment: PENDING  # separate project or explicit promotion decision
 mfa_enforced: true
 secrets_committed: false
-backup_restore_tested: true
+backup_restore_tested: false
 private_storage_tested: true
 signed_url_audit_tested: true
 ```
 
 ### Operator handoff (continue outside GitHub agent)
 
-1. Link CLI: `supabase link --project-ref ecxkhihlbrcwpavfoaoq`
-2. Push schema: `supabase db push` or `./scripts/staging/apply-migrations.sh remote-linked`
-3. Wire gitignored `runtime-config.js` (URL + anon key only)
-4. MFA + six synthetic roles on staging; run policy suite
-5. Do **not** load Master Development List until HD-OI-020 leadership gates
+1. Preserve the verified Pages + Supabase runtime configuration; never add service-role material.
+2. Separate PR validation from Pages deployment concurrency and verify superseding deployments.
+3. Supply trusted CIDRs before restricting database networking.
+4. Obtain backup/restore capability and record a drill receipt when the operator selects a plan.
+5. Do **not** load Master Development List until HD-OI-020 leadership gates.
 
 ## Governed data-import phase
 
@@ -259,8 +261,10 @@ HD_OI_019:
   progress:
     staging_project: PROVISIONED
     data_placement_docs: COMPLETE
-    hosted_migrations: PENDING_OPERATOR
-    mfa_provider: PENDING_OPERATOR
+    hosted_migrations: VERIFIED
+    mfa_provider: VERIFIED_TOTP
+    pages_runtime: VERIFIED_STAGING
+    platform_hardening: FAIL_BACKUPS_AND_NETWORK
 
 HD_OI_020:
   name: governed_pilot_import
@@ -277,3 +281,5 @@ HD_OI_021:
 GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal contact information, donation histories, attendance records, private notes, relationship assessments, consent state, suppression state, and private documents belong only in **local custody and/or Supabase** (authenticated data service + private storage). Notion is not a substitute SoR for those records.
 
 Production import and outreach remain blocked until both technical and leadership gates are satisfied.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

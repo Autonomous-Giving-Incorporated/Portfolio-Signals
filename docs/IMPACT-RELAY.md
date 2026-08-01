@@ -72,3 +72,8 @@ Privileged Supabase roles (`director`, `campaign_lead`, `development`, `data_ste
 - No raw CRM in git.
 - Impact Relay data-dir is local/staging only.
 - Public Pages remain aggregate-only.
+
+This bridge remains shadow/local-console only until the limited-cohort gates are explicitly
+approved. It does not authorize notifications, production money movement, CRM import, or outreach.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

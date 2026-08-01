@@ -67,9 +67,10 @@ Also delivered under HD-OI-019:
 | Edge Function authenticated HTTP issuance | PASS — synthetic director received `200`, downloaded the signed object, and produced audit event `18` without storage-path leakage |
 | Seven-file synthetic hosted policy suite | PASS |
 | SSL enforcement | ENABLED — staging restart completed |
-| GitHub Pages staging host | PASS — HTTPS site live from `964587d`; runtime config points to staging without service-role material |
+| GitHub Pages staging host | PASS — HTTPS site deployed from main `b573fe0`; runtime config points to staging without service-role material |
 | Supabase Auth URL configuration | PASS — Pages root plus workspace and import-review redirects |
 | Authenticated Pages runtime wiring | PASS — PR #33 merged as `32087fa`; canonical HTML loads runtime config before application modules |
+| Impact Relay host screens | OBSERVED — finance/donor screens and shadow/cohort runbooks are present; live cohort remains unactivated |
 | Staging platform hardening | FAIL — backups deferred and DB network unrestricted |
 | Production project separation | PENDING |
 | Real workbook import | BLOCKED (HD-OI-020) |
@@ -79,6 +80,8 @@ Also delivered under HD-OI-019:
 - run backup/restore drill and record operator evidence;
 - restrict database network access after trusted CIDRs are supplied;
 - reconcile remaining hosted API/storage configuration drift;
+- separate pull-request validation from the Pages deployment concurrency group;
+- verify and allow the finance/donor Pages redirects before exercising Supabase OTP on those screens;
 - provision a separate production project or record an explicit single-project promotion decision.
 
 Hosted schema, RLS, storage, session, import, and document-audit controls were verified with
@@ -90,6 +93,12 @@ worktree at that commit. The bounded post-deployment probe deleted its temporary
 storage object, disabled its profile, and banned its synthetic Auth identity. The overall verdict
 remains `FAIL` until the platform-hardening items above are closed.
 
+PR #33 repaired the Pages runtime load and merged as
+`32087fa65cae90d5ee69f253bbb14befc058708d`. A superseding deployment from main
+`b573fe078296bcc02e9d4e21140cf777d9d050d2` included the repair and passed. Canonical HTML is
+correct; existing clients may retain pre-repair Pages content for the observed 600-second cache
+window.
+
 Repository-side session closure now fails closed for missing or expired JWT expiry claims, reflects profile role changes immediately, and pins the tested Node, Deno, Supabase CLI, and PostgreSQL toolchain. Signed document URLs are bounded to 30-300 seconds, read metadata through caller RLS, and fail closed unless privacy-safe access audit evidence is written. Hosted provider configuration and staging evidence remain operator-owned.
 
 ## Non-goals
@@ -99,4 +108,4 @@ Repository-side session closure now fails closed for missing or expired JWT expi
 - leadership policy approval;
 - Notion as CRM system of record.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

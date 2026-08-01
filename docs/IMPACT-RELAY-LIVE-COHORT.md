@@ -81,3 +81,8 @@ Copy to Impact-Relay `docs/pilot/FINDINGS.md` (or append section):
 - Decision: continue shadow | expand cohort | pause
 - Sign-off: finance ___ privacy ___ date ___
 ```
+
+This document is a gated procedure, not activation authority. No live cohort, notification,
+production money movement, CRM import, or outreach is approved by its presence in the repository.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

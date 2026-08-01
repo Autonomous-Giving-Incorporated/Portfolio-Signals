@@ -39,7 +39,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 
 ## Recommended implementation
 
-- **Frontend:** server-rendered TypeScript application deployed separately from GitHub Pages (current shell: static workspace + runtime config).
+- **Frontend:** static GitHub Pages staging shell with deploy-generated public runtime config; Supabase Auth, RLS, and private Storage remain the restricted-data boundary.
 - **Identity and database:** Supabase Auth + Postgres with row-level security.
 - **MFA:** required for director, campaign lead, development, data steward, and auditor roles.
 - **Documents:** private object-storage bucket (`campaign-private`) with time-limited signed URLs.
@@ -132,3 +132,13 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 - Lists authorized.
 - Donation tracking reconciled.
 - Stewardship owners assigned.
+
+## Current staging implementation
+
+- Pages host: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
+- Verified deployed main: `b573fe078296bcc02e9d4e21140cf777d9d050d2`
+- Runtime-load repair: `32087fa65cae90d5ee69f253bbb14befc058708d`
+- Authenticated workspace/import-review runtime initialization: PASS
+- Production environment, import, and outreach: BLOCKED
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

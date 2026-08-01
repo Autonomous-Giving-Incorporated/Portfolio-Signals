@@ -14,7 +14,7 @@ As of 2026-08-01:
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
-| GitHub Pages deployment | Active staging host at `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` |
+| GitHub Pages deployment | Active HTTPS staging host at `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`; deployed main `b573fe0` includes runtime repair `32087fa` |
 | Static security policy checks | Passing |
 | Workbook parser contract | Passing; executable quarantine tests cover provenance, input rejection, fail-closed parsing, and overwrite protection |
 | Authenticated database schema | Implemented |
@@ -59,8 +59,11 @@ docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
 docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
 docs/HD-OI-019.md                       Current hardening phase notes
+docs/IMPACT-RELAY*.md                   Impact Relay bridge, shadow, and gated cohort runbooks
 scripts/staging/                        Local/staging bootstrap helpers (no secrets)
 workspace/                              Authenticated decision and pipeline modules
+finance-impact.html                     Impact Relay finance host screen (local/staging console API)
+donor-impact.html                       Impact Relay donor host screen (local/staging console API)
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
 .github/workflows/                      Validation, security, Pages, and Supabase CI
@@ -173,7 +176,8 @@ PR #14 observed a green disposable run for migrations, six-role fixtures, and RL
 | API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` |
 | Role | Staging (default) until leadership names production |
 | Schema push | Operator: `supabase link --project-ref ecxkhihlbrcwpavfoaoq` then `supabase db push` |
-| Browser config | Gitignored `runtime-config.js` from `scripts/staging/runtime-config.staging.example.js` |
+| Browser config | Generated at Pages deploy time from `STAGING_SUPABASE_URL` plus masked `STAGING_SUPABASE_ANON_KEY`; local copies remain gitignored |
+| Pages host | `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` |
 
 CI continues to use a **disposable** local Supabase stack. Linking the hosted project does not apply migrations or load data by itself.
 
@@ -196,7 +200,8 @@ CI continues to use a **disposable** local Supabase stack. Linking the hosted pr
 public_portal: PASS
 public_schema_validation: PASS
 pages_validation: PASS
-pages_deploy: PLAN_GATED
+pages_deploy: PASS_STAGING
+pages_runtime_config: PASS
 static_policy_checks: PASS
 local_security_contract: PASS
 migration_chain: PASS
@@ -212,10 +217,11 @@ production_import: BLOCKED
 outreach: BLOCKED
 sensitive_data_in_repo: PROHIBITED
 master_development_list: LOCAL_ONLY_INVENTORIED  # SHA-256 in docs/DATA-PLACEMENT.md
+impact_relay_host_screens: SHADOW_ONLY
 ```
 
 See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
 
 Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIME-VERSIONS.md](docs/RUNTIME-VERSIONS.md).
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

@@ -42,9 +42,10 @@ Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign to
 | Edge Function authenticated path | Version 2 from `abf1c1d`; synthetic director received `200`, downloaded the object, and produced audit event `18` without path leakage | PASS |
 | Synthetic hosted policy suite | Seven repository SQL files | PASS |
 | SSL enforcement | Enabled; staging restart completed | VERIFIED |
-| GitHub Pages staging host | `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` from `964587d` | PASS |
+| GitHub Pages staging host | `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/` from main `b573fe0` | PASS |
 | Auth site URL and redirects | Pages root, workspace, and import-review URLs configured | PASS |
 | Authenticated Pages runtime wiring | PR #33 merged as `32087fa`; workspace client initializes and unauthenticated import review redirects to workspace | PASS |
+| Impact Relay finance/donor Auth redirects | Not present in the verified two-URL allowlist | PENDING |
 | Overall staging readiness | Backups deferred; DB network unrestricted | FAIL |
 | Real CRM data | Not loaded | REQUIRED |
 
@@ -77,6 +78,10 @@ cp scripts/staging/runtime-config.staging.example.js runtime-config.js
 ```
 
 `bootstrap.env` and `runtime-config.js` are operator-local and must not be committed.
+
+For GitHub Pages, Actions generates `runtime-config.js` from repository variable
+`STAGING_SUPABASE_URL` and masked secret `STAGING_SUPABASE_ANON_KEY`. The generator accepts only
+the exact staging origin and never receives a service-role key.
 
 ## Remote staging project
 
@@ -148,6 +153,7 @@ github_pages_staging_host: true
 github_pages_runtime_config_published: true
 github_pages_runtime_config_loaded: true
 auth_site_url_and_redirects: true
+impact_relay_auth_redirects: false
 edge_function_unauthenticated_denial: true
 edge_function_authenticated_signed_url: true
 staging_readiness: FAIL
@@ -165,6 +171,11 @@ query to the authenticated user, merged under explicit operator approval, and wa
 to staging. The successful post-deployment probe removed its mutable document and object, disabled
 its profile, and banned its synthetic Auth user.
 
+PR #33 repaired the live HTML load order. Main deployment `b573fe0` contains fix `32087fa` and
+passed a browser check for client initialization plus unauthenticated import-review redirection.
+Pages advertises `max-age=600`, so existing browser sessions may require a hard refresh during
+that bounded propagation window.
+
 ## JCode / operator continue checklist
 
 When continuing in an interactive IDE (for example JCode):
@@ -180,4 +191,8 @@ When continuing in an interactive IDE (for example JCode):
 
 The repository automation is ready for non-interactive hosted verification. A Supabase access token or an already authenticated dashboard session remains operator-owned. Absence of that credential is a hard stop, not permission to place it in Git, chat, shell history, or an evidence file.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: e3db304e9f992adbf11398a47a2a00e356d22abf
+The Pages workflow currently uses one `concurrency: pages` group for both pull-request validation
+and main deployment. A newer run can cancel an active deployment; always verify the successful
+superseding run contains the intended merge commit.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2

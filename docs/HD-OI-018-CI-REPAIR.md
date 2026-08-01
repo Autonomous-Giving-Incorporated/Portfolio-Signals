@@ -51,3 +51,9 @@ pages_deploy: OPTIONAL_PLAN_DEPENDENT
 ## Closure
 
 HD-OI-018 is complete for the executable policy lane as of PR #15. Production environment hardening is the next engineering phase and still requires separate staging/production projects, MFA, secrets, and leadership authority decisions before any real data import.
+
+Historical note: the earlier Pages plan gate was later closed for staging. GitHub Pages is active,
+with deploy-generated runtime configuration and authenticated entry-point load order verified under
+HD-OI-019. This does not change the historical PR #15 evidence above.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: b573fe078296bcc02e9d4e21140cf777d9d050d2
