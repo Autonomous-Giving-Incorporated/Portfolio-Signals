@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hacker Dojo Import Review</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="section" id="importReviewApp">
+    <div class="section-heading">
+      <div><p class="eyebrow">HD-OI-017</p><h1>Import quarantine review</h1></div>
+      <span class="status-pill status-blocked">Promotion blocked</span>
+    </div>
+    <section class="metric-grid" aria-label="Batch summary">
+      <article class="metric-card"><span class="metric-label">Batch state</span><strong id="batchState">Not loaded</strong></article>
+      <article class="metric-card"><span class="metric-label">Rows staged</span><strong id="rowCount">0</strong></article>
+      <article class="metric-card"><span class="metric-label">Blocking exceptions</span><strong id="blockingCount">0</strong></article>
+      <article class="metric-card"><span class="metric-label">Promotable rows</span><strong id="promotableCount">0</strong></article>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Promotion gates</h2><span class="tag warning">HUMAN REVIEW</span></div>
+      <div class="control-grid">
+        <label><input type="checkbox" disabled> Native workbook source verified</label>
+        <label><input type="checkbox" disabled> SHA-256 receipt reconciled</label>
+        <label><input type="checkbox" disabled> Duplicate exceptions resolved</label>
+        <label><input type="checkbox" disabled> Suppression matches enforced</label>
+        <label><input type="checkbox" disabled> Consent state reviewed</label>
+        <label><input type="checkbox" disabled> Relationship owner assigned</label>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Staging rows</h2><button class="button secondary" id="refreshImport">Refresh</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Row</th><th>Identity state</th><th>Consent</th><th>Suppression</th><th>Exceptions</th><th>Promotion</th></tr></thead><tbody id="importRows"><tr><td colspan="6">Authenticate in the director workspace and select an import batch.</td></tr></tbody></table></div>
+    </section>
+    <p class="note">This interface must show masked or aggregate fields only. Full personal data remains restricted to approved data-steward workflows.</p>
+  </main>
+  <script type="module" src="import-review.js"></script>
+</body>
+</html>
