@@ -8,7 +8,18 @@ Operator guide for standing up a **staging** environment without committing secr
 - apply repository migrations;
 - load **synthetic** fixtures only;
 - verify import gates, review actions, RLS, and storage matrix;
-- wire public runtime config for the authenticated workspace.
+- wire public runtime config for the authenticated workspace;
+- keep public fundraising progress on **Impact Relay** (aggregate-only Pages surface).
+
+## Related public surface
+
+Live donation progress, use-of-funds receipts, and event digests:
+
+https://scrimshawlife-ctrl.github.io/Impact-Relay/
+
+Repo: https://github.com/scrimshawlife-ctrl/Impact-Relay
+
+Staging of Hacker-Dojo must not publish personal CRM data. Aggregate campaign totals belong on Impact Relay after authorized reduction (for example Every.org aggregate summary → `impact-relay --every-org-aggregate`).
 
 ## Non-goals
 
