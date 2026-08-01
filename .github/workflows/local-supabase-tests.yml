@@ -1,0 +1,39 @@
+name: Local Supabase Policy Tests
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'services/import-api/**'
+      - '.github/workflows/local-supabase-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.31.8
+      - name: Start disposable Supabase project
+        run: supabase start
+      - name: Reset and apply migrations
+        run: supabase db reset
+      - name: Load synthetic role fixtures
+        run: psql "$(supabase status -o env | sed -n 's/^DB_URL=//p')" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+      - name: Execute RLS acceptance checks
+        run: psql "$(supabase status -o env | sed -n 's/^DB_URL=//p')" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+      - name: Reject committed sensitive exports
+        run: |
+          if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
+            echo 'Sensitive or binary source export detected.' >&2
+            exit 1
+          fi
+      - name: Stop local stack
+        if: always()
+        run: supabase stop --no-backup
