@@ -8,42 +8,59 @@ This repository is the **canonical host app** (campaign ops + public portal).
 | [Impact-Relay](https://github.com/scrimshawlife-ctrl/Impact-Relay) | Ledger, L0–L3 agents, durable workflows, donor API, RBAC ports |
 | **Hacker-Dojo** (this repo) | Campaign UX, Supabase auth, import quarantine, director portal |
 
-Public impact surface (aggregates only):  
-https://scrimshawlife-ctrl.github.io/Impact-Relay/
+Public impact: https://scrimshawlife-ctrl.github.io/Impact-Relay/
 
 ## Local finance + donor screens
 
-1. Start Impact Relay console API (from Impact-Relay checkout):
+1. Start Impact Relay console API:
 
 ```bash
 cd ../Impact-Relay
 python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --port 8787
 ```
 
-2. Open host pages (from this repo, any static server or file open):
+2. Open:
 
-- `finance-impact.html` — finance review queue (approve expenses)
-- `donor-impact.html` — donor timeline / receipt detail
+| Page | Purpose |
+|------|---------|
+| `finance-impact.html` | L3 expense approval queue |
+| `donor-impact.html` | Donor timeline / UOF detail |
 
-Default API base: `http://127.0.0.1:8787`  
-Override: `localStorage.IMPACT_RELAY_API = 'http://127.0.0.1:8787'`
+3. Auth modes:
 
-Auth for pilot: header `Authorization: Bearer finance.approver@hackersdojo.example`  
-(maps via Impact Relay fixture OIDC → `finance_approver` role).
+| Mode | When | How |
+|------|------|-----|
+| **Fixture** | No `runtime-config.js` | Pilot email mapped in Impact Relay |
+| **Supabase** | `runtime-config.js` present | OTP login → profile.role → Impact Relay headers |
+
+Shared bridge: `workspace/impact-relay-bridge.js`
+
+### Headers sent to Impact Relay (Supabase mode)
+
+| Header | Source |
+|--------|--------|
+| `X-Impact-Email` | `session.user.email` |
+| `X-HD-Campaign-Role` | `profiles.role` |
+| `X-Impact-Roles` | mapped IR roles (comma-separated) |
+| `X-Impact-Subject` | Supabase user id |
+| `Authorization` | `Bearer host:{email}` |
 
 ## Role mapping (campaign ↔ Impact Relay)
 
-| Hacker-Dojo campaign role | Impact Relay role |
-|---------------------------|-------------------|
-| director / development | `tenant_admin` or `finance_approver` |
-| board viewer / auditor | `auditor` |
-| data steward | `finance_reviewer` |
+| Hacker-Dojo `profiles.role` | Impact Relay roles | Finance approve? |
+|----------------------------|--------------------|------------------|
+| `director` | tenant_admin, finance_approver | yes |
+| `campaign_lead` | finance_approver, finance_reviewer | yes |
+| `development` | finance_approver, finance_reviewer | yes |
+| `data_steward` | finance_reviewer | no |
+| `auditor` / `board_viewer` | auditor | no |
 
-OIDC in production: host validates Supabase/Auth JWT, then maps claims to  
-`impact_relay.auth.Principal` before calling console APIs.
+## Shadow mode
+
+See [IMPACT-RELAY-SHADOW.md](./IMPACT-RELAY-SHADOW.md) — no live notifications, copy data-dir only.
 
 ## Privacy boundary
 
-- This repo must not store raw donor CRM exports in git.
-- Impact Relay durable data-dir is **local/staging only** (not GitHub).
-- Public Pages stay aggregate-only (Privacy Sentinel).
+- No raw CRM in git.
+- Impact Relay data-dir is local/staging only.
+- Public Pages remain aggregate-only.
