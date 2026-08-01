@@ -55,6 +55,9 @@ jobs:
           grep -q "/auth/v1/user" services/import-api/server.mjs
           grep -q "require_privileged_mfa" services/import-api/server.mjs
           ! grep -q "x-authenticated-user" services/import-api/server.mjs
+          ! grep -Eq "logger\.error\([^)]*error" services/import-api/server.mjs
+          grep -q "import_batch_creation_failed" services/import-api/server.mjs
+          grep -q "import_review_load_failed" import-review.js
           grep -q '"@e965/xlsx": "0.20.3"' services/workbook-parser/package.json
           grep -qx '22.18.0' .nvmrc
           grep -qx 'nodejs 22.18.0' .tool-versions
@@ -64,6 +67,11 @@ jobs:
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
           test -f workspace/session.js
           test -f docs/STAGING-BOOTSTRAP.md
+          test -f docs/OPERATIONAL-CONTROLS.md
+          test -f docs/RETENTION-LEGAL-HOLD.md
+          test -f docs/templates/RESTORE-DRILL-EVIDENCE.md
+          grep -q "30-300 seconds; 60-second default" docs/PRODUCTION-HARDENING.md
+          grep -q "Production purge automation may be enabled only" docs/RETENTION-LEGAL-HOLD.md
           ! grep -q "private_documents" supabase/functions/signed-document-url/index.ts
           ! grep -q "outreach_authorized" workspace.js
           python3 - <<'PY'

@@ -115,6 +115,7 @@ Repository progress in this phase:
 - fail-closed JWT expiration and immediate role-revocation checks;
 - pinned Node, Supabase CLI, and PostgreSQL versions;
 - bounded signed-document URLs with privacy-safe issuance audit evidence;
+- privacy-safe structured logging plus secret rotation, recovery, retention, and legal-hold runbooks;
 - import-review approve / reject / promote RPCs + UI;
 - storage matrix tests for private bucket and document metadata;
 - staging bootstrap scripts and docs;

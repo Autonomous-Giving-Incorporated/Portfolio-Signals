@@ -11,12 +11,12 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => new Promise((resolve) => server.close(resolve))));
 });
 
-async function start(fetchImpl) {
+async function start(fetchImpl, logger = { error() {} }) {
   const server = createImportApi({
     supabaseUrl: 'https://example.supabase.co',
     serviceRoleKey: 'test-service-role',
     fetchImpl,
-    logger: { error() {} }
+    logger
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   servers.push(server);
@@ -136,13 +136,14 @@ test('uses the verified Supabase user id and preserves quarantine-only writes', 
 });
 
 test('does not leak persistence error details to callers', async () => {
+  const logs = [];
   const base = await start(async (url) => {
     if (url.endsWith('/auth/v1/user')) return Response.json({ id: USER_ID });
     if (url.endsWith('/rest/v1/rpc/require_privileged_mfa')) {
       return Response.json({ id: USER_ID, active: true, mfa_enforced: true, role: 'director' });
     }
-    return new Response('private database detail', { status: 500 });
-  });
+    return new Response('private database detail bearer-secret@example.com', { status: 500 });
+  }, { error(...args) { logs.push(args); } });
 
   const response = await fetch(`${base}/v1/import-batches`, {
     method: 'POST',
@@ -152,4 +153,10 @@ test('does not leak persistence error details to callers', async () => {
 
   assert.equal(response.status, 502);
   assert.deepEqual(await response.json(), { error: 'import_persistence_failed' });
+  assert.deepEqual(logs, [[{
+    event: 'import_batch_creation_failed',
+    code: 'import_persistence_failed'
+  }]]);
+  assert.equal(JSON.stringify(logs).includes('private database detail'), false);
+  assert.equal(JSON.stringify(logs).includes('bearer-secret@example.com'), false);
 });

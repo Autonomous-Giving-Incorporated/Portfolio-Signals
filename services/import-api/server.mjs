@@ -41,6 +41,10 @@ async function readBody(req) {
 }
 
 export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch, logger = console }) {
+  function logFailure(event, code) {
+    logger.error({ event, code });
+  }
+
   async function authenticatedUser(req) {
     const token = bearerToken(req);
     if (!token) return null;
@@ -107,8 +111,8 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
     let actor;
     try {
       actor = await authenticatedUser(req);
-    } catch (error) {
-      logger.error('Supabase session verification failed', error);
+    } catch {
+      logFailure('supabase_session_verification_failed', 'authentication_unavailable');
       return send(res, 503, { error: 'authentication_unavailable' });
     }
     if (!actor) {
@@ -118,8 +122,8 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
     let profile;
     try {
       profile = await authorizedImportProfile(req, actor);
-    } catch (error) {
-      logger.error('Supabase authorization verification failed', error);
+    } catch {
+      logFailure('supabase_authorization_verification_failed', 'authorization_unavailable');
       return send(res, 503, { error: 'authorization_unavailable' });
     }
     if (!profile) {
@@ -188,8 +192,8 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
         throw new Error('atomic_import_failed:invalid_response');
       }
       return send(res, 201, result);
-    } catch (error) {
-      logger.error('Import batch creation failed', error);
+    } catch {
+      logFailure('import_batch_creation_failed', 'import_persistence_failed');
       return send(res, 502, { error: 'import_persistence_failed' });
     }
   });
