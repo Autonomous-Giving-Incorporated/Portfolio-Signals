@@ -21,6 +21,9 @@ jobs:
       - name: Validate parser entrypoint
         working-directory: services/workbook-parser
         run: npm run validate
+      - name: Test import API authentication boundary
+        working-directory: services/import-api
+        run: npm test
       - name: Verify private storage controls
         shell: bash
         run: |
@@ -32,6 +35,9 @@ jobs:
           grep -q "consent_candidate" import-review.js
           grep -q "approve_import_row" import-review.js
           grep -q "source_name" services/import-api/server.mjs
+          grep -q "/auth/v1/user" services/import-api/server.mjs
+          grep -q "require_privileged_mfa" services/import-api/server.mjs
+          ! grep -q "x-authenticated-user" services/import-api/server.mjs
           grep -q "campaign-private must not be public" supabase/tests/storage_matrix.sql
           test -f workspace/session.js
           test -f docs/STAGING-BOOTSTRAP.md
