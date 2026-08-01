@@ -59,6 +59,14 @@ Shared bridge: `workspace/impact-relay-bridge.js`
 
 See [IMPACT-RELAY-SHADOW.md](./IMPACT-RELAY-SHADOW.md) — no live notifications, copy data-dir only.
 
+## Live cohort
+
+See [IMPACT-RELAY-LIVE-COHORT.md](./IMPACT-RELAY-LIVE-COHORT.md) — staff MFA, controlled expenses, findings template.
+
+## MFA
+
+Privileged Supabase roles (`director`, `campaign_lead`, `development`, `data_steward`, `auditor`) must have `profiles.mfa_enforced = true` before Impact Relay screens accept the session (same rule as director workspace).
+
 ## Privacy boundary
 
 - No raw CRM in git.
