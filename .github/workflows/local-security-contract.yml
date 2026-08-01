@@ -44,6 +44,7 @@ jobs:
           grep -q "Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')" supabase/functions/signed-document-url/index.ts
           grep -q "document_records" supabase/migrations/011_document_access_audit.sql
           grep -q "record_document_access" supabase/functions/signed-document-url/index.ts
+          grep -q ".eq('id', userData.user.id)" supabase/functions/signed-document-url/index.ts
           grep -q "expiresIn < 30 || expiresIn > 300" supabase/functions/signed-document-url/index.ts
           grep -q "document_access_authorized" supabase/migrations/011_document_access_audit.sql
           grep -q "consent_candidate" import-review.js
