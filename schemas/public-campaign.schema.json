@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scrimshawlife-ctrl.github.io/Hacker-Dojo/schemas/public-campaign.schema.json",
+  "title": "Hacker Dojo Public Campaign Data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "updatedAt", "authority", "campaign", "registry", "execution", "gates", "privacy"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "updatedAt": {"type": "string", "format": "date"},
+    "authority": {"const": "advisory_only"},
+    "campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumTarget", "stretchTarget", "currency", "minimumCaseState", "stretchCaseState"],
+      "properties": {
+        "minimumTarget": {"type": "integer", "minimum": 0},
+        "stretchTarget": {"type": "integer", "minimum": 0},
+        "currency": {"const": "USD"},
+        "minimumCaseState": {"type": "string"},
+        "stretchCaseState": {"type": "string"}
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["normalizedMemberIds", "bayAreaRecords", "organizerLabels", "privateRelayOccurrences", "highEngagementRecords", "outreachReadyRecords", "qualification"],
+      "properties": {
+        "normalizedMemberIds": {"type": "integer", "minimum": 0},
+        "bayAreaRecords": {"type": "integer", "minimum": 0},
+        "organizerLabels": {"type": "integer", "minimum": 0},
+        "privateRelayOccurrences": {"type": "integer", "minimum": 0},
+        "highEngagementRecords": {"type": "integer", "minimum": 0},
+        "outreachReadyRecords": {"type": "integer", "minimum": 0},
+        "qualification": {"type": "string"}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reason"],
+      "properties": {
+        "state": {"enum": ["blocked", "review", "authorized", "active", "sealed"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "state"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "state": {"enum": ["pending", "approved", "blocked", "not_applicable"]}
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "piiAllowed", "rawRegistryAllowed", "donorHistoryAllowed", "privateNotesAllowed"],
+      "properties": {
+        "classification": {"const": "public_aggregate_only"},
+        "piiAllowed": {"const": false},
+        "rawRegistryAllowed": {"const": false},
+        "donorHistoryAllowed": {"const": false},
+        "privateNotesAllowed": {"const": false}
+      }
+    }
+  }
+}
