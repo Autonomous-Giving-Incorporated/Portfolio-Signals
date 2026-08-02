@@ -2,7 +2,7 @@
 
 **Campaign:** HD-OI-041 — Repository State Reconciliation and Staging Acceptance  
 **Recorded:** 2026-08-02  
-**Canonical repository:** `scrimshawlife-ctrl/Hacker-Dojo`  
+**Canonical repository:** `scrimshawlife-ctrl/Fund-Intel`  
 **Current `main` baseline:** `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`
 
 ## Purpose
