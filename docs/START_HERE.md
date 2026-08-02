@@ -15,25 +15,27 @@ private_data_in_github: PROHIBITED
 ## Read in this order
 
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — current baseline, historical evidence, drift, and required verification.
-2. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
-3. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — staging setup and verification procedures.
-4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, RLS, and application boundaries.
-5. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where public, restricted, and source data may exist.
-6. [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) — governed workbook quarantine and promotion flow.
-7. [PRODUCTION-HARDENING.md](PRODUCTION-HARDENING.md) — production checklist and operational controls.
-8. [IMPACT-RELAY.md](IMPACT-RELAY.md) — Impact Relay host integration.
-9. [IMPACT-RELAY-SHADOW.md](IMPACT-RELAY-SHADOW.md) — finance rehearsal without live notification.
-10. [IMPACT-RELAY-LIVE-COHORT.md](IMPACT-RELAY-LIVE-COHORT.md) — limited cohort procedure; operator approval required.
+2. [HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md](HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md) — PR #44 pre-merge local acceptance evidence and limits.
+3. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
+4. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — staging setup and verification procedures.
+5. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, RLS, and application boundaries.
+6. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where public, restricted, and source data may exist.
+7. [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) — governed workbook quarantine and promotion flow.
+8. [PRODUCTION-HARDENING.md](PRODUCTION-HARDENING.md) — production checklist and operational controls.
+9. [IMPACT-RELAY.md](IMPACT-RELAY.md) — Impact Relay host integration.
+10. [IMPACT-RELAY-SHADOW.md](IMPACT-RELAY-SHADOW.md) — finance rehearsal without live notification.
+11. [IMPACT-RELAY-LIVE-COHORT.md](IMPACT-RELAY-LIVE-COHORT.md) — limited cohort procedure; operator approval required.
 
 ## Current baseline
 
 ```yaml
 repository: scrimshawlife-ctrl/Hacker-Dojo
-main_commit: 522b66076f6b93be587eec8da95ff6d137746a6a
-phase: HD-OI-041_RECONCILIATION
-previous_phase: HD-OI-019_PRODUCTION_ENVIRONMENT_HARDENING
+main_commit: 251549f1e2142c35d1807cc9412d596ce82e360d
+phase: HD-OI-041B_LOCAL_ACCEPTANCE
+previous_phase: HD-OI-041_RECONCILIATION
 staging_project_ref: ecxkhihlbrcwpavfoaoq
-current_main_hosted_acceptance: PENDING
+pr_44_local_acceptance: PASS_PREMERGE_ONLY
+current_main_hosted_acceptance: NOT_RUN
 ```
 
 ## Operator rule
@@ -43,8 +45,9 @@ Do not treat an earlier successful deployment or synthetic suite as proof that c
 ## Immediate execution sequence
 
 ```text
-verify current main locally
-→ deploy current main to staging
+obtain explicit approval to merge the green local-acceptance PR
+→ verify the resulting exact main commit locally
+→ deploy that exact main commit to staging
 → verify hosted migration/function parity
 → execute synthetic role and import suites
 → execute browser smoke tests
