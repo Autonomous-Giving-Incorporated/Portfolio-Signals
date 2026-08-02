@@ -1,6 +1,8 @@
-# Hacker Dojo Campaign Intelligence
+# A.G.I. Fund-Intel
 
-A governed campaign-control system for Hacker Dojo's **$420K minimum campaign** and **$2M transformation path**.
+Fund-Intel is the GitHub Pages-compatible frontend and client-control component of **Autonomously Giving Incorporated (A.G.I.)**. Impact Relay is the tenant-isolated financial and impact backend. Hacker Dojo is the canonical reference tenant for the reusable suite, using its **$420K minimum campaign** and **$2M transformation path** as the regression plan.
+
+See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for component boundaries, authority, tenancy, hosting, and delivery milestones.
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 

@@ -1,8 +1,10 @@
-# Hacker Dojo Campaign Intelligence — Production Roadmap
+# A.G.I. Fund-Intel — Product and Hacker Dojo Pilot Roadmap
 
 ## Objective
 
-Deliver a governed campaign operating system for Hacker Dojo without placing donor, member, attendance, relationship, consent, suppression, or private-document data in GitHub.
+Deliver Fund-Intel as the reusable frontend and client-administration component of **Autonomously Giving Incorporated (A.G.I.)**, while preserving Hacker Dojo as the canonical reference tenant and keeping donor, member, attendance, relationship, consent, suppression, and private-document data out of GitHub.
+
+The cross-repository sequence is AGI-001 through AGI-009 in [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md). The HD-OI phases below remain the Hacker Dojo pilot and evidence track.
 
 The operating target is a **$420K minimum campaign** with a separately governed **$2M transformation path** and an Aug. 21, 2026 SupperHappyFundHouse campaign event.
 
