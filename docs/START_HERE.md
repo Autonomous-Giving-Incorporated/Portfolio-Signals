@@ -30,12 +30,14 @@ private_data_in_github: PROHIBITED
 
 ```yaml
 repository: scrimshawlife-ctrl/Hacker-Dojo
-main_commit: 251549f1e2142c35d1807cc9412d596ce82e360d
+main_commit: 152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4
 phase: HD-OI-041B_LOCAL_ACCEPTANCE
 previous_phase: HD-OI-041_RECONCILIATION
 staging_project_ref: ecxkhihlbrcwpavfoaoq
-pr_44_local_acceptance: PASS_PREMERGE_ONLY
-current_main_hosted_acceptance: NOT_RUN
+exact_main_local_acceptance: PASS  # workflow 30726851425
+pages_deployment_exact_main: PASS  # workflow 30726851423
+public_portal_smoke: PASS  # read-only public check
+current_main_hosted_acceptance: BLOCKED_ENVIRONMENT_DESIGNATION
 ```
 
 ## Operator rule
@@ -45,10 +47,10 @@ Do not treat an earlier successful deployment or synthetic suite as proof that c
 ## Immediate execution sequence
 
 ```text
-obtain explicit approval to merge the green local-acceptance PR
-→ verify the resulting exact main commit locally
-→ deploy that exact main commit to staging
-→ verify hosted migration/function parity
+resolve the hosted environment designation before testing
+→ verify hosted migration/function parity only after it is confirmed staging
+→ run authenticated browser smoke with synthetic accounts
+→ execute the synthetic director journey
 → execute synthetic role and import suites
 → execute browser smoke tests
 → execute director acceptance journey
