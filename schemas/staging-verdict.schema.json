@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/schemas/staging-verdict.schema.json",
+  "title": "Hacker Dojo staging acceptance verdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "repository",
+    "commit",
+    "environment",
+    "executedAt",
+    "verdict",
+    "technicalGates",
+    "leadershipGates",
+    "productionImportAuthorized",
+    "outreachAuthorized"
+  ],
+  "properties": {
+    "repository": { "const": "scrimshawlife-ctrl/Hacker-Dojo" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "environment": { "enum": ["local", "staging", "production"] },
+    "executedAt": { "type": "string", "format": "date-time" },
+    "verdict": { "enum": ["GO", "CONDITIONAL", "NO_GO"] },
+    "technicalGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publicContract",
+        "securityContract",
+        "migrationChain",
+        "sixRoleRls",
+        "importGates",
+        "privateStorage",
+        "signedUrlAudit",
+        "browserSmoke",
+        "directorAcceptance"
+      ],
+      "properties": {
+        "publicContract": { "$ref": "#/$defs/gate" },
+        "securityContract": { "$ref": "#/$defs/gate" },
+        "migrationChain": { "$ref": "#/$defs/gate" },
+        "sixRoleRls": { "$ref": "#/$defs/gate" },
+        "importGates": { "$ref": "#/$defs/gate" },
+        "privateStorage": { "$ref": "#/$defs/gate" },
+        "signedUrlAudit": { "$ref": "#/$defs/gate" },
+        "browserSmoke": { "$ref": "#/$defs/gate" },
+        "directorAcceptance": { "$ref": "#/$defs/gate" }
+      }
+    },
+    "leadershipGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["useOfFunds", "privacyPolicy", "outreachBasis", "namedOwners", "sourceWorkbook"],
+      "properties": {
+        "useOfFunds": { "$ref": "#/$defs/authorityGate" },
+        "privacyPolicy": { "$ref": "#/$defs/authorityGate" },
+        "outreachBasis": { "$ref": "#/$defs/authorityGate" },
+        "namedOwners": { "$ref": "#/$defs/authorityGate" },
+        "sourceWorkbook": { "$ref": "#/$defs/authorityGate" }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "summary"],
+        "properties": {
+          "severity": { "enum": ["P0", "P1", "P2"] },
+          "summary": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string" },
+          "due": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "productionImportAuthorized": { "const": false },
+    "outreachAuthorized": { "const": false },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "source"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": { "enum": ["PASS", "FAIL", "NOT_RUN", "NOT_COMPUTABLE"] },
+        "evidence": { "type": "string" }
+      }
+    },
+    "authorityGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": { "enum": ["APPROVED", "BLOCKED", "NOT_COMPUTABLE"] },
+        "record": { "type": "string" }
+      }
+    }
+  }
+}
