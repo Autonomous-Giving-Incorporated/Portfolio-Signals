@@ -17,7 +17,13 @@ Every production decision must distinguish:
 
 Historical attendance, membership, donor, sponsor, or relationship evidence does not by itself grant outreach authority.
 
-## Verified state — 2026-08-01
+## Current evidence boundary — HD-OI-041
+
+The current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The component evidence below is retained for provenance, but it must not be read as current-main hosted acceptance.
+
+PR #44 (`e124375bfd60758df9857b03dfc171c9210b78b1`) completed all four pull-request workflows, including the disposable local acceptance suite. It remains pre-merge evidence only. Current `main` remains `NO_GO` pending exact-commit local execution after merge, hosted staging parity, browser smoke, and director acceptance.
+
+## Historical component evidence — 2026-08-01
 
 ```yaml
 public_portal: PASS
@@ -155,14 +161,14 @@ Repository progress in this phase:
 
 ```yaml
 staging_project_created: true  # ecxkhihlbrcwpavfoaoq
-staging_migrations_applied: OPERATOR  # required next
-staging_environment: VERIFIED  # after migrations + synthetic suite on staging
-production_environment: VERIFIED  # separate project or explicit promotion decision
-mfa_enforced: true
+staging_migrations_applied: NOT_RUN_FOR_CURRENT_MAIN
+staging_environment: NOT_RUN_FOR_CURRENT_MAIN
+production_environment: NOT_SEPARATED
+mfa_enforced: NOT_RUN_FOR_CURRENT_MAIN
 secrets_committed: false
-backup_restore_tested: true
-private_storage_tested: true
-signed_url_audit_tested: true
+backup_restore_tested: NOT_VERIFIED_CURRENT
+private_storage_tested: NOT_RUN_FOR_CURRENT_MAIN
+signed_url_audit_tested: NOT_RUN_FOR_CURRENT_MAIN
 ```
 
 ### Operator handoff (continue outside GitHub agent)
