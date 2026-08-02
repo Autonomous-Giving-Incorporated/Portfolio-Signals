@@ -21,31 +21,47 @@
   grid-area: brand;
   display: flex;
   align-items: center;
+  gap: .8rem;
   min-height: 76px;
 }
-
-.brand-logo {
-  display: block;
-  width: clamp(210px, 25vw, 310px);
-  height: auto;
+.brand-mark {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(201, 0, 70, .18);
 }
-
-.brand-logo-dark { display: none; }
-html[data-theme="dark"] .brand-logo-light { display: none; }
-html[data-theme="dark"] .brand-logo-dark { display: block; }
+.brand-wordmark {
+  display: grid;
+  line-height: .82;
+  font-size: 1.38rem;
+  letter-spacing: -.04em;
+}
+.brand-wordmark strong { font-weight: 800; }
+.brand-divider {
+  width: 1px;
+  height: 46px;
+  background: var(--line);
+  margin-inline: .25rem;
+}
+.brand-product {
+  max-width: 180px;
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
 
 .site-header > div:not(.header-actions):not(.brand-identity) {
   grid-area: hero;
   max-width: 960px;
   padding: clamp(1.3rem, 3vw, 2.7rem) 0 .5rem;
 }
-
 .site-header h1 {
   color: var(--text);
   font-size: clamp(2.65rem, 7vw, 6.1rem);
   max-width: 900px;
 }
-
 .site-header .eyebrow { color: var(--hd-red); }
 .header-actions { grid-area: actions; align-self: center; }
 
@@ -65,7 +81,6 @@ html[data-theme="dark"] .brand-logo-dark { display: block; }
   color: white;
   border-bottom: 4px solid var(--hd-red);
 }
-
 .status-event {
   display: flex;
   flex-direction: column;
@@ -88,19 +103,13 @@ html[data-theme="dark"] .brand-logo-dark { display: block; }
 .status-progress small { color: rgba(255,255,255,.66); }
 
 .metric-card:first-child,
-.funding-ladder article:first-child {
-  border-top: 4px solid var(--hd-red);
-}
+.funding-ladder article:first-child { border-top: 4px solid var(--hd-red); }
 .metric-card:nth-child(2),
-.funding-ladder article:last-child {
-  border-top: 4px solid var(--hd-crimson);
-}
-
+.funding-ladder article:last-child { border-top: 4px solid var(--hd-crimson); }
 .ladder-value,
 .cta-line,
 .next-run span,
 .risk-grid span { color: var(--hd-red); }
-
 .progress-track div { background: linear-gradient(90deg, var(--hd-red), var(--hd-crimson)); }
 .button, .tab.active { background: var(--hd-red); border-color: var(--hd-red); }
 .workspace-nav-button.is-active { background: var(--hd-red); border-color: var(--hd-red); }
@@ -124,7 +133,7 @@ html[data-theme="dark"] .brand-logo-dark { display: block; }
   }
   .header-actions { justify-content: flex-start; }
   .campaign-status-bar { grid-template-columns: 1fr; }
-  .brand-logo { width: min(270px, 85vw); }
+  .brand-divider, .brand-product { display: none; }
   footer { align-items: flex-start; flex-direction: column; }
   .footer-meta { justify-content: flex-start; text-align: left; }
 }
