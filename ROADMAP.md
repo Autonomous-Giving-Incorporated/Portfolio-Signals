@@ -54,6 +54,8 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Public campaign surface
 
+- dedicated GitHub Pages routes for sponsor, grant, and aggregate member-segment intelligence;
+- reusable accessible dropdown filters, range explorers, and evidence-bound tooltips;
 - director-facing campaign overview;
 - $420K minimum and $2M stretch framing;
 - proposed funding ladder;

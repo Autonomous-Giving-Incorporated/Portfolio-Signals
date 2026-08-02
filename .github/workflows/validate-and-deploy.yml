@@ -45,7 +45,7 @@ jobs:
             exit 1
           fi
       - name: Verify static entry points
-        run: test -f index.html && test -f styles.css && test -f app.js
+        run: node scripts/validate-static-routes.mjs
 
   deploy:
     if: github.event_name != 'pull_request'
