@@ -1,0 +1,29 @@
+{
+  "repository": "scrimshawlife-ctrl/Hacker-Dojo",
+  "commit": "0000000000000000000000000000000000000000",
+  "environment": "staging",
+  "executedAt": "2026-08-02T00:00:00Z",
+  "verdict": "NO_GO",
+  "technicalGates": {
+    "publicContract": { "state": "NOT_RUN" },
+    "securityContract": { "state": "NOT_RUN" },
+    "migrationChain": { "state": "NOT_RUN" },
+    "sixRoleRls": { "state": "NOT_RUN" },
+    "importGates": { "state": "NOT_RUN" },
+    "privateStorage": { "state": "NOT_RUN" },
+    "signedUrlAudit": { "state": "NOT_RUN" },
+    "browserSmoke": { "state": "NOT_RUN" },
+    "directorAcceptance": { "state": "NOT_RUN" }
+  },
+  "leadershipGates": {
+    "useOfFunds": { "state": "NOT_COMPUTABLE" },
+    "privacyPolicy": { "state": "NOT_COMPUTABLE" },
+    "outreachBasis": { "state": "NOT_COMPUTABLE" },
+    "namedOwners": { "state": "NOT_COMPUTABLE" },
+    "sourceWorkbook": { "state": "NOT_COMPUTABLE" }
+  },
+  "exceptions": [],
+  "productionImportAuthorized": false,
+  "outreachAuthorized": false,
+  "evidence": []
+}

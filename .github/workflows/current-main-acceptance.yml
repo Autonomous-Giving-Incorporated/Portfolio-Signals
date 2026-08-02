@@ -1,0 +1,125 @@
+name: Current-main acceptance contract
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify required acceptance surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            docs/START_HERE.md
+            docs/CURRENT-STATE.md
+            docs/STAGING-ACCEPTANCE.md
+            schemas/staging-verdict.schema.json
+            templates/staging-verdict.example.json
+            index.html
+            workspace.html
+            import-review.html
+            finance-impact.html
+            donor-impact.html
+            app.js
+            workspace.js
+            workspace-nav.js
+            brand.css
+            workspace-nav.css
+          )
+          for path in "${required[@]}"; do
+            test -f "$path" || { echo "missing required surface: $path"; exit 1; }
+          done
+
+      - name: Parse JavaScript entry points
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find . -maxdepth 2 -type f -name '*.js' \
+            ! -name 'runtime-config.js' \
+            ! -path './node_modules/*' | sort)
+
+      - name: Verify authenticated runtime ordering
+        shell: python
+        run: |
+          from pathlib import Path
+
+          checks = {
+              'workspace.html': ('runtime-config.js', 'workspace.js'),
+              'import-review.html': ('runtime-config.js', 'import-review.js'),
+              'finance-impact.html': ('runtime-config.js', 'finance-impact.js'),
+              'donor-impact.html': ('runtime-config.js', 'donor-impact.js'),
+          }
+          for path, (runtime, module) in checks.items():
+              text = Path(path).read_text(encoding='utf-8')
+              runtime_pos = text.find(runtime)
+              module_pos = text.find(module)
+              if runtime_pos < 0 or module_pos < 0 or runtime_pos > module_pos:
+                  raise SystemExit(f'{path}: {runtime} must load before {module}')
+
+      - name: Verify authority boundaries remain explicit
+        shell: python
+        run: |
+          from pathlib import Path
+
+          combined = '\n'.join(
+              Path(path).read_text(encoding='utf-8')
+              for path in ['README.md', 'ROADMAP.md', 'docs/CURRENT-STATE.md', 'docs/STAGING-ACCEPTANCE.md']
+          ).lower()
+          required = [
+              'production import',
+              'outreach',
+              'blocked',
+              'suppression',
+              'consent',
+          ]
+          missing = [term for term in required if term not in combined]
+          if missing:
+              raise SystemExit(f'missing authority-boundary terms: {missing}')
+
+      - name: Validate staging verdict template
+        run: |
+          npx --yes \
+            --package ajv-cli@5 \
+            --package ajv-formats@3 \
+            ajv validate \
+            --spec=draft2020 \
+            -c ajv-formats \
+            -s schemas/staging-verdict.schema.json \
+            -d templates/staging-verdict.example.json
+
+      - name: Confirm receipt cannot authorize import or outreach
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          receipt = json.loads(Path('templates/staging-verdict.example.json').read_text())
+          assert receipt['productionImportAuthorized'] is False
+          assert receipt['outreachAuthorized'] is False
+
+      - name: Emit commit-scoped acceptance note
+        run: |
+          {
+            echo '## Current-main acceptance contract'
+            echo
+            echo "Commit: \`${GITHUB_SHA}\`"
+            echo
+            echo 'This workflow validates repository structure and the staging-verdict contract only.'
+            echo 'It does not claim hosted deployment, Supabase parity, production import authority, or outreach authority.'
+          } >> "$GITHUB_STEP_SUMMARY"
