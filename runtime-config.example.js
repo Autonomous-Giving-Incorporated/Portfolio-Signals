@@ -4,5 +4,6 @@
 window.HACKER_DOJO_CONFIG = {
   supabaseUrl: 'https://ecxkhihlbrcwpavfoaoq.supabase.co',
   supabaseAnonKey: 'YOUR_PUBLIC_ANON_KEY',
-  defaultClientSlug: 'hacker-dojo'
+  defaultClientSlug: 'hacker-dojo',
+  impactRelayApiBase: 'https://impact-relay.example.run.app'
 };
