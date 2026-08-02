@@ -3,7 +3,7 @@
 **Campaign:** HD-OI-041 — Repository State Reconciliation and Staging Acceptance  
 **Recorded:** 2026-08-02  
 **Canonical repository:** `scrimshawlife-ctrl/Hacker-Dojo`  
-**Current `main` baseline:** `251549f1e2142c35d1807cc9412d596ce82e360d`
+**Current `main` baseline:** `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`
 
 ## Purpose
 
@@ -20,7 +20,7 @@ This document separates current repository state from older hosted verification 
 
 ```yaml
 repository_visibility: PUBLIC
-main_commit: 251549f1e2142c35d1807cc9412d596ce82e360d
+main_commit: 152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4
 public_portal: OBSERVED_IMPLEMENTED
 authenticated_workspace: OBSERVED_IMPLEMENTED
 hacker_dojo_brand_system: OBSERVED_IMPLEMENTED
@@ -49,7 +49,7 @@ historical_hosted_synthetic_policy_suite: 7_of_7_PASS
 historical_staging_project_ref: ecxkhihlbrcwpavfoaoq
 ```
 
-These results remain useful provenance. They must not be represented as a current-main staging acceptance result until the full suite is rerun against `251549f1e2142c35d1807cc9412d596ce82e360d` or a later approved commit.
+These results remain useful provenance. They remain historical provenance. Exact-main local acceptance now passed for `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`; hosted evidence still cannot be promoted because the dashboard labels the project `Production`.
 
 ## Drift detected
 
@@ -58,9 +58,11 @@ readme_current_main_evidence: RECONCILED_IN_PENDING_DOCS_PR
 roadmap_current_main_evidence: RECONCILED_IN_PENDING_DOCS_PR
 start_here_baseline: RECONCILED_IN_PENDING_DOCS_PR
 pr_28: SUPERSEDED_AND_CLOSED_WITHOUT_MERGE
-pr_44_local_acceptance: PASS_PREMERGE_ONLY
-current_main_hosted_parity: NOT_RUN
-latest_brand_and_navigation_browser_smoke: NOT_RUN
+exact_main_local_acceptance: PASS  # workflow 30726851425
+pages_deployment_exact_main: PASS  # workflow 30726851423
+public_portal_smoke: PASS  # read-only public check; no captured console errors
+current_main_hosted_parity: BLOCKED_ENVIRONMENT_DESIGNATION
+latest_authenticated_browser_smoke: NOT_RUN
 ```
 
 ## Required current-main verification
@@ -89,7 +91,7 @@ Run the following against the current baseline:
 
 ## Current verdict
 
-PR #44 completed a green local acceptance workflow against its unmerged head. That is pre-merge evidence only; the exact current-main and hosted lanes remain unexecuted.
+Exact-main local acceptance completed successfully for `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`. Hosted parity, authenticated browser smoke, and director acceptance remain unexecuted because the dashboard presents the connected project as `Production`.
 
 ```yaml
 verdict: NO_GO
