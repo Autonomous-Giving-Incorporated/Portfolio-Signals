@@ -68,6 +68,11 @@ begin
   if length(trim(coalesce(p_config->>'product_name', ''))) not between 1 and 100 then raise exception 'invalid_product_name'; end if;
   if length(coalesce(p_config->>'campaign_title', '')) > 160 then raise exception 'invalid_campaign_title'; end if;
   if length(coalesce(p_config->>'campaign_tagline', '')) > 280 then raise exception 'invalid_campaign_tagline'; end if;
+  if p_config ? 'modules' and (
+    jsonb_typeof(p_config->'modules') <> 'object'
+    or jsonb_typeof(p_config#>'{modules,sponsors}') is distinct from 'boolean'
+    or jsonb_typeof(p_config#>'{modules,grants}') is distinct from 'boolean'
+  ) then raise exception 'invalid_client_modules'; end if;
   foreach v_color in array array[
     p_config#>>'{theme,primary}', p_config#>>'{theme,accent}', p_config#>>'{theme,background}'
   ] loop
@@ -223,6 +228,7 @@ values (
     'product_name', 'Campaign Control Center',
     'campaign_title', 'Keep the room where builders become possible.',
     'campaign_tagline', 'Come home. Build something. Fund the next builder.',
+    'modules', jsonb_build_object('sponsors', true, 'grants', true),
     'theme', jsonb_build_object('primary', '#ED1C24', 'accent', '#33D6C5', 'background', '#071725'),
     'assets', jsonb_build_object('logo_path', null, 'icon_path', null, 'hero_path', null)
   ),

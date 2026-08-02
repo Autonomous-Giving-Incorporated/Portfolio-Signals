@@ -91,6 +91,7 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 - privacy-safe public configuration projection selected by client slug;
 - static Hacker Dojo fallback when runtime configuration is unavailable;
 - complete version history and tenant audit events.
+- onboarding-controlled sponsor and grant modules with disabled-route and workspace navigation gates.
 
 ### Governed import foundation
 

@@ -5,6 +5,7 @@ const FALLBACK = {
   product_name: 'Campaign Control Center',
   campaign_title: 'Keep the room where builders become possible.',
   campaign_tagline: 'Come home. Build something. Fund the next builder.',
+  modules: { sponsors: true, grants: true },
   theme: { primary: '#ED1C24', accent: '#33D6C5', background: '#071725' },
   assets: { logo_path: null, icon_path: null, hero_path: null }
 };
@@ -15,10 +16,11 @@ function getConfig() { return window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ 
 function clientSlug() { return new URLSearchParams(location.search).get('client') || getConfig().defaultClientSlug || 'hacker-dojo'; }
 function assetUrl(path) { const { supabaseUrl } = getConfig(); return path && supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(path).replaceAll('%2F', '/')}` : ''; }
 function safeConfig(raw = {}) {
-  return { organization_name: String(raw.organization_name || FALLBACK.organization_name).slice(0, 100), product_name: String(raw.product_name || FALLBACK.product_name).slice(0, 100), campaign_title: String(raw.campaign_title || FALLBACK.campaign_title).slice(0, 160), campaign_tagline: String(raw.campaign_tagline || FALLBACK.campaign_tagline).slice(0, 280), theme: { primary: validColor(raw.theme?.primary, FALLBACK.theme.primary), accent: validColor(raw.theme?.accent, FALLBACK.theme.accent), background: validColor(raw.theme?.background, FALLBACK.theme.background) }, assets: { logo_path: raw.assets?.logo_path || null, icon_path: raw.assets?.icon_path || null, hero_path: raw.assets?.hero_path || null } };
+  return { organization_name: String(raw.organization_name || FALLBACK.organization_name).slice(0, 100), product_name: String(raw.product_name || FALLBACK.product_name).slice(0, 100), campaign_title: String(raw.campaign_title || FALLBACK.campaign_title).slice(0, 160), campaign_tagline: String(raw.campaign_tagline || FALLBACK.campaign_tagline).slice(0, 280), modules: { sponsors: raw.modules?.sponsors !== false, grants: raw.modules?.grants !== false }, theme: { primary: validColor(raw.theme?.primary, FALLBACK.theme.primary), accent: validColor(raw.theme?.accent, FALLBACK.theme.accent), background: validColor(raw.theme?.background, FALLBACK.theme.background) }, assets: { logo_path: raw.assets?.logo_path || null, icon_path: raw.assets?.icon_path || null, hero_path: raw.assets?.hero_path || null } };
 }
 function applyPublicConfig(config) {
   const safe = safeConfig(config);
+  const slug = clientSlug();
   document.documentElement.style.setProperty('--brand-red', safe.theme.primary);
   document.documentElement.style.setProperty('--brand-teal', safe.theme.accent);
   document.documentElement.style.setProperty('--brand-navy', safe.theme.background);
@@ -33,6 +35,17 @@ function applyPublicConfig(config) {
   if (icon) document.querySelectorAll('link[rel="icon"]').forEach(link => { link.href = icon; });
   const hero = assetUrl(safe.assets.hero_path);
   if (hero) document.querySelector('.site-header')?.style.setProperty('--client-hero-image', `url("${hero}")`);
+  for (const module of ['sponsors', 'grants']) {
+    document.querySelectorAll(`[data-agi-module="${module}"]`).forEach(node => { node.hidden = !safe.modules[module]; });
+  }
+  document.querySelectorAll('a[href$=".html"]').forEach(link => {
+    const url = new URL(link.href, location.href);
+    if (url.origin === location.origin) { url.searchParams.set('client', slug); link.href = url.href; }
+  });
+  const required = document.body.dataset.requiredModule;
+  if (required && safe.modules[required] === false) {
+    document.querySelector('main').innerHTML = `<section class="panel"><p class="eyebrow">Module not enabled</p><h1>${escapeHtml(safe.organization_name)}</h1><p>This fundraising module has not been enabled during client onboarding.</p><a class="button" href="index.html?client=${encodeURIComponent(slug)}">Return to overview</a></section>`;
+  }
 }
 async function loadPublicConfig() {
   const runtime = getConfig();

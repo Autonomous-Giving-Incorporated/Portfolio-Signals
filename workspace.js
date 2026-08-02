@@ -27,6 +27,7 @@ let activeClient = null;
 let activeProfile = null;
 let selectedClient = null;
 let isMasterAdmin = false;
+let enabledModules = { sponsors: false, grants: false };
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -103,6 +104,11 @@ async function renderSession(session) {
   activeProfile = profile;
   selectedClient = currentClient;
   isMasterAdmin = masterAdmin;
+  if (currentClient?.id) {
+    const { data: publishedConfig, error: configError } = await activeClient.from('client_config_versions').select('config').eq('client_id', currentClient.id).eq('state', 'published').maybeSingle();
+    if (configError) throw configError;
+    enabledModules = { sponsors: publishedConfig?.config?.modules?.sponsors !== false, grants: publishedConfig?.config?.modules?.grants !== false };
+  }
   gate.hidden = true;
   workspace.hidden = false;
   document.getElementById('identityLine').textContent =
@@ -135,8 +141,8 @@ function renderNavigation(role) {
   if (roleCan(role, 'brand_configuration')) items.push({ id: 'brand_configuration', label: 'Brand & content' });
   if (roleCan(role, 'decisions')) items.push({ id: 'decisions', label: 'Decisions' });
   if (roleCan(role, 'opportunities')) {
-    items.push({ id: 'sponsors', label: 'Sponsors' });
-    items.push({ id: 'grants', label: 'Grants' });
+    if (enabledModules.sponsors) items.push({ id: 'sponsors', label: 'Sponsors' });
+    if (enabledModules.grants) items.push({ id: 'grants', label: 'Grants' });
   }
   if (roleCan(role, 'claims')) items.push({ id: 'claims', label: 'Claims' });
   if (roleCan(role, 'imports')) items.push({ id: 'imports', label: 'Imports' });
@@ -211,7 +217,8 @@ async function loadDashboard(role) {
     </p>
     <div class="control-grid">
       ${roleCan(role, 'decisions') ? '<button type="button" class="button secondary" data-jump="decisions">Open decisions</button>' : ''}
-      ${roleCan(role, 'opportunities') ? '<button type="button" class="button secondary" data-jump="sponsors">Open sponsor pipeline</button>' : ''}
+      ${roleCan(role, 'opportunities') && enabledModules.sponsors ? '<button type="button" class="button secondary" data-jump="sponsors">Open sponsor pipeline</button>' : ''}
+      ${roleCan(role, 'opportunities') && enabledModules.grants ? '<button type="button" class="button secondary" data-jump="grants">Open grant pipeline</button>' : ''}
       ${roleCan(role, 'imports') ? '<button type="button" class="button secondary" data-jump="imports">Open imports</button>' : ''}
       ${roleCan(role, 'impact_finance') ? '<a class="button secondary" href="finance-impact.html">Impact finance queue</a>' : ''}
       ${roleCan(role, 'impact_donor_staff') ? '<a class="button secondary" href="donor-impact.html">Impact donor receipts</a>' : ''}

@@ -53,6 +53,7 @@ declare
     'product_name', 'Campaign Control Center',
     'campaign_title', 'Builder room campaign',
     'campaign_tagline', 'Fund the next builder.',
+    'modules', jsonb_build_object('sponsors', true, 'grants', false),
     'theme', jsonb_build_object('primary', '#ED1C24', 'accent', '#33D6C5', 'background', '#071725'),
     'assets', jsonb_build_object(
       'logo_path', 'org_hacker_dojo/00000000-0000-0000-0000-000000000101/logo.png',
@@ -61,12 +62,21 @@ declare
     )
   );
   v_bad_config jsonb := jsonb_set(v_config, '{assets,logo_path}', to_jsonb('org_config_other/00000000-0000-0000-0000-000000000101/logo.png'::text));
+  v_bad_modules jsonb := jsonb_set(v_config, '{modules,grants}', to_jsonb('yes'::text));
   v_draft public.client_config_versions;
   v_second public.client_config_versions;
   v_published public.client_config_versions;
   v_rollback public.client_config_versions;
 begin
   if (select count(*) from public.client_assets) <> 2 then raise exception 'client member cannot read asset metadata'; end if;
+
+  begin
+    perform public.save_client_config_draft('org_hacker_dojo', v_bad_modules, 'Draft with invalid module configuration');
+    raise exception 'invalid module configuration unexpectedly accepted';
+  exception when others then
+    if sqlerrm = 'invalid module configuration unexpectedly accepted' then raise; end if;
+    if sqlerrm not like '%invalid_client_modules%' then raise; end if;
+  end;
 
   begin
     insert into storage.objects(bucket_id, name, owner_id)
@@ -103,6 +113,7 @@ begin
   v_published := public.publish_client_config(v_draft.id, 'Publish governed config');
   if v_published.state <> 'published' or v_published.published_by <> auth.uid() then raise exception 'draft was not published by director'; end if;
   if (public.get_public_client_config('hacker-dojo')->>'version')::integer <> v_published.version then raise exception 'published config not visible publicly'; end if;
+  if (public.get_public_client_config('hacker-dojo')#>>'{config,modules,grants}')::boolean then raise exception 'disabled grant module not preserved publicly'; end if;
 
   begin
     perform public.publish_client_config(v_published.id, 'Republish already published config');
