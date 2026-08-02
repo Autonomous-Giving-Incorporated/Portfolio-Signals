@@ -54,6 +54,8 @@ GitHub Pages receives only the public Supabase URL and anonymous key in generate
 7. Review the version history, then publish the intended draft.
 8. If required, roll back from a historical version. The system creates a new published version and preserves the complete audit trail.
 
+The master administrator completes onboarding from **Platform admin** only after the client has an active director, one published valid configuration, and at least one enabled fundraising module. Activation is MFA-gated, rationale-bound, auditable, and may only transition a client from `provisioning` to `active` once.
+
 ## Acceptance boundary
 
 Completion requires:

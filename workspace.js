@@ -390,8 +390,8 @@ async function mountPlatformAdmin() {
   content.innerHTML = `
     <div class="workspace-toolbar"><div><strong>A.G.I. platform administration</strong><span>${data.length} clients</span></div></div>
     <div class="table-wrap"><table class="workspace-table">
-      <thead><tr><th>Client</th><th>Identifier</th><th>State</th><th>Reference</th></tr></thead>
-      <tbody>${data.map(client => `<tr><td>${escapeHtml(client.display_name)}<small>${escapeHtml(client.slug)}</small></td><td>${escapeHtml(client.id)}</td><td>${escapeHtml(client.state)}</td><td>${client.reference_tenant ? 'yes' : 'no'}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Client</th><th>Identifier</th><th>State</th><th>Reference</th><th>Onboarding</th></tr></thead>
+      <tbody>${data.map(client => `<tr><td>${escapeHtml(client.display_name)}<small>${escapeHtml(client.slug)}</small></td><td>${escapeHtml(client.id)}</td><td>${escapeHtml(client.state)}</td><td>${client.reference_tenant ? 'yes' : 'no'}</td><td>${client.state === 'provisioning' ? `<button class="button secondary" type="button" data-activate-client="${escapeHtml(client.id)}">Activate</button>` : 'complete'}</td></tr>`).join('')}</tbody>
     </table></div>
     <form id="provisionClientForm" class="control-grid">
       <label>Client ID<input name="clientId" required pattern="org_[a-z0-9_]+" placeholder="org_example"></label>
@@ -401,7 +401,24 @@ async function mountPlatformAdmin() {
       <label>Rationale<input name="rationale" required minlength="12"></label>
       <button class="button" type="submit">Provision client</button>
     </form>
-    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. It does not grant the master administrator access to client-private records.</p>`;
+    <label>Activation rationale<input id="activationRationale" minlength="12" placeholder="Confirm published config and enabled modules"></label>
+    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>`;
+
+  content.querySelectorAll('[data-activate-client]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#activationRationale').value.trim();
+      const { error: activationError } = await activeClient.rpc('activate_client', {
+        p_client_id: button.dataset.activateClient,
+        p_rationale: rationale
+      });
+      if (activationError) {
+        content.querySelector('#platformMessage').textContent = activationError.message;
+        return;
+      }
+      clearWorkspaceSessionCache();
+      await mountPlatformAdmin();
+    });
+  });
 
   content.querySelector('#provisionClientForm').addEventListener('submit', async event => {
     event.preventDefault();
