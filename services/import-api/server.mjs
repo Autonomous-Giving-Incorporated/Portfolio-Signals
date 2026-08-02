@@ -154,10 +154,12 @@ export function createImportApi({ supabaseUrl, serviceRoleKey, fetchImpl = fetch
     const canonical = JSON.stringify(body.rows);
     const computed = crypto.createHash('sha256').update(canonical).digest('hex');
     const sourceName = body.source_filename || body.source_name || 'native-workbook.xlsx';
+    const clientId = body.client_id || 'org_hacker_dojo';
     const storagePath = body.storage_object_path
-      || `quarantine/${body.source_sha256}/${sourceName}`;
+      || `${clientId}/quarantine/${body.source_sha256}/${sourceName}`;
 
     const batchPayload = {
+      client_id: clientId,
       source_name: sourceName,
       source_sha256: body.source_sha256,
       source_received_at: body.source_received_at || new Date().toISOString(),

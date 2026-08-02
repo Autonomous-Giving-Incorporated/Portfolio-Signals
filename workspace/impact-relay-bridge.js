@@ -9,7 +9,7 @@ import {
   clearWorkspaceSessionCache
 } from './session.js';
 
-/** Hacker-Dojo campaign role → Impact Relay role names (must match library map). */
+/** Display-only role map. Production authority comes from the signed JWT. */
 export const CAMPAIGN_TO_IMPACT_ROLES = {
   director: ['tenant_admin', 'finance_approver'],
   campaign_lead: ['finance_approver', 'finance_reviewer'],
@@ -55,15 +55,10 @@ export function impactRelayApiBase() {
  * Build fetch headers for Impact Relay after Supabase auth.
  * Falls back to fixture pilot email when no session (local file open).
  */
-export function impactRelayHeaders({ email, role, subject, displayName, fixtureFallback = true } = {}) {
+export function impactRelayHeaders({ accessToken, fixtureFallback = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (email && role) {
-    headers['Authorization'] = `Bearer host:${email}`;
-    headers['X-Impact-Email'] = email;
-    headers['X-HD-Campaign-Role'] = role;
-    headers['X-Impact-Roles'] = (CAMPAIGN_TO_IMPACT_ROLES[role] || []).join(',');
-    if (subject) headers['X-Impact-Subject'] = subject;
-    if (displayName) headers['X-Impact-Display-Name'] = displayName;
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
     return headers;
   }
   if (fixtureFallback) {
@@ -128,10 +123,7 @@ export async function loadImpactRelaySession({ requireFinance = false, requireSt
     session: sessionData.session,
     supabase,
     headers: impactRelayHeaders({
-      email,
-      role: profile.role,
-      subject: sessionData.session.user.id,
-      displayName: profile.display_name || email,
+      accessToken: sessionData.session.access_token,
       fixtureFallback: false
     })
   };

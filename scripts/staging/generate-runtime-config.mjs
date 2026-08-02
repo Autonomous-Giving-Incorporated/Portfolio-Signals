@@ -16,7 +16,8 @@ const runtimeConfig = [
   '// Contains only browser-public Supabase configuration. Never add service-role credentials.',
   'window.HACKER_DOJO_CONFIG = {',
   `  supabaseUrl: ${JSON.stringify(supabaseUrl)},`,
-  `  supabaseAnonKey: ${JSON.stringify(supabaseAnonKey)}`,
+  `  supabaseAnonKey: ${JSON.stringify(supabaseAnonKey)},`,
+  '  defaultClientSlug: "hacker-dojo"',
   '};',
   '',
 ].join('\n');

@@ -31,19 +31,22 @@ python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --por
 | Mode | When | How |
 |------|------|-----|
 | **Fixture** | No `runtime-config.js` | Pilot email mapped in Impact Relay |
-| **Supabase** | `runtime-config.js` present | OTP login → profile.role → Impact Relay headers |
+| **Supabase** | `runtime-config.js` present | OTP login → short-lived Supabase JWT → Impact Relay JWKS validation |
 
 Shared bridge: `workspace/impact-relay-bridge.js`
 
-### Headers sent to Impact Relay (Supabase mode)
+### Authorization sent to Impact Relay (Supabase mode)
 
-| Header | Source |
-|--------|--------|
-| `X-Impact-Email` | `session.user.email` |
-| `X-HD-Campaign-Role` | `profiles.role` |
-| `X-Impact-Roles` | mapped IR roles (comma-separated) |
-| `X-Impact-Subject` | Supabase user id |
-| `Authorization` | `Bearer host:{email}` |
+The browser sends only `Authorization: Bearer <session.access_token>`. It does not
+send role, tenant, subject, or email authority headers. Supabase signs active
+tenant memberships into the `client_memberships` claim through
+`public.agi_custom_access_token_hook`. Impact Relay validates signature, expiry,
+issuer, and audience against Supabase JWKS, then selects the membership matching
+its configured `tenant_id`.
+
+Enable the hook in the Supabase dashboard under Authentication → Hooks → Custom
+Access Token and select `public.agi_custom_access_token_hook`. Existing sessions
+must be refreshed after membership changes before the new claim is present.
 
 ## Role mapping (campaign ↔ Impact Relay)
 

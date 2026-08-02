@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: local-supabase-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   local-acceptance:
     runs-on: ubuntu-latest
@@ -92,6 +96,14 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_policy_matrix.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/storage_matrix.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/006_document_access_audit.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/007_agi_tenant_foundation.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/008_agi_operational_isolation.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/009_agi_workspace_context.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/010_agi_client_configuration.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/011_agi_client_onboarding.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/012_agi_two_person_approvals.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/013_agi_impact_relay_jwt.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
 
       - name: Reject committed sensitive exports
         run: |

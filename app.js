@@ -27,10 +27,13 @@ if (header && headerCopy) {
   `;
   header.prepend(identity);
 
-  const eyebrow = headerCopy.querySelector('.eyebrow');
-  const title = headerCopy.querySelector('h1');
-  if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
-  if (title) title.textContent = 'Campaign Control Center';
+  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html');
+  if (isOverview) {
+    const eyebrow = headerCopy.querySelector('.eyebrow');
+    const title = headerCopy.querySelector('h1');
+    if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
+    if (title) title.textContent = 'Campaign Control Center';
+  }
 }
 
 const nav = document.querySelector('.primary-nav');

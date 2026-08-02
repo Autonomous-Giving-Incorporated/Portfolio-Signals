@@ -154,62 +154,10 @@
         <p>Public fit does not equal an active relationship. Every opportunity remains evidence-bound.</p>
       </div>
 
-      <div class="tabs" role="tablist" aria-label="Pipelines">
-        <button class="tab active" data-tab="sponsors" role="tab">Sponsors</button>
-        <button class="tab" data-tab="grants" role="tab">Grants</button>
-        <button class="tab" data-tab="members" role="tab">Member segments</button>
-      </div>
-
-      <div id="sponsors" class="tab-panel active" role="tabpanel">
-        <div class="table-toolbar">
-          <label>Filter <input id="sponsorFilter" type="search" placeholder="Search company, sector, priority" /></label>
-          <span>20 seeded candidates</span>
-        </div>
-        <div class="table-wrap">
-          <table id="sponsorTable">
-            <thead><tr><th>Company</th><th>Sector</th><th>Stage</th><th>Priority</th><th>Recommended ask</th><th>Control</th></tr></thead>
-            <tbody>
-              <tr><td>Google / Google.org</td><td>AI, philanthropy</td><td>Identified</td><td>P0</td><td>AI skills and workforce partnership</td><td>Route unverified</td></tr>
-              <tr><td>Microsoft</td><td>Cloud, nonprofit technology</td><td>Historical relationship</td><td>P0</td><td>AI capacity, cloud, reactivation</td><td>Owner unknown</td></tr>
-              <tr><td>NVIDIA</td><td>AI hardware, STEM</td><td>Identified</td><td>P0</td><td>Physical-AI lab and compute</td><td>Open route unverified</td></tr>
-              <tr><td>Anthropic</td><td>Responsible AI</td><td>Identified</td><td>P0</td><td>Nonprofit AI capacity</td><td>Host eligibility unknown</td></tr>
-              <tr><td>Applied Intuition</td><td>Autonomy software</td><td>Prospecting</td><td>P0</td><td>Simulation and physical-AI programs</td><td>Duplicate source rows</td></tr>
-              <tr><td>Groq</td><td>AI compute</td><td>Contacted</td><td>P0</td><td>Compute and AI workshops</td><td>No response recorded</td></tr>
-              <tr><td>Moveworks</td><td>Enterprise AI</td><td>Contacted</td><td>P0</td><td>AI workforce cohort</td><td>No response recorded</td></tr>
-              <tr><td>Waymo</td><td>Autonomous mobility</td><td>Contacted</td><td>P1</td><td>Workforce and lab sponsorship</td><td>Needs requalification</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="grants" class="tab-panel" role="tabpanel" hidden>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Opportunity</th><th>Decision</th><th>Timing</th><th>Primary gate</th></tr></thead>
-            <tbody>
-              <tr><td>Microsoft Elevate</td><td><span class="status-dot go">GO</span></td><td>Immediate</td><td>Named project owner</td></tr>
-              <tr><td>Workforce Accelerator Fund 14</td><td><span class="status-dot conditional">CONDITIONAL</span></td><td>Aug. 27, 2026</td><td>Quantum/fusion consortium and 1:1 match</td></tr>
-              <tr><td>Mountain View Facade Grant</td><td><span class="status-dot conditional">CONDITIONAL</span></td><td>Until depleted</td><td>Property and landlord eligibility</td></tr>
-              <tr><td>NSF STEM K-12</td><td><span class="status-dot hold">PARTNER ROUTE</span></td><td>Anytime</td><td>Accredited higher-education lead</td></tr>
-              <tr><td>Google.org AI Opportunity Fund</td><td><span class="status-dot hold">PARTNER ROUTE</span></td><td>Ongoing mapping</td><td>Verified intermediary route</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="members" class="tab-panel" role="tabpanel" hidden>
-        <div class="segment-grid">
-          <article><strong>5,212</strong><span>Deduplicated member IDs</span></article>
-          <article><strong>1,862</strong><span>Bay Area records in normalized extract</span></article>
-          <article><strong>62</strong><span>Organizer/co-organizer labels at source level</span></article>
-          <article><strong>723</strong><span>Private-relay occurrences at source level</span></article>
-          <article><strong>70</strong><span>High-engagement records, score ≥ 60</span></article>
-          <article><strong>0</strong><span>Authorized outreach-ready records</span></article>
-        </div>
-        <div class="privacy-callout">
-          <strong>Restricted data boundary</strong>
-          <p>The GitHub Pages site must never contain the raw member registry, personal emails, addresses, or attendance-level PII. Those records belong in a separately authenticated system.</p>
-        </div>
+      <div class="pillar-grid route-grid">
+        <a class="panel route-card" href="sponsors.html" data-agi-module="sponsors"><strong>Sponsors</strong><span>Candidate stages, priorities, asks, and controls</span></a>
+        <a class="panel route-card" href="grants.html" data-agi-module="grants"><strong>Grants</strong><span>Eligibility decisions, timing, and primary gates</span></a>
+        <a class="panel route-card" href="members.html"><strong>Member segments</strong><span>Aggregate engagement evidence and privacy boundaries</span></a>
       </div>
     </section>
 
@@ -283,6 +231,8 @@
     <span>Advisory state · No outreach authority granted</span>
   </footer>
 
+  <script src="runtime-config.js"></script>
   <script src="app.js"></script>
+  <script type="module" src="public-client-config.js"></script>
 </body>
 </html>

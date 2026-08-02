@@ -292,6 +292,10 @@ reset role;
 update public.profiles
    set role = 'board_viewer'
  where id = '00000000-0000-0000-0000-000000000105';
+update public.client_memberships
+   set role = 'board_viewer'
+ where client_id = 'org_hacker_dojo'
+   and user_id = '00000000-0000-0000-0000-000000000105';
 
 set local role authenticated;
 select public.test_set_user('00000000-0000-0000-0000-000000000105');
@@ -300,13 +304,16 @@ begin
   if public.current_role() is distinct from 'board_viewer'::public.app_role then
     raise exception 'role revocation was not reflected in the active session';
   end if;
+  if public.current_client_role('org_hacker_dojo') is distinct from 'board_viewer'::public.app_role then
+    raise exception 'client role revocation was not reflected in the active session';
+  end if;
   begin
     perform public.create_import_batch(
       jsonb_build_object(
         'source_name', 'revoked-role.xlsx',
         'source_sha256', repeat('f', 64),
         'schema_version', 'synthetic-v1',
-        'storage_object_path', 'quarantine/revoked-role.xlsx'
+        'storage_object_path', 'org_hacker_dojo/quarantine/revoked-role.xlsx'
       ),
       '[]'::jsonb
     );

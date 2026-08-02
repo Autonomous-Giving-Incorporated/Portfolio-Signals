@@ -58,6 +58,16 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 | Data steward | Imports, deduplication, consent, suppression, provenance |
 | Auditor | Read-only audit log and control verification |
 
+Roles are assigned per A.G.I. client through `client_memberships`. The legacy profile role is retained only for compatibility and MFA policy evaluation. Workspace authorization and navigation use the selected client's live membership role.
+
+## Client and platform administration
+
+- `get_workspace_context()` returns the active profile, master-admin flag, and only the client shells the caller may enumerate.
+- The browser stores only the selected public client identifier. Every operational query also filters by that `client_id`; database RLS remains authoritative.
+- Client directors manage existing authenticated profiles through `set_client_membership()`. Changes are audited and cannot remove the final active director.
+- Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
+- Master-admin and privileged client mutations require an active MFA-enforced profile.
+
 ## Director workflow
 
 1. Sign in with MFA.

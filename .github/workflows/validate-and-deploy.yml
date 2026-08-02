@@ -45,7 +45,13 @@ jobs:
             exit 1
           fi
       - name: Verify static entry points
-        run: test -f index.html && test -f styles.css && test -f app.js
+        run: node scripts/validate-static-routes.mjs
+      - name: Install browser acceptance dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run two-tenant browser and accessibility acceptance
+        run: npm run test:browser
 
   deploy:
     if: github.event_name != 'pull_request'

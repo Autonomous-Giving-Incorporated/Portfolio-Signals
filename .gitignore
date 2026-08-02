@@ -8,6 +8,8 @@ runtime-config.js
 
 # Dependencies and local tooling
 node_modules/
+test-results/
+playwright-report/
 .supabase/
 supabase/.branches/
 supabase/.temp/

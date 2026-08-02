@@ -13,6 +13,21 @@ begin
   perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
+create or replace function public.test_import_row_was_promoted(
+  test_row_id bigint,
+  test_constituent_id uuid
+) returns boolean
+language sql security definer set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.import_staging_rows
+    where id = test_row_id
+      and state = 'promoted'
+      and promoted_constituent_id = test_constituent_id
+  );
+$$;
+
 begin;
 
 -- Structural quarantine contract.
@@ -220,10 +235,7 @@ begin
   if v_constituent is null then
     raise exception 'eligible confirmed row did not promote';
   end if;
-  if not exists (
-    select 1 from public.import_staging_rows
-    where id = v_id and state = 'promoted' and promoted_constituent_id = v_constituent
-  ) then
+  if not public.test_import_row_was_promoted(v_id, v_constituent) then
     raise exception 'eligible promotion did not mark row promoted';
   end if;
 end $$;

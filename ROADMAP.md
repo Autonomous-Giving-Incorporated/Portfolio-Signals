@@ -1,8 +1,10 @@
-# Hacker Dojo Campaign Intelligence — Production Roadmap
+# A.G.I. Fund-Intel — Product and Hacker Dojo Pilot Roadmap
 
 ## Objective
 
-Deliver a governed campaign operating system for Hacker Dojo without placing donor, member, attendance, relationship, consent, suppression, or private-document data in GitHub.
+Deliver Fund-Intel as the reusable frontend and client-administration component of **Autonomously Giving Incorporated (A.G.I.)**, while preserving Hacker Dojo as the canonical reference tenant and keeping donor, member, attendance, relationship, consent, suppression, and private-document data out of GitHub.
+
+The cross-repository sequence is AGI-001 through AGI-009 in [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md). The HD-OI phases below remain the Hacker Dojo pilot and evidence track.
 
 The operating target is a **$420K minimum campaign** with a separately governed **$2M transformation path** and an Aug. 21, 2026 SupperHappyFundHouse campaign event.
 
@@ -52,6 +54,8 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Public campaign surface
 
+- dedicated GitHub Pages routes for sponsor, grant, and aggregate member-segment intelligence;
+- reusable accessible dropdown filters, range explorers, and evidence-bound tooltips;
 - director-facing campaign overview;
 - $420K minimum and $2M stretch framing;
 - proposed funding ladder;
@@ -64,6 +68,10 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Authenticated workspace foundation
 
+- authoritative per-session A.G.I. client context and client switcher;
+- tenant-filtered dashboard, decision, pipeline, claim, and audit queries;
+- audited director membership administration with last-director protection;
+- MFA-gated master administration and client provisioning without implicit private-data access;
 - six application roles: director, campaign lead, development, board viewer, data steward, and auditor;
 - active-profile and MFA-ready authentication boundary;
 - role-aware application navigation;
@@ -74,6 +82,17 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 - append-only audit-event model;
 - private opportunity notes and document metadata;
 - row-level-security policies.
+
+### Client customization and publication
+
+- immutable tenant configuration snapshots with explicit draft, publish, archive, and rollback transitions;
+- director-only brand and campaign-content controls with live preview and rationale gates;
+- governed tenant assets with MIME, size, ownership, and quota enforcement;
+- privacy-safe public configuration projection selected by client slug;
+- static Hacker Dojo fallback when runtime configuration is unavailable;
+- complete version history and tenant audit events.
+- onboarding-controlled sponsor and grant modules with disabled-route and workspace navigation gates.
+- onboarding-configurable one- or two-person decision approvals with distinct approvers and immutable evidence.
 
 ### Governed import foundation
 
