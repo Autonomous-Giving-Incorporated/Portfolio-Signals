@@ -5,14 +5,41 @@ differ, but their visual and interaction grammar must remain consistent.
 
 ## Shared primitives
 
-- Neutral canvas: `#f5f7fb`, white surfaces, `#eef2f8` secondary surfaces.
-- Ink: `#152033`; muted copy: `#566376`; rules: `#d8e0eb`.
-- Suite blue: `#16325c`; secondary blue: `#255f85`.
-- Tenant accent may override `--agi-accent`. Hacker Dojo uses its red brand layer.
+The suite identity is **Autonomously Giving Incorporated**. Canonical values live
+in `styles.css` `:root`; this document describes them, it does not duplicate them
+as a second source of truth.
+
+- Neutral canvas: `#f7f8fa`, white surfaces, `#e6e9ec` secondary surfaces.
+- Ink: `#0e1116`; secondary ink `#1f232b`; muted copy: `#566376`; rules: `#d8dde4`.
+- Brand green: `#2e7d6b` (trust, stability, growth); secondary green `#a5cbb8` (clarity, balance).
+- Accent amber: `#e6b23c` (optimism, action).
+- Tenant accent may override `--agi-accent`. Hacker Dojo uses its red brand layer (`brand.css`).
 - Semantic colors are stable across repos: success `#19734a`, warning `#755000`, danger `#a83232`.
 - Tenant accents must retain WCAG AA contrast in text, controls, focus rings, and status treatments.
 - Controls use 10px corners, cards use 18px corners, compact statuses may use pills.
-- The system font stack is the default. Mono is reserved for identifiers, receipts, and tabular evidence.
+- Type is **Inter** for UI, headings, and body; **Space Grotesk** (`--agi-font-accent`)
+  for accents, labels, and supporting elements. Mono stays reserved for identifiers,
+  receipts, and tabular evidence.
+
+### Fill-only colors
+
+Two brand colors are **fills, not foregrounds**, and the distinction is load-bearing:
+
+| Token | Value | On white | Use |
+|---|---|---|---|
+| `--agi-accent` | `#e6b23c` | 1.94:1 | fills and bars only; pair with ink on top (9.7:1) |
+| `--agi-brand-2` | `#a5cbb8` | 1.77:1 | tints, bar segments, hover washes |
+| `--agi-accent-ink` | `#886311` | 5.5:1 | text, icons, and thin strokes that need the amber hue |
+| `--agi-brand` | `#2e7d6b` | 4.9:1 | text-safe brand green |
+
+Amber as small text or a 1px border fails AA outright. Use `--accent-ink`
+(which resolves to the brand amber in dark mode, where it clears 8:1) instead.
+
+## Verifying a palette change
+
+Any change to these values must be re-checked for contrast before merge —
+foreground pairs at 4.5:1, and UI/large text at 3:1. A swap that only edits
+`:root` will silently break every rule that uses a token as `color:`.
 
 ## Interaction rules
 

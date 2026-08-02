@@ -1,22 +1,33 @@
+/* Autonomously Giving Incorporated — suite identity.
+ * Canonical source for the --agi-* contract in docs/AGI-DESIGN-SYSTEM.md.
+ * Tenants override --agi-accent (and their own layer, e.g. brand.css for
+ * Hacker Dojo red) via client theme config; they do not edit these defaults. */
 :root {
   color-scheme: light;
-  --agi-bg: #f5f7fb;
+  --agi-bg: #f7f8fa;
   --agi-surface: #ffffff;
-  --agi-surface-alt: #eef2f8;
-  --agi-text: #152033;
+  --agi-surface-alt: #e6e9ec;
+  --agi-text: #0e1116;
+  --agi-text-2: #1f232b;
   --agi-muted: #566376;
-  --agi-line: #d8e0eb;
-  --agi-brand: #16325c;
-  --agi-brand-2: #255f85;
-  --agi-accent: #a84328;
+  --agi-line: #d8dde4;
+  --agi-brand: #2e7d6b;
+  --agi-brand-2: #a5cbb8;
+  --agi-accent: #e6b23c;
+  /* Fill-only. #e6b23c is 1.94:1 on white — never use it for text or thin
+   * strokes on a light surface. --agi-accent-ink keeps the 42deg brand hue
+   * at AA (5.5:1) for those cases. */
+  --agi-accent-ink: #886311;
   --agi-success: #19734a;
   --agi-warning: #755000;
   --agi-danger: #a83232;
-  --agi-shadow: 0 18px 50px rgba(21, 32, 51, 0.08);
+  --agi-shadow: 0 18px 50px rgba(14, 17, 22, 0.08);
   --agi-radius-sm: 10px;
   --agi-radius: 18px;
   --agi-radius-pill: 999px;
   --agi-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Geometric/technical companion — accents, labels, and supporting elements. */
+  --agi-font-accent: "Space Grotesk", var(--agi-font);
   --bg: var(--agi-bg);
   --surface: var(--agi-surface);
   --surface-alt: var(--agi-surface-alt);
@@ -26,25 +37,31 @@
   --brand: var(--agi-brand);
   --brand-2: var(--agi-brand-2);
   --accent: var(--agi-accent);
+  --accent-ink: var(--agi-accent-ink);
   --success: var(--agi-success);
   --warning: var(--agi-warning);
   --danger: var(--agi-danger);
   --shadow: var(--agi-shadow);
   --radius: var(--agi-radius);
+  --text-2: var(--agi-text-2);
+  --font-accent: var(--agi-font-accent);
 }
 
+/* Dark uses the brand's own near-blacks (0E1116 / 1F232B). Brand green is
+ * lightened for AA contrast on dark surfaces; the amber accent already clears it. */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0d1522;
-  --surface: #131e2e;
-  --surface-alt: #172538;
-  --text: #edf4ff;
-  --muted: #a9b7c9;
-  --line: #2a3a50;
-  --brand: #86b7dd;
-  --brand-2: #4a91c4;
-  --accent: #f08a68;
-  --shadow: 0 20px 55px rgba(0, 0, 0, 0.28);
+  --bg: #0e1116;
+  --surface: #1f232b;
+  --surface-alt: #272c36;
+  --text: #f7f8fa;
+  --muted: #a8b2bd;
+  --line: #333944;
+  --brand: #7fc0ad;
+  --brand-2: #a5cbb8;
+  --accent: #e6b23c;
+  --accent-ink: #e6b23c;
+  --shadow: 0 20px 55px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; }
@@ -73,7 +90,7 @@ button { cursor: pointer; }
 }
 .site-header h1 { margin: .15rem 0 .6rem; font-size: clamp(2.4rem, 6vw, 5.4rem); line-height: .98; max-width: 980px; letter-spacing: -.055em; }
 .lede { max-width: 780px; color: var(--muted); font-size: 1.08rem; }
-.eyebrow { text-transform: uppercase; letter-spacing: .18em; font-weight: 800; font-size: .75rem; color: var(--accent); margin: 0 0 .4rem; }
+.eyebrow { font-family: var(--font-accent); text-transform: uppercase; letter-spacing: .18em; font-weight: 800; font-size: .75rem; color: var(--accent-ink); margin: 0 0 .4rem; }
 .header-actions { display: flex; align-items: flex-start; gap: .75rem; flex-wrap: wrap; justify-content: flex-end; }
 
 .primary-nav {
@@ -100,7 +117,7 @@ button { cursor: pointer; }
 }
 .metric-card { padding: 1.4rem; }
 .metric-card strong { display: block; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1; margin: .45rem 0 .55rem; }
-.metric-label { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; color: var(--muted); }
+.metric-label { font-family: var(--font-accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; color: var(--muted); }
 .metric-card small { color: var(--muted); }
 
 .two-column { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1rem; }
@@ -108,27 +125,27 @@ button { cursor: pointer; }
 .panel-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
 .panel-heading h3 { margin: 0; font-size: 1.35rem; }
 blockquote { margin: 1.3rem 0 .5rem; font-size: clamp(1.6rem, 3vw, 2.7rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 800; }
-.cta-line { color: var(--accent); font-weight: 800; }
+.cta-line { color: var(--accent-ink); font-weight: 800; }
 .pillar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-top: 1.5rem; }
 .pillar-grid div { padding: 1rem; background: var(--surface-alt); border-radius: 12px; }
 .pillar-grid strong, .pillar-grid span { display: block; }
 .pillar-grid span { color: var(--muted); font-size: .92rem; margin-top: .25rem; }
 
-.status-pill, .tag, .status-dot, .gate { display: inline-flex; align-items: center; border-radius: 999px; font-weight: 800; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
+.status-pill, .tag, .status-dot, .gate { font-family: var(--font-accent); display: inline-flex; align-items: center; border-radius: 999px; font-weight: 800; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
 .status-pill { padding: .65rem .9rem; }
 .status-blocked { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
-.tag { padding: .4rem .65rem; background: color-mix(in srgb, var(--brand-2) 13%, transparent); color: var(--brand-2); }
+.tag { padding: .4rem .65rem; background: color-mix(in srgb, var(--brand-2) 13%, transparent); color: var(--brand); }
 .tag.warning { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning); }
 .status-dot { padding: .35rem .55rem; }
 .go { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
 .conditional { color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
-.hold { color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
+.hold { color: var(--brand); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
 
 .button, .decision-button, .tab {
   border: 1px solid var(--line); background: var(--brand); color: white; border-radius: 999px; padding: .7rem 1rem; font-weight: 800;
 }
 .button.secondary { background: transparent; color: var(--text); }
-.decision-button { padding: .45rem .7rem; font-size: .8rem; background: transparent; color: var(--brand-2); }
+.decision-button { padding: .45rem .7rem; font-size: .8rem; background: transparent; color: var(--brand); }
 .decision-list { margin: 0; padding-left: 1.2rem; }
 .decision-list li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .9rem 0; border-bottom: 1px solid var(--line); }
 .decision-list li:last-child { border-bottom: 0; }
@@ -136,7 +153,7 @@ blockquote { margin: 1.3rem 0 .5rem; font-size: clamp(1.6rem, 3vw, 2.7rem); line
 .funding-ladder { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .funding-ladder article { padding: 1.4rem; position: relative; overflow: hidden; }
 .funding-ladder article::after { content: ""; position: absolute; inset: auto -30px -30px auto; width: 100px; height: 100px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.ladder-value { font-size: 2rem; font-weight: 900; color: var(--accent); }
+.ladder-value { font-size: 2rem; font-weight: 900; color: var(--accent-ink); }
 .funding-ladder h3 { margin: .35rem 0; }
 .funding-ladder p { color: var(--muted); }
 .gate { padding: .35rem .55rem; background: var(--surface-alt); color: var(--muted); }
@@ -170,18 +187,18 @@ th { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-s
 .control-grid input { margin-right: .6rem; }
 .risk-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .risk-grid article { padding: 1.2rem; }
-.risk-grid span { color: var(--accent); font-weight: 900; font-size: .75rem; text-transform: uppercase; }
+.risk-grid span { color: var(--accent-ink); font-weight: 900; font-size: .75rem; text-transform: uppercase; }
 .risk-grid strong { display: block; margin: .35rem 0; }
 .risk-grid p { color: var(--muted); margin-bottom: 0; }
 
 .resource-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .resource-card { padding: 1.25rem; text-decoration: none; transition: transform .2s ease, border-color .2s ease; }
-.resource-card:hover { transform: translateY(-4px); border-color: var(--brand-2); }
+.resource-card:hover { transform: translateY(-4px); border-color: var(--brand); }
 .resource-card strong, .resource-card span { display: block; }
 .resource-card span { color: var(--muted); margin-top: .35rem; }
 .next-run { padding: 1.4rem; margin-top: 1rem; }
 .next-run span, .next-run strong { display: block; }
-.next-run span { color: var(--accent); font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.next-run span { color: var(--accent-ink); font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
 .next-run strong { font-size: 1.5rem; margin: .35rem 0; }
 .next-run p { color: var(--muted); margin-bottom: 0; }
 
@@ -212,12 +229,12 @@ dialog form { padding: 1.5rem; }
 }
 .decision-workspace { display: grid; gap: 1rem; }
 .decision-card { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-alt); }
-.decision-key { color: var(--accent); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.decision-key { color: var(--accent-ink); font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
 .decision-state { justify-self: start; padding: .25rem .55rem; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .78rem; }
 .decision-actions, .row-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
 .authorization { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
 .authorization-not_reviewed { color: var(--muted); }
-.authorization-approved { color: var(--accent); }
+.authorization-approved { color: var(--accent-ink); }
 .authorization-blocked, .authorization-suppressed { color: var(--danger); }
 .note.error, #actionMessage.error { color: var(--danger); font-style: normal; }
 .auth-form { display: grid; gap: .8rem; max-width: 420px; }
@@ -245,7 +262,7 @@ dialog form { padding: 1.5rem; }
 .route-card:hover,
 .route-card:focus-visible {
   transform: translateY(-2px);
-  border-color: var(--accent);
+  border-color: var(--accent-ink);
 }
 
 .route-card strong { font-size: 1.15rem; }
@@ -254,7 +271,7 @@ select,
 input[type="range"] { width: 100%; }
 
 input[type="range"] {
-  accent-color: var(--accent);
+  accent-color: var(--accent-ink);
   margin-top: .65rem;
 }
 
