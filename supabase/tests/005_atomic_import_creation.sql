@@ -10,6 +10,38 @@ begin
   perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
+create or replace function public.test_atomic_batch_valid(test_batch_id uuid) returns boolean
+language sql security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.import_batches
+    where id = test_batch_id
+      and submitted_by = '00000000-0000-0000-0000-000000000105'
+      and row_count = 2
+      and state = 'received'
+  ) and (
+    select count(*) = 2 from public.import_staging_rows where batch_id = test_batch_id
+  );
+$$;
+
+create or replace function public.test_import_audit_exists(test_sha256 text) returns boolean
+language sql security definer set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.audit_log a
+    join public.import_batches b on b.id::text = a.entity_id
+    where a.action = 'import_batch_created'
+      and b.source_sha256 = test_sha256
+  );
+$$;
+
+create or replace function public.test_import_batch_hash_exists(test_sha256 text) returns boolean
+language sql security definer set search_path = public
+as $$
+  select exists (select 1 from public.import_batches where source_sha256 = test_sha256);
+$$;
+
 begin;
 set local role authenticated;
 
@@ -75,17 +107,8 @@ begin
   if (v_result->>'promotion_authorized')::boolean is not false then
     raise exception 'atomic import granted promotion authority';
   end if;
-  if not exists (
-    select 1 from public.import_batches
-    where id = v_batch_id
-      and submitted_by = '00000000-0000-0000-0000-000000000105'
-      and row_count = 2
-      and state = 'received'
-  ) then
+  if not public.test_atomic_batch_valid(v_batch_id) then
     raise exception 'atomic import batch missing or incorrect';
-  end if;
-  if (select count(*) from public.import_staging_rows where batch_id = v_batch_id) <> 2 then
-    raise exception 'atomic import staging rows missing';
   end if;
 end $$;
 
@@ -93,13 +116,7 @@ end $$;
 select public.test_set_user('00000000-0000-0000-0000-000000000101');
 do $$
 begin
-  if not exists (
-    select 1
-    from public.audit_log a
-    join public.import_batches b on b.id::text = a.entity_id
-    where a.action = 'import_batch_created'
-      and b.source_sha256 = repeat('d', 64)
-  ) then
+  if not public.test_import_audit_exists(repeat('d', 64)) then
     raise exception 'atomic import audit event missing';
   end if;
 end $$;
@@ -134,7 +151,7 @@ begin
     when unique_violation then null;
   end;
 
-  if exists (select 1 from public.import_batches where source_sha256 = repeat('e', 64)) then
+  if public.test_import_batch_hash_exists(repeat('e', 64)) then
     raise exception 'failed atomic import left an orphaned batch';
   end if;
 end $$;

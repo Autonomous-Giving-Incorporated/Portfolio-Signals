@@ -70,9 +70,13 @@ begin
   if exists (select 1 from public.claims where client_id = 'org_operational_isolation') then
     raise exception 'cross-client claim visible';
   end if;
-  if exists (select 1 from public.import_batches where client_id = 'org_operational_isolation') then
-    raise exception 'cross-client import batch visible';
-  end if;
+  begin
+    if exists (select 1 from public.import_batches where client_id = 'org_operational_isolation') then
+      raise exception 'cross-client import batch visible';
+    end if;
+  exception
+    when insufficient_privilege then null;
+  end;
 
   select id into v_other_row_id from agi_other_row_id;
 

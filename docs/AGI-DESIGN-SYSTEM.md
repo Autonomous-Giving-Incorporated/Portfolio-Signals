@@ -6,10 +6,11 @@ differ, but their visual and interaction grammar must remain consistent.
 ## Shared primitives
 
 - Neutral canvas: `#f5f7fb`, white surfaces, `#eef2f8` secondary surfaces.
-- Ink: `#152033`; muted copy: `#637083`; rules: `#d8e0eb`.
+- Ink: `#152033`; muted copy: `#566376`; rules: `#d8e0eb`.
 - Suite blue: `#16325c`; secondary blue: `#255f85`.
 - Tenant accent may override `--agi-accent`. Hacker Dojo uses its red brand layer.
-- Semantic colors are stable across repos: success `#19734a`, warning `#9a6700`, danger `#a83232`.
+- Semantic colors are stable across repos: success `#19734a`, warning `#755000`, danger `#a83232`.
+- Tenant accents must retain WCAG AA contrast in text, controls, focus rings, and status treatments.
 - Controls use 10px corners, cards use 18px corners, compact statuses may use pills.
 - The system font stack is the default. Mono is reserved for identifiers, receipts, and tabular evidence.
 
