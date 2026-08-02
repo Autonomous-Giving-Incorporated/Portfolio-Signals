@@ -69,8 +69,30 @@
   border-top: 1px solid var(--line);
   box-shadow: 0 8px 24px rgba(0,0,0,.04);
 }
-.primary-nav a:first-child { color: var(--hd-red); }
-.primary-nav a:hover { color: var(--hd-red); }
+.primary-nav a {
+  position: relative;
+  padding-block: .25rem;
+  transition: color .18s ease;
+}
+.primary-nav a:hover,
+.primary-nav a.is-active { color: var(--hd-red); }
+.primary-nav a.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -.6rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--hd-red);
+}
+.primary-nav a:focus-visible,
+.button:focus-visible,
+.decision-button:focus-visible,
+.tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--hd-red) 35%, transparent);
+  outline-offset: 3px;
+}
 
 .campaign-status-bar {
   display: grid;
@@ -125,6 +147,11 @@
 .footer-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem 1rem; text-align: right; }
 .footer-meta small { color: var(--muted); }
 
+@media (prefers-reduced-motion: reduce) {
+  .primary-nav a,
+  .resource-card { transition: none; }
+}
+
 @media (max-width: 800px) {
   .site-header {
     grid-template-columns: 1fr;
@@ -134,6 +161,7 @@
   .header-actions { justify-content: flex-start; }
   .campaign-status-bar { grid-template-columns: 1fr; }
   .brand-divider, .brand-product { display: none; }
+  .primary-nav a.is-active::after { bottom: -.35rem; }
   footer { align-items: flex-start; flex-direction: column; }
   .footer-meta { justify-content: flex-start; text-align: left; }
 }
