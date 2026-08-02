@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="assets/brand/hacker-dojo-icon.svg">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="brand.css">
+  <link rel="stylesheet" href="workspace-nav.css">
 </head>
 <body class="workspace-shell">
   <main id="workspaceRoot" aria-live="polite">
@@ -65,12 +66,13 @@
           <article class="metric-card"><span class="metric-label">Confirmed consent (not outreach auth)</span><strong id="authorizedCount">—</strong></article>
           <article class="metric-card"><span class="metric-label">Import exceptions</span><strong id="exceptionCount">—</strong></article>
         </div>
-        <div id="workspaceContent" class="panel"><p>Loading authorized workspace…</p></div>
+        <div id="workspaceContent" class="panel" aria-live="polite"><p>Loading authorized workspace…</p></div>
       </section>
     </section>
   </main>
   <script src="runtime-config.js"></script>
   <script type="module" src="workspace.js"></script>
+  <script type="module" src="workspace-nav.js"></script>
 </body>
-<!-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Brand continuity pass -->
+<!-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Workspace navigation hardening -->
 </html>
