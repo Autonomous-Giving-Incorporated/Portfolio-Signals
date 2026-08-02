@@ -1,4 +1,79 @@
 const root = document.documentElement;
+
+// Load the Hacker Dojo brand layer without coupling it to the base dashboard stylesheet.
+const brandStyles = document.createElement('link');
+brandStyles.rel = 'stylesheet';
+brandStyles.href = 'brand.css';
+document.head.appendChild(brandStyles);
+
+const favicon = document.createElement('link');
+favicon.rel = 'icon';
+favicon.type = 'image/svg+xml';
+favicon.href = 'assets/brand/hacker-dojo-icon.svg';
+document.head.appendChild(favicon);
+
+const header = document.querySelector('.site-header');
+const headerCopy = header?.querySelector(':scope > div:not(.header-actions)');
+if (header && headerCopy) {
+  headerCopy.classList.add('hero-copy');
+
+  const identity = document.createElement('div');
+  identity.className = 'brand-identity';
+  identity.innerHTML = `
+    <img class="brand-mark" src="assets/brand/hacker-dojo-icon.svg" alt="Hacker Dojo" width="64" height="64" />
+    <span class="brand-wordmark"><strong>HACKER</strong><strong>DOJO</strong></span>
+    <span class="brand-divider" aria-hidden="true"></span>
+    <span class="brand-product">Campaign Control Center</span>
+  `;
+  header.prepend(identity);
+
+  const eyebrow = headerCopy.querySelector('.eyebrow');
+  const title = headerCopy.querySelector('h1');
+  if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
+  if (title) title.textContent = 'Campaign Control Center';
+}
+
+const nav = document.querySelector('.primary-nav');
+if (nav) {
+  const statusBar = document.createElement('aside');
+  statusBar.className = 'campaign-status-bar';
+  statusBar.setAttribute('aria-label', 'Campaign status');
+  statusBar.innerHTML = `
+    <div class="status-event">
+      <span>Campaign event</span>
+      <strong>SupperHappyFundHouse</strong>
+      <small>August 21, 2026</small>
+    </div>
+    <div class="status-progress">
+      <span>Minimum campaign</span>
+      <strong>$420K · approval gate open</strong>
+      <div class="status-track" aria-hidden="true"><i style="width: 18%"></i></div>
+      <small>Illustrative readiness indicator, not funds raised</small>
+    </div>
+    <div class="status-progress">
+      <span>Transformation path</span>
+      <strong>$2M · board case required</strong>
+      <div class="status-track" aria-hidden="true"><i style="width: 8%"></i></div>
+      <small>Separate multi-year plan</small>
+    </div>
+  `;
+  nav.insertAdjacentElement('afterend', statusBar);
+}
+
+const footer = document.querySelector('footer');
+if (footer) {
+  footer.innerHTML = `
+    <div class="footer-brand">
+      <img src="assets/brand/hacker-dojo-icon.svg" alt="" width="38" height="38" />
+      <span>Hacker Dojo Campaign Control Center</span>
+    </div>
+    <div class="footer-meta">
+      <small>Powered by Neon Genie</small>
+      <small>Advisory state · No outreach authority granted</small>
+    </div>
+  `;
+}
+
 const themeToggle = document.getElementById('themeToggle');
 const storedTheme = localStorage.getItem('hd-theme');
 if (storedTheme) root.dataset.theme = storedTheme;
