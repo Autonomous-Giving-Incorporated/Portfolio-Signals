@@ -1,5 +1,5 @@
 {
-  "repository": "scrimshawlife-ctrl/Hacker-Dojo",
+  "repository": "scrimshawlife-ctrl/Fund-Intel",
   "commit": "152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4",
   "environment": "local",
   "executedAt": "2026-08-02T01:23:41Z",
@@ -79,20 +79,20 @@
   "evidence": [
     {
       "label": "Complete local acceptance",
-      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726851425",
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851425",
       "sha256": "16f997052536ff359d0b6d26de816508c2a23a9f7d751d192914d4b1c50dfccb"
     },
     {
       "label": "Pages deployment",
-      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726851423"
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851423"
     },
     {
       "label": "Current-main acceptance contract",
-      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726851434"
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851434"
     },
     {
       "label": "Local security contract",
-      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726851419"
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851419"
     }
   ]
 }
