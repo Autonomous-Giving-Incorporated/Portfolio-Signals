@@ -19,9 +19,9 @@ Historical attendance, membership, donor, sponsor, or relationship evidence does
 
 ## Current evidence boundary — HD-OI-041
 
-The current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The component evidence below is retained for provenance, but it must not be read as current-main hosted acceptance.
+The current `main` baseline is `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`.
 
-PR #44 (`e124375bfd60758df9857b03dfc171c9210b78b1`) completed all four pull-request workflows, including the disposable local acceptance suite. It remains pre-merge evidence only. Current `main` remains `NO_GO` pending exact-commit local execution after merge, hosted staging parity, browser smoke, and director acceptance.
+The exact-main disposable local acceptance suite passed (workflow `30726851425`), and Pages deployment passed (workflow `30726851423`). A read-only public portal smoke check passed without captured console errors. Current `main` remains `NO_GO` because the connected Supabase dashboard labels the project `Production`; hosted synthetic parity, authenticated browser smoke, and director acceptance are therefore blocked pending designation reconciliation.
 
 ## Historical component evidence — 2026-08-01
 
@@ -161,14 +161,14 @@ Repository progress in this phase:
 
 ```yaml
 staging_project_created: true  # ecxkhihlbrcwpavfoaoq
-staging_migrations_applied: NOT_RUN_FOR_CURRENT_MAIN
-staging_environment: NOT_RUN_FOR_CURRENT_MAIN
+staging_migrations_applied: BLOCKED_ENVIRONMENT_DESIGNATION
+staging_environment: BLOCKED_ENVIRONMENT_DESIGNATION
 production_environment: NOT_SEPARATED
-mfa_enforced: NOT_RUN_FOR_CURRENT_MAIN
+mfa_enforced: BLOCKED_ENVIRONMENT_DESIGNATION
 secrets_committed: false
 backup_restore_tested: NOT_VERIFIED_CURRENT
-private_storage_tested: NOT_RUN_FOR_CURRENT_MAIN
-signed_url_audit_tested: NOT_RUN_FOR_CURRENT_MAIN
+private_storage_tested: BLOCKED_ENVIRONMENT_DESIGNATION
+signed_url_audit_tested: BLOCKED_ENVIRONMENT_DESIGNATION
 ```
 
 ### Operator handoff (continue outside GitHub agent)
