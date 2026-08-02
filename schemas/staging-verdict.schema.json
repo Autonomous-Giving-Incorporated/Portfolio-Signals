@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/schemas/staging-verdict.schema.json",
+  "$id": "https://github.com/scrimshawlife-ctrl/Fund-Intel/schemas/staging-verdict.schema.json",
   "title": "Hacker Dojo staging acceptance verdict",
   "type": "object",
   "additionalProperties": false,
@@ -16,7 +16,7 @@
     "outreachAuthorized"
   ],
   "properties": {
-    "repository": { "const": "scrimshawlife-ctrl/Hacker-Dojo" },
+    "repository": { "const": "scrimshawlife-ctrl/Fund-Intel" },
     "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "environment": { "enum": ["local", "staging", "production"] },
     "executedAt": { "type": "string", "format": "date-time" },
