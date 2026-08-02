@@ -4,29 +4,61 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Hacker Dojo Director Workspace</title>
+  <meta name="theme-color" content="#ed1c24">
+  <title>Hacker Dojo Campaign Control Center</title>
+  <link rel="icon" type="image/svg+xml" href="assets/brand/hacker-dojo-icon.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="brand.css">
 </head>
 <body class="workspace-shell">
   <main id="workspaceRoot" aria-live="polite">
     <section class="section auth-gate" id="authGate">
-      <p class="eyebrow">RESTRICTED</p>
-      <h1>Director Workspace</h1>
-      <p>This surface requires an authenticated account, MFA, and an approved campaign role.</p>
+      <div class="workspace-brand-lockup" aria-label="Hacker Dojo Campaign Control Center">
+        <img src="assets/brand/hacker-dojo-icon.svg" alt="" width="72" height="72">
+        <div><strong>HACKER</strong><strong>DOJO</strong></div>
+        <span>Campaign Control Center</span>
+      </div>
+      <div class="auth-copy">
+        <p class="eyebrow">Restricted director workspace</p>
+        <h1>Sign in to campaign operations</h1>
+        <p>This surface requires an authenticated account, MFA, an active profile, and an approved campaign role.</p>
+      </div>
       <form id="loginForm" class="panel auth-form">
-        <label>Email <input id="email" type="email" autocomplete="email" required></label>
+        <label>Email address <input id="email" type="email" autocomplete="email" required></label>
         <button class="button" type="submit">Send secure sign-in link</button>
-        <p id="authMessage" class="note"></p>
+        <p id="authMessage" class="note" aria-live="polite"></p>
       </form>
+      <aside class="workspace-authority-note">
+        <strong>Authority boundary</strong>
+        <span>Authentication grants system access only. It does not grant outreach authority or waive consent, suppression, or approval gates.</span>
+      </aside>
     </section>
 
     <section id="workspace" hidden>
-      <header class="site-header">
-        <div><p class="eyebrow">HD-OI-013</p><h1>Campaign Operations</h1><p id="identityLine" class="lede"></p></div>
-        <button id="signOut" class="button secondary">Sign out</button>
+      <header class="site-header workspace-header">
+        <div class="brand-identity">
+          <img class="brand-mark" src="assets/brand/hacker-dojo-icon.svg" alt="" width="64" height="64">
+          <span class="brand-wordmark"><strong>HACKER</strong><strong>DOJO</strong></span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-product">Authenticated Campaign Workspace</span>
+        </div>
+        <div class="header-actions">
+          <span class="status-pill status-blocked">Controlled access</span>
+          <button id="signOut" class="button secondary">Sign out</button>
+        </div>
+        <div class="workspace-hero-copy">
+          <p class="eyebrow">HD-OI-013 · Governed operations</p>
+          <h1>Campaign Operations</h1>
+          <p id="identityLine" class="lede"></p>
+        </div>
       </header>
       <nav id="roleNav" class="primary-nav" aria-label="Workspace sections"></nav>
-      <section class="section">
+      <section class="section workspace-overview">
+        <div class="workspace-context-strip">
+          <span><strong>$420K</strong> minimum campaign</span>
+          <span><strong>$2M</strong> transformation path</span>
+          <span><strong>Outreach</strong> remains approval-gated</span>
+        </div>
         <div class="metric-grid">
           <article class="metric-card"><span class="metric-label">Open decisions</span><strong id="decisionCount">—</strong></article>
           <article class="metric-card"><span class="metric-label">Active opportunities</span><strong id="opportunityCount">—</strong></article>
@@ -40,5 +72,5 @@
   <script src="runtime-config.js"></script>
   <script type="module" src="workspace.js"></script>
 </body>
-<!-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: 6ed61b7 -->
+<!-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Brand continuity pass -->
 </html>
