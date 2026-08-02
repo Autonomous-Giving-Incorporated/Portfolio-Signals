@@ -22,15 +22,15 @@ Hacker Dojo is the canonical reference tenant: `org_hacker_dojo`. It is a regres
 
 ## Configuration and publication
 
-Client configuration will be versioned as draft, preview, published, superseded, or archived. Public GitHub Pages surfaces consume only a privacy-safe published projection. Private data remains in tenant-scoped Supabase tables and Storage.
+Client configuration is versioned as draft, published, or archived. Rollback creates a new immutable published version from a historical snapshot. Public GitHub Pages surfaces consume only a privacy-safe published projection. Private data remains in tenant-scoped Supabase tables and Storage. See [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md).
 
 ## Delivery milestones
 
 1. AGI-001 — suite contracts and shared identifiers.
 2. AGI-002 — shared tenancy, memberships, master administration, and isolation tests.
-3. AGI-003 — versioned configuration and Hacker Dojo migration.
+3. AGI-003 — authenticated client context and administration.
 4. AGI-004 — shared multi-page frontend shell.
-5. AGI-005 — director customization and governed assets.
+5. AGI-005 — immutable director customization, public runtime configuration, and governed assets.
 6. AGI-006 — sponsor/grant productization and onboarding.
 7. AGI-007 — onboarding-configurable two-person approvals.
 8. AGI-008 — Supabase JWT integration and Cloud Run boundary.

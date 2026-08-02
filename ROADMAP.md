@@ -83,6 +83,15 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 - private opportunity notes and document metadata;
 - row-level-security policies.
 
+### Client customization and publication
+
+- immutable tenant configuration snapshots with explicit draft, publish, archive, and rollback transitions;
+- director-only brand and campaign-content controls with live preview and rationale gates;
+- governed tenant assets with MIME, size, ownership, and quota enforcement;
+- privacy-safe public configuration projection selected by client slug;
+- static Hacker Dojo fallback when runtime configuration is unavailable;
+- complete version history and tenant audit events.
+
 ### Governed import foundation
 
 - batch and staging-row lifecycle;

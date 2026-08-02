@@ -91,6 +91,7 @@ export function roleCan(role, capability) {
     imports_act: ['director', 'data_steward'],
     audit: ['director', 'data_steward', 'auditor'],
     client_admin: ['director'],
+    brand_configuration: ['director'],
     // Impact Relay host screens
     impact_finance: ['director', 'campaign_lead', 'development'],
     impact_donor_staff: [
