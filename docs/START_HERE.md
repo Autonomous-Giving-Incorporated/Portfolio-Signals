@@ -30,7 +30,7 @@ private_data_in_github: PROHIBITED
 ## Current baseline
 
 ```yaml
-repository: scrimshawlife-ctrl/Hacker-Dojo
+repository: scrimshawlife-ctrl/Fund-Intel
 main_commit: 152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4
 phase: HD-OI-041B_LOCAL_ACCEPTANCE
 previous_phase: HD-OI-041_RECONCILIATION
