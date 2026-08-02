@@ -63,6 +63,9 @@ jobs:
       - name: Type-check signed document function
         run: deno check supabase/functions/signed-document-url/index.ts
 
+      - name: Execute complete security contract
+        run: bash scripts/acceptance/run_security_contract.sh
+
       - name: Start disposable Supabase project
         run: supabase start
 
@@ -100,26 +103,36 @@ jobs:
             exit 1
           fi
 
+      - name: Stop and verify disposable stack
+        run: |
+          set -euo pipefail
+          supabase stop --no-backup
+          if supabase status >/dev/null 2>&1; then
+            echo 'Disposable Supabase stack is still running.' >&2
+            exit 1
+          fi
+
       - name: Emit commit-scoped local receipt
-        if: success()
         env:
           ACCEPTED_SHA: ${{ github.sha }}
           ACCEPTED_RUN_ID: ${{ github.run_id }}
+          ACCEPTED_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           mkdir -p out/audit
           python3 scripts/acceptance/write_local_receipt.py \
             --commit "$ACCEPTED_SHA" \
             --run-id "$ACCEPTED_RUN_ID" \
+            --run-url "$ACCEPTED_RUN_URL" \
             --output out/audit/local-acceptance.json
+          python3 -m json.tool out/audit/local-acceptance.json >/dev/null
           cat out/audit/local-acceptance.json >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
-        if: success()
         with:
           name: hd-oi-041-local-acceptance-${{ github.sha }}
           path: out/audit/local-acceptance.json
           if-no-files-found: error
 
-      - name: Stop disposable stack
-        if: always()
-        run: supabase stop --no-backup
+      - name: Emergency disposable-stack cleanup
+        if: failure()
+        run: supabase stop --no-backup || true
