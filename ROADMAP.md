@@ -66,6 +66,10 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Authenticated workspace foundation
 
+- authoritative per-session A.G.I. client context and client switcher;
+- tenant-filtered dashboard, decision, pipeline, claim, and audit queries;
+- audited director membership administration with last-director protection;
+- MFA-gated master administration and client provisioning without implicit private-data access;
 - six application roles: director, campaign lead, development, board viewer, data steward, and auditor;
 - active-profile and MFA-ready authentication boundary;
 - role-aware application navigation;

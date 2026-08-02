@@ -34,7 +34,8 @@ function money(value) {
 
 export async function mountPipelineWorkspace(root, type = 'sponsorship') {
   const opportunityType = type === 'grant' ? 'grant' : 'sponsorship';
-  const { supabase, profile } = await requireWorkspaceSession();
+  const { supabase, profile, selectedClient } = await requireWorkspaceSession();
+  if (!selectedClient?.role) throw new Error('Select a client membership to view pipelines.');
   const editable = roleCan(profile.role, 'opportunities_write');
 
   root.innerHTML = '<p class="workspace-loading">Loading controlled pipeline…</p>';
@@ -42,6 +43,7 @@ export async function mountPipelineWorkspace(root, type = 'sponsorship') {
   const { data, error } = await supabase
     .from('opportunities')
     .select('id,title,type,stage,ask_amount,designated_outcome,next_action,next_action_at,authorization_state,version,updated_at')
+    .eq('client_id', selectedClient.id)
     .eq('type', opportunityType)
     .order('updated_at', { ascending: false });
   if (error) throw error;
@@ -108,6 +110,7 @@ export async function mountPipelineWorkspace(root, type = 'sponsorship') {
     if (!title || !title.trim()) return;
 
     const { error: insertError } = await supabase.from('opportunities').insert({
+      client_id: selectedClient.id,
       type: opportunityType,
       title: title.trim(),
       stage: 'identified',

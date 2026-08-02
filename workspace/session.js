@@ -8,6 +8,7 @@ const PRIVILEGED_ROLES = new Set([
   'auditor'
 ]);
 
+const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 let cached = null;
 
 export function getRuntimeConfig() {
@@ -25,7 +26,7 @@ export function createWorkspaceClient() {
 }
 
 export async function requireWorkspaceSession() {
-  if (cached?.session && cached?.profile && cached?.supabase) {
+  if (cached?.session && cached?.profile && cached?.supabase && cached?.context) {
     return cached;
   }
 
@@ -36,27 +37,46 @@ export async function requireWorkspaceSession() {
     throw new Error('Authentication required.');
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id,display_name,role,mfa_enforced,active')
-    .eq('id', sessionData.session.user.id)
-    .single();
-  if (profileError) throw profileError;
-  if (!profile?.active) throw new Error('Active campaign profile required.');
+  const { data: context, error: contextError } = await supabase.rpc('get_workspace_context');
+  if (contextError) throw contextError;
+  const profile = context?.profile;
+  if (!profile?.active) throw new Error('Active A.G.I. profile required.');
 
-  if (PRIVILEGED_ROLES.has(profile.role) && !profile.mfa_enforced) {
+  const clients = Array.isArray(context.clients) ? context.clients : [];
+  const preferredClientId = localStorage.getItem(CLIENT_STORAGE_KEY);
+  const selectedClient = clients.find(client => client.id === preferredClientId)
+    || clients.find(client => client.role)
+    || clients[0]
+    || null;
+  const role = selectedClient?.role || null;
+
+  if ((PRIVILEGED_ROLES.has(role) || context.is_master_admin) && !profile.mfa_enforced) {
     throw new Error('Enforced MFA is required for privileged roles.');
   }
+
+  if (selectedClient) localStorage.setItem(CLIENT_STORAGE_KEY, selectedClient.id);
 
   cached = {
     supabase,
     session: sessionData.session,
-    profile
+    profile: { ...profile, role },
+    context,
+    clients,
+    selectedClient,
+    isMasterAdmin: Boolean(context.is_master_admin)
   };
   return cached;
 }
 
 export function clearWorkspaceSessionCache() {
+  cached = null;
+}
+
+export function selectWorkspaceClient(clientId) {
+  if (!cached?.clients?.some(client => client.id === clientId)) {
+    throw new Error('Selected client is not available to this account.');
+  }
+  localStorage.setItem(CLIENT_STORAGE_KEY, clientId);
   cached = null;
 }
 
@@ -70,6 +90,7 @@ export function roleCan(role, capability) {
     imports: ['director', 'campaign_lead', 'data_steward'],
     imports_act: ['director', 'data_steward'],
     audit: ['director', 'data_steward', 'auditor'],
+    client_admin: ['director'],
     // Impact Relay host screens
     impact_finance: ['director', 'campaign_lead', 'development'],
     impact_donor_staff: [

@@ -57,6 +57,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/007_agi_tenant_foundation.sql
       - name: Execute A.G.I. operational-isolation checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/008_agi_operational_isolation.sql
+      - name: Execute A.G.I. workspace-context checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/009_agi_workspace_context.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then

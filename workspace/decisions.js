@@ -13,7 +13,8 @@ function escapeHtml(value = '') {
 }
 
 export async function mountDecisionQueue(root) {
-  const { supabase, profile } = await requireWorkspaceSession();
+  const { supabase, profile, selectedClient } = await requireWorkspaceSession();
+  if (!selectedClient?.role) throw new Error('Select a client membership to view decisions.');
   const canDecide = roleCan(profile.role, 'decisions_write');
 
   root.innerHTML = '<p class="workspace-loading">Loading decision queue…</p>';
@@ -21,6 +22,7 @@ export async function mountDecisionQueue(root) {
   const { data, error } = await supabase
     .from('decisions')
     .select('id,key,title,status,rationale,decided_at,evidence,created_at')
+    .eq('client_id', selectedClient.id)
     .order('created_at');
   if (error) throw error;
 

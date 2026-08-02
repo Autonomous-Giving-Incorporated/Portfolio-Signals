@@ -1,4 +1,10 @@
-import { createWorkspaceClient, clearWorkspaceSessionCache, roleCan } from './workspace/session.js';
+import {
+  createWorkspaceClient,
+  clearWorkspaceSessionCache,
+  requireWorkspaceSession,
+  roleCan,
+  selectWorkspaceClient
+} from './workspace/session.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 
@@ -18,6 +24,14 @@ const PRIVILEGED_ROLES = new Set([
 
 let activeClient = null;
 let activeProfile = null;
+let selectedClient = null;
+let isMasterAdmin = false;
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>'"]/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[character]));
+}
 
 function showMessage(text) {
   message.textContent = text;
@@ -71,35 +85,52 @@ async function renderSession(session) {
     return;
   }
 
-  const { data: profile, error } = await activeClient
-    .from('profiles')
-    .select('id,display_name,role,mfa_enforced,active')
-    .eq('id', session.user.id)
-    .single();
-
-  const mfaRequired = profile && PRIVILEGED_ROLES.has(profile.role);
-  if (error || !profile?.active || (mfaRequired && !profile.mfa_enforced)) {
+  clearWorkspaceSessionCache();
+  let workspaceSession;
+  try {
+    workspaceSession = await requireWorkspaceSession();
+  } catch (error) {
     gate.hidden = false;
     workspace.hidden = true;
-    showMessage(
-      mfaRequired
-        ? 'Access blocked: active profile and enforced MFA are required for privileged roles.'
-        : 'Access blocked: an active campaign profile is required.'
-    );
+    showMessage(`Access blocked: ${error.message}`);
     return;
   }
 
+  const { profile, clients, selectedClient: currentClient, isMasterAdmin: masterAdmin } = workspaceSession;
+  const mfaRequired = PRIVILEGED_ROLES.has(profile.role) || masterAdmin;
+  if (mfaRequired && !profile.mfa_enforced) throw new Error('Enforced MFA is required.');
   activeProfile = profile;
+  selectedClient = currentClient;
+  isMasterAdmin = masterAdmin;
   gate.hidden = true;
   workspace.hidden = false;
   document.getElementById('identityLine').textContent =
-    `${profile.display_name || session.user.email} · ${profile.role}`;
+    `${profile.display_name || session.user.email} · ${profile.role || 'platform administration'}`;
+  renderClientSelector(clients, currentClient);
   renderNavigation(profile.role);
   await loadDashboard(profile.role);
 }
 
+function renderClientSelector(clients, currentClient) {
+  const select = document.getElementById('clientSelector');
+  select.innerHTML = clients.map(client => `
+    <option value="${escapeHtml(client.id)}" ${client.id === currentClient?.id ? 'selected' : ''}>
+      ${escapeHtml(client.display_name)}${client.role ? ` · ${escapeHtml(client.role)}` : ' · platform view'}
+    </option>`).join('');
+  select.disabled = clients.length < 2;
+  select.onchange = () => {
+    selectWorkspaceClient(select.value);
+    location.reload();
+  };
+  document.getElementById('clientContext').textContent = currentClient
+    ? `${currentClient.display_name} · ${currentClient.state}`
+    : 'No client membership assigned';
+}
+
 function renderNavigation(role) {
   const items = [];
+  if (isMasterAdmin) items.push({ id: 'platform_admin', label: 'Platform admin' });
+  if (roleCan(role, 'client_admin')) items.push({ id: 'client_admin', label: 'Client admin' });
   if (roleCan(role, 'decisions')) items.push({ id: 'decisions', label: 'Decisions' });
   if (roleCan(role, 'opportunities')) {
     items.push({ id: 'sponsors', label: 'Sponsors' });
@@ -133,6 +164,14 @@ function renderNavigation(role) {
 }
 
 async function loadDashboard(role) {
+  if (!selectedClient?.role) {
+    document.getElementById('decisionCount').textContent = '—';
+    document.getElementById('opportunityCount').textContent = '—';
+    document.getElementById('authorizedCount').textContent = '—';
+    document.getElementById('exceptionCount').textContent = '—';
+    content.innerHTML = `<h2>Platform administration</h2><p>Select Platform admin to provision clients. Platform authority does not grant access to client-private campaign records.</p>`;
+    return;
+  }
   const canReadConstituents = [
     'director',
     'campaign_lead',
@@ -142,14 +181,17 @@ async function loadDashboard(role) {
   ].includes(role);
 
   const [decisions, opportunities, confirmedConsent, exceptions] = await Promise.all([
-    activeClient.from('decisions').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+    activeClient.from('decisions').select('*', { count: 'exact', head: true }).eq('client_id', selectedClient.id).eq('status', 'open'),
     activeClient.from('opportunities').select('*', { count: 'exact', head: true })
+      .eq('client_id', selectedClient.id)
       .in('stage', ['qualified', 'meeting', 'proposal', 'verbal']),
     canReadConstituents
       ? activeClient.from('constituents').select('*', { count: 'exact', head: true })
+          .eq('client_id', selectedClient.id)
           .eq('consent_status', 'confirmed')
       : Promise.resolve({ count: 0 }),
     activeClient.from('import_exceptions').select('*', { count: 'exact', head: true })
+      .eq('client_id', selectedClient.id)
       .is('resolved_at', null)
   ]);
 
@@ -185,7 +227,11 @@ async function openSection(section) {
   if (!activeProfile) throw new Error('Authentication required.');
   setBusy(true);
 
-  if (section === 'decisions') {
+  if (section === 'client_admin') {
+    await mountClientAdmin();
+  } else if (section === 'platform_admin') {
+    await mountPlatformAdmin();
+  } else if (section === 'decisions') {
     await mountDecisionQueue(content);
   } else if (section === 'sponsors') {
     await mountPipelineWorkspace(content, 'sponsorship');
@@ -232,6 +278,7 @@ async function openSection(section) {
     const { data, error } = await activeClient
       .from('claims')
       .select('id,claim,state,verified_at,created_at')
+      .eq('client_id', selectedClient.id)
       .order('created_at', { ascending: false })
       .limit(50);
     if (error) throw error;
@@ -252,6 +299,7 @@ async function openSection(section) {
     const { data, error } = await activeClient
       .from('audit_log')
       .select('id,action,entity_type,entity_id,occurred_at')
+      .eq('client_id', selectedClient.id)
       .order('occurred_at', { ascending: false })
       .limit(50);
     if (error) throw error;
@@ -273,6 +321,94 @@ async function openSection(section) {
   }
 
   setBusy(false);
+}
+
+async function mountClientAdmin() {
+  if (activeProfile.role !== 'director' || !selectedClient?.role) {
+    throw new Error('Client director access required.');
+  }
+  const { data, error } = await activeClient
+    .from('client_memberships')
+    .select('user_id,role,active,membership_version,profiles(display_name)')
+    .eq('client_id', selectedClient.id)
+    .order('role');
+  if (error) throw error;
+
+  content.innerHTML = `
+    <div class="workspace-toolbar"><div><strong>Client administration</strong><span>${selectedClient.display_name}</span></div></div>
+    <div class="table-wrap"><table class="workspace-table">
+      <thead><tr><th>Member</th><th>Role</th><th>State</th><th>Version</th></tr></thead>
+      <tbody>${data.map(member => `<tr><td>${escapeHtml(member.profiles?.display_name || member.user_id)}<small>${escapeHtml(member.user_id)}</small></td><td>${escapeHtml(member.role)}</td><td>${member.active ? 'active' : 'inactive'}</td><td>${member.membership_version}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <form id="membershipForm" class="control-grid">
+      <label>User UUID<input name="userId" required pattern="[0-9a-fA-F-]{36}" placeholder="Existing authenticated profile UUID"></label>
+      <label>Client role<select name="role">${['director','campaign_lead','development','board_viewer','data_steward','auditor'].map(role => `<option>${role}</option>`).join('')}</select></label>
+      <label>Status<select name="active"><option value="true">Active</option><option value="false">Inactive</option></select></label>
+      <label>Rationale<input name="rationale" required minlength="12" placeholder="Reason for membership change"></label>
+      <button class="button" type="submit">Save membership</button>
+    </form>
+    <p class="note" id="adminMessage">Membership changes are audited. The final active director cannot be removed.</p>`;
+
+  content.querySelector('#membershipForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { error: mutationError } = await activeClient.rpc('set_client_membership', {
+      p_client_id: selectedClient.id,
+      p_user_id: form.get('userId').trim(),
+      p_role: form.get('role'),
+      p_active: form.get('active') === 'true',
+      p_rationale: form.get('rationale').trim()
+    });
+    if (mutationError) {
+      content.querySelector('#adminMessage').textContent = mutationError.message;
+      return;
+    }
+    clearWorkspaceSessionCache();
+    await mountClientAdmin();
+  });
+}
+
+async function mountPlatformAdmin() {
+  if (!isMasterAdmin) throw new Error('Master administrator access required.');
+  const { data, error } = await activeClient
+    .from('clients')
+    .select('id,slug,display_name,state,reference_tenant,created_at')
+    .order('display_name');
+  if (error) throw error;
+
+  content.innerHTML = `
+    <div class="workspace-toolbar"><div><strong>A.G.I. platform administration</strong><span>${data.length} clients</span></div></div>
+    <div class="table-wrap"><table class="workspace-table">
+      <thead><tr><th>Client</th><th>Identifier</th><th>State</th><th>Reference</th></tr></thead>
+      <tbody>${data.map(client => `<tr><td>${escapeHtml(client.display_name)}<small>${escapeHtml(client.slug)}</small></td><td>${escapeHtml(client.id)}</td><td>${escapeHtml(client.state)}</td><td>${client.reference_tenant ? 'yes' : 'no'}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <form id="provisionClientForm" class="control-grid">
+      <label>Client ID<input name="clientId" required pattern="org_[a-z0-9_]+" placeholder="org_example"></label>
+      <label>URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="example"></label>
+      <label>Display name<input name="displayName" required></label>
+      <label>Initial director UUID<input name="directorId" required pattern="[0-9a-fA-F-]{36}"></label>
+      <label>Rationale<input name="rationale" required minlength="12"></label>
+      <button class="button" type="submit">Provision client</button>
+    </form>
+    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. It does not grant the master administrator access to client-private records.</p>`;
+
+  content.querySelector('#provisionClientForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { error: provisionError } = await activeClient.rpc('provision_client', {
+      p_client_id: form.get('clientId').trim(),
+      p_slug: form.get('slug').trim(),
+      p_display_name: form.get('displayName').trim(),
+      p_initial_director: form.get('directorId').trim(),
+      p_rationale: form.get('rationale').trim()
+    });
+    if (provisionError) {
+      content.querySelector('#platformMessage').textContent = provisionError.message;
+      return;
+    }
+    clearWorkspaceSessionCache();
+    location.reload();
+  });
 }
 
 void root;
