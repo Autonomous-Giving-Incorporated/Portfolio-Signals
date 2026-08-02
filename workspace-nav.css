@@ -1,0 +1,77 @@
+.workspace-shell #roleNav {
+  display: flex;
+  gap: .55rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  padding-block: .75rem;
+}
+
+.workspace-shell #roleNav::before {
+  content: "Authorized tools";
+  align-self: center;
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  margin-right: .25rem;
+}
+
+.workspace-shell #roleNav .workspace-nav-button {
+  position: relative;
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-height: 42px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.workspace-shell #roleNav .workspace-nav-button:hover {
+  border-color: var(--line);
+  background: var(--surface-alt);
+}
+
+.workspace-shell #roleNav .workspace-nav-button.is-active {
+  background: var(--hd-red);
+  border-color: var(--hd-red);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(237, 28, 36, .18);
+}
+
+.workspace-shell #roleNav .workspace-nav-button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  bottom: -7px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--hd-red);
+}
+
+.workspace-shell #workspaceContent {
+  min-height: 280px;
+  scroll-margin-top: 6rem;
+}
+
+@media (max-width: 800px) {
+  .workspace-shell #roleNav {
+    flex-wrap: nowrap;
+    padding-inline: 1rem;
+    margin-inline: 0;
+  }
+
+  .workspace-shell #roleNav::before {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    padding-right: .65rem;
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-shell #roleNav { scroll-behavior: auto; }
+}
