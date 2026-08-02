@@ -1,0 +1,82 @@
+{
+  "repository": "scrimshawlife-ctrl/Hacker-Dojo",
+  "commit": "7a4d77b4068f63112a6f230277cc0c4e3168dd6a",
+  "environment": "staging",
+  "executedAt": "2026-08-02T00:58:00Z",
+  "verdict": "NO_GO",
+  "technicalGates": {
+    "publicContract": {
+      "state": "PASS",
+      "evidence": "PR #42 head b571b7e: Validate and deploy director portal run 30726118991 passed before merge."
+    },
+    "securityContract": {
+      "state": "PASS",
+      "evidence": "PR #42 head b571b7e: Local security contract run 30726118951 passed before merge."
+    },
+    "migrationChain": {
+      "state": "NOT_RUN",
+      "evidence": "No disposable or hosted migration execution has been observed for exact merge commit 7a4d77b4."
+    },
+    "sixRoleRls": {
+      "state": "NOT_RUN",
+      "evidence": "No six-role RLS execution has been observed for exact merge commit 7a4d77b4."
+    },
+    "importGates": {
+      "state": "NOT_RUN",
+      "evidence": "No import-gate execution has been observed for exact merge commit 7a4d77b4."
+    },
+    "privateStorage": {
+      "state": "NOT_RUN",
+      "evidence": "No private-storage matrix execution has been observed for exact merge commit 7a4d77b4."
+    },
+    "signedUrlAudit": {
+      "state": "NOT_RUN",
+      "evidence": "Earlier hosted proof is historical and does not establish parity for exact merge commit 7a4d77b4."
+    },
+    "browserSmoke": {
+      "state": "NOT_RUN",
+      "evidence": "No browser smoke test has been observed against a deployment of exact merge commit 7a4d77b4."
+    },
+    "directorAcceptance": {
+      "state": "NOT_RUN",
+      "evidence": "No director acceptance session has been recorded for exact merge commit 7a4d77b4."
+    }
+  },
+  "leadershipGates": {
+    "useOfFunds": { "state": "NOT_COMPUTABLE" },
+    "privacyPolicy": { "state": "NOT_COMPUTABLE" },
+    "outreachBasis": { "state": "BLOCKED" },
+    "namedOwners": { "state": "NOT_COMPUTABLE" },
+    "sourceWorkbook": { "state": "BLOCKED" }
+  },
+  "exceptions": [
+    {
+      "severity": "P0",
+      "summary": "Exact merge commit has not completed disposable Supabase, hosted parity, browser smoke, or director acceptance lanes."
+    },
+    {
+      "severity": "P1",
+      "summary": "Earlier hosted staging evidence is commit-scoped to older revisions and must not be promoted to current-main proof."
+    }
+  ],
+  "productionImportAuthorized": false,
+  "outreachAuthorized": false,
+  "evidence": [
+    {
+      "label": "Acceptance contract workflow",
+      "source": "GitHub Actions run 30726118980 on PR #42 head b571b7eddb76a59a9057204e4c7c25d281a8ef4b"
+    },
+    {
+      "label": "Portal validation workflow",
+      "source": "GitHub Actions run 30726118991 on PR #42 head b571b7eddb76a59a9057204e4c7c25d281a8ef4b"
+    },
+    {
+      "label": "Local security contract",
+      "source": "GitHub Actions run 30726118951 on PR #42 head b571b7eddb76a59a9057204e4c7c25d281a8ef4b"
+    },
+    {
+      "label": "Acceptance contract merge",
+      "source": "Merge commit 7a4d77b4068f63112a6f230277cc0c4e3168dd6a"
+    }
+  ]
+}
