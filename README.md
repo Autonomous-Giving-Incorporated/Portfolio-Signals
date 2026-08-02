@@ -6,9 +6,9 @@ The repository now contains both a privacy-safe public director portal and the c
 
 ## Current evidence boundary
 
-As of 2026-08-02, the current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The implementation rows below describe repository capability; they do not prove hosted acceptance of this commit.
+As of 2026-08-02, the current `main` baseline is `152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4`.
 
-HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted parity, browser smoke, and director acceptance are recorded for one exact commit. PR #44 completed a green **pre-merge** disposable local acceptance run for `e124375bfd60758df9857b03dfc171c9210b78b1`; that result is useful evidence but is not proof for current `main`.
+HD-OI-041 exact-main local acceptance passed for this commit (workflow `30726851425`); the current Pages deployment also completed successfully, and the public portal loaded without captured console errors. This remains a `NO_GO` for full staging acceptance because the hosted Supabase project presents as `Production`, so hosted synthetic parity, authenticated browser smoke, and director acceptance were not run.
 
 | Capability | State |
 |---|---|
@@ -210,12 +210,14 @@ CI continues to use a **disposable** local Supabase stack. Linking the hosted pr
 ## Current campaign-control state
 
 ```yaml
-main_baseline: 251549f1e2142c35d1807cc9412d596ce82e360d
-current_main_verdict: NO_GO  # acceptance evidence incomplete
-repository_contract: PASS  # current-tree structural contract
-pr_44_local_acceptance: PASS_PREMERGE_ONLY  # e124375bfd60758df9857b03dfc171c9210b78b1
-hosted_staging_current_main: NOT_RUN
-browser_smoke_current_main: NOT_RUN
+main_baseline: 152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4
+current_main_verdict: NO_GO  # hosted and director gates incomplete
+repository_contract: PASS
+exact_main_local_acceptance: PASS  # workflow 30726851425
+pages_deployment_exact_main: PASS  # workflow 30726851423
+public_portal_smoke: PASS  # read-only public check; no captured console errors
+hosted_staging_current_main: BLOCKED_ENVIRONMENT_DESIGNATION
+browser_smoke_authenticated: NOT_RUN
 director_acceptance_current_main: NOT_RUN
 staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq
 private_data_placement: LOCAL_PLUS_SUPABASE
