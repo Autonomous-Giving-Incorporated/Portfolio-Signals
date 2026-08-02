@@ -4,9 +4,11 @@ A governed campaign-control system for Hacker Dojo's **$420K minimum campaign** 
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
-## Verified implementation state
+## Current evidence boundary
 
-As of 2026-08-01:
+As of 2026-08-02, the current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The implementation rows below describe repository capability; they do not prove hosted acceptance of this commit.
+
+HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted parity, browser smoke, and director acceptance are recorded for one exact commit. PR #44 completed a green **pre-merge** disposable local acceptance run for `e124375bfd60758df9857b03dfc171c9210b78b1`; that result is useful evidence but is not proof for current `main`.
 
 | Capability | State |
 |---|---|
@@ -14,13 +16,13 @@ As of 2026-08-01:
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
-| GitHub Pages deployment | Plan-gated (private free plan unsupported; deploy skips without failing validation) |
+| GitHub Pages deployment | Historical state only; exact current-main deployment acceptance is NOT_RUN |
 | Static security policy checks | Passing |
 | Workbook parser contract | Passing; executable quarantine tests cover provenance, input rejection, fail-closed parsing, and overwrite protection |
 | Authenticated database schema | Implemented |
 | Six application roles | Implemented |
 | Row-level-security policies | Implemented; six-role disposable suite green |
-| MFA / active-profile hardening | Implemented in schema; provider enablement is operator-owned |
+| MFA / active-profile hardening | Implemented in schema; hosted enforcement for exact current main is NOT_RUN |
 | Append-only audit model | Implemented |
 | Sponsor and grant workflow schema | Implemented |
 | Decision approval workflow | Implemented |
@@ -32,7 +34,7 @@ As of 2026-08-01:
 | Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
 | Production environment checklist | Documented |
-| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); migrations/MFA operator-owned |
+| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); exact current-main hosted parity is NOT_RUN |
 | Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
 | Impact Relay finance/donor host screens | Implemented (console API + Supabase role/MFA bridge) |
 | Impact Relay shadow + live-cohort runbooks | Documented; live cohort execution operator-owned |
@@ -208,24 +210,17 @@ CI continues to use a **disposable** local Supabase stack. Linking the hosted pr
 ## Current campaign-control state
 
 ```yaml
-public_portal: PASS
-public_schema_validation: PASS
-pages_validation: PASS
-pages_deploy: PLAN_GATED
-static_policy_checks: PASS
-local_security_contract: PASS
-migration_chain: PASS
-synthetic_fixture_loading: PASS
-six_role_rls_execution: PASS
-import_gate_execution: PASS
-identity_mfa_controls: IN_PROGRESS_HD_OI_019
-impact_relay_host_screens: PASS
-impact_relay_supabase_bridge: PASS
-impact_relay_live_cohort: RUNBOOK_READY  # execution operator-owned
-staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq; migrations operator-owned
+main_baseline: 251549f1e2142c35d1807cc9412d596ce82e360d
+current_main_verdict: NO_GO  # acceptance evidence incomplete
+repository_contract: PASS  # current-tree structural contract
+pr_44_local_acceptance: PASS_PREMERGE_ONLY  # e124375bfd60758df9857b03dfc171c9210b78b1
+hosted_staging_current_main: NOT_RUN
+browser_smoke_current_main: NOT_RUN
+director_acceptance_current_main: NOT_RUN
+staging_supabase_project: PROVISIONED  # ref ecxkhihlbrcwpavfoaoq
 private_data_placement: LOCAL_PLUS_SUPABASE
 notion_crm_sor: REJECTED
-production_supabase: NOT_SEPARATED_YET  # treat current project as staging until named
+production_supabase: NOT_SEPARATED_YET
 production_import: BLOCKED
 outreach: BLOCKED
 sensitive_data_in_repo: PROHIBITED
