@@ -15,8 +15,9 @@ private_data_in_github: PROHIBITED
 ## Read in this order
 
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — current baseline, historical evidence, drift, and required verification.
-2. [HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md](HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md) — PR #44 pre-merge local acceptance evidence and limits.
-3. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
+2. [HD-OI-041-EXACT-MAIN-LOCAL-RECEIPT.md](HD-OI-041-EXACT-MAIN-LOCAL-RECEIPT.md) — exact-main local evidence and remaining stop condition.
+3. [HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md](HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md) — superseded PR #44 pre-merge evidence.
+12. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
 4. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — staging setup and verification procedures.
 5. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, RLS, and application boundaries.
 6. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where public, restricted, and source data may exist.
@@ -51,10 +52,7 @@ resolve the hosted environment designation before testing
 → verify hosted migration/function parity only after it is confirmed staging
 → run authenticated browser smoke with synthetic accounts
 → execute the synthetic director journey
-→ execute synthetic role and import suites
-→ execute browser smoke tests
-→ execute director acceptance journey
-→ issue GO / CONDITIONAL / NO_GO receipt
+→ issue an exact-commit GO / CONDITIONAL / NO_GO receipt
 ```
 
 ## Stop conditions
