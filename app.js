@@ -21,7 +21,7 @@ if (header && headerCopy) {
   identity.className = 'brand-identity';
   identity.innerHTML = `
     <img class="brand-mark" src="assets/brand/hacker-dojo-icon.svg" alt="Hacker Dojo" width="64" height="64" />
-    <span class="brand-wordmark"><strong>HACKER</strong><strong>DOJO</strong></span>
+    <span class="brand-wordmark" aria-hidden="true"><strong>HACKER</strong><strong>DOJO</strong></span>
     <span class="brand-divider" aria-hidden="true"></span>
     <span class="brand-product">Campaign Control Center</span>
   `;
@@ -78,17 +78,57 @@ const themeToggle = document.getElementById('themeToggle');
 const storedTheme = localStorage.getItem('hd-theme');
 if (storedTheme) root.dataset.theme = storedTheme;
 
+function syncThemeControl() {
+  if (!themeToggle) return;
+  const isDark = root.dataset.theme === 'dark';
+  themeToggle.textContent = isDark ? 'Use light theme' : 'Use dark theme';
+  themeToggle.setAttribute('aria-pressed', String(isDark));
+  themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+}
+
+syncThemeControl();
 themeToggle?.addEventListener('click', () => {
   const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
   root.dataset.theme = next;
   localStorage.setItem('hd-theme', next);
+  syncThemeControl();
 });
+
+const navLinks = [...document.querySelectorAll('.primary-nav a[href^="#"]')];
+const navSections = navLinks
+  .map((link) => document.querySelector(link.getAttribute('href')))
+  .filter(Boolean);
+
+function setActiveSection(sectionId) {
+  navLinks.forEach((link) => {
+    const active = link.getAttribute('href') === `#${sectionId}`;
+    link.classList.toggle('is-active', active);
+    if (active) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+if ('IntersectionObserver' in window && navSections.length) {
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (visible) setActiveSection(visible.target.id);
+  }, { rootMargin: '-18% 0px -62% 0px', threshold: [0.08, 0.25, 0.5] });
+  navSections.forEach((section) => observer.observe(section));
+}
+setActiveSection(location.hash.replace('#', '') || navSections[0]?.id || 'overview');
 
 const tabs = [...document.querySelectorAll('.tab')];
 const panels = [...document.querySelectorAll('.tab-panel')];
 tabs.forEach((tab) => {
+  tab.setAttribute('aria-selected', String(tab.classList.contains('active')));
   tab.addEventListener('click', () => {
-    tabs.forEach((item) => item.classList.toggle('active', item === tab));
+    tabs.forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-selected', String(active));
+    });
     panels.forEach((panel) => {
       const active = panel.id === tab.dataset.tab;
       panel.classList.toggle('active', active);
@@ -130,6 +170,7 @@ const dialogText = document.getElementById('dialogText');
 document.querySelectorAll('.decision-button').forEach((button) => {
   button.addEventListener('click', () => {
     const item = decisionCopy[button.dataset.decision];
+    if (!item || !dialog || !dialogTitle || !dialogText) return;
     dialogTitle.textContent = item.title;
     dialogText.textContent = item.text;
     dialog.showModal();
