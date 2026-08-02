@@ -4,5 +4,6 @@
 // Project ref: ecxkhihlbrcwpavfoaoq
 window.HACKER_DOJO_CONFIG = {
   supabaseUrl: 'https://ecxkhihlbrcwpavfoaoq.supabase.co',
-  supabaseAnonKey: 'YOUR_PUBLIC_ANON_KEY'
+  supabaseAnonKey: 'YOUR_PUBLIC_ANON_KEY',
+  defaultClientSlug: 'hacker-dojo'
 };
