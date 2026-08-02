@@ -1,0 +1,98 @@
+{
+  "repository": "scrimshawlife-ctrl/Fund-Intel",
+  "commit": "152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4",
+  "environment": "local",
+  "executedAt": "2026-08-02T01:23:41Z",
+  "verdict": "NO_GO",
+  "technicalGates": {
+    "publicContract": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425"
+    },
+    "securityContract": {
+      "state": "PASS",
+      "evidence": "Workflows 30726851419 and 30726851425"
+    },
+    "migrationChain": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425 disposable Supabase suite"
+    },
+    "sixRoleRls": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425 disposable Supabase suite"
+    },
+    "importGates": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425 disposable Supabase suite"
+    },
+    "privateStorage": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425 disposable Supabase suite"
+    },
+    "signedUrlAudit": {
+      "state": "PASS",
+      "evidence": "Workflow 30726851425 disposable Supabase suite"
+    },
+    "browserSmoke": {
+      "state": "NOT_RUN",
+      "evidence": "Only public portal smoke ran; authenticated smoke is blocked"
+    },
+    "directorAcceptance": {
+      "state": "NOT_RUN",
+      "evidence": "Blocked pending environment designation"
+    }
+  },
+  "leadershipGates": {
+    "useOfFunds": {
+      "state": "BLOCKED",
+      "record": "No leadership approval recorded"
+    },
+    "privacyPolicy": {
+      "state": "BLOCKED",
+      "record": "No leadership approval recorded"
+    },
+    "outreachBasis": {
+      "state": "BLOCKED",
+      "record": "Outreach remains unauthorized"
+    },
+    "namedOwners": {
+      "state": "NOT_COMPUTABLE",
+      "record": "No current ownership record supplied"
+    },
+    "sourceWorkbook": {
+      "state": "BLOCKED",
+      "record": "No real workbook is authorized"
+    }
+  },
+  "exceptions": [
+    {
+      "severity": "P1",
+      "summary": "Hosted suite blocked because project ecxkhihlbrcwpavfoaoq dashboard labels its branch main Production."
+    },
+    {
+      "severity": "P1",
+      "summary": "Authenticated browser smoke and director acceptance remain unrun."
+    }
+  ],
+  "productionImportAuthorized": false,
+  "outreachAuthorized": false,
+  "evidence": [
+    {
+      "label": "Complete local acceptance",
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851425",
+      "sha256": "16f997052536ff359d0b6d26de816508c2a23a9f7d751d192914d4b1c50dfccb"
+    },
+    {
+      "label": "Pages deployment",
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851423"
+    },
+    {
+      "label": "Current-main acceptance contract",
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851434"
+    },
+    {
+      "label": "Local security contract",
+      "source": "https://github.com/scrimshawlife-ctrl/Fund-Intel/actions/runs/30726851419"
+    }
+  ]
+}

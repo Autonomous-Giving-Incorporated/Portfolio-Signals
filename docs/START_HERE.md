@@ -15,27 +15,30 @@ private_data_in_github: PROHIBITED
 ## Read in this order
 
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — current baseline, historical evidence, drift, and required verification.
-2. [HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md](HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md) — PR #44 pre-merge local acceptance evidence and limits.
-3. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
-4. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — staging setup and verification procedures.
-5. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, RLS, and application boundaries.
-6. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where public, restricted, and source data may exist.
-7. [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) — governed workbook quarantine and promotion flow.
-8. [PRODUCTION-HARDENING.md](PRODUCTION-HARDENING.md) — production checklist and operational controls.
-9. [IMPACT-RELAY.md](IMPACT-RELAY.md) — Impact Relay host integration.
-10. [IMPACT-RELAY-SHADOW.md](IMPACT-RELAY-SHADOW.md) — finance rehearsal without live notification.
-11. [IMPACT-RELAY-LIVE-COHORT.md](IMPACT-RELAY-LIVE-COHORT.md) — limited cohort procedure; operator approval required.
+2. [HD-OI-041-EXACT-MAIN-LOCAL-RECEIPT.md](HD-OI-041-EXACT-MAIN-LOCAL-RECEIPT.md) — exact-main local evidence and remaining stop condition.
+3. [HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md](HD-OI-041-LOCAL-ACCEPTANCE-PREMERGE.md) — superseded PR #44 pre-merge evidence.
+4. [../ROADMAP.md](../ROADMAP.md) — engineering phases and leadership gates.
+5. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — staging setup and verification procedures.
+6. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, RLS, and application boundaries.
+7. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where public, restricted, and source data may exist.
+8. [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) — governed workbook quarantine and promotion flow.
+9. [PRODUCTION-HARDENING.md](PRODUCTION-HARDENING.md) — production checklist and operational controls.
+10. [IMPACT-RELAY.md](IMPACT-RELAY.md) — Impact Relay host integration.
+11. [IMPACT-RELAY-SHADOW.md](IMPACT-RELAY-SHADOW.md) — finance rehearsal without live notification.
+12. [IMPACT-RELAY-LIVE-COHORT.md](IMPACT-RELAY-LIVE-COHORT.md) — limited cohort procedure; operator approval required.
 
 ## Current baseline
 
 ```yaml
-repository: scrimshawlife-ctrl/Hacker-Dojo
-main_commit: 251549f1e2142c35d1807cc9412d596ce82e360d
+repository: scrimshawlife-ctrl/Fund-Intel
+main_commit: 152227a9cc7d6e2f83d9cc132acc6c7f31c5abe4
 phase: HD-OI-041B_LOCAL_ACCEPTANCE
 previous_phase: HD-OI-041_RECONCILIATION
 staging_project_ref: ecxkhihlbrcwpavfoaoq
-pr_44_local_acceptance: PASS_PREMERGE_ONLY
-current_main_hosted_acceptance: NOT_RUN
+exact_main_local_acceptance: PASS  # workflow 30726851425
+pages_deployment_exact_main: PASS  # workflow 30726851423
+public_portal_smoke: PASS  # read-only public check
+current_main_hosted_acceptance: BLOCKED_ENVIRONMENT_DESIGNATION
 ```
 
 ## Operator rule
@@ -45,14 +48,11 @@ Do not treat an earlier successful deployment or synthetic suite as proof that c
 ## Immediate execution sequence
 
 ```text
-obtain explicit approval to merge the green local-acceptance PR
-→ verify the resulting exact main commit locally
-→ deploy that exact main commit to staging
-→ verify hosted migration/function parity
-→ execute synthetic role and import suites
-→ execute browser smoke tests
-→ execute director acceptance journey
-→ issue GO / CONDITIONAL / NO_GO receipt
+resolve the hosted environment designation before testing
+→ verify hosted migration/function parity only after it is confirmed staging
+→ run authenticated browser smoke with synthetic accounts
+→ execute the synthetic director journey
+→ issue an exact-commit GO / CONDITIONAL / NO_GO receipt
 ```
 
 ## Stop conditions

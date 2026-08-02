@@ -11,10 +11,10 @@ Historical successful runs are evidence for their recorded commits only. They do
 Record before execution:
 
 ```yaml
-repository: scrimshawlife-ctrl/Hacker-Dojo
+repository: scrimshawlife-ctrl/Fund-Intel
 commit: <40-character SHA>
 staging_project: ecxkhihlbrcwpavfoaoq
-pages_origin: https://scrimshawlife-ctrl.github.io/Hacker-Dojo/
+pages_origin: https://scrimshawlife-ctrl.github.io/Fund-Intel/
 operator: <name or GitHub login>
 started_at: <UTC timestamp>
 ```
