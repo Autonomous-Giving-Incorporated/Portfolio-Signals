@@ -23,7 +23,7 @@ begin
         'source_name', 'unauthorized.xlsx',
         'source_sha256', repeat('b', 64),
         'schema_version', 'synthetic-v1',
-        'storage_object_path', 'quarantine/unauthorized.xlsx'
+        'storage_object_path', 'org_hacker_dojo/quarantine/unauthorized.xlsx'
       ),
       '[]'::jsonb
     );
@@ -47,7 +47,7 @@ begin
       'source_sha256', repeat('d', 64),
       'source_received_at', now(),
       'schema_version', 'synthetic-v1',
-      'storage_object_path', 'quarantine/atomic-success.xlsx',
+      'storage_object_path', 'org_hacker_dojo/quarantine/atomic-success.xlsx',
       'receipt', jsonb_build_object('promotion_authorized', false)
     ),
     jsonb_build_array(
@@ -114,7 +114,7 @@ begin
         'source_name', 'atomic-rollback.xlsx',
         'source_sha256', repeat('e', 64),
         'schema_version', 'synthetic-v1',
-        'storage_object_path', 'quarantine/atomic-rollback.xlsx'
+        'storage_object_path', 'org_hacker_dojo/quarantine/atomic-rollback.xlsx'
       ),
       jsonb_build_array(
         jsonb_build_object(
