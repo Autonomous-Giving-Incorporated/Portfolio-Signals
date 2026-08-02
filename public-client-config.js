@@ -25,12 +25,12 @@ function applyPublicConfig(config) {
   document.documentElement.style.setProperty('--brand-teal', safe.theme.accent);
   document.documentElement.style.setProperty('--brand-navy', safe.theme.background);
   document.querySelectorAll('title').forEach(node => { node.textContent = `${safe.organization_name} ${safe.product_name}`; });
-  document.querySelectorAll('.brand-product').forEach(node => { node.textContent = safe.product_name; });
-  document.querySelectorAll('.brand-wordmark').forEach(node => { node.setAttribute('aria-label', safe.organization_name); });
+  document.querySelectorAll('.tenant-product').forEach(node => { node.textContent = safe.product_name; });
+  document.querySelectorAll('.tenant-chip').forEach(node => { node.setAttribute('aria-label', `${safe.organization_name} campaign context`); });
   document.querySelectorAll('h1').forEach((node, index) => { if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title; });
   document.querySelectorAll('.lede, .cta-line').forEach((node, index) => { if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline; });
   const logo = assetUrl(safe.assets.logo_path || safe.assets.icon_path);
-  if (logo) document.querySelectorAll('.brand-mark, .workspace-brand-lockup img').forEach(img => { img.src = logo; img.alt = safe.organization_name; });
+  if (logo) document.querySelectorAll('.tenant-mark, .workspace-brand-lockup img').forEach(img => { img.src = logo; img.alt = safe.organization_name; });
   const icon = assetUrl(safe.assets.icon_path);
   if (icon) document.querySelectorAll('link[rel="icon"]').forEach(link => { link.href = icon; });
   const hero = assetUrl(safe.assets.hero_path);

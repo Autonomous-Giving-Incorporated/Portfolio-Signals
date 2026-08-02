@@ -52,6 +52,8 @@ test.beforeEach(async ({ page }) => installTenantApi(page));
 
 test('two tenants retain independent branding, modules, and navigation context', async ({ page }) => {
   await page.goto('/index.html?client=second-tenant');
+  await expect(page.locator('.brand-wordmark')).toContainText('ZERO STATE');
+  await expect(page.locator('.brand-product')).toContainText('Fund Intel');
   await expect(page.locator('h1').first()).toHaveText('Second tenant independent campaign');
   await expect(page).toHaveTitle('Second Tenant A.G.I. Campaign Control');
   await expect(page.locator('a[href*="grants.html"]')).toBeVisible();
@@ -66,6 +68,7 @@ test('two tenants retain independent branding, modules, and navigation context',
   );
 
   await page.goto('/index.html?client=hacker-dojo');
+  await expect(page.locator('.brand-product')).toContainText('Fund Intel');
   await expect(page.locator('h1').first()).toHaveText('Keep the room where builders become possible.');
   await expect(page.locator('a[href*="sponsors.html"]')).toBeVisible();
   await expect(page.locator('a[href*="grants.html"]')).toBeHidden();

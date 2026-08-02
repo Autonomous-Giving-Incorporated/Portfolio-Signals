@@ -3,13 +3,13 @@ const root = document.documentElement;
 // Load the Hacker Dojo brand layer without coupling it to the base dashboard stylesheet.
 const brandStyles = document.createElement('link');
 brandStyles.rel = 'stylesheet';
-brandStyles.href = 'brand.css';
+brandStyles.href = 'brand.css?v=zero-state-1';
 document.head.appendChild(brandStyles);
 
 const favicon = document.createElement('link');
 favicon.rel = 'icon';
 favicon.type = 'image/svg+xml';
-favicon.href = 'assets/brand/hacker-dojo-icon.svg';
+favicon.href = 'assets/brand/zero-state-mark.svg';
 document.head.appendChild(favicon);
 
 const header = document.querySelector('.site-header');
@@ -20,10 +20,15 @@ if (header && headerCopy) {
   const identity = document.createElement('div');
   identity.className = 'brand-identity';
   identity.innerHTML = `
-    <img class="brand-mark" src="assets/brand/hacker-dojo-icon.svg" alt="Hacker Dojo" width="64" height="64" />
-    <span class="brand-wordmark" aria-hidden="true"><strong>HACKER</strong><strong>DOJO</strong></span>
+    <img class="brand-mark" src="assets/brand/zero-state-mark.svg" alt="Zero State" width="52" height="52" />
+    <span class="brand-wordmark"><strong>ZERO STATE</strong><span>Product suite</span></span>
     <span class="brand-divider" aria-hidden="true"></span>
-    <span class="brand-product">Campaign Control Center</span>
+    <span class="brand-product">Fund Intel<br />Decision Workspace</span>
+    <span class="tenant-chip"><img class="tenant-mark" src="assets/brand/hacker-dojo-icon.svg" alt="" />Hacker Dojo campaign</span>
+    <nav class="brand-suite-links" aria-label="Zero State product suite">
+      <a href="https://scrimshawlife-ctrl.github.io/Autonomous-Giving-Incorporated/">AGI</a>
+      <a href="https://scrimshawlife-ctrl.github.io/Impact-Relay/">Impact Relay</a>
+    </nav>
   `;
   header.prepend(identity);
 
@@ -67,11 +72,11 @@ const footer = document.querySelector('footer');
 if (footer) {
   footer.innerHTML = `
     <div class="footer-brand">
-      <img src="assets/brand/hacker-dojo-icon.svg" alt="" width="38" height="38" />
-      <span>Hacker Dojo Campaign Control Center</span>
+      <img src="assets/brand/zero-state-mark.svg" alt="" width="38" height="38" />
+      <span>Zero State · Fund Intel</span>
     </div>
     <div class="footer-meta">
-      <small>Powered by Neon Genie</small>
+      <small>Hacker Dojo campaign context · Powered by Neon Genie</small>
       <small>Advisory state · No outreach authority granted</small>
     </div>
   `;

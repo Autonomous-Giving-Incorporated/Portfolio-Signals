@@ -14,7 +14,7 @@
   gap: 2rem 3rem;
   padding-top: 1.35rem;
   background: var(--surface);
-  border-top: 5px solid var(--hd-red);
+  border-top: 5px solid var(--accent);
 }
 
 .brand-identity {
@@ -25,19 +25,22 @@
   min-height: 76px;
 }
 .brand-mark {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   flex: 0 0 auto;
-  border-radius: 16px;
-  box-shadow: 0 12px 28px rgba(201, 0, 70, .18);
+  border-radius: 0;
+  box-shadow: none;
 }
 .brand-wordmark {
   display: grid;
   line-height: .82;
-  font-size: 1.38rem;
-  letter-spacing: -.04em;
+  font-family: var(--agi-mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--brand-2);
 }
-.brand-wordmark strong { font-weight: 800; }
+.brand-wordmark strong { font-weight: 600; }
 .brand-divider {
   width: 1px;
   height: 46px;
@@ -48,9 +51,28 @@
   max-width: 180px;
   color: var(--muted);
   font-size: .88rem;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.2;
 }
+.brand-suite-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem .8rem;
+  margin-left: auto;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.brand-suite-links a { color: var(--brand-2); text-decoration: none; }
+.brand-suite-links a:hover { text-decoration: underline; text-underline-offset: .25rem; }
+.tenant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--muted);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+.tenant-chip img { width: 24px; height: 24px; border-radius: 4px; }
 
 .site-header > div:not(.header-actions):not(.brand-identity) {
   grid-area: hero;
@@ -62,7 +84,7 @@
   font-size: clamp(2.65rem, 7vw, 6.1rem);
   max-width: 900px;
 }
-.site-header .eyebrow { color: var(--hd-red); }
+.site-header .eyebrow { color: var(--brand-2); }
 .header-actions { grid-area: actions; align-self: center; }
 
 .primary-nav {
@@ -75,7 +97,7 @@
   transition: color .18s ease;
 }
 .primary-nav a:hover,
-.primary-nav a.is-active { color: var(--hd-red); }
+.primary-nav a.is-active { color: var(--brand-2); }
 .primary-nav a.is-active::after {
   content: "";
   position: absolute;
@@ -84,7 +106,7 @@
   bottom: -.6rem;
   height: 3px;
   border-radius: 999px;
-  background: var(--hd-red);
+  background: var(--accent);
 }
 .primary-nav a:focus-visible,
 .button:focus-visible,
@@ -92,7 +114,7 @@
 .tab:focus-visible,
 .workspace-nav-button:focus-visible,
 .auth-form input:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--hd-red) 35%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
   outline-offset: 3px;
 }
 
@@ -135,8 +157,8 @@
 .next-run span,
 .risk-grid span { color: var(--hd-red); }
 .progress-track div { background: linear-gradient(90deg, var(--hd-red), var(--hd-crimson)); }
-.button, .tab.active { background: var(--hd-red); border-color: var(--hd-red); }
-.workspace-nav-button.is-active { background: var(--hd-red); border-color: var(--hd-red); }
+.button, .tab.active { background: var(--text); border-color: var(--text); }
+.workspace-nav-button.is-active { background: var(--text); border-color: var(--text); }
 
 .footer-brand {
   display: flex;
@@ -145,9 +167,11 @@
   font-weight: 800;
   color: var(--text);
 }
-.footer-brand img { width: 38px; height: 38px; border-radius: 10px; }
+.footer-brand img { width: 38px; height: 38px; border-radius: 0; }
 .footer-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem 1rem; text-align: right; }
 .footer-meta small { color: var(--muted); }
+html[data-theme="dark"] .brand-mark,
+html[data-theme="dark"] .footer-brand img { filter: invert(1) sepia(.1) saturate(.3); }
 
 /* Authenticated workspace continuity */
 .auth-gate {
@@ -199,6 +223,7 @@
   .header-actions { justify-content: flex-start; }
   .campaign-status-bar { grid-template-columns: 1fr; }
   .brand-divider, .brand-product { display: none; }
+  .brand-suite-links { width: 100%; margin-left: 0; }
   .primary-nav a.is-active::after { bottom: -.35rem; }
   footer { align-items: flex-start; flex-direction: column; }
   .footer-meta { justify-content: flex-start; text-align: left; }
