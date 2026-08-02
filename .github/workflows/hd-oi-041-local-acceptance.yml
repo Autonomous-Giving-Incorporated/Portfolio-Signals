@@ -1,0 +1,125 @@
+name: HD-OI-041 Complete Local Acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: npm
+          cache-dependency-path: |
+            services/workbook-parser/package-lock.json
+            services/import-api/package-lock.json
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.2.7
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.31.8
+
+      - name: Validate public campaign contract
+        run: |
+          npx --yes --package ajv-cli@5 --package ajv-formats@3 \
+            ajv validate --spec=draft2020 -c ajv-formats \
+            -s schemas/public-campaign.schema.json \
+            -d data/public-campaign.json
+
+      - name: Parse JavaScript entry points
+        run: |
+          node --check app.js
+          node --check workspace.js
+          node --check workspace-nav.js
+          node --check import-review.js
+          node --check finance-impact.js
+          node --check donor-impact.js
+
+      - name: Install and audit workbook parser
+        working-directory: services/workbook-parser
+        run: |
+          npm ci --ignore-scripts
+          npm audit --audit-level=high
+          npm run validate
+          npm test
+
+      - name: Test import API
+        working-directory: services/import-api
+        run: npm test
+
+      - name: Type-check signed document function
+        run: deno check supabase/functions/signed-document-url/index.ts
+
+      - name: Start disposable Supabase project
+        run: supabase start
+
+      - name: Apply full migration chain
+        run: supabase db reset
+
+      - name: Resolve disposable database URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          test -n "${DB_URL:-}"
+          printf 'DB_URL=%s\n' "$DB_URL" >> "$GITHUB_ENV"
+
+      - name: Load six synthetic roles
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+
+      - name: Execute import gate suite
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/003_import_gate_cases.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/004_import_review_actions.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/005_atomic_import_creation.sql
+
+      - name: Execute role and storage policy suites
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_policy_matrix.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/storage_matrix.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/006_document_access_audit.sql
+
+      - name: Reject committed sensitive exports
+        run: |
+          if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
+            echo 'Sensitive or binary source export detected.' >&2
+            exit 1
+          fi
+
+      - name: Emit commit-scoped local receipt
+        if: success()
+        env:
+          ACCEPTED_SHA: ${{ github.sha }}
+          ACCEPTED_RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p out/audit
+          python3 scripts/acceptance/write_local_receipt.py \
+            --commit "$ACCEPTED_SHA" \
+            --run-id "$ACCEPTED_RUN_ID" \
+            --output out/audit/local-acceptance.json
+          cat out/audit/local-acceptance.json >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: hd-oi-041-local-acceptance-${{ github.sha }}
+          path: out/audit/local-acceptance.json
+          if-no-files-found: error
+
+      - name: Stop disposable stack
+        if: always()
+        run: supabase stop --no-backup
