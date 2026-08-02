@@ -3,7 +3,7 @@
 **Campaign:** HD-OI-041 — Repository State Reconciliation and Staging Acceptance  
 **Recorded:** 2026-08-02  
 **Canonical repository:** `scrimshawlife-ctrl/Hacker-Dojo`  
-**Current `main` baseline:** `522b66076f6b93be587eec8da95ff6d137746a6a`
+**Current `main` baseline:** `251549f1e2142c35d1807cc9412d596ce82e360d`
 
 ## Purpose
 
@@ -20,7 +20,7 @@ This document separates current repository state from older hosted verification 
 
 ```yaml
 repository_visibility: PUBLIC
-main_commit: 522b66076f6b93be587eec8da95ff6d137746a6a
+main_commit: 251549f1e2142c35d1807cc9412d596ce82e360d
 public_portal: OBSERVED_IMPLEMENTED
 authenticated_workspace: OBSERVED_IMPLEMENTED
 hacker_dojo_brand_system: OBSERVED_IMPLEMENTED
@@ -49,17 +49,18 @@ historical_hosted_synthetic_policy_suite: 7_of_7_PASS
 historical_staging_project_ref: ecxkhihlbrcwpavfoaoq
 ```
 
-These results remain useful provenance. They must not be represented as a current-main staging acceptance result until the full suite is rerun against `522b66076f6b93be587eec8da95ff6d137746a6a` or a later approved commit.
+These results remain useful provenance. They must not be represented as a current-main staging acceptance result until the full suite is rerun against `251549f1e2142c35d1807cc9412d596ce82e360d` or a later approved commit.
 
 ## Drift detected
 
 ```yaml
-readme_pages_state: STALE_OR_CONTRADICTORY
-roadmap_hosted_state: PARTIALLY_STALE
-start_here_document: PREVIOUSLY_MISSING
-open_draft_pr_28: STALE_RELATIVE_TO_MAIN
-current_main_hosted_parity: PENDING
-latest_brand_and_navigation_browser_smoke: PENDING
+readme_current_main_evidence: RECONCILED_IN_PENDING_DOCS_PR
+roadmap_current_main_evidence: RECONCILED_IN_PENDING_DOCS_PR
+start_here_baseline: RECONCILED_IN_PENDING_DOCS_PR
+pr_28: SUPERSEDED_AND_CLOSED_WITHOUT_MERGE
+pr_44_local_acceptance: PASS_PREMERGE_ONLY
+current_main_hosted_parity: NOT_RUN
+latest_brand_and_navigation_browser_smoke: NOT_RUN
 ```
 
 ## Required current-main verification
@@ -88,8 +89,10 @@ Run the following against the current baseline:
 
 ## Current verdict
 
+PR #44 completed a green local acceptance workflow against its unmerged head. That is pre-merge evidence only; the exact current-main and hosted lanes remain unexecuted.
+
 ```yaml
-verdict: CONDITIONAL
+verdict: NO_GO
 public_demo: READY
 local_control_model: STRONG_FOUNDATION
 hosted_staging_current_main: NOT_YET_REVERIFIED
