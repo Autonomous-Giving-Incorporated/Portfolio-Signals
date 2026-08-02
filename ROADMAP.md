@@ -92,6 +92,7 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 - static Hacker Dojo fallback when runtime configuration is unavailable;
 - complete version history and tenant audit events.
 - onboarding-controlled sponsor and grant modules with disabled-route and workspace navigation gates.
+- onboarding-configurable one- or two-person decision approvals with distinct approvers and immutable evidence.
 
 ### Governed import foundation
 

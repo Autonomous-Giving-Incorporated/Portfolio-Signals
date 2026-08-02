@@ -7,7 +7,7 @@
 - [x] AGI-004: convert embedded tabs into dedicated GitHub Pages-compatible pages with reusable dropdown, slider, and tooltip controls.
 - [x] AGI-005: add director customization, previews, publication, rollback, and governed assets.
 - [x] AGI-006: productize sponsor/grant modules and implement governed client onboarding activation.
-- [ ] AGI-007: add optional two-person approvals selected during onboarding.
+- [x] AGI-007: add optional two-person approvals selected during onboarding.
 - [ ] AGI-008: exchange and validate short-lived Supabase JWTs with Impact Relay.
 - [ ] AGI-009: pass browser, accessibility, security, and two-tenant acceptance.
 

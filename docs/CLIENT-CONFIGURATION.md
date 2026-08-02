@@ -24,6 +24,7 @@ The published projection supports:
 - organization and product names;
 - campaign title and tagline;
 - onboarding-controlled sponsor and grant module enablement;
+- one- or two-person decision approval policy;
 - primary, accent, and background theme colors;
 - governed logo, icon, and hero asset paths.
 

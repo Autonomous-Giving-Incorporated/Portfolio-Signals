@@ -73,6 +73,10 @@ begin
     or jsonb_typeof(p_config#>'{modules,sponsors}') is distinct from 'boolean'
     or jsonb_typeof(p_config#>'{modules,grants}') is distinct from 'boolean'
   ) then raise exception 'invalid_client_modules'; end if;
+  if p_config ? 'approvals' and (
+    jsonb_typeof(p_config->'approvals') <> 'object'
+    or coalesce((p_config#>>'{approvals,decision_approvers}')::integer, 0) not in (1, 2)
+  ) then raise exception 'invalid_client_approval_policy'; end if;
   foreach v_color in array array[
     p_config#>>'{theme,primary}', p_config#>>'{theme,accent}', p_config#>>'{theme,background}'
   ] loop
@@ -229,6 +233,7 @@ values (
     'campaign_title', 'Keep the room where builders become possible.',
     'campaign_tagline', 'Come home. Build something. Fund the next builder.',
     'modules', jsonb_build_object('sponsors', true, 'grants', true),
+    'approvals', jsonb_build_object('decision_approvers', 1),
     'theme', jsonb_build_object('primary', '#ED1C24', 'accent', '#33D6C5', 'background', '#071725'),
     'assets', jsonb_build_object('logo_path', null, 'icon_path', null, 'hero_path', null)
   ),

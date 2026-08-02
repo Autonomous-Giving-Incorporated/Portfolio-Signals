@@ -63,12 +63,21 @@ declare
   );
   v_bad_config jsonb := jsonb_set(v_config, '{assets,logo_path}', to_jsonb('org_config_other/00000000-0000-0000-0000-000000000101/logo.png'::text));
   v_bad_modules jsonb := jsonb_set(v_config, '{modules,grants}', to_jsonb('yes'::text));
+  v_bad_approvals jsonb := jsonb_set(v_config, '{approvals}', jsonb_build_object('decision_approvers', 3));
   v_draft public.client_config_versions;
   v_second public.client_config_versions;
   v_published public.client_config_versions;
   v_rollback public.client_config_versions;
 begin
   if (select count(*) from public.client_assets) <> 2 then raise exception 'client member cannot read asset metadata'; end if;
+
+  begin
+    perform public.save_client_config_draft('org_hacker_dojo', v_bad_approvals, 'Draft with invalid approval configuration');
+    raise exception 'invalid approval configuration unexpectedly accepted';
+  exception when others then
+    if sqlerrm = 'invalid approval configuration unexpectedly accepted' then raise; end if;
+    if sqlerrm not like '%invalid_client_approval_policy%' then raise; end if;
+  end;
 
   begin
     perform public.save_client_config_draft('org_hacker_dojo', v_bad_modules, 'Draft with invalid module configuration');
