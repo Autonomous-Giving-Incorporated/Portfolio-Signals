@@ -1,0 +1,93 @@
+{
+  "repository": "scrimshawlife-ctrl/Hacker-Dojo",
+  "commit": "e124375bfd60758df9857b03dfc171c9210b78b1",
+  "environment": "local",
+  "executedAt": "2026-08-02T01:05:15Z",
+  "verdict": "NO_GO",
+  "technicalGates": {
+    "publicContract": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565"
+    },
+    "securityContract": {
+      "state": "PASS",
+      "evidence": "PR #44 workflows 30726324563 and 30726324565"
+    },
+    "migrationChain": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565 disposable Supabase suite"
+    },
+    "sixRoleRls": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565 disposable Supabase suite"
+    },
+    "importGates": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565 disposable Supabase suite"
+    },
+    "privateStorage": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565 disposable Supabase suite"
+    },
+    "signedUrlAudit": {
+      "state": "PASS",
+      "evidence": "PR #44 workflow 30726324565 disposable Supabase suite"
+    },
+    "browserSmoke": {
+      "state": "NOT_RUN",
+      "evidence": "Not part of pre-merge local workflow"
+    },
+    "directorAcceptance": {
+      "state": "NOT_RUN",
+      "evidence": "Not part of pre-merge local workflow"
+    }
+  },
+  "leadershipGates": {
+    "useOfFunds": {
+      "state": "BLOCKED",
+      "record": "No leadership approval recorded"
+    },
+    "privacyPolicy": {
+      "state": "BLOCKED",
+      "record": "No leadership approval recorded"
+    },
+    "outreachBasis": {
+      "state": "BLOCKED",
+      "record": "Outreach remains unauthorized"
+    },
+    "namedOwners": {
+      "state": "NOT_COMPUTABLE",
+      "record": "No current ownership record supplied"
+    },
+    "sourceWorkbook": {
+      "state": "BLOCKED",
+      "record": "No real workbook is authorized"
+    }
+  },
+  "exceptions": [
+    {
+      "severity": "P1",
+      "summary": "Evidence applies only to unmerged PR #44 head; exact current main and hosted parity are not run."
+    },
+    {
+      "severity": "P1",
+      "summary": "Browser smoke and director acceptance remain not run."
+    }
+  ],
+  "productionImportAuthorized": false,
+  "outreachAuthorized": false,
+  "evidence": [
+    {
+      "label": "PR #44 complete local acceptance",
+      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726324565"
+    },
+    {
+      "label": "PR #44 local security contract",
+      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726324563"
+    },
+    {
+      "label": "PR #44 current-main acceptance contract",
+      "source": "https://github.com/scrimshawlife-ctrl/Hacker-Dojo/actions/runs/30726324554"
+    }
+  ]
+}
