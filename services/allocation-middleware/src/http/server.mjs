@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const startedAt = Date.now();
 
 async function readBody(req) {
   const chunks = [];
@@ -21,6 +22,8 @@ function send(res, status, data) {
   res.writeHead(status, {
     'content-type': 'application/json',
     'content-length': Buffer.byteLength(body),
+    'x-content-type-options': 'nosniff',
+    'cache-control': 'no-store',
   });
   res.end(body);
 }
@@ -29,11 +32,6 @@ function unauthorized(res) {
   send(res, 401, { error: 'UNAUTHORIZED' });
 }
 
-/**
- * @param {{ service: any, operatorToken?: string, webhookToken?: string }} opts
- * operatorToken protects mutating operator routes when set.
- * webhookToken protects every.org webhook when set (header x-webhook-token).
- */
 export function createAllocationServer({ service, operatorToken, webhookToken }) {
   function requireOperator(req, res) {
     if (!operatorToken) return true;
@@ -45,10 +43,13 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
     return false;
   }
 
-  function requireWebhook(req, res) {
+  function requireWebhook(req, res, url) {
     if (!webhookToken) return true;
     const header = req.headers['x-webhook-token'] || '';
-    if (header === webhookToken) return true;
+    // Query token supports providers (e.g. every.org) that cannot set custom headers.
+    // Prefer header in production; query is for pilot webhooks only.
+    const query = url.searchParams.get('token') || '';
+    if (header === webhookToken || query === webhookToken) return true;
     unauthorized(res);
     return false;
   }
@@ -56,8 +57,17 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
   return http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url || '/', 'http://localhost');
+
+      if (req.method === 'GET' && url.pathname === '/healthz') {
+        return send(res, 200, { status: 'ok', uptimeSec: Math.floor((Date.now() - startedAt) / 1000) });
+      }
+      if (req.method === 'GET' && url.pathname === '/readyz') {
+        const h = await service.health();
+        return send(res, 200, { status: 'ready', ...h });
+      }
+
       if (req.method === 'POST' && url.pathname === '/webhooks/every-org') {
-        if (!requireWebhook(req, res)) return;
+        if (!requireWebhook(req, res, url)) return;
         const payload = await readJson(req);
         const result = await service.ingestEveryOrg(payload);
         return send(res, 200, { created: result.created });
@@ -94,6 +104,21 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
         const result = await service.attachProof(body);
         return send(res, 201, result);
       }
+      if (req.method === 'GET' && url.pathname === '/labels') {
+        return send(res, 200, await service.listLabels());
+      }
+      if (req.method === 'POST' && url.pathname === '/labels') {
+        if (!requireOperator(req, res)) return;
+        const body = await readJson(req);
+        await service.setLabel(body);
+        return send(res, 200, { ok: true });
+      }
+      if (req.method === 'POST' && url.pathname === '/pots/merge') {
+        if (!requireOperator(req, res)) return;
+        const body = await readJson(req);
+        await service.mergePots(body);
+        return send(res, 200, { ok: true });
+      }
       if (req.method === 'GET' && url.pathname === '/exceptions') {
         return send(res, 200, await service.listExceptions());
       }
@@ -129,7 +154,11 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
         const htmlPath = path.join(__dirname, '../../public/index.html');
         try {
           const html = await readFile(htmlPath, 'utf8');
-          res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+          res.writeHead(200, {
+            'content-type': 'text/html; charset=utf-8',
+            'x-content-type-options': 'nosniff',
+            'cache-control': 'no-store',
+          });
           return res.end(html);
         } catch {
           return send(res, 200, { service: 'allocation-middleware', ok: true });
@@ -147,25 +176,35 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
 const isMain =
   process.argv[1] && path.resolve(fileURLToPath(import.meta.url)) === path.resolve(process.argv[1]);
 if (isMain) {
+  const { loadConfig } = await import('../app/config.mjs');
   const { createService } = await import('../app/service.mjs');
   const { createFileStore, createMemoryStore } = await import('../app/store.mjs');
-  const orgId = process.env.ORG_ID || 'org_demo';
-  const dataFile = process.env.DATA_FILE || '';
-  const store = dataFile ? createFileStore(dataFile) : createMemoryStore();
+  const cfg = loadConfig(process.env);
+  if (!cfg.ok) {
+    console.error('Production configuration invalid:');
+    for (const e of cfg.errors) console.error(' -', e);
+    process.exit(1);
+  }
+  const store = cfg.dataFile ? createFileStore(cfg.dataFile) : createMemoryStore();
   const service = createService({
-    orgId,
+    orgId: cfg.orgId,
     store,
-    proofSlaHours: Number(process.env.PROOF_SLA_HOURS || 72),
+    proofSlaHours: cfg.proofSlaHours,
   });
   const server = createAllocationServer({
     service,
-    operatorToken: process.env.OPERATOR_TOKEN || '',
-    webhookToken: process.env.WEBHOOK_TOKEN || '',
+    operatorToken: cfg.operatorToken,
+    webhookToken: cfg.webhookToken,
   });
-  const port = Number(process.env.PORT || 8787);
-  server.listen(port, () => {
+  server.listen(cfg.port, '0.0.0.0', () => {
     console.log(
-      `allocation-middleware on http://127.0.0.1:${port} org=${orgId} store=${dataFile || 'memory'}`,
+      JSON.stringify({
+        msg: 'allocation-middleware listening',
+        port: cfg.port,
+        orgId: cfg.orgId,
+        store: cfg.dataFile || 'memory',
+        production: cfg.production,
+      }),
     );
   });
 }

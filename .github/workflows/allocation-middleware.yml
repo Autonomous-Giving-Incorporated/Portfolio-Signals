@@ -1,0 +1,29 @@
+name: Allocation middleware
+
+on:
+  pull_request:
+    paths:
+      - 'services/allocation-middleware/**'
+      - '.github/workflows/allocation-middleware.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/allocation-middleware/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test
+        working-directory: services/allocation-middleware
+        run: npm test
+      - name: Production config guard (negative)
+        working-directory: services/allocation-middleware
+        run: |
+          set +e
+          NODE_ENV=production node -e "import('./src/app/config.mjs').then(m=>{const c=m.loadConfig(process.env); process.exit(c.ok?1:0)})"
+          test $? -eq 0

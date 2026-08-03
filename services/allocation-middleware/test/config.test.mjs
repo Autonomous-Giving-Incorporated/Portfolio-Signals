@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { loadConfig } from '../src/app/config.mjs';
+
+test('dev allows missing tokens', () => {
+  const c = loadConfig({ NODE_ENV: 'development' });
+  assert.equal(c.ok, true);
+  assert.equal(c.orgId, 'org_demo');
+});
+
+test('production requires guards', () => {
+  const c = loadConfig({
+    NODE_ENV: 'production',
+    ORG_ID: 'org_pilot',
+    DATA_FILE: '/data/state.json',
+    OPERATOR_TOKEN: 'x'.repeat(16),
+    WEBHOOK_TOKEN: 'y'.repeat(16),
+  });
+  assert.equal(c.ok, true);
+});
+
+test('production fails without DATA_FILE', () => {
+  const c = loadConfig({
+    NODE_ENV: 'production',
+    ORG_ID: 'org_pilot',
+    OPERATOR_TOKEN: 'x'.repeat(16),
+    WEBHOOK_TOKEN: 'y'.repeat(16),
+  });
+  assert.equal(c.ok, false);
+  assert.ok(c.errors.some((e) => e.includes('DATA_FILE')));
+});

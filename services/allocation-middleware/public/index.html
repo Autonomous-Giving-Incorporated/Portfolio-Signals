@@ -2,25 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Allocation — Available</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Allocation</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 1.5rem; max-width: 52rem; }
+    body { font-family: system-ui, sans-serif; margin: 1.25rem; max-width: 56rem; color: #111; }
     h1,h2 { font-weight: 600; }
-    table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1.5rem; }
-    th, td { border: 1px solid #ccc; padding: 0.4rem 0.6rem; text-align: left; }
-    label { display: block; margin: 0.4rem 0; }
-    input, button { font: inherit; }
-    section { margin-bottom: 2rem; }
-    pre { background: #f6f6f6; padding: 0.75rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1.25rem; }
+    th, td { border: 1px solid #ccc; padding: 0.4rem 0.55rem; text-align: left; font-size: 0.95rem; }
+    label { display: block; margin: 0.35rem 0; }
+    input, button, select { font: inherit; }
+    section { margin-bottom: 1.75rem; }
+    pre { background: #f6f6f6; padding: 0.75rem; overflow: auto; font-size: 0.85rem; }
+    .bar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; margin-bottom: 1rem; padding: 0.75rem; background: #f3f4f6; border-radius: 8px; }
+    .bar label { margin: 0; }
+    .msg { color: #065f46; }
+    .err { color: #991b1b; }
+    .hint { color: #555; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <h1>Allocation</h1>
-  <p>Transaction-light pots · every.org credits · approve to allocate · inbox for exceptions</p>
+  <p class="hint">Pots from every.org · approve allocations · proof · board packet. Day-to-day: check Inbox.</p>
+
+  <div class="bar">
+    <label>Operator token
+      <input id="token" type="password" placeholder="required in production" autocomplete="off" style="min-width:16rem" />
+    </label>
+    <button type="button" id="btn-save-token">Save token</button>
+    <span id="auth-state" class="hint"></span>
+  </div>
+
   <section>
     <h2>Available</h2>
     <div id="available">Loading…</div>
   </section>
+
   <section>
     <h2>Allocate</h2>
     <form id="alloc-form">
@@ -33,6 +49,28 @@
     </form>
     <p id="alloc-msg"></p>
   </section>
+
+  <section>
+    <h2>Map labels / merge pots</h2>
+    <p class="hint">Rename display labels or merge a messy designation into the right program pot.</p>
+    <form id="label-form">
+      <label>Kind
+        <select name="kind"><option value="campaign">campaign</option><option value="program">program</option></select>
+      </label>
+      <label>Key <input name="key" required placeholder="lab" /></label>
+      <label>Label <input name="label" required placeholder="Community Lab" /></label>
+      <button type="submit">Save label</button>
+    </form>
+    <form id="merge-form" style="margin-top:1rem">
+      <label>From campaign <input name="fromCampaign" required /></label>
+      <label>From program <input name="fromProgram" required /></label>
+      <label>To campaign <input name="toCampaign" required /></label>
+      <label>To program <input name="toProgram" required /></label>
+      <button type="submit">Merge pots</button>
+    </form>
+    <p id="map-msg"></p>
+  </section>
+
   <section>
     <h2>Attach proof</h2>
     <form id="proof-form">
@@ -44,20 +82,40 @@
     </form>
     <p id="proof-msg"></p>
   </section>
+
   <section>
     <h2>Inbox</h2>
     <div id="exceptions">—</div>
   </section>
+
   <section>
     <h2>Board packet</h2>
     <button type="button" id="btn-packet">Refresh packet</button>
     <pre id="packet">{}</pre>
   </section>
+
   <script type="module">
+    const tokenEl = document.getElementById('token');
+    tokenEl.value = localStorage.getItem('operatorToken') || '';
+    document.getElementById('auth-state').textContent = tokenEl.value ? 'Token saved in this browser' : 'No token saved';
+
+    function opHeaders(json = true) {
+      const h = {};
+      if (json) h['content-type'] = 'application/json';
+      const tok = localStorage.getItem('operatorToken') || tokenEl.value;
+      if (tok) h['x-operator-token'] = tok;
+      return h;
+    }
+
+    document.getElementById('btn-save-token').onclick = () => {
+      localStorage.setItem('operatorToken', tokenEl.value.trim());
+      document.getElementById('auth-state').textContent = 'Token saved';
+    };
+
     async function loadAvailable() {
       const rows = await (await fetch('/available')).json();
       if (!rows.length) {
-        document.getElementById('available').textContent = 'No pots yet. Send an every.org webhook or wait for gifts.';
+        document.getElementById('available').textContent = 'No pots yet. Configure every.org webhook or import CSV.';
         return;
       }
       const table = document.createElement('table');
@@ -65,49 +123,65 @@
       const tb = document.createElement('tbody');
       for (const r of rows) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.campaignKey}</td><td>${r.programKey}</td><td>${r.credited}</td><td>${r.allocated}</td><td><strong>${r.available}</strong></td>`;
+        const c = r.campaignLabel && r.campaignLabel !== r.campaignKey ? `${r.campaignLabel} <code>${r.campaignKey}</code>` : r.campaignKey;
+        const p = r.programLabel && r.programLabel !== r.programKey ? `${r.programLabel} <code>${r.programKey}</code>` : r.programKey;
+        tr.innerHTML = `<td>${c}</td><td>${p}</td><td>${r.credited}</td><td>${r.allocated}</td><td><strong>${r.available}</strong></td>`;
         tb.appendChild(tr);
       }
       table.appendChild(tb);
       document.getElementById('available').replaceChildren(table);
     }
+
     async function loadExceptions() {
       const rows = await (await fetch('/exceptions')).json();
       document.getElementById('exceptions').textContent = rows.length
         ? rows.map((e) => `${e.code}: ${e.message}`).join('\n')
         : 'No open exceptions';
     }
+
     document.getElementById('alloc-form').addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const fd = new FormData(ev.target);
-      const body = Object.fromEntries(fd.entries());
-      const res = await fetch('/allocations', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/allocations', { method: 'POST', headers: opHeaders(), body: JSON.stringify(body) });
       const data = await res.json();
-      document.getElementById('alloc-msg').textContent = res.ok
-        ? `Approved ${data.id}`
-        : `Error: ${data.error}`;
+      const el = document.getElementById('alloc-msg');
+      el.className = res.ok ? 'msg' : 'err';
+      el.textContent = res.ok ? `Approved ${data.id}` : `Error: ${data.error}`;
       await loadAvailable();
     });
+
+    document.getElementById('label-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/labels', { method: 'POST', headers: opHeaders(), body: JSON.stringify(body) });
+      const data = await res.json();
+      document.getElementById('map-msg').textContent = res.ok ? 'Label saved' : `Error: ${data.error}`;
+      await loadAvailable();
+    });
+
+    document.getElementById('merge-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/pots/merge', { method: 'POST', headers: opHeaders(), body: JSON.stringify(body) });
+      const data = await res.json();
+      document.getElementById('map-msg').textContent = res.ok ? 'Pots merged' : `Error: ${data.error}`;
+      await loadAvailable();
+    });
+
     document.getElementById('proof-form').addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const fd = new FormData(ev.target);
-      const body = Object.fromEntries(fd.entries());
-      const headers = { 'content-type': 'application/json' };
-      const tok = localStorage.getItem('operatorToken');
-      if (tok) headers['x-operator-token'] = tok;
-      const res = await fetch('/proofs', { method: 'POST', headers, body: JSON.stringify(body) });
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/proofs', { method: 'POST', headers: opHeaders(), body: JSON.stringify(body) });
       const data = await res.json();
       document.getElementById('proof-msg').textContent = res.ok ? 'Proof attached' : `Error: ${data.error}`;
       await loadExceptions();
     });
+
     document.getElementById('btn-packet').addEventListener('click', async () => {
       const data = await (await fetch('/packet')).json();
       document.getElementById('packet').textContent = JSON.stringify(data, null, 2);
     });
+
     await loadAvailable();
     await loadExceptions();
   </script>

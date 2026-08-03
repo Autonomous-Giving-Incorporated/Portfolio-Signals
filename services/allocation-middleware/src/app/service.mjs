@@ -3,7 +3,8 @@ import { parseGiftCsv } from '../connectors/csv.mjs';
 import { emptyState, creditGift, availableCents, resolvePotPath } from '../domain/pots.mjs';
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
-import { createMemoryStore } from './store.mjs';
+import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
+import { createMemoryStore, ensureExtras } from './store.mjs';
 
 export function createService({
   orgId,
@@ -13,20 +14,27 @@ export function createService({
   proofSlaHours = 72,
 }) {
   async function withState(fn) {
-    let state = await store.load();
-    if (!state.proofs) state = { ...state, proofs: new Map() };
+    let state = ensureExtras(await store.load());
     const result = fn(state);
     if (result && result.state) {
-      await store.save(result.state);
+      await store.save(ensureExtras(result.state));
       return result;
     }
     return result;
   }
 
+  function mapKeys(state, campaignKey, programKey) {
+    return applyAliases(orgId, campaignKey, programKey, state);
+  }
+
   return {
     async ingestEveryOrg(payload) {
-      const gift = normalizeEveryOrgDonation(payload, { orgId });
-      return withState((state) => creditGift(state, gift));
+      return withState((state) => {
+        let gift = normalizeEveryOrgDonation(payload, { orgId });
+        const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
+        gift = { ...gift, ...mapped };
+        return creditGift(state, gift);
+      });
     },
     async importCsv(text) {
       const rows = parseGiftCsv(text);
@@ -34,10 +42,11 @@ export function createService({
       await withState((state) => {
         let s = state;
         for (const row of rows) {
-          const { campaignKey, programKey } = resolvePotPath({
+          let { campaignKey, programKey } = resolvePotPath({
             fundraiserKey: row.campaignKey,
             designationKey: row.programKey,
           });
+          ({ campaignKey, programKey } = mapKeys(s, campaignKey, programKey));
           const net = parseAmount(row.netAmount);
           const gross = parseAmount(row.amount || row.netAmount);
           const gift = {
@@ -60,12 +69,17 @@ export function createService({
       return { created, total: rows.length };
     },
     async listAvailable() {
-      const state = await store.load();
+      const state = ensureExtras(await store.load());
+      const labels = state.labels || new Map();
       return [...state.pots.values()]
         .filter((p) => p.orgId === orgId)
         .map((p) => ({
           campaignKey: p.campaignKey,
           programKey: p.programKey,
+          campaignLabel:
+            labels.get(`${orgId}|campaign|${p.campaignKey}`) || p.campaignKey,
+          programLabel:
+            labels.get(`${orgId}|program|${p.programKey}`) || p.programKey,
           credited: formatCents(p.creditedCents),
           allocated: formatCents(p.allocatedCents),
           available: formatCents(
@@ -77,20 +91,33 @@ export function createService({
       const amountCents = parseAmount(amount).cents;
       const id = idgen();
       const approvedAt = now();
-      await withState((state) =>
-        approveAllocation(state, {
+      await withState((state) => {
+        const mapped = mapKeys(state, campaignKey, programKey);
+        return approveAllocation(state, {
           id,
           orgId,
-          campaignKey,
-          programKey,
+          campaignKey: mapped.campaignKey,
+          programKey: mapped.programKey,
           amountCents,
           purpose,
           approvedBy,
           approvedAt,
-        }),
-      );
+        });
+      });
       const state = await store.load();
       return state.allocations.get(id);
+    },
+    async setLabel(input) {
+      await withState((state) => setLabel(state, { orgId, ...input }));
+      return { ok: true };
+    },
+    async listLabels() {
+      const state = ensureExtras(await store.load());
+      return listLabels(state, orgId);
+    },
+    async mergePots(input) {
+      await withState((state) => mergePots(state, { orgId, ...input }));
+      return { ok: true };
     },
     async attachProof({ allocationId, uri, note, attachedBy }) {
       if (!uri || !String(uri).trim()) throw new Error('PROOF_URI_REQUIRED');
@@ -107,7 +134,6 @@ export function createService({
           attachedAt: now(),
         });
         proofs.set(allocationId, list);
-        // close MISSING_PROOF exceptions for this allocation
         const exceptions = state.exceptions.map((e) =>
           e.code === 'MISSING_PROOF' && e.ref?.allocationId === allocationId
             ? { ...e, open: false }
@@ -118,9 +144,8 @@ export function createService({
       return { ok: true };
     },
     async listExceptions({ openOnly = true } = {}) {
-      const state = await store.load();
+      const state = ensureExtras(await store.load());
       const base = [...(state.exceptions || [])];
-      // generate MISSING_PROOF for allocations past SLA without proof
       const slaMs = proofSlaHours * 3600 * 1000;
       const nowMs = Date.parse(now());
       for (const a of state.allocations.values()) {
@@ -158,7 +183,7 @@ export function createService({
       }));
     },
     async getTrail() {
-      const state = await store.load();
+      const state = ensureExtras(await store.load());
       return {
         gifts: [...state.gifts.values()].filter((g) => g.orgId === orgId),
         allocations: [...state.allocations.values()].filter((a) => a.orgId === orgId),
@@ -173,7 +198,7 @@ export function createService({
     },
     async getPacket() {
       const pots = await this.listAvailable();
-      const state = await store.load();
+      const state = ensureExtras(await store.load());
       const allocations = [...state.allocations.values()].filter((a) => a.orgId === orgId);
       let credited = 0n;
       let allocated = 0n;
@@ -200,6 +225,17 @@ export function createService({
           allocated: formatCents(allocated),
           available: formatCents(credited - allocated),
         },
+      };
+    },
+    async health() {
+      const state = ensureExtras(await store.load());
+      return {
+        ok: true,
+        orgId,
+        pots: state.pots.size,
+        gifts: state.gifts.size,
+        allocations: state.allocations.size,
+        openExceptions: (await this.listExceptions({ openOnly: true })).length,
       };
     },
   };
