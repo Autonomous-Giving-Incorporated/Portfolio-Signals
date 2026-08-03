@@ -17,7 +17,10 @@
   /* Fill-only. #e6b23c is 1.94:1 on white — never use it for text or thin
    * strokes on a light surface. --agi-accent-ink keeps the 42deg brand hue
    * at AA (5.5:1) for those cases. */
-  --agi-accent-ink: #886311;
+  --agi-accent-ink: #7f5d10;
+  /* Text-safe brand green. #2e7d6b is only 4.04:1 on --agi-surface-alt, so it
+   * is a fill and large-text color, not a body-text color. */
+  --agi-brand-ink: #296e5e;
   --agi-success: #19734a;
   --agi-warning: #755000;
   --agi-danger: #a83232;
@@ -38,6 +41,7 @@
   --brand-2: var(--agi-brand-2);
   --accent: var(--agi-accent);
   --accent-ink: var(--agi-accent-ink);
+  --brand-ink: var(--agi-brand-ink);
   --success: var(--agi-success);
   --warning: var(--agi-warning);
   --danger: var(--agi-danger);
@@ -61,6 +65,7 @@ html[data-theme="dark"] {
   --brand-2: #a5cbb8;
   --accent: #e6b23c;
   --accent-ink: #e6b23c;
+  --brand-ink: #7fc0ad;
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.4);
 }
 
@@ -134,18 +139,18 @@ blockquote { margin: 1.3rem 0 .5rem; font-size: clamp(1.6rem, 3vw, 2.7rem); line
 .status-pill, .tag, .status-dot, .gate { font-family: var(--font-accent); display: inline-flex; align-items: center; border-radius: 999px; font-weight: 800; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
 .status-pill { padding: .65rem .9rem; }
 .status-blocked { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
-.tag { padding: .4rem .65rem; background: color-mix(in srgb, var(--brand-2) 13%, transparent); color: var(--brand); }
+.tag { padding: .4rem .65rem; background: color-mix(in srgb, var(--brand-2) 13%, transparent); color: var(--brand-ink); }
 .tag.warning { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning); }
 .status-dot { padding: .35rem .55rem; }
 .go { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
 .conditional { color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
-.hold { color: var(--brand); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
+.hold { color: var(--brand-ink); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
 
 .button, .decision-button, .tab {
   border: 1px solid var(--line); background: var(--brand); color: white; border-radius: 999px; padding: .7rem 1rem; font-weight: 800;
 }
 .button.secondary { background: transparent; color: var(--text); }
-.decision-button { padding: .45rem .7rem; font-size: .8rem; background: transparent; color: var(--brand); }
+.decision-button { padding: .45rem .7rem; font-size: .8rem; background: transparent; color: var(--brand-ink); }
 .decision-list { margin: 0; padding-left: 1.2rem; }
 .decision-list li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .9rem 0; border-bottom: 1px solid var(--line); }
 .decision-list li:last-child { border-bottom: 0; }

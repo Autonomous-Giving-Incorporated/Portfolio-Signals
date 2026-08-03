@@ -25,21 +25,29 @@ as a second source of truth.
 
 Two brand colors are **fills, not foregrounds**, and the distinction is load-bearing:
 
-| Token | Value | On white | Use |
-|---|---|---|---|
-| `--agi-accent` | `#e6b23c` | 1.94:1 | fills and bars only; pair with ink on top (9.7:1) |
-| `--agi-brand-2` | `#a5cbb8` | 1.77:1 | tints, bar segments, hover washes |
-| `--agi-accent-ink` | `#886311` | 5.5:1 | text, icons, and thin strokes that need the amber hue |
-| `--agi-brand` | `#2e7d6b` | 4.9:1 | text-safe brand green |
+Ratios below are against the **worst** light surface, `--agi-surface-alt`
+(`#e6e9ec`) — not white. Checking against white alone is how a palette passes
+review and still fails the axe acceptance run.
 
-Amber as small text or a 1px border fails AA outright. Use `--accent-ink`
-(which resolves to the brand amber in dark mode, where it clears 8:1) instead.
+| Token | Value | On `#e6e9ec` | Use |
+|---|---|---|---|
+| `--agi-accent` | `#e6b23c` | 1.66:1 | fills and bars only; pair with ink on top (9.7:1) |
+| `--agi-brand-2` | `#a5cbb8` | 1.51:1 | tints, bar segments, hover washes |
+| `--agi-brand` | `#2e7d6b` | 4.04:1 | fills, large text, white-on-green buttons (4.9:1) |
+| `--agi-accent-ink` | `#7f5d10` | 4.96:1 | text, icons, thin strokes needing the amber hue |
+| `--agi-brand-ink` | `#296e5e` | 4.94:1 | text needing the brand green |
+
+Note that `--agi-brand` itself is **not** a body-text color: it clears AA on
+white (4.93:1) but not on the secondary surface. Use `--brand-ink` for text.
+Both ink tokens resolve back to their lighter brand values in dark mode, where
+the near-black surfaces give them 7–8:1.
 
 ## Verifying a palette change
 
-Any change to these values must be re-checked for contrast before merge —
-foreground pairs at 4.5:1, and UI/large text at 3:1. A swap that only edits
-`:root` will silently break every rule that uses a token as `color:`.
+Any change to these values must be re-checked before merge — foreground pairs
+at 4.5:1 against **every** surface they can land on, and UI/large text at 3:1.
+A swap that only edits `:root` will silently break every rule that uses a token
+as `color:`; `npm run test:browser` runs axe over both tenants and is the gate.
 
 ## Interaction rules
 
