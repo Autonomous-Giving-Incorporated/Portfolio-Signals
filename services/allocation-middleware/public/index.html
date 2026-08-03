@@ -34,6 +34,17 @@
     <p id="alloc-msg"></p>
   </section>
   <section>
+    <h2>Attach proof</h2>
+    <form id="proof-form">
+      <label>Allocation id <input name="allocationId" required /></label>
+      <label>URI <input name="uri" required placeholder="https://..." /></label>
+      <label>Note <input name="note" /></label>
+      <label>Attached by <input name="attachedBy" /></label>
+      <button type="submit">Attach proof</button>
+    </form>
+    <p id="proof-msg"></p>
+  </section>
+  <section>
     <h2>Inbox</h2>
     <div id="exceptions">—</div>
   </section>
@@ -80,6 +91,18 @@
         ? `Approved ${data.id}`
         : `Error: ${data.error}`;
       await loadAvailable();
+    });
+    document.getElementById('proof-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(ev.target);
+      const body = Object.fromEntries(fd.entries());
+      const headers = { 'content-type': 'application/json' };
+      const tok = localStorage.getItem('operatorToken');
+      if (tok) headers['x-operator-token'] = tok;
+      const res = await fetch('/proofs', { method: 'POST', headers, body: JSON.stringify(body) });
+      const data = await res.json();
+      document.getElementById('proof-msg').textContent = res.ok ? 'Proof attached' : `Error: ${data.error}`;
+      await loadExceptions();
     });
     document.getElementById('btn-packet').addEventListener('click', async () => {
       const data = await (await fetch('/packet')).json();

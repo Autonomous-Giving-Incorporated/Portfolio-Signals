@@ -44,3 +44,14 @@ ORG_ID=org_demo npm start   # http://127.0.0.1:8787
 - In-memory store (Supabase deferred)
 
 Plan: https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md
+
+### Persistence, auth, proof (follow-on)
+
+| Feature | How |
+| --- | --- |
+| File store | `DATA_FILE=./data/org.json npm start` |
+| Operator auth | `OPERATOR_TOKEN=...` on allocate/import/proof |
+| Webhook auth | `WEBHOOK_TOKEN=...` header `x-webhook-token` |
+| Proof | `POST /proofs` + `MISSING_PROOF` after `PROOF_SLA_HOURS` |
+| Supabase | Migration `202608030001_allocation_middleware.sql` |
+
