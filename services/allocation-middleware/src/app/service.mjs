@@ -238,5 +238,76 @@ export function createService({
         openExceptions: (await this.listExceptions({ openOnly: true })).length,
       };
     },
+    /**
+     * Setup wizard status for every.org connect flow.
+     * @param {{ webhookUrl?: string, hasWebhookToken?: boolean, hasOperatorToken?: boolean }} meta
+     */
+    async getSetupStatus(meta = {}) {
+      const state = ensureExtras(await store.load());
+      const gifts = [...state.gifts.values()].filter((g) => g.orgId === orgId);
+      const pots = [...state.pots.values()].filter((p) => p.orgId === orgId);
+      const allocations = [...state.allocations.values()].filter((a) => a.orgId === orgId);
+      const lastGift = gifts
+        .slice()
+        .sort((a, b) => String(b.donatedAt).localeCompare(String(a.donatedAt)))[0];
+      const steps = {
+        copyWebhookUrl: Boolean(meta.webhookUrl),
+        pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see every.org admin
+        receivedTestGift: gifts.length > 0,
+        hasAvailableBalance: pots.some((p) => p.creditedCents > p.allocatedCents),
+        firstAllocation: allocations.length > 0,
+      };
+      return {
+        orgId,
+        connector: 'every.org',
+        authModel: 'webhook_url', // not OAuth
+        webhookUrl: meta.webhookUrl || null,
+        hasWebhookToken: Boolean(meta.hasWebhookToken),
+        hasOperatorToken: Boolean(meta.hasOperatorToken),
+        steps,
+        counts: {
+          gifts: gifts.length,
+          pots: pots.length,
+          allocations: allocations.length,
+        },
+        lastGift: lastGift
+          ? {
+              chargeId: lastGift.chargeId,
+              campaignKey: lastGift.campaignKey,
+              programKey: lastGift.programKey,
+              netCents: lastGift.netCents.toString(),
+              donatedAt: lastGift.donatedAt,
+              source: lastGift.source,
+            }
+          : null,
+        instructions: [
+          {
+            id: 1,
+            title: 'Copy your webhook URL',
+            detail: 'Use the URL shown in this wizard (includes a secret token).',
+          },
+          {
+            id: 2,
+            title: 'Open every.org nonprofit settings',
+            detail: 'Go to every.org/<your-slug>/admin/settings → Advanced settings.',
+          },
+          {
+            id: 3,
+            title: 'Paste the webhook URL',
+            detail: 'Save. every.org will POST each completed donation to AGI.',
+          },
+          {
+            id: 4,
+            title: 'Send a small test gift',
+            detail: 'Donate $1 (or use a known test gift) to your nonprofit page.',
+          },
+          {
+            id: 5,
+            title: 'Confirm Available',
+            detail: 'This page shows Received when the first gift lands. Then allocate.',
+          },
+        ],
+      };
+    },
   };
 }

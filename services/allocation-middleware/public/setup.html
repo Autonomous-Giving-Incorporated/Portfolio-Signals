@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connect every.org — Setup</title>
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: system-ui, sans-serif; margin: 0; color: #111; background: #fafafa; }
+    main { max-width: 40rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+    h1 { font-size: 1.5rem; font-weight: 650; margin: 0 0 0.35rem; }
+    h2 { font-size: 1.05rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+    .lead { color: #444; margin: 0 0 1.25rem; line-height: 1.45; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+    .step { display: grid; grid-template-columns: 2rem 1fr; gap: 0.65rem; padding: 0.75rem 0; border-top: 1px solid #f0f0f0; }
+    .step:first-of-type { border-top: 0; }
+    .num { width: 1.75rem; height: 1.75rem; border-radius: 999px; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; }
+    .num.done { background: #059669; }
+    .num.wait { background: #9ca3af; }
+    .url-box { font-family: ui-monospace, monospace; font-size: 0.8rem; word-break: break-all; background: #f3f4f6; padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0; }
+    button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; padding: 0.5rem 0.85rem; background: #111; color: #fff; }
+    button.secondary { background: #e5e7eb; color: #111; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+    .ok { color: #065f46; font-weight: 600; }
+    .warn { color: #92400e; }
+    .muted { color: #6b7280; font-size: 0.9rem; }
+    a { color: #1d4ed8; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+    .status-pill.ready { background: #d1fae5; color: #065f46; }
+    .status-pill.pending { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Connect every.org</h1>
+    <p class="lead">
+      AGI does not use every.org OAuth. You paste one webhook URL into every.org once.
+      Gifts then appear as <strong>Available</strong> balances to allocate.
+    </p>
+
+    <div class="card" id="status-card">
+      <span class="status-pill pending" id="status-pill">Checking…</span>
+      <p class="muted" id="status-line" style="margin: 0.5rem 0 0"></p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Your webhook URL</h2>
+      <p class="muted">Paste this into every.org → your nonprofit → admin → Settings → Advanced.</p>
+      <div class="url-box" id="webhook-url">Loading…</div>
+      <div class="row">
+        <button type="button" id="btn-copy">Copy URL</button>
+        <button type="button" class="secondary" id="btn-refresh">Refresh status</button>
+        <a class="btn secondary" href="/" style="text-decoration:none">Open Allocation →</a>
+      </div>
+      <p class="muted" id="copy-msg"></p>
+    </div>
+
+    <div class="card" id="steps"></div>
+
+    <div class="card">
+      <h2 style="margin-top:0">After connect</h2>
+      <ol class="muted">
+        <li>Rename or merge designation pots if names are messy.</li>
+        <li>Approve an allocation (operator token required in production).</li>
+        <li>Attach proof and open the board packet.</li>
+      </ol>
+    </div>
+  </main>
+  <script type="module">
+    const urlEl = document.getElementById('webhook-url');
+    const stepsEl = document.getElementById('steps');
+    const pill = document.getElementById('status-pill');
+    const statusLine = document.getElementById('status-line');
+
+    async function load() {
+      const res = await fetch('/setup');
+      const data = await res.json();
+      urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the server)';
+
+      const done = data.steps.receivedTestGift;
+      pill.textContent = done ? 'Connected' : 'Waiting for first gift';
+      pill.className = 'status-pill ' + (done ? 'ready' : 'pending');
+      statusLine.textContent = done
+        ? `Org ${data.orgId} · ${data.counts.gifts} gift(s) · last ${data.lastGift?.chargeId || ''}`
+        : `Org ${data.orgId} · no gifts yet · waiting for every.org POST`;
+
+      stepsEl.innerHTML = '';
+      for (const step of data.instructions) {
+        let state = 'wait';
+        if (step.id <= 3) state = data.webhookUrl ? 'done' : 'wait';
+        if (step.id === 4 || step.id === 5) state = data.steps.receivedTestGift ? 'done' : 'wait';
+        if (step.id === 5 && data.steps.hasAvailableBalance) state = 'done';
+        const div = document.createElement('div');
+        div.className = 'step';
+        div.innerHTML = `<div class="num ${state}">${state === 'done' ? '✓' : step.id}</div>
+          <div><strong>${step.title}</strong><div class="muted">${step.detail}</div></div>`;
+        stepsEl.appendChild(div);
+      }
+    }
+
+    document.getElementById('btn-copy').onclick = async () => {
+      const text = urlEl.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        document.getElementById('copy-msg').textContent = 'Copied.';
+      } catch {
+        document.getElementById('copy-msg').textContent = 'Select the URL and copy manually.';
+      }
+    };
+    document.getElementById('btn-refresh').onclick = () => load();
+    await load();
+    setInterval(load, 8000);
+  </script>
+</body>
+</html>

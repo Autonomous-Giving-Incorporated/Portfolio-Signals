@@ -1,3 +1,7 @@
+## Connect every.org
+
+Open `/setup.html` for the guided webhook setup (no OAuth).
+
 # Allocation middleware
 
 MVP package for AGI allocation middleware (every.org → pots → allocate → packet).
