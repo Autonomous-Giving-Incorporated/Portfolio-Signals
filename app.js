@@ -35,7 +35,7 @@ if (header && headerCopy) {
   if (isOverview) {
     const eyebrow = headerCopy.querySelector('.eyebrow');
     const title = headerCopy.querySelector('h1');
-    if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
+    if (eyebrow) eyebrow.textContent = 'Fund Intel · Decision Workspace';
     if (title) title.textContent = 'Campaign Control Center';
   }
 }
@@ -75,7 +75,7 @@ if (footer) {
       <span>Autonomously Giving Incorporated · Fund Intel</span>
     </div>
     <div class="footer-meta">
-      <small>Hacker Dojo campaign context · Powered by Neon Genie</small>
+      <small>Hacker Dojo campaign context</small>
       <small>Software by Zero State</small>
       <a href="https://autogive.app/brand#tokens">Tokens</a>
       <a href="https://autogive.app/brand#logo">Logo use</a>
