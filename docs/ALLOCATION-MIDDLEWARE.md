@@ -27,3 +27,20 @@ It does **not** own human approval of allocations (Autonomous Giving capability)
 ## Implementation note
 
 When middleware ships, prefer **capability modules** co-located in a modular monolith per Specs SPEC-002A / SPEC-020. Public `data/public-campaign.json` contracts for the GitHub Pages suite remain separate and advisory-only.
+
+## Implementation status
+
+MVP package: `services/allocation-middleware/`
+
+```bash
+cd services/allocation-middleware
+npm test
+ORG_ID=org_demo npm start   # http://127.0.0.1:8787
+```
+
+- every.org webhook: `POST /webhooks/every-org`
+- CSV import: `POST /import/csv`
+- Operator UI: `/` (Available · Allocate · Inbox · Packet)
+- In-memory store (Supabase deferred)
+
+Plan: https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md
