@@ -20,6 +20,20 @@ test('production requires guards', () => {
   assert.equal(c.ok, true);
 });
 
+test('production accepts supabase instead of operator token', () => {
+  const c = loadConfig({
+    NODE_ENV: 'production',
+    ORG_ID: 'org_hacker_dojo',
+    DATA_FILE: '/data/state.json',
+    WEBHOOK_TOKEN: 'y'.repeat(16),
+    PUBLIC_BASE_URL: 'https://alloc.example.com',
+    SUPABASE_URL: 'https://xyz.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
+  });
+  assert.equal(c.ok, true);
+  assert.equal(c.hasSupabaseAuth, true);
+});
+
 test('production fails without DATA_FILE', () => {
   const c = loadConfig({
     NODE_ENV: 'production',
