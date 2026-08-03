@@ -30,7 +30,7 @@ async function installTenantApi(page) {
       defaultClientSlug: 'hacker-dojo'
     };
   });
-  await page.route('https://esm.sh/@supabase/supabase-js@2.45.4', route => {
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
     route.fulfill({
       contentType: 'application/javascript',
       body: `
