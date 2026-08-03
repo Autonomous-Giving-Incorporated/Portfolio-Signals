@@ -2,7 +2,13 @@ import { emptyState } from '../domain/pots.mjs';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
-/** Serialize Maps in state for JSON */
+export function ensureExtras(state) {
+  if (!state.proofs) state.proofs = new Map();
+  if (!state.labels) state.labels = new Map();
+  if (!state.aliases) state.aliases = new Map();
+  return state;
+}
+
 export function serializeState(state) {
   return {
     gifts: [...state.gifts.entries()].map(([k, v]) => [
@@ -27,12 +33,13 @@ export function serializeState(state) {
     ]),
     exceptions: state.exceptions,
     proofs: state.proofs ? [...state.proofs.entries()] : [],
+    labels: state.labels ? [...state.labels.entries()] : [],
+    aliases: state.aliases ? [...state.aliases.entries()] : [],
   };
 }
 
 export function deserializeState(raw) {
-  const state = emptyState();
-  state.proofs = new Map();
+  const state = ensureExtras(emptyState());
   if (!raw) return state;
   for (const [k, v] of raw.gifts || []) {
     state.gifts.set(k, {
@@ -55,22 +62,20 @@ export function deserializeState(raw) {
     });
   }
   state.exceptions = raw.exceptions || [];
-  for (const [k, v] of raw.proofs || []) {
-    state.proofs.set(k, v);
-  }
+  for (const [k, v] of raw.proofs || []) state.proofs.set(k, v);
+  for (const [k, v] of raw.labels || []) state.labels.set(k, v);
+  for (const [k, v] of raw.aliases || []) state.aliases.set(k, v);
   return state;
 }
 
 export function createMemoryStore(initial) {
-  let state = initial || emptyState();
-  if (!state.proofs) state.proofs = new Map();
+  let state = ensureExtras(initial || emptyState());
   return {
     async load() {
       return state;
     },
     async save(next) {
-      state = next;
-      if (!state.proofs) state.proofs = new Map();
+      state = ensureExtras(next);
     },
   };
 }
@@ -84,14 +89,12 @@ export function createFileStore(filePath) {
         const raw = JSON.parse(await readFile(filePath, 'utf8'));
         cache = deserializeState(raw);
       } catch {
-        cache = emptyState();
-        cache.proofs = new Map();
+        cache = ensureExtras(emptyState());
       }
       return cache;
     },
     async save(next) {
-      cache = next;
-      if (!cache.proofs) cache.proofs = new Map();
+      cache = ensureExtras(next);
       await mkdir(path.dirname(filePath), { recursive: true });
       await writeFile(filePath, JSON.stringify(serializeState(next), null, 2));
     },

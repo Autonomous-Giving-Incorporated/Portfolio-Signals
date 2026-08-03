@@ -55,3 +55,6 @@ Plan: https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/do
 | Proof | `POST /proofs` + `MISSING_PROOF` after `PROOF_SLA_HOURS` |
 | Supabase | Migration `202608030001_allocation_middleware.sql` |
 
+
+
+See [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) for pilot deploy gates.

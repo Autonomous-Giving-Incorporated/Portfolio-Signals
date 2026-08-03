@@ -57,3 +57,11 @@ test('operator token required when configured', async () => {
   });
   assert.equal(denied.status, 401);
 });
+
+test('healthz is ok', async () => {
+  const base = await start();
+  const res = await fetch(`${base}/healthz`);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.status, 'ok');
+});
