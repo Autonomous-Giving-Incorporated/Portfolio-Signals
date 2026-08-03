@@ -225,4 +225,42 @@
   .workspace-brand-lockup { align-items: flex-start; flex-wrap: wrap; }
   .workspace-brand-lockup span { width: 100%; padding: .65rem 0 0; border-left: 0; border-top: 1px solid var(--line); }
   .workspace-authority-note { flex-direction: column; }
+  .impact-host-header .brand-product { display: block; max-width: none; }
+  .impact-host-header .brand-identity { flex-wrap: wrap; }
+  .impact-host-header .brand-suite-links { margin-left: 0; width: 100%; }
 }
+
+/* Impact Relay host pilot screens (finance / donor) — compact AGI shell */
+.impact-host-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.impact-host-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem clamp(1.25rem, 5vw, 5rem);
+  background: var(--surface);
+  border-top: 5px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+}
+.impact-host-header .brand-identity {
+  grid-area: unset;
+  width: 100%;
+  min-height: 0;
+}
+.impact-host-main {
+  flex: 1 1 auto;
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+.impact-host-shell > footer {
+  margin-top: auto;
+}
+.impact-host-auth {
+  max-width: 32rem;
+  margin-bottom: 1.5rem;
+}
+.impact-host-auth .lede { max-width: 36rem; }

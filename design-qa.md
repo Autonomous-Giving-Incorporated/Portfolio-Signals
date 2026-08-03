@@ -14,5 +14,6 @@
 - Authentication: the login gate uses the same AGI/product/tenant hierarchy as the public workspace.
 - Tokens and type: shared AGI palette, Space Grotesk display, and Inter interface typography are applied.
 - Builder attribution: Zero State appears only in the legal footer beside Tokens, Logo use, and Legal.
+- Impact Relay host pilots: `finance-impact.html` and `donor-impact.html` now share the AGI lockup, suite navigation, and footer governance (see `docs/AGI-DESIGN-SYSTEM.md`).
 
 final result: passed
