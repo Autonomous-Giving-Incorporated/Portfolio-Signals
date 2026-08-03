@@ -26,6 +26,8 @@ python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --por
 | `finance-impact.html` | L3 expense approval queue |
 | `donor-impact.html` | Donor timeline / UOF detail |
 
+Both screens use the **AGI host shell** (wordmark lockup, suite links, Tokens / Logo / Legal footer, Zero State credit). See [AGI-DESIGN-SYSTEM.md](AGI-DESIGN-SYSTEM.md) § Impact Relay host pilot screens.
+
 3. Auth modes:
 
 | Mode | When | How |

@@ -30,3 +30,21 @@ The masthead includes reciprocal links to AGI and Impact Relay. Tenant branding 
 - Loading, empty, error, blocked, waiting, and verified states use shared language.
 - Operational tables may scroll horizontally on small screens while primary actions remain reachable.
 - Public evidence and authenticated operations share typography while authority boundaries remain visually explicit.
+
+## Host pilot and operational screens
+
+Operational host surfaces use the same AGI shell contract as the public portal and workspace:
+
+| Surface | Product role |
+|---|---|
+| `finance-impact.html` | Impact Relay · Finance review |
+| `donor-impact.html` | Impact Relay · Donor receipts |
+| `import-review.html` | Fund Intel · Import review |
+
+Each must show:
+
+1. AGI wordmark → product role → Hacker Dojo campaign context
+2. Reciprocal suite links (`autogive.app` family + local workspace)
+3. Footer: AGI mark, product name, Tokens / Logo use / Legal, “Software by Zero State”
+
+Implementation: `brand.css` (`.impact-host-shell`, `.impact-host-header`) plus the shared `.brand-identity` / footer patterns. Public pages also load `brand.css` statically so AGI identity does not depend solely on `app.js` injection. Do not ship operational screens with eyebrow-only product labels and no corporate chrome.
