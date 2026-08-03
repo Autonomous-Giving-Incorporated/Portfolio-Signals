@@ -5,7 +5,7 @@ import { loadConfig, buildEveryOrgWebhookUrl } from '../src/app/config.mjs';
 test('dev allows missing tokens', () => {
   const c = loadConfig({ NODE_ENV: 'development' });
   assert.equal(c.ok, true);
-  assert.equal(c.orgId, 'org_demo');
+  assert.equal(c.orgId, 'org_hacker_dojo');
 });
 
 test('production requires guards', () => {

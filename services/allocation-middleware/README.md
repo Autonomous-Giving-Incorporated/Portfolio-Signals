@@ -1,3 +1,13 @@
+## Hacker Dojo pilot (default)
+
+```bash
+npm run seed:hacker-dojo
+npm run start:hacker-dojo
+# open http://127.0.0.1:8787
+```
+
+Default dev `ORG_ID` is `org_hacker_dojo`. Live every.org integration comes later via `/setup.html`.
+
 ## Connect every.org
 
 Open `/setup.html` for the guided webhook setup (no OAuth).
