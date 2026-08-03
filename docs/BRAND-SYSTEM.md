@@ -1,8 +1,8 @@
-# Zero State + Hacker Dojo brand system
+# AGI + Hacker Dojo brand system
 
 ## Purpose
 
-This document defines how the Hacker Dojo tenant identity sits inside the Zero State Fund Intel product shell across the public director portal and future authenticated campaign workspace.
+This document defines how the Hacker Dojo tenant identity sits inside the AGI Fund Intel product shell across the public director portal and authenticated campaign workspace. Zero State is the software builder, not the customer-facing suite brand.
 
 The system must remain operational, legible, privacy-safe, and consistent across desktop, mobile, light mode, and dark mode.
 
@@ -10,15 +10,15 @@ The system must remain operational, legible, privacy-safe, and consistent across
 
 The persistent masthead order is:
 
-1. Zero State mark and wordmark
+1. AGI mark and wordmark
 2. Fund Intel product name and Decision Workspace role
 3. Hacker Dojo campaign context
 
-AGI and Impact Relay remain available as reciprocal suite links. Tenant identity never replaces the Zero State or Fund Intel identity.
+AGI and Impact Relay remain available as reciprocal suite links. Tenant identity never replaces AGI or Fund Intel identity.
 
 ## Canonical marks
 
-`assets/brand/zero-state-mark.svg` is the canonical suite mark. It appears in the masthead and shared footer.
+`assets/brand/agi-wordmark.png` and `assets/brand/agi-mark.png` are the canonical corporate assets. They appear in the masthead, application icon, and shared footer.
 
 `assets/brand/hacker-dojo-icon.svg` is the canonical application mark.
 
@@ -41,7 +41,7 @@ The full supplied horizontal wordmarks may be used in static campaign exports, p
 
 ## Shared and tenant color tokens
 
-The Zero State shell uses paper `#fbf9f4`, stone `#f4f0e8`, carbon `#1d2321`, rule `#b9b2a7`, signal yellow `#f2c200`, and deep teal `#486f6a`. Georgia carries display type, Inter body copy, and IBM Plex Mono metadata.
+The AGI shell uses ink `#0e1116`, graphite `#1f232b`, green `#2e7d6b`, mint `#a5cbb8`, cool gray `#e6e9ec`, paper `#f7f8fa`, and gold `#e6b23c`. Space Grotesk carries display type, Inter body copy, and IBM Plex Mono metadata.
 
 ```css
 --hd-red: #ed1c24;
@@ -55,11 +55,11 @@ Tenant usage:
 - `--hd-crimson`: secondary campaign emphasis and transformation-path accents;
 - `--hd-charcoal`: high-contrast campaign status band and dark neutral surfaces.
 
-Semantic success, warning, and error colors remain separate from tenant colors. Zero State interaction and status tokens take precedence in the shared shell.
+Semantic success, warning, and error colors remain separate from tenant colors. AGI interaction and status tokens take precedence in the shared shell.
 
 ## Layout hierarchy
 
-1. Zero State suite identity
+1. AGI corporate identity
 2. Fund Intel product identity
 3. Hacker Dojo tenant context
 4. Campaign event and approval-state band
@@ -105,3 +105,5 @@ New brand assets require:
 3. light/dark contrast review;
 4. accessibility review;
 5. confirmation that the asset contains no private campaign data.
+
+Public navigation uses `autogive.app`, with Fund Intel at `/fund-intel/` and Impact Relay at `/impact-relay/`. Every footer includes Tokens, Logo use, Legal, and the restrained credit “Software by Zero State.”

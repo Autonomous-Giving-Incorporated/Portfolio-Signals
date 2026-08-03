@@ -8,7 +8,7 @@ This repository is the **canonical host app** (campaign ops + public portal).
 | [Impact-Relay](https://github.com/scrimshawlife-ctrl/Impact-Relay) | Ledger, L0–L3 agents, durable workflows, donor API, RBAC ports |
 | **Hacker-Dojo** (this repo) | Campaign UX, Supabase auth, import quarantine, director portal |
 
-Public impact: https://scrimshawlife-ctrl.github.io/Impact-Relay/
+Public impact: https://autogive.app/impact-relay/
 
 ## Local finance + donor screens
 

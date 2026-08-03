@@ -52,7 +52,7 @@ test.beforeEach(async ({ page }) => installTenantApi(page));
 
 test('two tenants retain independent branding, modules, and navigation context', async ({ page }) => {
   await page.goto('/index.html?client=second-tenant');
-  await expect(page.locator('.brand-wordmark')).toContainText('ZERO STATE');
+  await expect(page.locator('.brand-mark')).toHaveAttribute('alt', 'Autonomously Giving Incorporated');
   await expect(page.locator('.brand-product')).toContainText('Fund Intel');
   await expect(page.locator('h1').first()).toHaveText('Second tenant independent campaign');
   await expect(page).toHaveTitle('Second Tenant A.G.I. Campaign Control');

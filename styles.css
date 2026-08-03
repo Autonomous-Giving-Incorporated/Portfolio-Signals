@@ -1,15 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 :root {
   color-scheme: light;
-  --agi-bg: #fbf9f4;
+  --agi-bg: #f7f8fa;
   --agi-surface: #ffffff;
-  --agi-surface-alt: #f4f0e8;
-  --agi-text: #1d2321;
-  --agi-muted: #626b67;
-  --agi-line: #b9b2a7;
-  --agi-brand: #1d2321;
-  --agi-brand-2: #486f6a;
-  --agi-accent: #f2c200;
-  --agi-success: #486f6a;
+  --agi-surface-alt: #e6e9ec;
+  --agi-text: #0e1116;
+  --agi-muted: #5b646f;
+  --agi-line: #cfd5d9;
+  --agi-brand: #0e1116;
+  --agi-green: #2e7d6b;
+  --agi-brand-2: #1f5f52;
+  --agi-accent: #e6b23c;
+  --agi-success: #1f5f52;
   --agi-warning: #6a5200;
   --agi-danger: #a83232;
   --agi-shadow: none;
@@ -17,7 +20,7 @@
   --agi-radius: 4px;
   --agi-radius-pill: 999px;
   --agi-font: Inter, system-ui, sans-serif;
-  --agi-display: Georgia, "Times New Roman", serif;
+  --agi-display: "Space Grotesk", Inter, system-ui, sans-serif;
   --agi-mono: "IBM Plex Mono", ui-monospace, monospace;
   --bg: var(--agi-bg);
   --surface: var(--agi-surface);
@@ -44,7 +47,7 @@ html[data-theme="dark"] {
   --muted: #a9b7c9;
   --line: #2a3a50;
   --brand: #86b7dd;
-  --brand-2: #4a91c4;
+  --brand-2: #a5cbb8;
   --accent: #f08a68;
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.28);
 }
@@ -124,9 +127,9 @@ blockquote { margin: 1.3rem 0 .5rem; font-size: clamp(1.6rem, 3vw, 2.7rem); line
 .tag { padding: .4rem .65rem; background: color-mix(in srgb, var(--brand-2) 13%, transparent); color: var(--brand-2); }
 .tag.warning { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning); }
 .status-dot { padding: .35rem .55rem; }
-.go { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.go { color: #1f5f52; background: color-mix(in srgb, var(--success) 12%, transparent); }
 .conditional { color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
-.hold { color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
+.hold { color: #1f5f52; background: color-mix(in srgb, var(--brand-2) 12%, transparent); }
 
 .button, .decision-button, .tab {
   border: 1px solid var(--line); background: var(--brand); color: white; border-radius: var(--agi-radius-sm); padding: .7rem 1rem; font-weight: 800;
