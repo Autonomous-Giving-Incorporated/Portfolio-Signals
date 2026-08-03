@@ -15,7 +15,7 @@ Operator guide for standing up a **staging** environment without committing secr
 
 Live donation progress, use-of-funds receipts, and event digests:
 
-https://scrimshawlife-ctrl.github.io/Impact-Relay/
+https://autogive.app/impact-relay/
 
 Repo: https://github.com/scrimshawlife-ctrl/Impact-Relay
 

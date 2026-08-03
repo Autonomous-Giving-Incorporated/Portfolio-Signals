@@ -1,25 +1,25 @@
-# Zero State shared interface contract
+# AGI shared interface contract
 
-AGI, Fund Intel, and Impact Relay are one Zero State suite. Their information density differs, but their identity, visual grammar, status language, and cross-product navigation remain consistent.
+Autonomously Giving Incorporated is the corporate master brand for AGI, Fund Intel, and Impact Relay. Their information density differs, but their identity, visual grammar, status language, and cross-product navigation remain consistent. Zero State is a footer-only software-builder credit.
 
 ## Shared primitives
 
-- Paper `#fbf9f4`, white surface `#ffffff`, stone `#f4f0e8`.
-- Carbon `#1d2321`, muted copy `#626b67`, rule `#b9b2a7`.
-- Signal yellow `#f2c200`; deep teal `#486f6a`.
+- Paper `#f7f8fa`, white surface `#ffffff`, cool gray `#e6e9ec`.
+- Ink `#0e1116`, graphite `#1f232b`, muted copy derived from graphite.
+- AGI gold `#e6b23c`; AGI green `#2e7d6b`; mint `#a5cbb8`.
 - Success/verified uses deep teal, warning uses `#6a5200`, and danger uses `#a83232`.
-- Georgia display, Inter body, IBM Plex Mono metadata.
+- Space Grotesk display, Inter body, IBM Plex Mono metadata.
 - Controls use 2px corners; structural surfaces use 4px corners; shadows are omitted.
 
 Canonical CSS custom properties use the `--agi-` prefix. Repository-local tokens alias these properties instead of defining unrelated palettes.
 
 ## Identity hierarchy
 
-1. Zero State mark and wordmark
+1. AGI mark and wordmark
 2. Fund Intel product name and “Decision Workspace” role
 3. Tenant or campaign context, such as Hacker Dojo
 
-The masthead includes reciprocal links to AGI and Impact Relay. Tenant branding can add an accent or mark, but cannot replace Zero State, product identity, semantic colors, or interaction behavior.
+The masthead includes reciprocal links to AGI and Impact Relay. Tenant branding can add an accent or mark, but cannot replace AGI, product identity, semantic colors, or interaction behavior. Canonical navigation uses `autogive.app`; Tokens, Logo use, Legal, and “Software by Zero State” appear in the footer.
 
 ## Interaction rules
 

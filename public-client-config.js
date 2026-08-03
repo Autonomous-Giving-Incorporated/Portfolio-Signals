@@ -30,7 +30,7 @@ function applyPublicConfig(config) {
   document.querySelectorAll('h1').forEach((node, index) => { if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title; });
   document.querySelectorAll('.lede, .cta-line').forEach((node, index) => { if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline; });
   const logo = assetUrl(safe.assets.logo_path || safe.assets.icon_path);
-  if (logo) document.querySelectorAll('.tenant-mark, .workspace-brand-lockup img').forEach(img => { img.src = logo; img.alt = safe.organization_name; });
+  if (logo) document.querySelectorAll('.tenant-mark').forEach(img => { img.src = logo; img.alt = safe.organization_name; });
   const icon = assetUrl(safe.assets.icon_path);
   if (icon) document.querySelectorAll('link[rel="icon"]').forEach(link => { link.href = icon; });
   const hero = assetUrl(safe.assets.hero_path);

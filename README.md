@@ -1,6 +1,6 @@
-# A.G.I. Fund-Intel
+# AGI Fund Intel
 
-Fund-Intel is the GitHub Pages-compatible frontend and client-control component of **Autonomously Giving Incorporated (A.G.I.)**. Impact Relay is the tenant-isolated financial and impact backend. Hacker Dojo is the canonical reference tenant for the reusable suite, using its **$420K minimum campaign** and **$2M transformation path** as the regression plan.
+Fund Intel is the GitHub Pages-compatible decision workspace of **Autonomously Giving Incorporated (AGI)**. AGI is the customer-facing corporate brand; Zero State is credited only as the software builder. Impact Relay is the tenant-isolated financial and impact backend. Hacker Dojo is the canonical reference tenant for the reusable suite, using its **$420K minimum campaign** and **$2M transformation path** as the regression plan.
 
 See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for component boundaries, authority, tenancy, hosting, and delivery milestones.
 
@@ -104,7 +104,7 @@ transformation: 2000000
 
 Live public donation progress, use-of-funds receipts, and event digests are published on **Impact Relay** (aggregate-only, no CRM data):
 
-https://scrimshawlife-ctrl.github.io/Impact-Relay/
+https://autogive.app/impact-relay/
 
 Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
 

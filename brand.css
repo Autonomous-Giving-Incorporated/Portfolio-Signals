@@ -25,22 +25,12 @@
   min-height: 76px;
 }
 .brand-mark {
-  width: 52px;
-  height: 52px;
+  width: 190px;
+  height: auto;
   flex: 0 0 auto;
   border-radius: 0;
   box-shadow: none;
 }
-.brand-wordmark {
-  display: grid;
-  line-height: .82;
-  font-family: var(--agi-mono);
-  font-size: .72rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--brand-2);
-}
-.brand-wordmark strong { font-weight: 600; }
 .brand-divider {
   width: 1px;
   height: 46px;
@@ -170,8 +160,8 @@
 .footer-brand img { width: 38px; height: 38px; border-radius: 0; }
 .footer-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem 1rem; text-align: right; }
 .footer-meta small { color: var(--muted); }
-html[data-theme="dark"] .brand-mark,
-html[data-theme="dark"] .footer-brand img { filter: invert(1) sepia(.1) saturate(.3); }
+.footer-meta a { color: var(--brand-2); text-decoration: none; font-size: .78rem; font-weight: 700; }
+.footer-meta a:hover { text-decoration: underline; text-underline-offset: .2rem; }
 
 /* Authenticated workspace continuity */
 .auth-gate {
@@ -191,7 +181,9 @@ html[data-theme="dark"] .footer-brand img { filter: invert(1) sepia(.1) saturate
   gap: .9rem;
   margin-bottom: 1.5rem;
 }
-.workspace-brand-lockup img { border-radius: 18px; box-shadow: 0 14px 34px rgba(201, 0, 70, .2); }
+.workspace-brand-lockup > img { width: 220px; height: auto; border-radius: 0; box-shadow: none; }
+.workspace-tenant-lockup { display: inline-flex; align-items: center; gap: .55rem; margin-left: auto; }
+.workspace-tenant-lockup img { width: 42px; height: 42px; border-radius: 10px; }
 .workspace-brand-lockup > div { display: grid; font-size: 1.55rem; line-height: .8; letter-spacing: -.05em; }
 .workspace-brand-lockup span { padding-left: .9rem; border-left: 1px solid var(--line); color: var(--muted); font-weight: 750; }
 .auth-copy h1 { margin: .25rem 0 .8rem; font-size: clamp(2.6rem, 6vw, 5.6rem); line-height: .96; letter-spacing: -.055em; }
@@ -201,6 +193,8 @@ html[data-theme="dark"] .footer-brand img { filter: invert(1) sepia(.1) saturate
 .auth-form input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: .8rem; background: var(--bg); color: var(--text); }
 .workspace-authority-note { grid-column: 1 / -1; display: flex; gap: .7rem; padding: 1rem 1.1rem; border-left: 4px solid var(--hd-red); background: var(--surface); border-radius: 10px; color: var(--muted); }
 .workspace-authority-note strong { color: var(--text); white-space: nowrap; }
+.auth-footer { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .6rem 1rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
+.auth-footer a { color: var(--brand-2); font-weight: 700; text-decoration: none; }
 .workspace-header .workspace-hero-copy { grid-area: hero; max-width: 900px; padding: 1.4rem 0 .5rem; }
 .workspace-header .workspace-hero-copy h1 { margin: .1rem 0 .5rem; }
 .workspace-context-strip { display: flex; flex-wrap: wrap; gap: .65rem; margin-bottom: 1rem; }
