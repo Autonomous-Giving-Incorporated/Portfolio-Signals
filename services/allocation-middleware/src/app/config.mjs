@@ -10,7 +10,7 @@ export function loadConfig(env = process.env) {
   const nodeEnv = env.NODE_ENV || 'development';
   const production =
     nodeEnv === 'production' || env.REQUIRE_PROD_GUARDS === '1' || env.REQUIRE_PROD_GUARDS === 'true';
-  const orgId = env.ORG_ID || (production ? '' : 'org_demo');
+  const orgId = env.ORG_ID || (production ? '' : 'org_hacker_dojo');
   const dataFile = env.DATA_FILE || '';
   const operatorToken = env.OPERATOR_TOKEN || '';
   const webhookToken = env.WEBHOOK_TOKEN || '';

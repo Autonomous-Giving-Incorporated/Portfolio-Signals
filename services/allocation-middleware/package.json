@@ -1,7 +1,7 @@
 {
   "name": "@agi/allocation-middleware",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "engines": {
     "node": ">=22 <23"
@@ -9,6 +9,8 @@
   "scripts": {
     "test": "node --test",
     "start": "node src/http/server.mjs",
-    "start:prod": "NODE_ENV=production node src/http/server.mjs"
+    "start:prod": "NODE_ENV=production node src/http/server.mjs",
+    "seed:hacker-dojo": "node scripts/seed-hacker-dojo.mjs",
+    "start:hacker-dojo": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json node src/http/server.mjs"
   }
 }

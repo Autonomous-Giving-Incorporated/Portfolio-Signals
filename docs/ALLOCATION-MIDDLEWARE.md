@@ -58,3 +58,6 @@ Plan: https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/do
 
 
 See [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) for pilot deploy gates.
+
+
+Pilot: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md).
