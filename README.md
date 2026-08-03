@@ -4,6 +4,10 @@ Fund Intel is the GitHub Pages-compatible decision workspace of **Autonomously G
 
 See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for component boundaries, authority, tenancy, hosting, and delivery milestones.
 
+## Platform specification status
+
+Fund Intel currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
 ## Current evidence boundary
