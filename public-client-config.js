@@ -10,7 +10,7 @@ const FALLBACK = {
   assets: { logo_path: null, icon_path: null, hero_path: null }
 };
 const BUCKET = 'agi-public-assets';
-const escapeHtml = (value = '') => String(value).replace(/[&<>'\"']/g, c => ({ '&': '&', '<': '<', '>': '>', \"'\": '&#39;', '\"': '"' }[c]));
+const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c]));
 const validColor = (value, fallback) => /^#[0-9a-f]{6}$/i.test(value || '') ? value : fallback;
 function getConfig() { return window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {}; }
 function clientSlug() { return new URLSearchParams(location.search).get('client') || getConfig().defaultClientSlug || 'hacker-dojo'; }
@@ -34,17 +34,17 @@ function applyPublicConfig(config) {
   const icon = assetUrl(safe.assets.icon_path);
   if (icon) document.querySelectorAll('link[rel="icon"]').forEach(link => { link.href = icon; });
   const hero = assetUrl(safe.assets.hero_path);
-  if (hero) document.querySelector('.site-header')?.style.setProperty('--client-hero-image', `url(\"${hero}\")`);
+  if (hero) document.querySelector('.site-header')?.style.setProperty('--client-hero-image', `url("${hero}")`);
   for (const module of ['sponsors', 'grants']) {
-    document.querySelectorAll(`[data-agi-module=\"${module}\"]`).forEach(node => { node.hidden = !safe.modules[module]; });
+    document.querySelectorAll(`[data-agi-module="${module}"]`).forEach(node => { node.hidden = !safe.modules[module]; });
   }
-  document.querySelectorAll('a[href$=\".html\"]').forEach(link => {
+  document.querySelectorAll('a[href$=".html"]').forEach(link => {
     const url = new URL(link.href, location.href);
     if (url.origin === location.origin) { url.searchParams.set('client', slug); link.href = url.href; }
   });
   const required = document.body.dataset.requiredModule;
   if (required && safe.modules[required] === false) {
-    document.querySelector('main').innerHTML = `<section class=\"panel\"><p class=\"eyebrow\">Module not enabled</p><h1>${escapeHtml(safe.organization_name)}</h1><p>This fundraising module has not been enabled during client onboarding.</p><a class=\"button\" href=\"index.html?client=${encodeURIComponent(slug)}\">Return to overview</a></section>`;
+    document.querySelector('main').innerHTML = `<section class="panel"><p class="eyebrow">Module not enabled</p><h1>${escapeHtml(safe.organization_name)}</h1><p>This fundraising module has not been enabled during client onboarding.</p><a class="button" href="index.html?client=${encodeURIComponent(slug)}">Return to overview</a></section>`;
   }
 }
 async function loadPublicConfig() {
