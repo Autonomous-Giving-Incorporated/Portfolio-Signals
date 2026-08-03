@@ -1,4 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 
 const BUCKET = 'agi-public-assets';
 const ALLOWED_KINDS = new Set(['logo', 'icon', 'hero', 'background', 'document']);

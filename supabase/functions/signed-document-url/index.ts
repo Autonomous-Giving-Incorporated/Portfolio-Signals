@@ -1,4 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
