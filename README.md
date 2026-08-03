@@ -16,6 +16,12 @@ Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/scr
 
 Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
 
+## Allocation middleware
+
+Transaction-light suite product direction (every.org-first pots → allocate → exceptions). Fund Intel’s role is **observe/credit**, not approval or evidence verification.
+
+See [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md).
+
 ## Current evidence boundary
 
 As of 2026-08-02, the current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The implementation rows below describe repository capability; they do not prove hosted acceptance of this commit.
