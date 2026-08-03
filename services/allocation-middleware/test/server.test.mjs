@@ -8,13 +8,13 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((s) => new Promise((r) => s.close(r))));
 });
 
-async function start() {
+async function start(opts = {}) {
   const service = createService({
     orgId: 'org_1',
     idgen: () => 'fixed-id',
     now: () => '2026-08-03T12:00:00Z',
   });
-  const server = createAllocationServer({ service });
+  const server = createAllocationServer({ service, ...opts });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   servers.push(server);
   const { port } = server.address();
@@ -40,4 +40,20 @@ test('webhook credits and available reflects gift', async () => {
   assert.equal(body.created, true);
   const av = await (await fetch(`${base}/available`)).json();
   assert.ok(av.some((p) => p.available === '25.00'));
+});
+
+test('operator token required when configured', async () => {
+  const base = await start({ operatorToken: 'secret' });
+  const denied = await fetch(`${base}/allocations`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      campaignKey: 'general',
+      programKey: 'undesignated',
+      amount: '1.00',
+      purpose: 'x',
+      approvedBy: 'a',
+    }),
+  });
+  assert.equal(denied.status, 401);
 });

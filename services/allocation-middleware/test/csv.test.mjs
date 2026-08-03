@@ -13,12 +13,12 @@ test('parseGiftCsv reads header rows', () => {
   assert.equal(rows[0].netAmount, '50.00');
 });
 
-test('importCsv credits pots', () => {
+test('importCsv credits pots', async () => {
   const svc = createService({ orgId: 'org_1', idgen: () => 'x' });
-  const result = svc.importCsv(
+  const result = await svc.importCsv(
     'chargeId,netAmount,campaignKey,programKey,currency,donatedAt\n' +
       'c-csv-2,10.00,,,USD,2026-08-01T00:00:00Z\n',
   );
   assert.equal(result.created, 1);
-  assert.ok(svc.listAvailable().some((p) => p.available === '10.00'));
+  assert.ok((await svc.listAvailable()).some((p) => p.available === '10.00'));
 });

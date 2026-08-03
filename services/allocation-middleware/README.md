@@ -22,3 +22,23 @@ https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/sup
 ## Plan
 
 https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md
+
+
+## Persistence & auth
+
+```bash
+# File-backed state (survives restarts)
+DATA_FILE=./data/org_demo.json ORG_ID=org_demo npm start
+
+# Optional tokens (recommended outside localhost demos)
+OPERATOR_TOKEN=secret WEBHOOK_TOKEN=whsec npm start
+# Operator routes: Authorization: Bearer secret  or  x-operator-token: secret
+# Webhook: x-webhook-token: whsec
+```
+
+Supabase DDL: `supabase/migrations/202608030001_allocation_middleware.sql` (RLS select for members; service role for webhook writes).
+
+## Proof
+
+`POST /proofs` with `{ allocationId, uri, note?, attachedBy? }`  
+Open `MISSING_PROOF` exceptions appear after `PROOF_SLA_HOURS` (default 72).
