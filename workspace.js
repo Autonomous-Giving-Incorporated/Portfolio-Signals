@@ -300,9 +300,9 @@ async function openSection(section) {
         <tbody>
           ${data.map(row => `
             <tr>
-              <td>${row.claim}</td>
-              <td>${row.state}</td>
-              <td>${row.verified_at || '—'}</td>
+              <td>${escapeHtml(row.claim)}</td>
+              <td>${escapeHtml(row.state)}</td>
+              <td>${escapeHtml(row.verified_at || '—')}</td>
             </tr>`).join('') || '<tr><td colspan="3">No claims visible.</td></tr>'}
         </tbody>
       </table></div>`;

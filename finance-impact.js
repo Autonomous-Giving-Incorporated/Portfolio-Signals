@@ -11,6 +11,12 @@ import {
 
 const $ = (id) => document.getElementById(id);
 
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[character]));
+}
+
 function setMsg(text, isError = false) {
   const el = $("actionMsg");
   if (!el) return;
@@ -63,16 +69,16 @@ async function refresh() {
       const pkt = c.packet_summary || {};
       card.innerHTML = `
         <div class="panel-heading">
-          <h3 style="margin:0;font-size:1rem">${c.workflow_id}</h3>
-          <span class="tag">${c.bucket || c.run_status}</span>
+          <h3 style="margin:0;font-size:1rem">${escapeHtml(c.workflow_id)}</h3>
+          <span class="tag">${escapeHtml(c.bucket || c.run_status)}</span>
         </div>
-        <p class="note">${pkt.vendor || "—"} · ${pkt.amount || "—"} ${pkt.currency || ""} · ${pkt.category || ""}</p>
-        <p class="note">${pkt.description || c.business_key || ""}</p>
+        <p class="note">${escapeHtml(pkt.vendor || "—")} · ${escapeHtml(pkt.amount || "—")} ${escapeHtml(pkt.currency || "")} · ${escapeHtml(pkt.category || "")}</p>
+        <p class="note">${escapeHtml(pkt.description || c.business_key || "")}</p>
         <div class="control-grid">
-          <button type="button" class="button secondary btn-detail" data-id="${c.workflow_id}">Detail</button>
+          <button type="button" class="button secondary btn-detail" data-id="${escapeHtml(c.workflow_id)}">Detail</button>
           ${
             c.bucket === "waiting" || c.run_status === "WAITING_SIGNAL"
-              ? `<button type="button" class="button btn-approve" data-id="${c.workflow_id}">Approve</button>`
+              ? `<button type="button" class="button btn-approve" data-id="${escapeHtml(c.workflow_id)}">Approve</button>`
               : ""
           }
         </div>

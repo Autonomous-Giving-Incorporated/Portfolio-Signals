@@ -5,6 +5,12 @@ import { impactRelayApiBase, impactRelayFetch, loadImpactRelaySession } from './
 
 const $ = (id) => document.getElementById(id);
 
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[character]));
+}
+
 function setMsg(t, err = false) {
   $("actionMsg").textContent = t;
   $("actionMsg").style.color = err ? "#b00" : "";
@@ -32,9 +38,9 @@ async function load() {
     for (const b of d.allocations || []) {
       const el = document.createElement("article");
       el.className = "metric-card";
-      el.innerHTML = `<span class="metric-label">${b.allocation_name}</span>
-        <strong>${b.remaining}</strong>
-        <span class="note">remaining of ${b.designated_total} (used ${b.used})</span>`;
+      el.innerHTML = `<span class="metric-label">${escapeHtml(b.allocation_name)}</span>
+        <strong>${escapeHtml(b.remaining)}</strong>
+        <span class="note">remaining of ${escapeHtml(b.designated_total)} (used ${escapeHtml(b.used)})</span>`;
       grid.appendChild(el);
     }
 
@@ -42,8 +48,8 @@ async function load() {
     tl.innerHTML = (d.timeline || [])
       .map(
         (e) =>
-          `<div class="panel" style="margin-bottom:0.5rem"><strong>${e.kind}</strong>
-          <span class="note">${e.at}</span><p>${e.summary}</p></div>`
+          `<div class="panel" style="margin-bottom:0.5rem"><strong>${escapeHtml(e.kind)}</strong>
+          <span class="note">${escapeHtml(e.at)}</span><p>${escapeHtml(e.summary)}</p></div>`
       )
       .join("") || "<p class='note'>No timeline events. Load pilot UOF into the console data-dir.</p>";
 
@@ -58,8 +64,8 @@ async function load() {
           const id = r.receipt_id;
           const amt = r.expenditure?.attributed_amount || r.attributed_amount || "—";
           return `<div class="control-grid" style="margin-bottom:0.5rem">
-            <span>${id} · ${amt}</span>
-            <button type="button" class="button secondary btn-r" data-id="${id}">Open</button>
+            <span>${escapeHtml(id)} · ${escapeHtml(amt)}</span>
+            <button type="button" class="button secondary btn-r" data-id="${escapeHtml(id)}">Open</button>
           </div>`;
         })
         .join("");
