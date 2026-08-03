@@ -114,6 +114,7 @@ jobs:
       - name: Execute role and storage policy suites
         run: |
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_e2e.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls_policy_matrix.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/storage_matrix.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/006_document_access_audit.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/007_agi_tenant_foundation.sql
