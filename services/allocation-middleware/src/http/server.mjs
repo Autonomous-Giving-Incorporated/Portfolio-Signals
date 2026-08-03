@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildEveryOrgWebhookUrl } from '../app/config.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startedAt = Date.now();
@@ -32,8 +33,8 @@ function unauthorized(res) {
   send(res, 401, { error: 'UNAUTHORIZED' });
 }
 
-export function createAllocationServer({ service, operatorToken, webhookToken }) {
-  function requireOperator(req, res) {
+export function createAllocationServer({ service, operatorToken, webhookToken, publicBaseUrl = '' }) {
+    function requireOperator(req, res) {
     if (!operatorToken) return true;
     const auth = req.headers.authorization || '';
     const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
@@ -65,6 +66,30 @@ export function createAllocationServer({ service, operatorToken, webhookToken })
         const h = await service.health();
         return send(res, 200, { status: 'ready', ...h });
       }
+      if (req.method === 'GET' && url.pathname === '/setup') {
+        const webhookUrl = buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken);
+        const status = await service.getSetupStatus({
+          webhookUrl,
+          hasWebhookToken: Boolean(webhookToken),
+          hasOperatorToken: Boolean(operatorToken),
+        });
+        return send(res, 200, status);
+      }
+      if (req.method === 'GET' && (url.pathname === '/setup.html' || url.pathname === '/connect')) {
+        const htmlPath = path.join(__dirname, '../../public/setup.html');
+        try {
+          const html = await readFile(htmlPath, 'utf8');
+          res.writeHead(200, {
+            'content-type': 'text/html; charset=utf-8',
+            'x-content-type-options': 'nosniff',
+            'cache-control': 'no-store',
+          });
+          return res.end(html);
+        } catch {
+          return send(res, 404, { error: 'setup_ui_missing' });
+        }
+      }
+
 
       if (req.method === 'POST' && url.pathname === '/webhooks/every-org') {
         if (!requireWebhook(req, res, url)) return;
@@ -195,6 +220,7 @@ if (isMain) {
     service,
     operatorToken: cfg.operatorToken,
     webhookToken: cfg.webhookToken,
+    publicBaseUrl: cfg.publicBaseUrl || `http://127.0.0.1:${cfg.port}`,
   });
   server.listen(cfg.port, '0.0.0.0', () => {
     console.log(

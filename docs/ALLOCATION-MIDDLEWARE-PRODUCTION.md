@@ -68,3 +68,17 @@ curl https://<app>.fly.dev/healthz
 | Single region file store | Snapshot volume; nightly copy |
 | Webhook without header auth | Edge inject token |
 | No multi-tenant process yet | One `ORG_ID` per deploy for pilot |
+
+
+## every.org setup wizard
+
+Open **`/setup.html`** (or `/connect`) on the deployed host.
+
+1. Copy the webhook URL shown (includes `?token=`).
+2. every.org → nonprofit admin → Settings → Advanced → paste webhook.
+3. Send a $1 test gift; wizard polls until **Connected**.
+4. Continue to Allocation UI for pots / allocate / packet.
+
+API: `GET /setup` returns JSON status (`authModel: webhook_url` — not OAuth).
+
+Requires `PUBLIC_BASE_URL` in production so the wizard can display the correct public URL.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadConfig } from '../src/app/config.mjs';
+import { loadConfig, buildEveryOrgWebhookUrl } from '../src/app/config.mjs';
 
 test('dev allows missing tokens', () => {
   const c = loadConfig({ NODE_ENV: 'development' });
@@ -15,6 +15,7 @@ test('production requires guards', () => {
     DATA_FILE: '/data/state.json',
     OPERATOR_TOKEN: 'x'.repeat(16),
     WEBHOOK_TOKEN: 'y'.repeat(16),
+    PUBLIC_BASE_URL: 'https://alloc.example.com',
   });
   assert.equal(c.ok, true);
 });
@@ -25,7 +26,15 @@ test('production fails without DATA_FILE', () => {
     ORG_ID: 'org_pilot',
     OPERATOR_TOKEN: 'x'.repeat(16),
     WEBHOOK_TOKEN: 'y'.repeat(16),
+    PUBLIC_BASE_URL: 'https://alloc.example.com',
   });
   assert.equal(c.ok, false);
   assert.ok(c.errors.some((e) => e.includes('DATA_FILE')));
+});
+
+test('buildEveryOrgWebhookUrl appends token', () => {
+  assert.equal(
+    buildEveryOrgWebhookUrl('https://alloc.example.com/', 'secret'),
+    'https://alloc.example.com/webhooks/every-org?token=secret',
+  );
 });

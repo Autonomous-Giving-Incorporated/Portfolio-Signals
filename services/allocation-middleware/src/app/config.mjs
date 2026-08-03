@@ -4,6 +4,7 @@
  * - DATA_FILE required (durable store)
  * - OPERATOR_TOKEN required
  * - WEBHOOK_TOKEN required
+ * - PUBLIC_BASE_URL recommended for setup wizard copy-paste URL
  */
 export function loadConfig(env = process.env) {
   const nodeEnv = env.NODE_ENV || 'development';
@@ -13,6 +14,7 @@ export function loadConfig(env = process.env) {
   const dataFile = env.DATA_FILE || '';
   const operatorToken = env.OPERATOR_TOKEN || '';
   const webhookToken = env.WEBHOOK_TOKEN || '';
+  const publicBaseUrl = (env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
   const port = Number(env.PORT || 8787);
   const proofSlaHours = Number(env.PROOF_SLA_HOURS || 72);
   const errors = [];
@@ -26,6 +28,9 @@ export function loadConfig(env = process.env) {
     if (!webhookToken || webhookToken.length < 16) {
       errors.push('WEBHOOK_TOKEN is required in production (min 16 chars)');
     }
+    if (!publicBaseUrl) {
+      errors.push('PUBLIC_BASE_URL is required in production (for every.org setup wizard)');
+    }
   }
 
   return {
@@ -35,9 +40,21 @@ export function loadConfig(env = process.env) {
     dataFile,
     operatorToken,
     webhookToken,
+    publicBaseUrl,
     port,
     proofSlaHours,
     errors,
     ok: errors.length === 0,
   };
+}
+
+/**
+ * Build the every.org webhook URL a nonprofit pastes into Advanced settings.
+ */
+export function buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken) {
+  const base = (publicBaseUrl || '').replace(/\/$/, '');
+  if (!base) return '';
+  const path = '/webhooks/every-org';
+  if (!webhookToken) return `${base}${path}`;
+  return `${base}${path}?token=${encodeURIComponent(webhookToken)}`;
 }

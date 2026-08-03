@@ -1,8 +1,9 @@
 # Example Fly.io config — customize app name and secrets before deploy.
 # fly apps create agi-allocation
 # fly volumes create am_data --size 1 --region sjc
-# fly secrets set ORG_ID=org_pilot OPERATOR_TOKEN=... WEBHOOK_TOKEN=...
+# fly secrets set ORG_ID=org_pilot OPERATOR_TOKEN=... WEBHOOK_TOKEN=... PUBLIC_BASE_URL=https://agi-allocation.fly.dev
 # fly deploy
+# Setup wizard: https://agi-allocation.fly.dev/setup.html
 
 app = "agi-allocation"
 primary_region = "sjc"
