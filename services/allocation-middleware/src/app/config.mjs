@@ -1,10 +1,10 @@
 /**
  * Production readiness config.
  * In production (NODE_ENV=production or REQUIRE_PROD_GUARDS=1):
- * - DATA_FILE required (durable store)
- * - OPERATOR_TOKEN required
+ * - DATA_FILE required
  * - WEBHOOK_TOKEN required
- * - PUBLIC_BASE_URL recommended for setup wizard copy-paste URL
+ * - Either Supabase director auth (SUPABASE_URL + SERVICE_ROLE) OR OPERATOR_TOKEN
+ * - PUBLIC_BASE_URL required
  */
 export function loadConfig(env = process.env) {
   const nodeEnv = env.NODE_ENV || 'development';
@@ -15,21 +15,34 @@ export function loadConfig(env = process.env) {
   const operatorToken = env.OPERATOR_TOKEN || '';
   const webhookToken = env.WEBHOOK_TOKEN || '';
   const publicBaseUrl = (env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
+  const supabaseUrl = (env.SUPABASE_URL || '').replace(/\/$/, '');
+  const supabaseAnonKey = env.SUPABASE_ANON_KEY || '';
+  const supabaseServiceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const allowOperatorFallback =
+    env.ALLOW_OPERATOR_TOKEN_FALLBACK === '1' ||
+    env.ALLOW_OPERATOR_TOKEN_FALLBACK === 'true' ||
+    !production;
   const port = Number(env.PORT || 8787);
   const proofSlaHours = Number(env.PROOF_SLA_HOURS || 72);
   const errors = [];
 
+  const hasSupabaseAuth = Boolean(supabaseUrl && supabaseServiceRoleKey);
+
   if (production) {
     if (!orgId) errors.push('ORG_ID is required in production');
     if (!dataFile) errors.push('DATA_FILE is required in production (durable store)');
-    if (!operatorToken || operatorToken.length < 16) {
-      errors.push('OPERATOR_TOKEN is required in production (min 16 chars)');
-    }
     if (!webhookToken || webhookToken.length < 16) {
       errors.push('WEBHOOK_TOKEN is required in production (min 16 chars)');
     }
     if (!publicBaseUrl) {
       errors.push('PUBLIC_BASE_URL is required in production (for every.org setup wizard)');
+    }
+    if (!hasSupabaseAuth) {
+      if (!operatorToken || operatorToken.length < 16) {
+        errors.push(
+          'SUPABASE_URL+SUPABASE_SERVICE_ROLE_KEY (director login) or OPERATOR_TOKEN required in production',
+        );
+      }
     }
   }
 
@@ -41,6 +54,11 @@ export function loadConfig(env = process.env) {
     operatorToken,
     webhookToken,
     publicBaseUrl,
+    supabaseUrl,
+    supabaseAnonKey,
+    supabaseServiceRoleKey,
+    hasSupabaseAuth,
+    allowOperatorFallback,
     port,
     proofSlaHours,
     errors,
@@ -48,9 +66,6 @@ export function loadConfig(env = process.env) {
   };
 }
 
-/**
- * Build the every.org webhook URL a nonprofit pastes into Advanced settings.
- */
 export function buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken) {
   const base = (publicBaseUrl || '').replace(/\/$/, '');
   if (!base) return '';

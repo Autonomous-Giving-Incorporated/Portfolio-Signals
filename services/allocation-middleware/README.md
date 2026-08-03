@@ -56,3 +56,6 @@ Supabase DDL: `supabase/migrations/202608030001_allocation_middleware.sql` (RLS 
 
 `POST /proofs` with `{ allocationId, uri, note?, attachedBy? }`  
 Open `MISSING_PROOF` exceptions appear after `PROOF_SLA_HOURS` (default 72).
+
+
+Director login: see [ALLOCATION-DIRECTOR-LOGIN.md](../../docs/ALLOCATION-DIRECTOR-LOGIN.md) — `/login.html`.

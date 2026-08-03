@@ -47,3 +47,6 @@ Re-run seed is **idempotent** on gift `chargeId`s. Set `SEED_ALLOCATE=0` to skip
 ## Privacy
 
 Fixture gifts are **synthetic** (no donor PII). Public campaign/impact JSON remain aggregate-only.
+
+
+Director login: see [ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) — `/login.html`.

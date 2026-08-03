@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Director login — Allocation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #fafafa; color: #111; }
+    main { max-width: 26rem; margin: 2rem auto; padding: 1.25rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 0.35rem; }
+    .lead { color: #555; font-size: 0.95rem; line-height: 1.45; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.1rem; margin-top: 1rem; }
+    label { display: block; margin: 0.5rem 0 0.25rem; font-size: 0.9rem; }
+    input { width: 100%; box-sizing: border-box; font: inherit; padding: 0.45rem 0.5rem; }
+    button { font: inherit; margin-top: 0.75rem; padding: 0.5rem 0.9rem; border: 0; border-radius: 8px; background: #111; color: #fff; cursor: pointer; width: 100%; }
+    .msg { margin-top: 0.75rem; font-size: 0.9rem; }
+    .err { color: #991b1b; }
+    .ok { color: #065f46; }
+    .muted { color: #6b7280; font-size: 0.85rem; }
+    a { color: #1d4ed8; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Director login</h1>
+    <p class="lead">
+      Sign in with your A.G.I. / Fund Intel account. You need an active membership on
+      <strong>org_hacker_dojo</strong> with role <code>director</code> or <code>campaign_lead</code> to allocate.
+    </p>
+
+    <div class="card" id="panel">
+      <p class="muted" id="config-msg">Loading auth config…</p>
+      <form id="login-form" hidden>
+        <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+        <label>Password <input name="password" type="password" required autocomplete="current-password" /></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p class="msg" id="msg"></p>
+      <p class="muted">
+        After login you return to <a href="/">Allocation</a>.
+        For every.org webhook setup see <a href="/setup.html">Connect every.org</a>.
+      </p>
+    </div>
+  </main>
+  <script type="module">
+    const msg = document.getElementById('msg');
+    const form = document.getElementById('login-form');
+    const configMsg = document.getElementById('config-msg');
+
+    const cfgRes = await fetch('/auth/config');
+    const cfg = await cfgRes.json();
+
+    if (!cfg.directorLoginEnabled) {
+      configMsg.innerHTML = cfg.operatorTokenFallback
+        ? 'Director login is not configured on this server. Use the <strong>operator token</strong> bar on the Allocation page (dev/pilot fallback).'
+        : 'Auth is not configured. Set SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY.';
+    } else {
+      configMsg.textContent = `Org ${cfg.orgId} · Supabase session required for writes`;
+      form.hidden = false;
+    }
+
+    // Resume session if already logged in
+    if (cfg.directorLoginEnabled && window.supabase) {
+      const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      const { data } = await sb.auth.getSession();
+      if (data.session?.access_token) {
+        sessionStorage.setItem('am_access_token', data.session.access_token);
+        sessionStorage.setItem('am_auth_mode', 'supabase');
+        msg.className = 'msg ok';
+        msg.textContent = 'Already signed in — redirecting…';
+        location.href = '/';
+      }
+
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        msg.textContent = 'Signing in…';
+        msg.className = 'msg';
+        const fd = new FormData(form);
+        const email = String(fd.get('email') || '');
+        const password = String(fd.get('password') || '');
+        const { data: sign, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+          msg.className = 'msg err';
+          msg.textContent = error.message;
+          return;
+        }
+        const token = sign.session?.access_token;
+        if (!token) {
+          msg.className = 'msg err';
+          msg.textContent = 'No session returned';
+          return;
+        }
+        sessionStorage.setItem('am_access_token', token);
+        sessionStorage.setItem('am_auth_mode', 'supabase');
+        // Verify membership
+        const me = await fetch('/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = await me.json();
+        if (!me.ok) {
+          msg.className = 'msg err';
+          msg.textContent = body.error || 'Not authorized for this org';
+          await sb.auth.signOut();
+          sessionStorage.removeItem('am_access_token');
+          return;
+        }
+        if (!body.canWrite) {
+          msg.className = 'msg err';
+          msg.textContent = `Signed in as ${body.role}, but allocate requires director or campaign_lead.`;
+          return;
+        }
+        msg.className = 'msg ok';
+        msg.textContent = `Welcome ${body.displayName || body.email} (${body.role})`;
+        setTimeout(() => { location.href = '/'; }, 400);
+      });
+    }
+  </script>
+</body>
+</html>

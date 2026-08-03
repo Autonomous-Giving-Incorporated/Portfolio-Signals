@@ -29,6 +29,8 @@
       <input id="token" type="password" placeholder="required in production" autocomplete="off" style="min-width:16rem" />
     </label>
     <button type="button" id="btn-save-token">Save token</button>
+    <a href="/login.html" style="margin-left:0.5rem">Director login</a>
+    <button type="button" id="btn-logout" class="secondary">Sign out</button>
     <span id="auth-state" class="hint"></span>
   </div>
 
@@ -102,11 +104,45 @@
     function opHeaders(json = true) {
       const h = {};
       if (json) h['content-type'] = 'application/json';
+      const jwt = sessionStorage.getItem('am_access_token');
+      if (jwt) {
+        h['Authorization'] = 'Bearer ' + jwt;
+        return h;
+      }
       const tok = localStorage.getItem('operatorToken') || tokenEl.value;
       if (tok) h['x-operator-token'] = tok;
       return h;
     }
 
+    async function refreshAuthBanner() {
+      const el = document.getElementById('auth-state');
+      const headers = opHeaders(false);
+      if (!headers.Authorization && !headers['x-operator-token']) {
+        el.textContent = 'Not signed in — use Director login or operator token';
+        return;
+      }
+      try {
+        const res = await fetch('/auth/me', { headers });
+        const body = await res.json();
+        if (!res.ok) {
+          el.textContent = 'Auth failed: ' + (body.error || res.status);
+          return;
+        }
+        el.textContent = body.mode === 'supabase_director'
+          ? `Director: ${body.email || body.displayName} (${body.role})`
+          : `Mode: ${body.mode}`;
+      } catch {
+        el.textContent = 'Auth check failed';
+      }
+    }
+
+    document.getElementById('btn-logout')?.addEventListener('click', () => {
+      sessionStorage.removeItem('am_access_token');
+      sessionStorage.removeItem('am_auth_mode');
+      localStorage.removeItem('operatorToken');
+      tokenEl.value = '';
+      location.href = '/login.html';
+    });
     document.getElementById('btn-save-token').onclick = () => {
       localStorage.setItem('operatorToken', tokenEl.value.trim());
       document.getElementById('auth-state').textContent = 'Token saved';
@@ -182,6 +218,7 @@
       document.getElementById('packet').textContent = JSON.stringify(data, null, 2);
     });
 
+    await refreshAuthBanner();
     await loadAvailable();
     await loadExceptions();
   </script>
