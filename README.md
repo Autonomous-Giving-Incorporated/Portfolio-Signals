@@ -10,6 +10,12 @@ Fund Intel currently declares **Experimental** conformance to [Autonomous Giving
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
+## Platform specification
+
+Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
+
+Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
+
 ## Current evidence boundary
 
 As of 2026-08-02, the current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The implementation rows below describe repository capability; they do not prove hosted acceptance of this commit.

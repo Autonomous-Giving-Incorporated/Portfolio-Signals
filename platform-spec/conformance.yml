@@ -1,0 +1,41 @@
+platform_spec:
+  repository: scrimshawlife-ctrl/Autonomous-Giving-Specs
+  version: 1.0.0
+
+service:
+  id: fund-intel
+  role: intelligence
+  name: Fund Intel
+
+implements:
+  specs:
+    - SPEC-001
+    - SPEC-002
+    - SPEC-003
+    - SPEC-004
+    - SPEC-005
+    - SPEC-007
+    - SPEC-008
+    - SPEC-012
+    - SPEC-013
+  contracts:
+    produces:
+      - CONTRACT-001
+      - CONTRACT-002
+    consumes: []
+  events:
+    produces:
+      - EVENT-001
+      - EVENT-002
+      - EVENT-003
+    consumes:
+      - EVENT-004
+      - EVENT-005
+
+evidence:
+  integration_tests: docs/AGI-SUITE-ARCHITECTURE.md
+  notes: >
+    Intelligence boundary — observes and recommends; never allocates.
+    Pinned to Autonomous Giving Specs v1.0.0 (tag v1.0.0).
+    Public campaign data remains under schemas/public-campaign.schema.json;
+    platform lifecycle contracts are declared here for suite interoperability.
