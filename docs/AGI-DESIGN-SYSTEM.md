@@ -40,6 +40,7 @@ Operational host surfaces use the same AGI shell contract as the public portal a
 | `finance-impact.html` | Impact Relay · Finance review |
 | `donor-impact.html` | Impact Relay · Donor receipts |
 | `import-review.html` | Fund Intel · Import review |
+| `services/allocation-middleware/public/*` | Fund Intel · Allocation middleware |
 
 Each must show:
 
@@ -48,3 +49,5 @@ Each must show:
 3. Footer: AGI mark, product name, Tokens / Logo use / Legal, “Software by Zero State”
 
 Implementation: `brand.css` (`.impact-host-shell`, `.impact-host-header`) plus the shared `.brand-identity` / footer patterns. Public pages also load `brand.css` statically so AGI identity does not depend solely on `app.js` injection. Do not ship operational screens with eyebrow-only product labels and no corporate chrome.
+
+Allocation middleware packages a self-contained shell at `services/allocation-middleware/public/css/agi-shell.css` (same `--agi-*` tokens, host header/footer, Space Grotesk / Inter / IBM Plex Mono) with brand assets under `public/assets/brand/`, because the Node pilot is served outside the GitHub Pages tree.

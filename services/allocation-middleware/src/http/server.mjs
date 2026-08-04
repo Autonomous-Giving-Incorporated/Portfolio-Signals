@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildEveryOrgWebhookUrl } from '../app/config.mjs';
@@ -111,6 +111,66 @@ export function createAllocationServer({
     if (header === webhookToken || query === webhookToken) return true;
     unauthorized(res);
     return false;
+  }
+
+  const publicRoot = path.join(__dirname, '../../public');
+
+  function contentTypeFor(filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    if (ext === '.css') return 'text/css; charset=utf-8';
+    if (ext === '.js') return 'text/javascript; charset=utf-8';
+    if (ext === '.png') return 'image/png';
+    if (ext === '.svg') return 'image/svg+xml';
+    if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
+    if (ext === '.webp') return 'image/webp';
+    if (ext === '.ico') return 'image/x-icon';
+    if (ext === '.woff2') return 'font/woff2';
+    return 'application/octet-stream';
+  }
+
+  function isStaticPath(pathname) {
+    return pathname.startsWith('/css/') || pathname.startsWith('/assets/');
+  }
+
+  async function serveStatic(res, pathname) {
+    const rel = pathname.replace(/^\/+/, '');
+    if (rel.includes('..') || path.isAbsolute(rel)) {
+      return send(res, 400, { error: 'bad_path' });
+    }
+    const filePath = path.join(publicRoot, rel);
+    if (!filePath.startsWith(publicRoot)) {
+      return send(res, 400, { error: 'bad_path' });
+    }
+    try {
+      const st = await stat(filePath);
+      if (!st.isFile()) {
+        return send(res, 404, { error: 'not_found' });
+      }
+      const body = await readFile(filePath);
+      res.writeHead(200, {
+        'content-type': contentTypeFor(filePath),
+        'x-content-type-options': 'nosniff',
+        'cache-control': 'public, max-age=3600',
+      });
+      return res.end(body);
+    } catch {
+      return send(res, 404, { error: 'not_found' });
+    }
+  }
+
+  async function serveHtml(res, name) {
+    const htmlPath = path.join(publicRoot, name);
+    try {
+      const html = await readFile(htmlPath, 'utf8');
+      res.writeHead(200, {
+        'content-type': 'text/html; charset=utf-8',
+        'x-content-type-options': 'nosniff',
+        'cache-control': 'no-store',
+      });
+      return res.end(html);
+    } catch {
+      return send(res, 404, { error: 'ui_missing' });
+    }
   }
 
   return http.createServer(async (req, res) => {
@@ -295,6 +355,9 @@ export function createAllocationServer({
       if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {
         return serveHtml(res, 'index.html');
       }
+      if (req.method === 'GET' && isStaticPath(url.pathname)) {
+        return serveStatic(res, url.pathname);
+      }
       send(res, 404, { error: 'not_found' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'error';
@@ -302,21 +365,6 @@ export function createAllocationServer({
       send(res, status, { error: message });
     }
   });
-
-  async function serveHtml(res, name) {
-    const htmlPath = path.join(__dirname, '../../public', name);
-    try {
-      const html = await readFile(htmlPath, 'utf8');
-      res.writeHead(200, {
-        'content-type': 'text/html; charset=utf-8',
-        'x-content-type-options': 'nosniff',
-        'cache-control': 'no-store',
-      });
-      return res.end(html);
-    } catch {
-      return send(res, 404, { error: 'ui_missing' });
-    }
-  }
 }
 
 const isMain =
