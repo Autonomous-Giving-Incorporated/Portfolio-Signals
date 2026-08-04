@@ -11,11 +11,11 @@
 | Secrets for webhook/operator | Ready when `NODE_ENV=production` |
 | Health checks | `/healthz`, `/readyz` |
 | Mapping UX (label + merge) | API + UI |
-| Hosted deploy recipe | Fly.io example (`fly.toml`) + `npm run deploy:fly` |
+| Hosted deploy recipe | Docker Compose (default); optional Fly / Render / Railway |
 | Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
 | Director SSO / Supabase session | Ready (`/login.html` + membership JWT) |
 | every.org live webhook | **Pilot operator step** |
-| Named Fly host with volume | **Pilot operator step** |
+| Named public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
 | Multi-region HA | Not required for pilot |
 
 Pilot runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md). Director auth: [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md).
@@ -44,9 +44,9 @@ Process **exits on boot** if guards fail.
 4. Map designations via **Merge pots** / **Labels** in UI after first gifts land.
 5. Directors sign in at **`/login.html`** (Supabase JWT + membership). Operator token remains an optional emergency fallback only.
 
-## Deploy (Fly.io)
+## Deploy
 
-Preferred (Hacker Dojo pilot) — **Docker Compose** (no Fly CLI):
+### Default — Docker Compose
 
 ```bash
 cd services/allocation-middleware
@@ -55,27 +55,21 @@ npm run compose:up
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 ```
 
-Fly-like SaaS without flyctl: **Render** or **Railway** — see [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
-
-Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on any host.
-
-Optional Fly: `npm run bootstrap:fly` after `fly auth login`.
-
-Manual equivalent:
+### Optional — Fly.io
 
 ```bash
+fly auth login   # once; Gatekeeper: xattr -d com.apple.quarantine ~/.fly/bin/flyctl
 cd services/allocation-middleware
-fly apps create agi-allocation   # once
-fly volumes create am_data --size 1 --region sjc
-fly secrets set ORG_ID=org_hacker_dojo WEBHOOK_TOKEN=... \
-  SUPABASE_URL=... SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... \
-  SEED_ON_BOOT=1 DATA_FILE=/data/state.json PUBLIC_BASE_URL=https://...
-fly deploy
-fly status
-curl https://<app>.fly.dev/healthz
+npm run bootstrap:fly
+BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
+# after stable: fly secrets set SEED_ON_BOOT=0 -a agi-allocation
 ```
 
-After stable seed, set `SEED_ON_BOOT=0`.
+### Optional — Render / Railway
+
+Dashboard deploy; see [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
+
+Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on any host.
 
 ## Pilot success criteria
 

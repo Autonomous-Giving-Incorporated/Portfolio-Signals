@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# Bootstrap Hacker Dojo allocation pilot on Fly.io (create app, volume, secrets, deploy, smoke).
+# OPTIONAL host: bootstrap Hacker Dojo allocation pilot on Fly.io.
+# Default pilot path is Docker Compose (npm run compose:up).
+# Docs: docs/ALLOCATION-HOSTING-OPTIONS.md §4
+#
 # Prerequisites: flyctl installed + `fly auth login` (or FLY_API_TOKEN).
+# macOS Gatekeeper: xattr -d com.apple.quarantine ~/.fly/bin/flyctl
 #
 # Optional env before run:
 #   FLY_APP=agi-allocation
@@ -15,14 +19,17 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "NOTE: Fly is an optional host. Docker Compose remains the default (npm run compose:up)."
+
 FLY=$(command -v fly || command -v flyctl || true)
 if [[ -z "${FLY}" ]]; then
-  echo "Install flyctl: curl -L https://fly.io/install.sh | sh"
   export PATH="${HOME}/.fly/bin:${PATH}"
   FLY=$(command -v fly || command -v flyctl || true)
 fi
 if [[ -z "${FLY}" ]]; then
-  echo "flyctl not found on PATH"
+  echo "flyctl not found on PATH."
+  echo "  Install: curl -L https://fly.io/install.sh | sh"
+  echo "  Or stay on Docker: npm run gen:env && npm run compose:up"
   exit 1
 fi
 
@@ -30,6 +37,7 @@ if ! $FLY auth whoami >/dev/null 2>&1; then
   echo "Not logged in to Fly."
   echo "  Run: fly auth login"
   echo "  Or set FLY_API_TOKEN"
+  echo "  Or stay on Docker: npm run compose:up"
   exit 1
 fi
 

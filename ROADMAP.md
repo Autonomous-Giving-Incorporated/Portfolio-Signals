@@ -277,8 +277,9 @@ Not a substitute for HD-OI-019–021 leadership gates; a **transaction-light** c
 | Domain + every.org webhook + allocate + packet | **Shipped** (`services/allocation-middleware/`) |
 | File store, proof SLA, setup wizard, CI | **Shipped** |
 | Supabase director login (`/login.html`) | **Shipped** |
-| Hacker Dojo seed + `SEED_ON_BOOT` + Fly helpers | **Shipped** |
-| Named Fly host + volume secrets | **Operator** |
+| Hacker Dojo seed + `SEED_ON_BOOT` + Docker Compose | **Shipped** (default host) |
+| Optional Fly / Render / Railway recipes | **Shipped** |
+| Named public host (any of the above) | **Optional operator** |
 | Live every.org webhook for Hacker Dojo | **Operator** |
 | Director acceptance of pilot allocate flow | **Pending** |
 
@@ -323,12 +324,14 @@ ALLOC_MW_MVP:
 ALLOC_MW_PILOT_HOST:
   name: hacker_dojo_allocation_pilot_host
   state: ACTIVE
-  completion: fly_host_director_login_seed_then_live_webhook
+  completion: docker_or_optional_public_host_director_login_seed_then_live_webhook
   progress:
     package: SHIPPED
     seed_on_boot: SHIPPED
     director_jwt: SHIPPED
-    named_host: PENDING_OPERATOR
+    docker_compose_default: SHIPPED
+    optional_fly_render_railway: SHIPPED
+    named_public_host: OPTIONAL_OPERATOR
     live_every_org: PENDING_OPERATOR
 ```
 

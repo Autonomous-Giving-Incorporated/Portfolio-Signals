@@ -21,10 +21,14 @@ npm test
 npm run start:hacker-dojo:seed   # local Node, SEED_ON_BOOT=1
 # open http://127.0.0.1:8787
 
-# Recommended host path (no Fly CLI)
+# Default host path — Docker Compose
 npm run gen:env                  # .env.pilot with tokens
 npm run compose:up               # Docker Compose + volume
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+
+# Optional — Fly.io (when flyctl works)
+# fly auth login && npm run bootstrap:fly
+# BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
 
 npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
@@ -32,7 +36,7 @@ npm run pilot:smoke              # health checks (BASE_URL=...)
 npm run pilot:env                # env checklist
 ```
 
-**Public hosts (dashboard, no flyctl):** Render (`render.yaml`) or Railway (`railway.toml`).  
+**Other hosts:** Render (`render.yaml`), Railway (`railway.toml`), or optional Fly (`fly.toml` + `bootstrap:fly`).  
 See [ALLOCATION-HOSTING-OPTIONS.md](../../docs/ALLOCATION-HOSTING-OPTIONS.md).
 
 Generic demo (non-Hacker Dojo):
