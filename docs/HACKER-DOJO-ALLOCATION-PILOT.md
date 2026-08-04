@@ -25,22 +25,47 @@ BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 | `/login.html` | Director login (Supabase) |
 | `/setup.html` | every.org webhook wizard (later) |
 
-## B — Hosted
+## B — Hosted (Fly.io)
+
+### Prerequisites
+
+1. [flyctl](https://fly.io/docs/hands-on/install-flyctl/) on PATH (`curl -L https://fly.io/install.sh | sh`)
+2. `fly auth login` (or `FLY_API_TOKEN`)
+3. Optional: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` for director login
+
+### One-command bootstrap
 
 ```bash
-export ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json
-export PUBLIC_BASE_URL=https://YOUR_APP.fly.dev
-export WEBHOOK_TOKEN=$(openssl rand -hex 24)
-export SEED_ON_BOOT=1
-# + SUPABASE_* for director login
-npm run pilot:env
-cd services/allocation-middleware && npm run deploy:fly
-BASE_URL=https://YOUR_APP.fly.dev npm run pilot:smoke
+cd services/allocation-middleware
+# optional director auth:
+# export SUPABASE_URL=... SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=...
+npm run bootstrap:fly
 ```
 
-Then director: membership on `org_hacker_dojo` → `/login.html` → allocate.
+This creates app `agi-allocation` (override with `FLY_APP=`), volume `am_data`, sets secrets (`ORG_ID=org_hacker_dojo`, `SEED_ON_BOOT=1`, webhook/operator tokens), deploys, and runs `pilot:smoke`.
 
-After stable: set `SEED_ON_BOOT=0`.
+### Manual
+
+```bash
+cd services/allocation-middleware
+export ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json
+export PUBLIC_BASE_URL=https://agi-allocation.fly.dev
+export WEBHOOK_TOKEN=$(openssl rand -hex 24)
+export SEED_ON_BOOT=1
+# + SUPABASE_* or OPERATOR_TOKEN
+npm run pilot:env
+fly apps create agi-allocation   # once
+fly volumes create am_data --size 1 --region sjc --yes
+fly secrets set ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json \
+  PUBLIC_BASE_URL="$PUBLIC_BASE_URL" WEBHOOK_TOKEN="$WEBHOOK_TOKEN" \
+  SEED_ON_BOOT=1 OPERATOR_TOKEN="$(openssl rand -hex 24)" ALLOW_OPERATOR_TOKEN_FALLBACK=1
+DEPLOY_YES=1 npm run deploy:fly -- --yes
+BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
+```
+
+Then director: membership on `org_hacker_dojo` → `/login.html` → allocate (or operator token fallback).
+
+After stable seed: `fly secrets set SEED_ON_BOOT=0 -a agi-allocation`.
 
 ## C — every.org later
 
@@ -55,7 +80,8 @@ After stable: set `SEED_ON_BOOT=0`.
 | `start:hacker-dojo:seed` | Seed + serve |
 | `pilot:smoke` | Health checks |
 | `pilot:env` | Env checklist |
-| `deploy:fly` | Fly deploy helper |
+| `bootstrap:fly` | Create app/volume/secrets + deploy + smoke |
+| `deploy:fly` | Fly deploy (`--yes` / `DEPLOY_YES=1` non-interactive) |
 | `seed:hacker-dojo` | Seed only |
 
 ## Seed fixture

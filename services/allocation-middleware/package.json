@@ -15,6 +15,7 @@
     "pilot:smoke": "bash scripts/pilot-smoke.sh",
     "pilot:env": "bash scripts/print-env-checklist.sh",
     "deploy:fly": "bash scripts/deploy-fly.sh",
-    "start:hacker-dojo:seed": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json SEED_ON_BOOT=1 node src/http/server.mjs"
+    "start:hacker-dojo:seed": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json SEED_ON_BOOT=1 node src/http/server.mjs",
+    "bootstrap:fly": "bash scripts/bootstrap-fly-pilot.sh"
   }
 }

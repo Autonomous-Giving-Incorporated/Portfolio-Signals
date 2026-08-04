@@ -1,9 +1,16 @@
-# Example Fly.io config — customize app name and secrets before deploy.
-# fly apps create agi-allocation
-# fly volumes create am_data --size 1 --region sjc
-# fly secrets set ORG_ID=org_pilot OPERATOR_TOKEN=... WEBHOOK_TOKEN=... PUBLIC_BASE_URL=https://agi-allocation.fly.dev
-# fly deploy
-# Setup wizard: https://agi-allocation.fly.dev/setup.html
+# Hacker Dojo allocation pilot — Fly.io
+#
+# One-time:
+#   fly auth login
+#   ./scripts/bootstrap-fly-pilot.sh
+#
+# Or manual:
+#   fly apps create agi-allocation
+#   fly volumes create am_data --size 1 --region sjc --app agi-allocation
+#   fly secrets set ORG_ID=org_hacker_dojo WEBHOOK_TOKEN=... PUBLIC_BASE_URL=https://agi-allocation.fly.dev \
+#     SEED_ON_BOOT=1 OPERATOR_TOKEN=...   # or SUPABASE_* for director login
+#   fly deploy
+#   BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
 
 app = "agi-allocation"
 primary_region = "sjc"
@@ -15,8 +22,9 @@ primary_region = "sjc"
   NODE_ENV = "production"
   PORT = "8787"
   DATA_FILE = "/data/state.json"
+  ORG_ID = "org_hacker_dojo"
   PROOF_SLA_HOURS = "72"
-  # SEED_ON_BOOT via secrets for first boot only
+  # SEED_ON_BOOT and tokens via fly secrets (not committed)
 
 [http_service]
   internal_port = 8787

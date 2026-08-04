@@ -49,15 +49,14 @@ Process **exits on boot** if guards fail.
 Preferred (Hacker Dojo pilot):
 
 ```bash
-export ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json
-export PUBLIC_BASE_URL=https://YOUR_APP.fly.dev
-export WEBHOOK_TOKEN=$(openssl rand -hex 24)
-export SEED_ON_BOOT=1
-# + SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY for director login
-npm run pilot:env
-cd services/allocation-middleware && npm run deploy:fly
-BASE_URL=https://YOUR_APP.fly.dev npm run pilot:smoke
+cd services/allocation-middleware
+# fly auth login   # once
+# optional: export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+npm run bootstrap:fly
+# BASE_URL defaults to https://agi-allocation.fly.dev
 ```
+
+Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on the host.
 
 Manual equivalent:
 

@@ -1,17 +1,45 @@
 #!/usr/bin/env bash
+# Deploy allocation-middleware to Fly.io.
+# Non-interactive when DEPLOY_YES=1 or first arg is --yes.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-if ! command -v fly >/dev/null 2>&1 && ! command -v flyctl >/dev/null 2>&1; then
-  echo "Install flyctl: https://fly.io/docs/hands-on/install-flyctl/"
+
+FLY=$(command -v fly || command -v flyctl || true)
+if [[ -z "${FLY}" ]]; then
+  echo "Install flyctl: curl -L https://fly.io/install.sh | sh"
+  echo "Then: export PATH=\"\$HOME/.fly/bin:\$PATH\""
   exit 1
 fi
-FLY=$(command -v fly || command -v flyctl)
+
 echo "=== Pre-deploy checklist ==="
-echo "Secrets: ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json WEBHOOK_TOKEN PUBLIC_BASE_URL"
-echo "  SEED_ON_BOOT=1 (first deploy) SUPABASE_* or OPERATOR_TOKEN"
-echo "One-time: fly apps create; fly volumes create am_data --size 1 --region sjc; fly secrets set ..."
-read -r -p "Continue with fly deploy? [y/N] " ans
-[[ "${ans:-}" == "y" || "${ans:-}" == "Y" ]] || { echo Aborted; exit 0; }
+echo "App: $(grep -E '^app\s*=' fly.toml | head -1 || echo agi-allocation)"
+echo "Secrets expected:"
+echo "  ORG_ID=org_hacker_dojo  DATA_FILE=/data/state.json"
+echo "  WEBHOOK_TOKEN  PUBLIC_BASE_URL=https://<app>.fly.dev"
+echo "  SEED_ON_BOOT=1 (first deploy)  + SUPABASE_* or OPERATOR_TOKEN"
+echo "One-time bootstrap: ./scripts/bootstrap-fly-pilot.sh"
+echo
+
+YES="${DEPLOY_YES:-}"
+if [[ "${1:-}" == "--yes" || "${1:-}" == "-y" ]]; then
+  YES=1
+fi
+if [[ "${YES}" != "1" ]]; then
+  if [[ -t 0 ]]; then
+    read -r -p "Continue with fly deploy? [y/N] " ans
+    [[ "${ans:-}" == "y" || "${ans:-}" == "Y" ]] || { echo Aborted; exit 0; }
+  else
+    echo "Non-interactive shell: re-run with --yes or DEPLOY_YES=1"
+    exit 1
+  fi
+fi
+
 $FLY deploy
-echo "Then: BASE_URL=https://<app>.fly.dev npm run pilot:smoke"
+APP=$($FLY status --json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('Name',''))" 2>/dev/null || true)
+APP=${APP:-agi-allocation}
+echo
+echo "Deploy requested. Smoke:"
+echo "  BASE_URL=https://${APP}.fly.dev npm run pilot:smoke"
+echo "Setup wizard: https://${APP}.fly.dev/setup.html"
+echo "Login:        https://${APP}.fly.dev/login.html"
