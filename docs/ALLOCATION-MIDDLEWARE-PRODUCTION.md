@@ -82,3 +82,8 @@ Open **`/setup.html`** (or `/connect`) on the deployed host.
 API: `GET /setup` returns JSON status (`authModel: webhook_url` — not OAuth).
 
 Requires `PUBLIC_BASE_URL` in production so the wizard can display the correct public URL.
+
+
+## Seed-on-boot
+
+`SEED_ON_BOOT=1` loads Hacker Dojo fixture on start. Scripts: `npm run pilot:smoke`, `pilot:env`, `deploy:fly`. See [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md).
