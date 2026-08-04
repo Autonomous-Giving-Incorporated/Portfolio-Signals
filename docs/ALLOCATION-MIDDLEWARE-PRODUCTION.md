@@ -46,17 +46,20 @@ Process **exits on boot** if guards fail.
 
 ## Deploy (Fly.io)
 
-Preferred (Hacker Dojo pilot):
+Preferred (Hacker Dojo pilot) — **Docker Compose** (no Fly CLI):
 
 ```bash
 cd services/allocation-middleware
-# fly auth login   # once
-# optional: export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
-npm run bootstrap:fly
-# BASE_URL defaults to https://agi-allocation.fly.dev
+npm run gen:env
+npm run compose:up
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 ```
 
-Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on the host.
+Fly-like SaaS without flyctl: **Render** or **Railway** — see [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
+
+Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on any host.
+
+Optional Fly: `npm run bootstrap:fly` after `fly auth login`.
 
 Manual equivalent:
 
