@@ -81,10 +81,12 @@ create policy am_exceptions_select on public.am_exceptions for select
   using (public.is_client_member(client_id) or public.is_master_admin());
 
 -- Directors can insert allocations and proofs for their client.
+-- master_admin is platform authority (is_master_admin()), not public.app_role.
+-- app_role values: director, campaign_lead, development, board_viewer, data_steward, auditor.
 create policy am_allocations_insert on public.am_allocations for insert
   with check (
     public.is_master_admin()
-    or public.current_client_role(client_id) in ('director', 'master_admin')
+    or public.current_client_role(client_id) = 'director'
     or public.is_client_member(client_id)
   );
 create policy am_proofs_insert on public.am_proofs for insert
