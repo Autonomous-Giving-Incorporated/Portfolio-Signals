@@ -45,11 +45,13 @@ export function createAuthVerifier({
   /**
    * Resolve membership role for clientId.
    * Prefer client_memberships; fall back to profiles.role for single-tenant legacy.
+   * Membership rows are read with the service role so RLS cannot hide an existing
+   * grant from the server-side verifier (user JWT is only used to identify the actor).
    */
-  async function getMembership(accessToken, userId) {
+  async function getMembership(_accessToken, userId) {
     const headers = {
       apikey: serviceRoleKey,
-      authorization: `Bearer ${accessToken}`,
+      authorization: `Bearer ${serviceRoleKey}`,
       accept: 'application/json',
     };
 

@@ -27,13 +27,19 @@ ALLOW_OPERATOR_TOKEN_FALLBACK=1
 SEED_ON_BOOT=1
 SEED_ALLOCATE=1
 PROOF_SLA_HOURS=72
-# SUPABASE_URL=
+# Director login (Fund-Intel #72) — fill from Supabase project settings
+# SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 # SUPABASE_ANON_KEY=
 # SUPABASE_SERVICE_ROLE_KEY=
+# After SUPABASE_* are set:
+#   DIRECTOR_EMAIL=you@example.com npm run grant:director
+#   ALLOW_OPERATOR_TOKEN_FALLBACK=0   # prefer JWT-only writes
+#   npm run compose:up
+#   BASE_URL=http://127.0.0.1:8787 npm run verify:director
 EOF
 
 echo "Wrote $OUT"
 echo "Next:"
 echo "  docker compose --env-file $OUT up -d --build"
 echo "  BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke"
-echo "For a public host, set PUBLIC_BASE_URL to your https URL before compose up."
+echo "Director login: add SUPABASE_* then npm run grant:director (see docs/ALLOCATION-DIRECTOR-LOGIN.md)"
