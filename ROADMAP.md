@@ -268,6 +268,24 @@ These decisions remain outside engineering authority:
 9. Authorize a native source workbook for quarantine import.
 10. Approve the transition from internal testing to real campaign operations.
 
+## Parallel track — Allocation middleware (Hacker Dojo pilot)
+
+Not a substitute for HD-OI-019–021 leadership gates; a **transaction-light** client ops track co-located in this repo.
+
+| Milestone | State |
+| --- | --- |
+| Domain + every.org webhook + allocate + packet | **Shipped** (`services/allocation-middleware/`) |
+| File store, proof SLA, setup wizard, CI | **Shipped** |
+| Supabase director login (`/login.html`) | **Shipped** |
+| Hacker Dojo seed + `SEED_ON_BOOT` + Fly helpers | **Shipped** |
+| Named Fly host + volume secrets | **Operator** |
+| Live every.org webhook for Hacker Dojo | **Operator** |
+| Director acceptance of pilot allocate flow | **Pending** |
+
+Docs: [ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md), [HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md), [ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md), [ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md).
+
+Design/plan (Specs): [design](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md), [MVP plan](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md), [pilot hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md).
+
 ## Release sequence
 
 ```yaml
@@ -295,6 +313,23 @@ HD_OI_020:
 HD_OI_021:
   name: controlled_campaign_operations
   state: BLOCKED_BY_PILOT_ACCEPTANCE
+
+ALLOC_MW_MVP:
+  name: allocation_middleware_mvp
+  state: COMPLETE
+  path: services/allocation-middleware
+  note: co-located modular monolith; seed pilot not live every.org
+
+ALLOC_MW_PILOT_HOST:
+  name: hacker_dojo_allocation_pilot_host
+  state: ACTIVE
+  completion: fly_host_director_login_seed_then_live_webhook
+  progress:
+    package: SHIPPED
+    seed_on_boot: SHIPPED
+    director_jwt: SHIPPED
+    named_host: PENDING_OPERATOR
+    live_every_org: PENDING_OPERATOR
 ```
 
 ## Non-negotiable boundary

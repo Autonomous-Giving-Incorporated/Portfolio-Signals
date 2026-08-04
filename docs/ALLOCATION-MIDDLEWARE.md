@@ -1,5 +1,6 @@
 # Allocation middleware — Fund Intel role
 
+**Status:** MVP shipped in this repo · Hacker Dojo pilot ready (seed fixtures)  
 **Canonical design:** [Specs design doc](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
 **Suite summary:** [AGI PRODUCT-ALLOCATION-MIDDLEWARE](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PRODUCT-ALLOCATION-MIDDLEWARE.md)
 
@@ -7,7 +8,7 @@
 
 Fund Intel remains the **intelligence / observe** boundary: signals, opportunities, recommendations, and—in the middleware product—**gift summary ingestion and pot credits** from donation platforms.
 
-It does **not** own human approval of allocations (Autonomous Giving capability) or evidence verification (Impact Relay capability).
+It does **not** own human approval of allocations (Autonomous Giving capability) or deep evidence verification (Impact Relay capability). The MVP co-locates allocate/proof/packet UI with credit ingestion in a modular monolith package (Specs SPEC-002A / SPEC-020 Profile B).
 
 ## Relevance to Fund Intel
 
@@ -22,45 +23,77 @@ It does **not** own human approval of allocations (Autonomous Giving capability)
 
 - No payment processing  
 - No deep QuickBooks/bank sync as product center  
-- No replacing Impact Relay proof/receipts  
+- No replacing Impact Relay proof/receipts for the full donor chain  
 
-## Implementation note
+## Package location
 
-When middleware ships, prefer **capability modules** co-located in a modular monolith per Specs SPEC-002A / SPEC-020. Public `data/public-campaign.json` contracts for the GitHub Pages suite remain separate and advisory-only.
+```text
+services/allocation-middleware/
+```
 
-## Implementation status
+Public `data/public-campaign.json` contracts for the GitHub Pages suite remain separate and advisory-only.
 
-MVP package: `services/allocation-middleware/`
+## Implementation status (2026-08-03)
+
+| Area | State |
+| --- | --- |
+| Domain (pots, gifts, allocate, exceptions, packet) | Shipped |
+| every.org webhook (`POST /webhooks/every-org`) | Shipped |
+| CSV import | Shipped |
+| Operator UI (Available · Allocate · Inbox · Packet) | Shipped |
+| File-backed durable store (`DATA_FILE`) | Shipped |
+| Proof + `MISSING_PROOF` SLA | Shipped |
+| Setup wizard (`/setup.html`, webhook — not OAuth) | Shipped |
+| Supabase director JWT + membership | Shipped (`/login.html`) |
+| Hacker Dojo pilot seed + `SEED_ON_BOOT` | Shipped |
+| Fly deploy helpers + smoke script | Shipped |
+| Live every.org gifts for Hacker Dojo | **Operator step** (not yet wired) |
+| Hosted Fly/production host | **Operator step** |
+
+### Local (Hacker Dojo default)
 
 ```bash
 cd services/allocation-middleware
 npm test
-ORG_ID=org_demo npm start   # http://127.0.0.1:8787
+npm run start:hacker-dojo:seed    # org_hacker_dojo + SEED_ON_BOOT
+# open http://127.0.0.1:8787
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 ```
 
-- every.org webhook: `POST /webhooks/every-org`
-- CSV import: `POST /import/csv`
-- Operator UI: `/` (Available · Allocate · Inbox · Packet)
-- In-memory store (Supabase deferred)
+| Path | Use |
+| --- | --- |
+| `/` | Available / allocate / proof / packet |
+| `/login.html` | Director login (Supabase JWT) |
+| `/setup.html` | every.org webhook wizard (later) |
 
-Plan: https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md
+Default org id: **`org_hacker_dojo`**. Generic demos can still set `ORG_ID=org_demo`.
 
-### Persistence, auth, proof (follow-on)
+### Auth
+
+| Mode | When |
+| --- | --- |
+| Supabase director / campaign_lead JWT | Preferred for pilot writes |
+| `OPERATOR_TOKEN` | Dev / emergency fallback (`ALLOW_OPERATOR_TOKEN_FALLBACK`) |
+| `WEBHOOK_TOKEN` | every.org webhook (`x-webhook-token` or `?token=`) |
+
+### Related docs
+
+| Doc | Purpose |
+| --- | --- |
+| [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) | Local + hosted pilot runbook |
+| [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) | Supabase membership + `/login.html` |
+| [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates, env, Fly |
+| Package [README](../services/allocation-middleware/README.md) | npm scripts |
+
+### Plans (Specs)
+
+- [MVP implementation plan](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md)  
+- [Hacker Dojo pilot hosting plan](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md)  
+
+### Persistence reference
 
 | Feature | How |
 | --- | --- |
-| File store | `DATA_FILE=./data/org.json npm start` |
-| Operator auth | `OPERATOR_TOKEN=...` on allocate/import/proof |
-| Webhook auth | `WEBHOOK_TOKEN=...` header `x-webhook-token` |
+| File store | `DATA_FILE=./data/hacker-dojo.json` |
+| Supabase DDL | Migration `202608030001_allocation_middleware.sql` (optional; Node pilot uses file store) |
 | Proof | `POST /proofs` + `MISSING_PROOF` after `PROOF_SLA_HOURS` |
-| Supabase | Migration `202608030001_allocation_middleware.sql` |
-
-
-
-See [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) for pilot deploy gates.
-
-
-Pilot: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md).
-
-
-Director login: see [ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) — `/login.html`.

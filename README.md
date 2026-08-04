@@ -18,9 +18,25 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 ## Allocation middleware
 
-Transaction-light suite product direction (every.org-first pots → allocate → exceptions). Fund Intel’s role is **observe/credit**, not approval or evidence verification.
+Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-See [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md).
+**Status (2026-08-03):** MVP shipped in `services/allocation-middleware/` with Hacker Dojo pilot seed (`org_hacker_dojo`), file-backed durability, every.org webhook (not OAuth), setup wizard, Supabase director login, and Fly deploy helpers. Live every.org webhook + named host remain operator steps.
+
+```bash
+cd services/allocation-middleware
+npm test
+npm run start:hacker-dojo:seed   # http://127.0.0.1:8787
+```
+
+| Doc | Purpose |
+| --- | --- |
+| [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
+| [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
+| [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
+| [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
+| [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
+
+Fund Intel’s suite role is **observe/credit** (gift summaries → pot balances). Deep evidence verification remains Impact Relay’s long-term boundary; the MVP co-locates allocate/proof/packet for the modular-monolith pilot.
 
 ## Current evidence boundary
 
@@ -31,6 +47,8 @@ HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted pari
 | Capability | State |
 |---|---|
 | Public director portal | Implemented |
+| Allocation middleware MVP | Implemented (`services/allocation-middleware/`; Hacker Dojo pilot seed) |
+| every.org live webhook (hosted) | Operator-owned (setup wizard ready) |
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
@@ -80,7 +98,12 @@ supabase/functions/signed-document-url  Authenticated private-document access
 supabase/tests/                         Synthetic fixtures and policy checks
 services/workbook-parser/               Native XLSX quarantine parser
 services/import-api/                    Parser-to-import-batch service boundary
+services/allocation-middleware/         every.org pots → allocate → proof → packet (MVP)
 
+docs/ALLOCATION-MIDDLEWARE.md           Middleware role + status
+docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Fly
+docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
+docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
