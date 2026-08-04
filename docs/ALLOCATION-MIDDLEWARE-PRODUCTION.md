@@ -11,10 +11,14 @@
 | Secrets for webhook/operator | Ready when `NODE_ENV=production` |
 | Health checks | `/healthz`, `/readyz` |
 | Mapping UX (label + merge) | API + UI |
-| Hosted deploy recipe | Fly.io example (`fly.toml`) |
+| Hosted deploy recipe | Fly.io example (`fly.toml`) + `npm run deploy:fly` |
+| Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
+| Director SSO / Supabase session | Ready (`/login.html` + membership JWT) |
 | every.org live webhook | **Pilot operator step** |
-| Director SSO / Supabase session | **Not yet** (operator token is pilot-grade) |
+| Named Fly host with volume | **Pilot operator step** |
 | Multi-region HA | Not required for pilot |
+
+Pilot runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md). Director auth: [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md).
 
 ## Production env (required)
 
@@ -38,19 +42,38 @@ Process **exits on boot** if guards fail.
    `https://<host>/webhooks/every-org?token=<WEBHOOK_TOKEN>`  
    Also accepts header `x-webhook-token` (preferred when a proxy can inject it).
 4. Map designations via **Merge pots** / **Labels** in UI after first gifts land.
-5. Directors paste **operator token** in the UI bar (stored in localStorage) for allocate/proof.
+5. Directors sign in at **`/login.html`** (Supabase JWT + membership). Operator token remains an optional emergency fallback only.
 
 ## Deploy (Fly.io)
+
+Preferred (Hacker Dojo pilot):
+
+```bash
+export ORG_ID=org_hacker_dojo DATA_FILE=/data/state.json
+export PUBLIC_BASE_URL=https://YOUR_APP.fly.dev
+export WEBHOOK_TOKEN=$(openssl rand -hex 24)
+export SEED_ON_BOOT=1
+# + SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY for director login
+npm run pilot:env
+cd services/allocation-middleware && npm run deploy:fly
+BASE_URL=https://YOUR_APP.fly.dev npm run pilot:smoke
+```
+
+Manual equivalent:
 
 ```bash
 cd services/allocation-middleware
 fly apps create agi-allocation   # once
 fly volumes create am_data --size 1 --region sjc
-fly secrets set ORG_ID=org_pilot OPERATOR_TOKEN=... WEBHOOK_TOKEN=...
+fly secrets set ORG_ID=org_hacker_dojo WEBHOOK_TOKEN=... \
+  SUPABASE_URL=... SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... \
+  SEED_ON_BOOT=1 DATA_FILE=/data/state.json PUBLIC_BASE_URL=https://...
 fly deploy
 fly status
 curl https://<app>.fly.dev/healthz
 ```
+
+After stable seed, set `SEED_ON_BOOT=0`.
 
 ## Pilot success criteria
 
@@ -64,10 +87,11 @@ curl https://<app>.fly.dev/healthz
 
 | Risk | Mitigation |
 | --- | --- |
-| Operator token shared | Rotate; move to Supabase director auth next |
+| Operator token shared | Prefer director JWT; disable fallback; rotate if used |
 | Single region file store | Snapshot volume; nightly copy |
-| Webhook without header auth | Edge inject token |
-| No multi-tenant process yet | One `ORG_ID` per deploy for pilot |
+| Webhook without header auth | Edge inject token; URL `?token=` for every.org paste |
+| No multi-tenant process yet | One `ORG_ID` per deploy for pilot (`org_hacker_dojo`) |
+| Seed data mistaken for live gifts | Turn off `SEED_ON_BOOT` after first host; label synthetic chargeIds |
 
 
 ## every.org setup wizard
