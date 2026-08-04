@@ -337,6 +337,8 @@ if (isMain) {
     store,
     proofSlaHours: cfg.proofSlaHours,
   });
+  const { maybeSeedOnBoot } = await import('../app/boot.mjs');
+  await maybeSeedOnBoot(service, process.env);
   const authVerifier = cfg.hasSupabaseAuth
     ? createAuthVerifier({
         supabaseUrl: cfg.supabaseUrl,

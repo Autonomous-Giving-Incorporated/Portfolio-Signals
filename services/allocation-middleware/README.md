@@ -1,3 +1,12 @@
+## Pilot
+
+```bash
+npm run start:hacker-dojo:seed
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+```
+
+`SEED_ON_BOOT=1` · [pilot runbook](../../docs/HACKER-DOJO-ALLOCATION-PILOT.md)
+
 ## Hacker Dojo pilot (default)
 
 ```bash
