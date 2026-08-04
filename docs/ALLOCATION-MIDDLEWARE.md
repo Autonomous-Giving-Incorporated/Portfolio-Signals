@@ -46,9 +46,10 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Setup wizard (`/setup.html`, webhook — not OAuth) | Shipped |
 | Supabase director JWT + membership | Shipped (`/login.html`) |
 | Hacker Dojo pilot seed + `SEED_ON_BOOT` | Shipped |
-| Fly deploy helpers + smoke script | Shipped |
+| Docker Compose pilot host | Shipped (default) |
+| Optional Fly / Render / Railway recipes | Shipped |
 | Live every.org gifts for Hacker Dojo | **Operator step** (not yet wired) |
-| Hosted Fly/production host | **Operator step** |
+| Named public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
 
 ### Local (Hacker Dojo default)
 

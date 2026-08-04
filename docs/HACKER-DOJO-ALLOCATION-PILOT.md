@@ -70,11 +70,21 @@ Set `PUBLIC_BASE_URL` to that same https origin before smoke if setup wizard URL
 
 ## E — Fly.io (optional)
 
-Only if flyctl runs on your machine. Prefer Compose/Render when Gatekeeper blocks Fly.
+Optional public host when flyctl works. Default remains Docker Compose (section B). Full notes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) §4.
 
 ```bash
-npm run bootstrap:fly   # requires fly auth login
+# once: install flyctl, then if Gatekeeper blocks:
+#   xattr -d com.apple.quarantine ~/.fly/bin/flyctl
+export PATH="$HOME/.fly/bin:$PATH"
+fly auth login
+
+cd services/allocation-middleware
+# optional: export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
+npm run bootstrap:fly
+BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
 ```
+
+After stable seed: `fly secrets set SEED_ON_BOOT=0 -a agi-allocation`.
 
 ## Scripts
 
@@ -82,10 +92,11 @@ npm run bootstrap:fly   # requires fly auth login
 | --- | --- |
 | `start:hacker-dojo:seed` | Local Node seed + serve |
 | `gen:env` | Generate `.env.pilot` tokens |
-| `compose:up` / `compose:down` | Docker Compose pilot |
+| `compose:up` / `compose:down` | Docker Compose pilot (**default**) |
 | `pilot:smoke` | Health checks (`BASE_URL=…`) |
 | `pilot:env` | Env checklist |
-| `bootstrap:fly` | Fly only (optional) |
+| `bootstrap:fly` | **Optional** Fly app + volume + secrets + deploy + smoke |
+| `deploy:fly` | **Optional** Fly deploy only (`--yes` / `DEPLOY_YES=1`) |
 | `seed:hacker-dojo` | Seed only |
 
 ## Seed fixture

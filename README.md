@@ -20,13 +20,13 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-**Status (2026-08-03):** MVP shipped in `services/allocation-middleware/` with Hacker Dojo pilot seed (`org_hacker_dojo`), file-backed durability, every.org webhook (not OAuth), setup wizard, Supabase director login, and Fly deploy helpers. Live every.org webhook + named host remain operator steps.
+**Status (2026-08-03):** MVP shipped in `services/allocation-middleware/` with Hacker Dojo pilot seed (`org_hacker_dojo`), file-backed durability, every.org webhook (not OAuth), setup wizard, Supabase director login. **Default host:** Docker Compose. **Optional hosts:** Fly.io, Render, Railway.
 
 ```bash
 cd services/allocation-middleware
 npm test
-npm run gen:env && npm run compose:up   # Docker pilot (preferred host path)
-# or: npm run start:hacker-dojo:seed    # bare Node
+npm run gen:env && npm run compose:up   # Docker pilot (default)
+# optional Fly: fly auth login && npm run bootstrap:fly
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 ```
 
@@ -34,7 +34,7 @@ BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 | --- | --- |
 | [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
 | [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
-| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose / Render / Railway (no Fly) |
+| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose (default) · Render · Railway · optional Fly |
 | [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
 | [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
@@ -104,7 +104,8 @@ services/import-api/                    Parser-to-import-batch service boundary
 services/allocation-middleware/         every.org pots → allocate → proof → packet (MVP)
 
 docs/ALLOCATION-MIDDLEWARE.md           Middleware role + status
-docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Fly
+docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Docker default
+docs/ALLOCATION-HOSTING-OPTIONS.md      Compose / Render / Railway / optional Fly
 docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
 docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture

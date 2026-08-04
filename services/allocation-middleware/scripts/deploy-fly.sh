@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy allocation-middleware to Fly.io.
+# OPTIONAL: deploy allocation-middleware to Fly.io.
+# Default host is Docker Compose (npm run compose:up).
 # Non-interactive when DEPLOY_YES=1 or first arg is --yes.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -7,8 +8,13 @@ cd "$ROOT"
 
 FLY=$(command -v fly || command -v flyctl || true)
 if [[ -z "${FLY}" ]]; then
+  export PATH="${HOME}/.fly/bin:${PATH}"
+  FLY=$(command -v fly || command -v flyctl || true)
+fi
+if [[ -z "${FLY}" ]]; then
   echo "Install flyctl: curl -L https://fly.io/install.sh | sh"
   echo "Then: export PATH=\"\$HOME/.fly/bin:\$PATH\""
+  echo "Or use Docker: npm run compose:up"
   exit 1
 fi
 
