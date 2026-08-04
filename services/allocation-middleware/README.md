@@ -25,7 +25,8 @@ npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
 npm run pilot:smoke              # health checks (BASE_URL=...)
 npm run pilot:env                # env checklist
-npm run deploy:fly               # Fly helper
+npm run bootstrap:fly            # create app + volume + secrets + deploy + smoke
+npm run deploy:fly -- --yes      # deploy only (non-interactive)
 ```
 
 Generic demo (non-Hacker Dojo):
