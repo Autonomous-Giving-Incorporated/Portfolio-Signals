@@ -20,6 +20,8 @@
     "gen:env": "bash scripts/gen-pilot-env.sh",
     "compose:up": "docker compose --env-file .env.pilot up -d --build",
     "compose:down": "docker compose --env-file .env.pilot down",
-    "compose:logs": "docker compose --env-file .env.pilot logs -f"
+    "compose:logs": "docker compose --env-file .env.pilot logs -f",
+    "grant:director": "node scripts/grant-director-membership.mjs",
+    "verify:director": "bash scripts/verify-director-auth.sh"
   }
 }

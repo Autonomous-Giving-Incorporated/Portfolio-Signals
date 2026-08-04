@@ -26,6 +26,12 @@ npm run gen:env                  # .env.pilot with tokens
 npm run compose:up               # Docker Compose + volume
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 
+# Director login (Fund-Intel #72) — after SUPABASE_* in .env.pilot
+# DIRECTOR_EMAIL=you@example.com npm run grant:director
+# npm run compose:up
+# BASE_URL=http://127.0.0.1:8787 npm run verify:director
+# DIRECTOR_EMAIL=… DIRECTOR_PASSWORD=… npm run verify:director -- --login
+
 # Optional — Fly.io (when flyctl works)
 # fly auth login && npm run bootstrap:fly
 # BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
