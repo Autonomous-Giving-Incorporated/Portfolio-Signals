@@ -21,4 +21,16 @@ echo "OK setup.html"
 code=$(curl -sS -o /dev/null -w "%{http_code}" "$BASE_URL/login.html")
 test "$code" = "200" || { echo "login.html failed: $code"; exit 1; }
 echo "OK login.html"
+code=$(curl -sS -o /dev/null -w "%{http_code}" "$BASE_URL/css/agi-shell.css")
+test "$code" = "200" || { echo "agi-shell.css failed: $code"; exit 1; }
+echo "OK agi-shell.css"
+code=$(curl -sS -o /dev/null -w "%{http_code}" "$BASE_URL/assets/brand/agi-mark.png")
+test "$code" = "200" || { echo "agi-mark.png failed: $code"; exit 1; }
+echo "OK brand mark"
+# Shell contract: wordmark + suite footer language present on allocation home
+html=$(curl -sS "$BASE_URL/")
+echo "$html" | grep -q 'agi-wordmark.png' || { echo "missing AGI wordmark"; exit 1; }
+echo "$html" | grep -q 'Software by Zero State' || { echo "missing Zero State footer credit"; exit 1; }
+echo "$html" | grep -q 'autogive.app' || { echo "missing suite links"; exit 1; }
+echo "OK shell contract"
 echo "SMOKE PASS"
