@@ -18,16 +18,22 @@ Hosted as a modular capability inside Fund-Intel (`services/allocation-middlewar
 
 ```bash
 npm test
-npm run start:hacker-dojo:seed   # SEED_ON_BOOT=1, org_hacker_dojo
+npm run start:hacker-dojo:seed   # local Node, SEED_ON_BOOT=1
 # open http://127.0.0.1:8787
+
+# Recommended host path (no Fly CLI)
+npm run gen:env                  # .env.pilot with tokens
+npm run compose:up               # Docker Compose + volume
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 
 npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
 npm run pilot:smoke              # health checks (BASE_URL=...)
 npm run pilot:env                # env checklist
-npm run bootstrap:fly            # create app + volume + secrets + deploy + smoke
-npm run deploy:fly -- --yes      # deploy only (non-interactive)
 ```
+
+**Public hosts (dashboard, no flyctl):** Render (`render.yaml`) or Railway (`railway.toml`).  
+See [ALLOCATION-HOSTING-OPTIONS.md](../../docs/ALLOCATION-HOSTING-OPTIONS.md).
 
 Generic demo (non-Hacker Dojo):
 

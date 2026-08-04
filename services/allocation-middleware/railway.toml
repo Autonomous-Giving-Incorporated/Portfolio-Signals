@@ -1,0 +1,20 @@
+# Railway — https://railway.app (dashboard deploy; CLI optional)
+# New Project → Deploy from GitHub → root: services/allocation-middleware
+# Add volume mounted at /data, set env from .env.example
+#
+# Dashboard variables (required):
+#   NODE_ENV=production
+#   ORG_ID=org_hacker_dojo
+#   DATA_FILE=/data/state.json
+#   PUBLIC_BASE_URL=https://<your-railway-domain>
+#   WEBHOOK_TOKEN=<random>
+#   OPERATOR_TOKEN=<random>   # or SUPABASE_* for director login
+#   SEED_ON_BOOT=1
+
+[build]
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/healthz"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"

@@ -1,0 +1,51 @@
+# Render Blueprint — https://render.com
+# Dashboard: New → Blueprint → connect Fund-Intel repo → this file.
+# Or: create a Docker Web Service with root dir services/allocation-middleware.
+#
+# Closest Fly-like host without flyctl (GitHub deploy + dashboard secrets).
+# Persistent disk mounts at /data for DATA_FILE.
+
+services:
+  - type: web
+    name: agi-allocation
+    runtime: docker
+    plan: starter
+    region: oregon
+    rootDir: services/allocation-middleware
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: am-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8787"
+      - key: ORG_ID
+        value: org_hacker_dojo
+      - key: DATA_FILE
+        value: /data/state.json
+      - key: PROOF_SLA_HOURS
+        value: "72"
+      - key: SEED_ON_BOOT
+        value: "1"
+      - key: SEED_ALLOCATE
+        value: "1"
+      - key: ALLOW_OPERATOR_TOKEN_FALLBACK
+        value: "1"
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: WEBHOOK_TOKEN
+        generateValue: true
+      - key: OPERATOR_TOKEN
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

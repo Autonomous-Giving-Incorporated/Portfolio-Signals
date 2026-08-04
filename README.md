@@ -25,13 +25,16 @@ Transaction-light **middleware** between donation platforms (canonical **every.o
 ```bash
 cd services/allocation-middleware
 npm test
-npm run start:hacker-dojo:seed   # http://127.0.0.1:8787
+npm run gen:env && npm run compose:up   # Docker pilot (preferred host path)
+# or: npm run start:hacker-dojo:seed    # bare Node
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 ```
 
 | Doc | Purpose |
 | --- | --- |
 | [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
 | [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
+| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose / Render / Railway (no Fly) |
 | [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
 | [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
