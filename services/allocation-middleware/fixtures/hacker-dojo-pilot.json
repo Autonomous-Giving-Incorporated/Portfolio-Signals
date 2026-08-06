@@ -1,0 +1,69 @@
+{
+  "orgId": "org_hacker_dojo",
+  "description": "Hacker Dojo pilot balances until every.org webhook is live. Privacy-safe synthetic gift summaries only.",
+  "source": "fixture",
+  "campaign": {
+    "minimumTarget": 420000,
+    "stretchTarget": 2000000,
+    "currency": "USD",
+    "publicPage": "https://www.every.org/hacker-dojo",
+    "fundIntel": "data/public-campaign.json"
+  },
+  "labels": [
+    { "kind": "campaign", "key": "hacker-dojo-420k", "label": "Hacker Dojo $420K Campaign" },
+    { "kind": "campaign", "key": "general", "label": "General operating" },
+    { "kind": "program", "key": "community-hardware-fund", "label": "Community Hardware Fund" },
+    { "kind": "program", "key": "undesignated", "label": "Undesignated" }
+  ],
+  "gifts": [
+    {
+      "chargeId": "fixture-hd-gift-001",
+      "netAmount": "10000.00",
+      "amount": "10000.00",
+      "currency": "USD",
+      "donatedAt": "2026-07-15T18:00:00Z",
+      "campaignKey": "hacker-dojo-420k",
+      "programKey": "community-hardware-fund"
+    },
+    {
+      "chargeId": "fixture-hd-gift-002",
+      "netAmount": "5000.00",
+      "amount": "5000.00",
+      "currency": "USD",
+      "donatedAt": "2026-07-22T16:30:00Z",
+      "campaignKey": "hacker-dojo-420k",
+      "programKey": "community-hardware-fund"
+    },
+    {
+      "chargeId": "fixture-hd-gift-003",
+      "netAmount": "2500.00",
+      "amount": "2500.00",
+      "currency": "USD",
+      "donatedAt": "2026-08-01T12:00:00Z",
+      "campaignKey": "hacker-dojo-420k",
+      "programKey": "community-hardware-fund"
+    },
+    {
+      "chargeId": "fixture-hd-gift-004",
+      "netAmount": "1500.00",
+      "amount": "1500.00",
+      "currency": "USD",
+      "donatedAt": "2026-08-02T09:15:00Z",
+      "campaignKey": "hacker-dojo-420k",
+      "programKey": "undesignated"
+    }
+  ],
+  "suggestedAllocation": {
+    "id": "alloc_community_hardware",
+    "campaignKey": "hacker-dojo-420k",
+    "programKey": "community-hardware-fund",
+    "amount": "2500.00",
+    "purpose": "Hands-on computing equipment for beginner electronics / robotics workshop",
+    "approvedBy": "director@hackerdojo.org",
+    "proof": {
+      "uri": "https://autogive.app/impact-relay/",
+      "note": "Linked to public Impact Relay outcome: Beginner Electronics Class (alloc_community_hardware)",
+      "attachedBy": "impact-relay-public"
+    }
+  }
+}

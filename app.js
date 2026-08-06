@@ -1,9 +1,9 @@
 const root = document.documentElement;
 
-// Load the Hacker Dojo brand layer without coupling it to the base dashboard stylesheet.
+// Tenant theme layer (per-client CSS vars) without coupling product chrome to one nonprofit.
 const brandStyles = document.createElement('link');
 brandStyles.rel = 'stylesheet';
-brandStyles.href = 'brand.css?v=agi-1';
+brandStyles.href = 'brand.css?v=agi-tenant-1';
 document.head.appendChild(brandStyles);
 
 const favicon = document.createElement('link');
@@ -23,7 +23,10 @@ if (header && headerCopy) {
     <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
     <span class="brand-divider" aria-hidden="true"></span>
     <span class="brand-product">Fund Intel<br />Decision Workspace</span>
-    <span class="tenant-chip"><img class="tenant-mark" src="assets/brand/hacker-dojo-icon.svg" alt="" />Hacker Dojo campaign</span>
+    <span class="tenant-chip" data-tenant-chip>
+      <img class="tenant-mark" src="assets/brand/hacker-dojo-icon.svg" alt="" />
+      Tenant · Hacker Dojo
+    </span>
     <nav class="brand-suite-links" aria-label="AGI product suite">
       <a href="https://autogive.app/">AGI</a>
       <a href="https://autogive.app/impact-relay/">Impact Relay</a>
@@ -31,12 +34,12 @@ if (header && headerCopy) {
   `;
   header.prepend(identity);
 
-  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html');
+  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html') || location.pathname.endsWith('/fund-intel');
   if (isOverview) {
     const eyebrow = headerCopy.querySelector('.eyebrow');
     const title = headerCopy.querySelector('h1');
-    if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
-    if (title) title.textContent = 'Campaign Control Center';
+    if (eyebrow) eyebrow.textContent = 'AGI product · Fund Intel';
+    if (title) title.textContent = 'Decision workspace';
   }
 }
 
@@ -75,7 +78,7 @@ if (footer) {
       <span>Autonomously Giving Incorporated · Fund Intel</span>
     </div>
     <div class="footer-meta">
-      <small>Hacker Dojo campaign context · Powered by Neon Genie</small>
+      <small data-tenant-name>Tenant · Hacker Dojo (reference)</small>
       <small>Software by Zero State</small>
       <a href="https://autogive.app/brand#tokens">Tokens</a>
       <a href="https://autogive.app/brand#logo">Logo use</a>

@@ -30,20 +30,31 @@ local native .xlsx
 
 See [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) and [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md).
 
-## Staging Supabase project (observed)
+## Supabase projects (suite-wide)
 
-| Field | Value | Label |
-|---|---|---|
-| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq | OBSERVED (operator-provided) |
-| Project ref | `ecxkhihlbrcwpavfoaoq` | OBSERVED |
-| API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
-| GitHub link | Project associated with this repository | OBSERVED (operator-reported) |
-| Classification | Treat as **staging** until leadership names production | OPERATOR DEFAULT |
-| Migrations applied | Operator-owned; not verified from CI | NOT_COMPUTABLE here |
-| Production import | **BLOCKED** | POLICY |
-| Real workbook load | **BLOCKED** until HD-OI-020 gates | POLICY |
+**Do not fragment.** New multi-tenant / AGI admin work uses **platform** only.  
+**Default:** platform ref `utdioxwiskzatwoejgiu`. **Legacy frozen:** `ecxkhihlbrcwpavfoaoq`.
 
-Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only.
+| Role | Project ref | Host | Classification |
+|---|---|---|---|
+| **Platform (canonical)** | `utdioxwiskzatwoejgiu` | `https://utdioxwiskzatwoejgiu.supabase.co` | AGI multi-tenant data plane; GitHub-linked |
+| **Dashboard** | — | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu | OBSERVED |
+| **Legacy HD staging** | `ecxkhihlbrcwpavfoaoq` | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | **Freeze** for new tenancy; migrate then retire |
+
+Schema source of truth remains this repo’s `supabase/migrations`. **Operator applies migrations** to platform (not assumed applied by docs alone):
+
+```bash
+supabase link --project-ref utdioxwiskzatwoejgiu
+PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu \
+  ./scripts/staging/apply-migrations.sh remote-linked
+```
+
+Authenticated workspace production URL: https://autogive.app/fund-intel/workspace  
+Primary `master_admin`: `scrimshawlife@gmail.com`. Second admin (Qi Diaz) deferred — `platform_administrators` insert with rationale ≥ 12 chars.
+
+Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only (or Vercel build from `PLATFORM_SUPABASE_*` env).
+
+Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Master Development List (source inventory only)
 
@@ -64,9 +75,11 @@ Outreach from historical membership, attendance, or this list alone remains **no
 
 ## Operator continue path (outside this PR)
 
-1. `supabase link --project-ref ecxkhihlbrcwpavfoaoq`
-2. `supabase db push` (or `./scripts/staging/apply-migrations.sh remote-linked`)
-3. Wire gitignored `runtime-config.js` with URL + anon key
-4. Enable MFA; provision six roles with synthetic fixtures first
-5. Verify import gates / RLS / storage matrix (prefer disposable local, then staging)
-6. Only then consider HD-OI-020 quarantine import of the authorized workbook
+1. `supabase link --project-ref utdioxwiskzatwoejgiu` (platform — not legacy HD staging)
+2. **Operator applies migrations** (`apply-migrations.sh remote-linked` or `supabase db push`)
+3. Wire gitignored / deploy-generated `runtime-config.js` with platform URL + anon key only
+4. Invite `scrimshawlife@gmail.com`; run `scripts/platform/bootstrap-master-admin.sql`; enable MFA as required
+5. Verify import gates / RLS / storage matrix (prefer disposable local, then platform)
+6. Smoke magic-link on https://autogive.app/fund-intel/workspace
+7. Only then consider HD-OI-020 quarantine import of the authorized workbook
+8. Keep `ecxkhihlbrcwpavfoaoq` frozen; retire after data confirmation

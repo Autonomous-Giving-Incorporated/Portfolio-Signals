@@ -1,0 +1,27 @@
+{
+  "name": "@agi/allocation-middleware",
+  "private": true,
+  "version": "0.4.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/http/server.mjs",
+    "start:prod": "NODE_ENV=production node src/http/server.mjs",
+    "seed:hacker-dojo": "node scripts/seed-hacker-dojo.mjs",
+    "start:hacker-dojo": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json SEED_ON_BOOT=0 node src/http/server.mjs",
+    "pilot:smoke": "bash scripts/pilot-smoke.sh",
+    "pilot:env": "bash scripts/print-env-checklist.sh",
+    "deploy:fly": "bash scripts/deploy-fly.sh",
+    "start:hacker-dojo:seed": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json SEED_ON_BOOT=1 node src/http/server.mjs",
+    "bootstrap:fly": "bash scripts/bootstrap-fly-pilot.sh",
+    "gen:env": "bash scripts/gen-pilot-env.sh",
+    "compose:up": "docker compose --env-file .env.pilot up -d --build",
+    "compose:down": "docker compose --env-file .env.pilot down",
+    "compose:logs": "docker compose --env-file .env.pilot logs -f",
+    "grant:director": "node scripts/grant-director-membership.mjs",
+    "verify:director": "bash scripts/verify-director-auth.sh"
+  }
+}

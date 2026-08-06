@@ -12,7 +12,17 @@ const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 let cached = null;
 
 export function getRuntimeConfig() {
-  return window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+  return window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+}
+
+/** Canonical workspace return URLs (path-prefixed production + local). */
+export function workspaceRedirectUrl() {
+  const { origin, pathname, href } = window.location;
+  // Prefer the path the user is already on (clean URL or .html).
+  if (pathname.includes('workspace')) {
+    return `${origin}${pathname}`;
+  }
+  return href.split('#')[0].split('?')[0];
 }
 
 export function createWorkspaceClient() {
@@ -21,7 +31,12 @@ export function createWorkspaceClient() {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
   return createClient(config.supabaseUrl, config.supabaseAnonKey, {
-    auth: { persistSession: true, detectSessionInUrl: true }
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    }
   });
 }
 

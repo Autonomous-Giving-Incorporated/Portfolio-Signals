@@ -38,3 +38,16 @@ Client configuration is versioned as draft, published, or archived. Rollback cre
 
 Real imports, outreach, money movement, and live notifications remain subject to separate authority gates.
 
+## Allocation middleware
+
+Suite product for **transaction-light allocation middleware** (canonical connector: **every.org**; campaign pot + program slice hierarchy; exception-only ops).
+
+**Status:** MVP implemented in `services/allocation-middleware/` (Hacker Dojo pilot seed; live webhook + named host operator-owned).
+
+- [docs/ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) — Fund Intel’s observe/credit role + status  
+- [docs/HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — pilot runbook  
+- [Specs design](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
+- [AGI product brief](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PRODUCT-ALLOCATION-MIDDLEWARE.md)  
+
+This track is distinct from Hacker Dojo campaign workspace milestones above; it must not pull Fund Intel into full financial transaction processing.
+

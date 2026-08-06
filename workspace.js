@@ -3,7 +3,8 @@ import {
   clearWorkspaceSessionCache,
   requireWorkspaceSession,
   roleCan,
-  selectWorkspaceClient
+  selectWorkspaceClient,
+  workspaceRedirectUrl
 } from './workspace/session.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
@@ -36,11 +37,57 @@ function escapeHtml(value = '') {
 }
 
 function showMessage(text) {
-  message.textContent = text;
+  if (message) message.textContent = text;
 }
 
 function setBusy(isBusy) {
   content?.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+}
+
+/** Consume ?code= / hash tokens from magic-link or invite before session reads. */
+async function settleAuthFromUrl(client) {
+  const url = new URL(window.location.href);
+  const hasCode = url.searchParams.has('code');
+  const hasTokenHash =
+    url.hash.includes('access_token') ||
+    url.hash.includes('refresh_token') ||
+    url.searchParams.has('token_hash') ||
+    url.searchParams.get('type') === 'invite' ||
+    url.searchParams.get('type') === 'magiclink' ||
+    url.searchParams.get('type') === 'signup';
+
+  if (!hasCode && !hasTokenHash) {
+    return client.auth.getSession().then(({ data }) => data.session);
+  }
+
+  showMessage('Completing secure sign-in…');
+
+  // PKCE: exchange ?code=
+  if (hasCode) {
+    const { data, error } = await client.auth.exchangeCodeForSession(url.searchParams.get('code'));
+    if (error) {
+      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
+      // Strip broken params so retry is clean
+      url.searchParams.delete('code');
+      url.searchParams.delete('type');
+      history.replaceState({}, '', url.pathname + url.search);
+      return null;
+    }
+    // Clean URL after success
+    history.replaceState({}, '', url.pathname);
+    return data.session;
+  }
+
+  // Implicit / verify redirects: let client parse hash then re-read session
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
+    return null;
+  }
+  if (data.session) {
+    history.replaceState({}, '', url.pathname);
+  }
+  return data.session;
 }
 
 if (!document.getElementById('loginForm')) {
@@ -58,11 +105,19 @@ if (activeClient) {
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('email').value.trim();
+    const redirectTo = workspaceRedirectUrl();
     const { error } = await activeClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${location.origin}${location.pathname}` }
+      options: {
+        emailRedirectTo: redirectTo,
+        shouldCreateUser: false
+      }
     });
-    showMessage(error ? error.message : 'Check your email for the secure sign-in link.');
+    showMessage(
+      error
+        ? error.message
+        : `Check your email for the secure sign-in link. Return to this exact page (${redirectTo}).`
+    );
   });
 
   document.getElementById('signOut').addEventListener('click', async () => {
@@ -73,9 +128,10 @@ if (activeClient) {
   activeClient.auth.onAuthStateChange((_event, session) => {
     renderSession(session).catch((error) => showMessage(error.message));
   });
-  activeClient.auth.getSession().then(({ data }) => {
-    renderSession(data.session).catch((error) => showMessage(error.message));
-  });
+
+  settleAuthFromUrl(activeClient)
+    .then((session) => renderSession(session))
+    .catch((error) => showMessage(error.message));
 }
 
 async function renderSession(session) {

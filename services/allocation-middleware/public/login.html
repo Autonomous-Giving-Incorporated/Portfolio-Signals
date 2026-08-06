@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#2e7d6b" />
+  <title>AGI Fund Intel · Director login</title>
+  <link rel="icon" type="image/png" href="/assets/brand/agi-mark.png" />
+  <link rel="stylesheet" href="/css/agi-shell.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="impact-host-shell">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="impact-host-header">
+    <div class="brand-identity">
+      <img class="brand-mark" src="/assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-product">Fund Intel<br />Allocation middleware</span>
+      <span class="tenant-chip">
+        <img src="/assets/brand/hacker-dojo-icon.svg" alt="" width="24" height="24" />
+        Hacker Dojo campaign
+      </span>
+      <nav class="brand-suite-links" aria-label="AGI product suite">
+        <a href="https://autogive.app/">AGI</a>
+        <a href="https://autogive.app/fund-intel/">Fund Intel</a>
+        <a href="https://autogive.app/impact-relay/">Impact Relay</a>
+        <a href="/">Allocation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="impact-host-main auth-main">
+    <p class="eyebrow">Restricted · Fund Intel</p>
+    <h1 style="margin:0.15rem 0 0.5rem;font-size:clamp(1.75rem,4vw,2.4rem)">Director login</h1>
+    <p class="lede">
+      Sign in with your AGI / Fund Intel account. You need an active membership on
+      <strong>org_hacker_dojo</strong> with role <code>director</code> or <code>campaign_lead</code> to allocate.
+    </p>
+
+    <section class="panel" style="margin-top:1.25rem" id="panel">
+      <div class="panel-heading">
+        <h2>Sign in</h2>
+        <span class="tag warning">HUMAN GATE</span>
+      </div>
+      <p class="note" id="config-msg">Loading auth config…</p>
+      <form id="login-form" class="stack-form" hidden>
+        <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+        <label>Password <input name="password" type="password" required autocomplete="current-password" /></label>
+        <button type="submit" class="button">Sign in</button>
+      </form>
+      <p class="note" id="msg" role="status"></p>
+      <p class="note" style="margin-top:1rem">
+        After login you return to <a href="/">Allocation</a>.
+        For every.org webhook setup see <a href="/setup.html">Connect every.org</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="/assets/brand/agi-mark.png" alt="" width="38" height="38" />
+      <span>Autonomously Giving Incorporated · Fund Intel</span>
+    </div>
+    <div class="footer-meta">
+      <small>Hacker Dojo campaign · Director login</small>
+      <small>Software by Zero State</small>
+      <a href="https://autogive.app/brand#tokens">Tokens</a>
+      <a href="https://autogive.app/brand#logo">Logo use</a>
+      <a href="https://autogive.app/legal">Legal</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    const msg = document.getElementById('msg');
+    const form = document.getElementById('login-form');
+    const configMsg = document.getElementById('config-msg');
+
+    const cfgRes = await fetch('/auth/config');
+    const cfg = await cfgRes.json();
+
+    if (!cfg.directorLoginEnabled) {
+      configMsg.innerHTML = cfg.operatorTokenFallback
+        ? 'Director login is not configured on this server. Use the <strong>operator token</strong> on the Allocation page (dev/pilot fallback).'
+        : 'Auth is not configured. Set SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY.';
+    } else {
+      configMsg.textContent = `Org ${cfg.orgId} · Supabase session required for writes`;
+      form.hidden = false;
+    }
+
+    if (cfg.directorLoginEnabled && window.supabase) {
+      const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      const { data } = await sb.auth.getSession();
+      if (data.session?.access_token) {
+        sessionStorage.setItem('am_access_token', data.session.access_token);
+        sessionStorage.setItem('am_auth_mode', 'supabase');
+        msg.className = 'note ok';
+        msg.textContent = 'Already signed in — redirecting…';
+        location.href = '/';
+      }
+
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        msg.textContent = 'Signing in…';
+        msg.className = 'note';
+        const fd = new FormData(form);
+        const email = String(fd.get('email') || '');
+        const password = String(fd.get('password') || '');
+        const { data: sign, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+          msg.className = 'note err';
+          msg.textContent = error.message;
+          return;
+        }
+        const token = sign.session?.access_token;
+        if (!token) {
+          msg.className = 'note err';
+          msg.textContent = 'No session returned';
+          return;
+        }
+        sessionStorage.setItem('am_access_token', token);
+        sessionStorage.setItem('am_auth_mode', 'supabase');
+        const me = await fetch('/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = await me.json();
+        if (!me.ok) {
+          msg.className = 'note err';
+          msg.textContent = body.error || 'Not authorized for this org';
+          await sb.auth.signOut();
+          sessionStorage.removeItem('am_access_token');
+          return;
+        }
+        if (!body.canWrite) {
+          msg.className = 'note err';
+          msg.textContent = `Signed in as ${body.role}, but allocate requires director or campaign_lead.`;
+          return;
+        }
+        msg.className = 'note ok';
+        msg.textContent = `Welcome ${body.displayName || body.email} (${body.role})`;
+        setTimeout(() => { location.href = '/'; }, 400);
+      });
+    }
+  </script>
+</body>
+</html>

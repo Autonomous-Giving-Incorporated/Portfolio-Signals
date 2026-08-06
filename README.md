@@ -4,7 +4,42 @@ Fund Intel is the GitHub Pages-compatible decision workspace of **Autonomously G
 
 See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for component boundaries, authority, tenancy, hosting, and delivery milestones.
 
+## Platform specification status
+
+Fund Intel currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
+
+## Platform specification
+
+Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
+
+Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
+
+## Allocation middleware
+
+Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
+
+**Status (2026-08-03):** MVP shipped in `services/allocation-middleware/` with Hacker Dojo pilot seed (`org_hacker_dojo`), file-backed durability, every.org webhook (not OAuth), setup wizard, Supabase director login. **Default host:** Docker Compose. **Optional hosts:** Fly.io, Render, Railway.
+
+```bash
+cd services/allocation-middleware
+npm test
+npm run gen:env && npm run compose:up   # Docker pilot (default)
+# optional Fly: fly auth login && npm run bootstrap:fly
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+```
+
+| Doc | Purpose |
+| --- | --- |
+| [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
+| [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
+| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose (default) · Render · Railway · optional Fly |
+| [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
+| [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
+| [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
+
+Fund Intel’s suite role is **observe/credit** (gift summaries → pot balances). Deep evidence verification remains Impact Relay’s long-term boundary; the MVP co-locates allocate/proof/packet for the modular-monolith pilot.
 
 ## Current evidence boundary
 
@@ -15,6 +50,8 @@ HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted pari
 | Capability | State |
 |---|---|
 | Public director portal | Implemented |
+| Allocation middleware MVP | Implemented (`services/allocation-middleware/`; Hacker Dojo pilot seed) |
+| every.org live webhook (hosted) | Operator-owned (setup wizard ready) |
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | GitHub Pages validation workflow | Passing |
@@ -36,7 +73,8 @@ HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted pari
 | Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
 | Production environment checklist | Documented |
-| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); exact current-main hosted parity is NOT_RUN |
+| Platform Supabase (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
+| Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — freeze for new tenancy; migrate then retire |
 | Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
 | Impact Relay finance/donor host screens | Implemented (console API + Supabase role/MFA bridge) |
 | Impact Relay shadow + live-cohort runbooks | Documented; live cohort execution operator-owned |
@@ -64,7 +102,13 @@ supabase/functions/signed-document-url  Authenticated private-document access
 supabase/tests/                         Synthetic fixtures and policy checks
 services/workbook-parser/               Native XLSX quarantine parser
 services/import-api/                    Parser-to-import-batch service boundary
+services/allocation-middleware/         every.org pots → allocate → proof → packet (MVP)
 
+docs/ALLOCATION-MIDDLEWARE.md           Middleware role + status
+docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Docker default
+docs/ALLOCATION-HOSTING-OPTIONS.md      Compose / Render / Railway / optional Fly
+docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
+docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
@@ -232,3 +276,7 @@ master_development_list: LOCAL_ONLY_INVENTORIED  # SHA-256 in docs/DATA-PLACEMEN
 See [ROADMAP.md](ROADMAP.md), [SECURITY.md](SECURITY.md), [docs/DATA-PLACEMENT.md](docs/DATA-PLACEMENT.md), and [docs/AUTHENTICATED-WORKSPACE.md](docs/AUTHENTICATED-WORKSPACE.md).
 
 Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIME-VERSIONS.md](docs/RUNTIME-VERSIONS.md).
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).

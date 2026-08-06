@@ -4,16 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Hacker Dojo — Impact Relay Finance Review</title>
+  <meta name="theme-color" content="#2e7d6b">
+  <title>AGI Impact Relay · Finance review</title>
+  <link rel="icon" type="image/png" href="assets/brand/agi-mark.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="brand.css">
 </head>
-<body>
-  <main class="section">
-    <section class="section auth-gate" id="authGate" hidden>
+<body class="impact-host-shell">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="impact-host-header">
+    <div class="brand-identity">
+      <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290">
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-product">Impact Relay<br>Finance review</span>
+      <span class="tenant-chip"><img class="tenant-mark" src="assets/brand/hacker-dojo-icon.svg" alt="">Tenant · Hacker Dojo</span>
+      <nav class="brand-suite-links" aria-label="AGI product suite">
+        <a href="https://autogive.app/">AGI</a>
+        <a href="https://autogive.app/fund-intel/">Fund Intel</a>
+        <a href="https://autogive.app/impact-relay/">Impact Relay</a>
+        <a href="workspace.html">Workspace</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="section impact-host-main">
+    <section class="panel impact-host-auth" id="authGate" hidden>
       <p class="eyebrow">RESTRICTED · IMPACT RELAY</p>
       <h1>Finance approval</h1>
       <p class="lede">Sign in with your campaign profile (director / campaign lead / development). Load <code>runtime-config.js</code> for Supabase.</p>
-      <form id="loginForm" class="panel auth-form">
+      <form id="loginForm" class="auth-form">
         <label>Email <input id="email" type="email" autocomplete="email" required></label>
         <button class="button" type="submit">Send secure sign-in link</button>
         <p id="authMessage" class="note"></p>
@@ -64,6 +84,21 @@
       </section>
     </div>
   </main>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/brand/agi-mark.png" alt="" width="38" height="38">
+      <span>Autonomously Giving Incorporated · Impact Relay</span>
+    </div>
+    <div class="footer-meta">
+      <small>Tenant · Hacker Dojo (reference) · Finance review pilot</small>
+      <small>Software by Zero State</small>
+      <a href="https://autogive.app/brand#tokens">Tokens</a>
+      <a href="https://autogive.app/brand#logo">Logo use</a>
+      <a href="https://autogive.app/legal">Legal</a>
+    </div>
+  </footer>
+
   <script src="runtime-config.js"></script>
   <script type="module" src="finance-impact.js"></script>
 </body>
