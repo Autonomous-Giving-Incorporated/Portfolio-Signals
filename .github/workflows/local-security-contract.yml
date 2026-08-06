@@ -33,8 +33,29 @@ jobs:
       - name: Test import API authentication boundary
         working-directory: services/import-api
         run: npm test
-      - name: Type-check signed document edge function
-        run: deno check supabase/functions/signed-document-url/index.ts
+      - name: Type-check Edge Functions
+        run: |
+          set -euo pipefail
+          # Root deno.json maps @supabase/supabase-js → npm: with nodeModulesDir auto.
+          attempt=1
+          max=3
+          while true; do
+            if deno cache --node-modules-dir=auto \
+              supabase/functions/signed-document-url/index.ts \
+              supabase/functions/upload-client-asset/index.ts \
+              && deno check --node-modules-dir=auto \
+              supabase/functions/signed-document-url/index.ts \
+              supabase/functions/upload-client-asset/index.ts; then
+              break
+            fi
+            if [ "$attempt" -ge "$max" ]; then
+              echo "deno cache/check failed after ${max} attempts" >&2
+              exit 1
+            fi
+            echo "Transient failure on attempt ${attempt}/${max}; retrying in $((attempt * 5))s..."
+            sleep $((attempt * 5))
+            attempt=$((attempt + 1))
+          done
       - name: Verify private storage controls
         shell: bash
         run: |

@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 
 /** Static fallback = reference tenant (Hacker Dojo), not product identity. */
 const FALLBACK = {
@@ -12,7 +12,7 @@ const FALLBACK = {
   tenant_label: 'Tenant',
 };
 const BUCKET = 'agi-public-assets';
-const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c]));
 const validColor = (value, fallback) => /^#[0-9a-f]{6}$/i.test(value || '') ? value : fallback;
 /** Prefer AGI platform config; keep HD aliases for older deploys. */
 function getConfig() {
