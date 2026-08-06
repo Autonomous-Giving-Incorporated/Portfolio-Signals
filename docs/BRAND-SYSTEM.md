@@ -20,14 +20,21 @@ AGI and Impact Relay remain available as reciprocal suite links. Tenant identity
 
 `assets/brand/agi-wordmark.png` and `assets/brand/agi-mark.png` are the canonical corporate assets. They appear in the masthead, application icon, and shared footer.
 
-`assets/brand/hacker-dojo-icon.svg` is the canonical application mark.
+`assets/tenants/hacker-dojo/` holds **reference tenant assets only** (not product chrome):
 
-Use it for:
+| Path | Role |
+|------|------|
+| `assets/tenants/hacker-dojo/icon.svg` | Tenant mark (chips, lockups) |
+| `assets/tenants/hacker-dojo/theme.css` | Tenant palette, scoped to `html[data-tenant="hacker-dojo"]` |
+
+New clients get `assets/tenants/<slug>/` the same way. Published Supabase `client_assets` may override mark/hero at runtime via `public-client-config.js`.
+
+Use tenant assets for:
 
 - tenant or campaign context;
-- favicon and tenant application icon;
-- mobile navigation;
-- authenticated workspace shell;
+- tenant mark in chips / workspace lockup;
+- mobile tenant context;
+- authenticated workspace tenant chip;
 - footer identity;
 - loading and empty states.
 
