@@ -97,6 +97,11 @@ test('uses the verified Supabase user id and preserves quarantine-only writes', 
       assert.equal(options.headers.authorization, 'Bearer valid-user-token');
       const { p_batch: batch, p_rows: rows } = JSON.parse(options.body);
       assert.equal('submitted_by' in batch, false);
+      assert.equal(batch.client_id, 'org_hacker_dojo');
+      assert.equal(
+        batch.storage_object_path,
+        `org_hacker_dojo/quarantine/${SHA256}/synthetic.xlsx`
+      );
       assert.equal(batch.state, 'received');
       assert.equal(batch.receipt.promotion_authorized, false);
       assert.equal(rows.length, 1);

@@ -34,7 +34,7 @@ insert into public.document_records (
 ) values (
   '30000000-0000-0000-0000-000000000001',
   'campaign-private',
-  '00000000-0000-0000-0000-000000000101/synthetic-evidence.txt',
+  'org_hacker_dojo/00000000-0000-0000-0000-000000000101/synthetic-evidence.txt',
   'Synthetic evidence marker',
   'restricted',
   repeat('b', 64),
@@ -52,7 +52,7 @@ begin
   insert into storage.objects (bucket_id, name, owner, owner_id, version)
   values (
     'campaign-private',
-    '00000000-0000-0000-0000-000000000101/synthetic-evidence.txt',
+    'org_hacker_dojo/00000000-0000-0000-0000-000000000101/synthetic-evidence.txt',
     '00000000-0000-0000-0000-000000000101',
     '00000000-0000-0000-0000-000000000101',
     '1'
@@ -74,7 +74,7 @@ begin
     insert into storage.objects (bucket_id, name, owner, owner_id, version)
     values (
       'campaign-private',
-      '00000000-0000-0000-0000-000000000104/forbidden.txt',
+      'org_hacker_dojo/00000000-0000-0000-0000-000000000104/forbidden.txt',
       '00000000-0000-0000-0000-000000000104',
       '00000000-0000-0000-0000-000000000104',
       '1'

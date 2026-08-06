@@ -4,10 +4,18 @@
 
 Move Hacker Dojo campaign operations from a read-only aggregate dashboard to an authenticated control system without exposing member, donor, attendance, consent, or relationship data in the static repository.
 
+## Production workspace URL
+
+https://autogive.app/fund-intel/workspace
+
+(Also reachable as `workspace.html` depending on rewrite configuration.)
+
+Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Legacy HD staging `ecxkhihlbrcwpavfoaoq` is **frozen** for new tenancy.
+
 ## Deployment boundary
 
 ```text
-GitHub Pages
+GitHub Pages / Vercel public shell
   public campaign shell
   aggregate evidence
   no private records
@@ -24,7 +32,7 @@ Authenticated application
   restricted notes
   audit trail
 
-Supabase (staging ref ecxkhihlbrcwpavfoaoq until production split)
+Supabase (platform ref utdioxwiskzatwoejgiu; legacy ecxkhihlbrcwpavfoaoq frozen)
   Postgres + row-level security
   Storage campaign-private
   encrypted fields / controlled document room
@@ -35,12 +43,12 @@ Notion
   not CRM SoR
 ```
 
-Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md).
+Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Platform bootstrap: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Suite hosts: [PLATFORM.md](PLATFORM.md).
 
 ## Recommended implementation
 
-- **Frontend:** server-rendered TypeScript application deployed separately from GitHub Pages (current shell: static workspace + runtime config).
-- **Identity and database:** Supabase Auth + Postgres with row-level security.
+- **Frontend:** static workspace shell + gitignored / deploy-generated `runtime-config.js` (URL + **anon** key only).
+- **Identity and database:** Supabase Auth + Postgres with row-level security on **platform** `utdioxwiskzatwoejgiu`.
 - **MFA:** required for director, campaign lead, development, data steward, and auditor roles.
 - **Documents:** private object-storage bucket (`campaign-private`) with time-limited signed URLs.
 - **Email:** no bulk-send integration until consent and suppression rules are approved.
@@ -58,9 +66,21 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 | Data steward | Imports, deduplication, consent, suppression, provenance |
 | Auditor | Read-only audit log and control verification |
 
+Roles are assigned per A.G.I. client through `client_memberships`. The profile role is retained only for compatibility and MFA policy evaluation. Workspace authorization and navigation use the selected client's live membership role.
+
+## Client and platform administration
+
+- `get_workspace_context()` returns the active profile, master-admin flag, and only the client shells the caller may enumerate.
+- The browser stores only the selected public client identifier. Every operational query also filters by that `client_id`; database RLS remains authoritative.
+- Client directors manage existing authenticated profiles through `set_client_membership()`. Changes are audited and cannot remove the final active director.
+- Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
+- Master-admin and privileged client mutations require an active MFA-enforced profile.
+- **Primary `master_admin`:** `scrimshawlife@gmail.com` (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
+- **Second admin (deferred):** Add Qi Diaz via `platform_administrators` insert with rationale ≥ 12 chars.
+
 ## Director workflow
 
-1. Sign in with MFA.
+1. Sign in with magic link (or approved Auth path) on https://autogive.app/fund-intel/workspace .
 2. Review campaign readiness and blocked gates.
 3. Approve, reject, or defer decisions with rationale.
 4. Assign relationship and execution owners.
@@ -80,6 +100,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Staging bootstrap: [S
 - Every mutation writes an audit event.
 - Every returned private-document signed URL uses a 30-300 second TTL and has an append-only audit event containing the actor, document ID, bucket, TTL, and expiry without recording the object path or URL.
 - Board/advisor status cannot be granted automatically as a donor benefit.
+- Browser config is **anon-only**; never place service-role keys in `runtime-config.js`, Vercel public env, or git.
 
 ## Import quarantine
 
@@ -103,10 +124,10 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 
 ### Gate A — Infrastructure
 
-- Supabase project created.
-- Production and staging environments separated.
+- Supabase **platform** project in use (`utdioxwiskzatwoejgiu`).
+- Legacy HD staging frozen for new tenancy.
 - MFA enforced.
-- Database migration applied.
+- Database migrations applied (**operator applies migrations**).
 - Backup and recovery tested.
 
 ### Gate B — Data governance

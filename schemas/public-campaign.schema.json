@@ -59,6 +59,26 @@
         }
       }
     },
+    "allocations": {
+      "type": "array",
+      "description": "Optional public-safe allocation identifiers for suite join with Impact Relay and AGI. No donor data.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["allocationId", "fundName", "status"],
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "pattern": "^alloc_[a-z0-9_]+$",
+            "description": "Stable public allocation identifier (e.g. alloc_community_hardware)"
+          },
+          "fundName": {"type": "string", "minLength": 1},
+          "status": {"enum": ["proposed", "approved", "active", "closed"]},
+          "rationale": {"type": "string"},
+          "publishedAt": {"type": "string"}
+        }
+      }
+    },
     "privacy": {
       "type": "object",
       "additionalProperties": false,

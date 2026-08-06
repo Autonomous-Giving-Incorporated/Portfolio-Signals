@@ -1,15 +1,15 @@
 const root = document.documentElement;
 
-// Load the Hacker Dojo brand layer without coupling it to the base dashboard stylesheet.
+// Tenant theme layer (per-client CSS vars) without coupling product chrome to one nonprofit.
 const brandStyles = document.createElement('link');
 brandStyles.rel = 'stylesheet';
-brandStyles.href = 'brand.css';
+brandStyles.href = 'brand.css?v=agi-tenant-1';
 document.head.appendChild(brandStyles);
 
 const favicon = document.createElement('link');
 favicon.rel = 'icon';
-favicon.type = 'image/svg+xml';
-favicon.href = 'assets/brand/hacker-dojo-icon.svg';
+favicon.type = 'image/png';
+favicon.href = 'assets/brand/agi-mark.png';
 document.head.appendChild(favicon);
 
 const header = document.querySelector('.site-header');
@@ -20,17 +20,27 @@ if (header && headerCopy) {
   const identity = document.createElement('div');
   identity.className = 'brand-identity';
   identity.innerHTML = `
-    <img class="brand-mark" src="assets/brand/hacker-dojo-icon.svg" alt="Hacker Dojo" width="64" height="64" />
-    <span class="brand-wordmark" aria-hidden="true"><strong>HACKER</strong><strong>DOJO</strong></span>
+    <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
     <span class="brand-divider" aria-hidden="true"></span>
-    <span class="brand-product">Campaign Control Center</span>
+    <span class="brand-product">Fund Intel<br />Decision Workspace</span>
+    <span class="tenant-chip" data-tenant-chip>
+      <img class="tenant-mark" src="assets/brand/hacker-dojo-icon.svg" alt="" />
+      Tenant · Hacker Dojo
+    </span>
+    <nav class="brand-suite-links" aria-label="AGI product suite">
+      <a href="https://autogive.app/">AGI</a>
+      <a href="https://autogive.app/impact-relay/">Impact Relay</a>
+    </nav>
   `;
   header.prepend(identity);
 
-  const eyebrow = headerCopy.querySelector('.eyebrow');
-  const title = headerCopy.querySelector('h1');
-  if (eyebrow) eyebrow.textContent = 'Director workspace · Neon Genie intelligence';
-  if (title) title.textContent = 'Campaign Control Center';
+  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html') || location.pathname.endsWith('/fund-intel');
+  if (isOverview) {
+    const eyebrow = headerCopy.querySelector('.eyebrow');
+    const title = headerCopy.querySelector('h1');
+    if (eyebrow) eyebrow.textContent = 'AGI product · Fund Intel';
+    if (title) title.textContent = 'Decision workspace';
+  }
 }
 
 const nav = document.querySelector('.primary-nav');
@@ -64,12 +74,15 @@ const footer = document.querySelector('footer');
 if (footer) {
   footer.innerHTML = `
     <div class="footer-brand">
-      <img src="assets/brand/hacker-dojo-icon.svg" alt="" width="38" height="38" />
-      <span>Hacker Dojo Campaign Control Center</span>
+      <img src="assets/brand/agi-mark.png" alt="" width="38" height="38" />
+      <span>Autonomously Giving Incorporated · Fund Intel</span>
     </div>
     <div class="footer-meta">
-      <small>Powered by Neon Genie</small>
-      <small>Advisory state · No outreach authority granted</small>
+      <small data-tenant-name>Tenant · Hacker Dojo (reference)</small>
+      <small>Software by Zero State</small>
+      <a href="https://autogive.app/brand#tokens">Tokens</a>
+      <a href="https://autogive.app/brand#logo">Logo use</a>
+      <a href="https://autogive.app/legal">Legal</a>
     </div>
   `;
 }

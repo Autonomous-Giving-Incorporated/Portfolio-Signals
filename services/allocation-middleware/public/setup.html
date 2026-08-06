@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#2e7d6b" />
+  <title>AGI Fund Intel · Connect every.org</title>
+  <link rel="icon" type="image/png" href="/assets/brand/agi-mark.png" />
+  <link rel="stylesheet" href="/css/agi-shell.css" />
+</head>
+<body class="impact-host-shell">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="impact-host-header">
+    <div class="brand-identity">
+      <img class="brand-mark" src="/assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-product">Fund Intel<br />Allocation middleware</span>
+      <span class="tenant-chip">
+        <img src="/assets/brand/hacker-dojo-icon.svg" alt="" width="24" height="24" />
+        Hacker Dojo campaign
+      </span>
+      <nav class="brand-suite-links" aria-label="AGI product suite">
+        <a href="https://autogive.app/">AGI</a>
+        <a href="https://autogive.app/fund-intel/">Fund Intel</a>
+        <a href="https://autogive.app/impact-relay/">Impact Relay</a>
+        <a href="/">Allocation</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="impact-host-main" style="max-width:40rem">
+    <p class="eyebrow">Fund Intel · Setup</p>
+    <h1 style="margin:0.15rem 0 0.5rem;font-size:clamp(1.75rem,4vw,2.4rem)">Connect every.org</h1>
+    <p class="lede">
+      AGI does not use every.org OAuth. Paste one webhook URL into every.org once.
+      Gifts then appear as <strong>Available</strong> balances to allocate.
+    </p>
+    <p class="note" style="margin:0.75rem 0 1.25rem">
+      <strong>Hacker Dojo pilot:</strong> until live every.org data is wired, use Docker seed
+      (<code>SEED_ON_BOOT=1</code> / <code>npm run compose:up</code>) for demo balances.
+    </p>
+
+    <nav class="local-nav" aria-label="Setup navigation">
+      <a href="/" >Allocation</a>
+      <a href="/setup.html" aria-current="page">Connect every.org</a>
+      <a href="/login.html">Director login</a>
+    </nav>
+
+    <section class="panel" id="status-card">
+      <div class="panel-heading">
+        <h2>Connection status</h2>
+        <span class="status-pill pending" id="status-pill">Checking…</span>
+      </div>
+      <p class="note" id="status-line" style="margin:0"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Your webhook URL</h2>
+      </div>
+      <p class="note">Paste into every.org → nonprofit admin → Settings → Advanced.</p>
+      <div class="url-box" id="webhook-url">Loading…</div>
+      <div class="row-actions">
+        <button type="button" class="button" id="btn-copy">Copy URL</button>
+        <button type="button" class="button secondary" id="btn-refresh">Refresh status</button>
+        <a class="button secondary" href="/">Open Allocation</a>
+      </div>
+      <p class="note" id="copy-msg" role="status"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><h2>Steps</h2></div>
+      <div id="steps"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><h2>After connect</h2></div>
+      <ol class="note" style="margin:0;padding-left:1.2rem">
+        <li>Rename or merge designation pots if names are messy.</li>
+        <li>Approve an allocation (director session or operator token).</li>
+        <li>Attach proof and open the board packet.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="/assets/brand/agi-mark.png" alt="" width="38" height="38" />
+      <span>Autonomously Giving Incorporated · Fund Intel</span>
+    </div>
+    <div class="footer-meta">
+      <small>Hacker Dojo campaign · every.org setup</small>
+      <small>Software by Zero State</small>
+      <a href="https://autogive.app/brand#tokens">Tokens</a>
+      <a href="https://autogive.app/brand#logo">Logo use</a>
+      <a href="https://autogive.app/legal">Legal</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    const urlEl = document.getElementById('webhook-url');
+    const stepsEl = document.getElementById('steps');
+    const pill = document.getElementById('status-pill');
+    const statusLine = document.getElementById('status-line');
+
+    async function load() {
+      const res = await fetch('/setup');
+      const data = await res.json();
+      urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the server)';
+
+      const done = data.steps.receivedTestGift;
+      pill.textContent = done ? 'Connected' : 'Waiting for first gift';
+      pill.className = 'status-pill ' + (done ? 'ready' : 'pending');
+      statusLine.textContent = done
+        ? `Org ${data.orgId} · ${data.counts.gifts} gift(s) · last ${data.lastGift?.chargeId || ''}`
+        : `Org ${data.orgId} · no gifts yet · waiting for every.org POST`;
+
+      stepsEl.innerHTML = '';
+      for (const step of data.instructions) {
+        let state = 'wait';
+        if (step.id <= 3) state = data.webhookUrl ? 'done' : 'wait';
+        if (step.id === 4 || step.id === 5) state = data.steps.receivedTestGift ? 'done' : 'wait';
+        if (step.id === 5 && data.steps.hasAvailableBalance) state = 'done';
+        const div = document.createElement('div');
+        div.className = 'step';
+        div.innerHTML = `<div class="num ${state}" aria-hidden="true">${state === 'done' ? '✓' : step.id}</div>
+          <div><strong>${step.title}</strong><div class="note">${step.detail}</div></div>`;
+        stepsEl.appendChild(div);
+      }
+    }
+
+    document.getElementById('btn-copy').onclick = async () => {
+      const text = urlEl.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        document.getElementById('copy-msg').textContent = 'Copied.';
+      } catch {
+        document.getElementById('copy-msg').textContent = 'Select the URL and copy manually.';
+      }
+    };
+    document.getElementById('btn-refresh').onclick = () => load();
+    await load();
+    setInterval(load, 8000);
+  </script>
+</body>
+</html>

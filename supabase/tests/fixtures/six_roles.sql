@@ -25,3 +25,13 @@ on conflict (id) do update
       mfa_enforced = excluded.mfa_enforced,
       deactivated_at = null,
       deactivation_reason = null;
+
+insert into public.client_memberships (client_id, user_id, role, active) values
+('org_hacker_dojo','00000000-0000-0000-0000-000000000101','director',true),
+('org_hacker_dojo','00000000-0000-0000-0000-000000000102','campaign_lead',true),
+('org_hacker_dojo','00000000-0000-0000-0000-000000000103','development',true),
+('org_hacker_dojo','00000000-0000-0000-0000-000000000104','board_viewer',true),
+('org_hacker_dojo','00000000-0000-0000-0000-000000000105','data_steward',true),
+('org_hacker_dojo','00000000-0000-0000-0000-000000000106','auditor',true)
+on conflict (client_id, user_id) do update
+  set role = excluded.role, active = true, membership_version = public.client_memberships.membership_version + 1;

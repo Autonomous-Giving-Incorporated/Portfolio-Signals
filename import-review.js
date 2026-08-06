@@ -1,6 +1,6 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 
-const config = window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+const config = window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 const state = {
   client: null,
   session: null,
@@ -18,11 +18,11 @@ function text(id, value) {
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
+    '&': '&',
+    '<': '<',
+    '>': '>',
     "'": '&#39;',
-    '"': '&quot;'
+    '"': '"'
   }[c]));
 }
 
@@ -137,7 +137,6 @@ async function load() {
   text('batchState', batch.state);
   text('rowCount', batch.row_count ?? state.rows.length);
   text('blockingCount', blocking);
-  text('promotableCount', promotable);
   text('actionAuthority', state.canAct
     ? 'Approve / reject / promote enabled for this role'
     : 'Read-only for this role');

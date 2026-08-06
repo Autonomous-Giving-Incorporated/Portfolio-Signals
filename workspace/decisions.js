@@ -13,16 +13,23 @@ function escapeHtml(value = '') {
 }
 
 export async function mountDecisionQueue(root) {
-  const { supabase, profile } = await requireWorkspaceSession();
+  const { supabase, profile, selectedClient, session } = await requireWorkspaceSession();
+  if (!selectedClient?.role) throw new Error('Select a client membership to view decisions.');
   const canDecide = roleCan(profile.role, 'decisions_write');
 
   root.innerHTML = '<p class="workspace-loading">Loading decision queue…</p>';
 
-  const { data, error } = await supabase
-    .from('decisions')
-    .select('id,key,title,status,rationale,decided_at,evidence,created_at')
-    .order('created_at');
+  const [decisionResult, configResult] = await Promise.all([
+    supabase.from('decisions')
+      .select('id,key,title,status,rationale,decided_at,evidence,created_at,decision_approvals(approver_id,requested_status,created_at)')
+      .eq('client_id', selectedClient.id)
+      .order('created_at'),
+    supabase.from('client_config_versions').select('config').eq('client_id', selectedClient.id).eq('state', 'published').maybeSingle()
+  ]);
+  const { data, error } = decisionResult;
   if (error) throw error;
+  if (configResult.error) throw configResult.error;
+  const requiredApprovers = Number(configResult.data?.config?.approvals?.decision_approvers) === 2 ? 2 : 1;
 
   if (!data.length) {
     root.innerHTML = `
@@ -47,13 +54,14 @@ export async function mountDecisionQueue(root) {
           <h3>${escapeHtml(item.title)}</h3>
         </div>
         <span class="decision-state state-${escapeHtml(item.status)}">${escapeHtml(item.status)}</span>
+        <p class="note">Approvals: ${(item.decision_approvals || []).length}/${requiredApprovers}${item.status === 'open' && item.decision_approvals?.length ? ` · awaiting another ${escapeHtml(item.decision_approvals[0].requested_status)} approval` : ''}</p>
         <label>Rationale
           <textarea ${canDecide && item.status === 'open' ? '' : 'disabled'}>${escapeHtml(item.rationale || '')}</textarea>
         </label>
         <div class="decision-actions">
           ${TERMINAL.map(status => `
             <button type="button" class="button secondary" data-status="${status}"
-              ${canDecide && item.status === 'open' ? '' : 'disabled'}>
+              ${canDecide && item.status === 'open' && !(item.decision_approvals || []).some(approval => approval.approver_id === session.user.id) ? '' : 'disabled'}>
               ${status}
             </button>`).join('')}
         </div>

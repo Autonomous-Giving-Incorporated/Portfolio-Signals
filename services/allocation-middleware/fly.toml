@@ -1,0 +1,48 @@
+# Hacker Dojo allocation pilot — Fly.io (OPTIONAL host)
+# Default pilot path is Docker Compose (docker-compose.yml).
+# Docs: docs/ALLOCATION-HOSTING-OPTIONS.md §4
+#
+# One-time:
+#   fly auth login          # or FLY_API_TOKEN
+#   # macOS Gatekeeper: xattr -d com.apple.quarantine ~/.fly/bin/flyctl
+#   npm run bootstrap:fly
+#
+# Or manual:
+#   fly apps create agi-allocation
+#   fly volumes create am_data --size 1 --region sjc --app agi-allocation
+#   fly secrets set ORG_ID=org_hacker_dojo WEBHOOK_TOKEN=... PUBLIC_BASE_URL=https://agi-allocation.fly.dev \
+#     SEED_ON_BOOT=1 OPERATOR_TOKEN=...   # or SUPABASE_* for director login
+#   DEPLOY_YES=1 npm run deploy:fly -- --yes
+#   BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
+
+app = "agi-allocation"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8787"
+  DATA_FILE = "/data/state.json"
+  ORG_ID = "org_hacker_dojo"
+  PROOF_SLA_HOURS = "72"
+  # SEED_ON_BOOT and tokens via fly secrets (not committed)
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/healthz"
+
+[mounts]
+  source = "am_data"
+  destination = "/data"

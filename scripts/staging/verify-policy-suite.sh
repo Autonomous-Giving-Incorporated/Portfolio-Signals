@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 MODE="${1:-local}"
-EXPECTED_STAGING_REF="ecxkhihlbrcwpavfoaoq"
+EXPECTED_STAGING_REF="utdioxwiskzatwoejgiu"
 
 if ! command -v psql >/dev/null 2>&1; then
   echo "psql is required" >&2

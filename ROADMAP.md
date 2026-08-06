@@ -1,8 +1,10 @@
-# Hacker Dojo Campaign Intelligence — Production Roadmap
+# A.G.I. Fund-Intel — Product and Hacker Dojo Pilot Roadmap
 
 ## Objective
 
-Deliver a governed campaign operating system for Hacker Dojo without placing donor, member, attendance, relationship, consent, suppression, or private-document data in GitHub.
+Deliver Fund-Intel as the reusable frontend and client-administration component of **Autonomously Giving Incorporated (A.G.I.)**, while preserving Hacker Dojo as the canonical reference tenant and keeping donor, member, attendance, relationship, consent, suppression, and private-document data out of GitHub.
+
+The cross-repository sequence is AGI-001 through AGI-009 in [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md). The HD-OI phases below remain the Hacker Dojo pilot and evidence track.
 
 The operating target is a **$420K minimum campaign** with a separately governed **$2M transformation path** and an Aug. 21, 2026 SupperHappyFundHouse campaign event.
 
@@ -52,6 +54,8 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Public campaign surface
 
+- dedicated GitHub Pages routes for sponsor, grant, and aggregate member-segment intelligence;
+- reusable accessible dropdown filters, range explorers, and evidence-bound tooltips;
 - director-facing campaign overview;
 - $420K minimum and $2M stretch framing;
 - proposed funding ladder;
@@ -64,6 +68,10 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 
 ### Authenticated workspace foundation
 
+- authoritative per-session A.G.I. client context and client switcher;
+- tenant-filtered dashboard, decision, pipeline, claim, and audit queries;
+- audited director membership administration with last-director protection;
+- MFA-gated master administration and client provisioning without implicit private-data access;
 - six application roles: director, campaign lead, development, board viewer, data steward, and auditor;
 - active-profile and MFA-ready authentication boundary;
 - role-aware application navigation;
@@ -74,6 +82,17 @@ source_workbook_inventory: COMPLETE  # aggregate-only; see docs/DATA-PLACEMENT.m
 - append-only audit-event model;
 - private opportunity notes and document metadata;
 - row-level-security policies.
+
+### Client customization and publication
+
+- immutable tenant configuration snapshots with explicit draft, publish, archive, and rollback transitions;
+- director-only brand and campaign-content controls with live preview and rationale gates;
+- governed tenant assets with MIME, size, ownership, and quota enforcement;
+- privacy-safe public configuration projection selected by client slug;
+- static Hacker Dojo fallback when runtime configuration is unavailable;
+- complete version history and tenant audit events.
+- onboarding-controlled sponsor and grant modules with disabled-route and workspace navigation gates.
+- onboarding-configurable one- or two-person decision approvals with distinct approvers and immutable evidence.
 
 ### Governed import foundation
 
@@ -249,6 +268,25 @@ These decisions remain outside engineering authority:
 9. Authorize a native source workbook for quarantine import.
 10. Approve the transition from internal testing to real campaign operations.
 
+## Parallel track — Allocation middleware (Hacker Dojo pilot)
+
+Not a substitute for HD-OI-019–021 leadership gates; a **transaction-light** client ops track co-located in this repo.
+
+| Milestone | State |
+| --- | --- |
+| Domain + every.org webhook + allocate + packet | **Shipped** (`services/allocation-middleware/`) |
+| File store, proof SLA, setup wizard, CI | **Shipped** |
+| Supabase director login (`/login.html`) | **Shipped** |
+| Hacker Dojo seed + `SEED_ON_BOOT` + Docker Compose | **Shipped** (default host) |
+| Optional Fly / Render / Railway recipes | **Shipped** |
+| Named public host (any of the above) | **Optional operator** |
+| Live every.org webhook for Hacker Dojo | **Operator** |
+| Director acceptance of pilot allocate flow | **Pending** |
+
+Docs: [ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md), [HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md), [ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md), [ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md).
+
+Design/plan (Specs): [design](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md), [MVP plan](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md), [pilot hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md).
+
 ## Release sequence
 
 ```yaml
@@ -276,6 +314,25 @@ HD_OI_020:
 HD_OI_021:
   name: controlled_campaign_operations
   state: BLOCKED_BY_PILOT_ACCEPTANCE
+
+ALLOC_MW_MVP:
+  name: allocation_middleware_mvp
+  state: COMPLETE
+  path: services/allocation-middleware
+  note: co-located modular monolith; seed pilot not live every.org
+
+ALLOC_MW_PILOT_HOST:
+  name: hacker_dojo_allocation_pilot_host
+  state: ACTIVE
+  completion: docker_or_optional_public_host_director_login_seed_then_live_webhook
+  progress:
+    package: SHIPPED
+    seed_on_boot: SHIPPED
+    director_jwt: SHIPPED
+    docker_compose_default: SHIPPED
+    optional_fly_render_railway: SHIPPED
+    named_public_host: OPTIONAL_OPERATOR
+    live_every_org: PENDING_OPERATOR
 ```
 
 ## Non-negotiable boundary
