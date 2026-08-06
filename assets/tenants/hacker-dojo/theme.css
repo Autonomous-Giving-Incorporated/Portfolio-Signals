@@ -1,0 +1,49 @@
+/* Tenant assets: Hacker Dojo (org_hacker_dojo / slug hacker-dojo).
+ * Loaded only when html[data-tenant="hacker-dojo"]. Product chrome stays AGI. */
+
+html[data-tenant="hacker-dojo"] {
+  --tenant-primary: #c9141c;
+  --tenant-secondary: #a9003a;
+  --tenant-ink: #303030;
+  /* Map into AGI accent slot for this tenant only */
+  --accent: var(--tenant-primary);
+}
+
+html[data-tenant="hacker-dojo"] .campaign-status-bar {
+  background: var(--tenant-ink);
+  border-bottom-color: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .status-track i {
+  background: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .metric-card:first-child,
+html[data-tenant="hacker-dojo"] .funding-ladder article:first-child {
+  border-top-color: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .metric-card:nth-child(2),
+html[data-tenant="hacker-dojo"] .funding-ladder article:last-child {
+  border-top-color: var(--tenant-secondary);
+}
+html[data-tenant="hacker-dojo"] .ladder-value,
+html[data-tenant="hacker-dojo"] .cta-line,
+html[data-tenant="hacker-dojo"] .next-run span,
+html[data-tenant="hacker-dojo"] .risk-grid span {
+  color: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .progress-track div {
+  background: linear-gradient(90deg, var(--tenant-primary), var(--tenant-secondary));
+}
+html[data-tenant="hacker-dojo"] .auth-gate {
+  background:
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--tenant-primary) 12%, transparent), transparent 34%),
+    var(--bg);
+}
+html[data-tenant="hacker-dojo"] .auth-form {
+  border-top-color: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .workspace-authority-note {
+  border-left-color: var(--tenant-primary);
+}
+html[data-tenant="hacker-dojo"] .workspace-context-strip strong {
+  color: var(--tenant-primary);
+}
