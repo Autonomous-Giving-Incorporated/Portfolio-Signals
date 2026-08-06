@@ -36,7 +36,8 @@ HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted pari
 | Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
 | Synthetic role fixtures | Implemented with MFA flags |
 | Production environment checklist | Documented |
-| Staging Supabase project | Provisioned (`ecxkhihlbrcwpavfoaoq`); exact current-main hosted parity is NOT_RUN |
+| Platform Supabase (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
+| Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — freeze for new tenancy; migrate then retire |
 | Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
 | Impact Relay finance/donor host screens | Implemented (console API + Supabase role/MFA bridge) |
 | Impact Relay shadow + live-cohort runbooks | Documented; live cohort execution operator-owned |
