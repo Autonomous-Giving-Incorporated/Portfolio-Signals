@@ -77,6 +77,8 @@ jobs:
       - name: Generate staging browser runtime config
         if: steps.pages.outcome == 'success'
         env:
+          PLATFORM_SUPABASE_URL: ${{ vars.PLATFORM_SUPABASE_URL || vars.STAGING_SUPABASE_URL }}
+          PLATFORM_SUPABASE_ANON_KEY: ${{ secrets.PLATFORM_SUPABASE_ANON_KEY || secrets.STAGING_SUPABASE_ANON_KEY }}
           STAGING_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
           STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
         run: node scripts/staging/generate-runtime-config.mjs

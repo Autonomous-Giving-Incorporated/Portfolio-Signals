@@ -24,7 +24,7 @@ const configs = {
 
 async function installTenantApi(page) {
   await page.addInitScript(() => {
-    window.HACKER_DOJO_CONFIG = {
+    window.AGI_FUND_INTEL_CONFIG = {
       supabaseUrl: 'https://acceptance.invalid',
       supabaseAnonKey: 'public-test-key',
       defaultClientSlug: 'hacker-dojo'

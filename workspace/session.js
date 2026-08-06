@@ -12,7 +12,7 @@ const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 let cached = null;
 
 export function getRuntimeConfig() {
-  return window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+  return window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 }
 
 export function createWorkspaceClient() {

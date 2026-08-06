@@ -32,7 +32,8 @@ See [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) and [STAGING-BOOTSTRAP.md](STAGING-BO
 
 ## Supabase projects (suite-wide)
 
-**Do not fragment.** New multi-tenant / AGI admin work uses **platform** only.
+**Do not fragment.** New multi-tenant / AGI admin work uses **platform** only.  
+**Default:** platform ref `utdioxwiskzatwoejgiu`. **Legacy frozen:** `ecxkhihlbrcwpavfoaoq`.
 
 | Role | Project ref | Host | Classification |
 |---|---|---|---|
@@ -40,17 +41,20 @@ See [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) and [STAGING-BOOTSTRAP.md](STAGING-BO
 | **Dashboard** | — | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu | OBSERVED |
 | **Legacy HD staging** | `ecxkhihlbrcwpavfoaoq` | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | **Freeze** for new tenancy; migrate then retire |
 
-Schema source of truth remains this repo’s `supabase/migrations`. Link and push to **platform** for Phase 2:
+Schema source of truth remains this repo’s `supabase/migrations`. **Operator applies migrations** to platform (not assumed applied by docs alone):
 
 ```bash
 supabase link --project-ref utdioxwiskzatwoejgiu
+PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu \
+  ./scripts/staging/apply-migrations.sh remote-linked
 ```
 
-GitHub Actions still may reference legacy `STAGING_SUPABASE_*` until cutover; update those vars to the platform host when applying Phase 2.
+Authenticated workspace production URL: https://autogive.app/fund-intel/workspace  
+Primary `master_admin`: `scrimshawlife@gmail.com`. Second admin (Qi Diaz) deferred — `platform_administrators` insert with rationale ≥ 12 chars.
 
-Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only.
+Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only (or Vercel build from `PLATFORM_SUPABASE_*` env).
 
-Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md) (once merged).
+Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Master Development List (source inventory only)
 
@@ -72,9 +76,10 @@ Outreach from historical membership, attendance, or this list alone remains **no
 ## Operator continue path (outside this PR)
 
 1. `supabase link --project-ref utdioxwiskzatwoejgiu` (platform — not legacy HD staging)
-2. `supabase db push` (or staging apply scripts retargeted to platform)
-3. Wire gitignored `runtime-config.js` with platform URL + anon key
-4. Enable MFA; provision six roles with synthetic fixtures first
+2. **Operator applies migrations** (`apply-migrations.sh remote-linked` or `supabase db push`)
+3. Wire gitignored / deploy-generated `runtime-config.js` with platform URL + anon key only
+4. Invite `scrimshawlife@gmail.com`; run `scripts/platform/bootstrap-master-admin.sql`; enable MFA as required
 5. Verify import gates / RLS / storage matrix (prefer disposable local, then platform)
-6. Only then consider HD-OI-020 quarantine import of the authorized workbook
-7. Freeze/retire `ecxkhihlbrcwpavfoaoq` after cutover
+6. Smoke magic-link on https://autogive.app/fund-intel/workspace
+7. Only then consider HD-OI-020 quarantine import of the authorized workbook
+8. Keep `ecxkhihlbrcwpavfoaoq` frozen; retire after data confirmation

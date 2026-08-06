@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-const config = window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+const config = window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 const state = {
   client: null,
   session: null,
