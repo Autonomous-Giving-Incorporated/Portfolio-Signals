@@ -30,20 +30,27 @@ local native .xlsx
 
 See [IMPORT-RUNBOOK.md](IMPORT-RUNBOOK.md) and [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md).
 
-## Staging Supabase project (observed)
+## Supabase projects (suite-wide)
 
-| Field | Value | Label |
-|---|---|---|
-| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq | OBSERVED (operator-provided) |
-| Project ref | `ecxkhihlbrcwpavfoaoq` | OBSERVED |
-| API host | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | OBSERVED |
-| GitHub link | Project associated with this repository | OBSERVED (operator-reported) |
-| Classification | Treat as **staging** until leadership names production | OPERATOR DEFAULT |
-| Migrations applied | Operator-owned; not verified from CI | NOT_COMPUTABLE here |
-| Production import | **BLOCKED** | POLICY |
-| Real workbook load | **BLOCKED** until HD-OI-020 gates | POLICY |
+**Do not fragment.** New multi-tenant / AGI admin work uses **platform** only.
+
+| Role | Project ref | Host | Classification |
+|---|---|---|---|
+| **Platform (canonical)** | `utdioxwiskzatwoejgiu` | `https://utdioxwiskzatwoejgiu.supabase.co` | AGI multi-tenant data plane; GitHub-linked |
+| **Dashboard** | — | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu | OBSERVED |
+| **Legacy HD staging** | `ecxkhihlbrcwpavfoaoq` | `https://ecxkhihlbrcwpavfoaoq.supabase.co` | **Freeze** for new tenancy; migrate then retire |
+
+Schema source of truth remains this repo’s `supabase/migrations`. Link and push to **platform** for Phase 2:
+
+```bash
+supabase link --project-ref utdioxwiskzatwoejgiu
+```
+
+GitHub Actions still may reference legacy `STAGING_SUPABASE_*` until cutover; update those vars to the platform host when applying Phase 2.
 
 Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only.
+
+Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md) (once merged).
 
 ## Master Development List (source inventory only)
 
@@ -64,9 +71,10 @@ Outreach from historical membership, attendance, or this list alone remains **no
 
 ## Operator continue path (outside this PR)
 
-1. `supabase link --project-ref ecxkhihlbrcwpavfoaoq`
-2. `supabase db push` (or `./scripts/staging/apply-migrations.sh remote-linked`)
-3. Wire gitignored `runtime-config.js` with URL + anon key
+1. `supabase link --project-ref utdioxwiskzatwoejgiu` (platform — not legacy HD staging)
+2. `supabase db push` (or staging apply scripts retargeted to platform)
+3. Wire gitignored `runtime-config.js` with platform URL + anon key
 4. Enable MFA; provision six roles with synthetic fixtures first
-5. Verify import gates / RLS / storage matrix (prefer disposable local, then staging)
+5. Verify import gates / RLS / storage matrix (prefer disposable local, then platform)
 6. Only then consider HD-OI-020 quarantine import of the authorized workbook
+7. Freeze/retire `ecxkhihlbrcwpavfoaoq` after cutover
