@@ -34,11 +34,16 @@ if (
 
 const runtimeConfig = [
   '// Generated runtime config — browser-public Supabase values only. Never service-role.',
-  'window.HACKER_DOJO_CONFIG = {',
+  '// AGI_FUND_INTEL_CONFIG is canonical; HACKER_DOJO_CONFIG remains a compat alias.',
+  'window.AGI_FUND_INTEL_CONFIG = {',
   `  supabaseUrl: ${JSON.stringify(supabaseUrl)},`,
   `  supabaseAnonKey: ${JSON.stringify(supabaseAnonKey)},`,
-  '  defaultClientSlug: "hacker-dojo"',
+  '  defaultClientSlug: "hacker-dojo",',
+  '  productName: "Fund Intel",',
+  '  platformName: "Autonomously Giving Incorporated",',
   '};',
+  'window.HACKER_DOJO_CONFIG = window.AGI_FUND_INTEL_CONFIG;',
+  'window.__HD_CONFIG__ = window.AGI_FUND_INTEL_CONFIG;',
   '',
 ].join('\n');
 

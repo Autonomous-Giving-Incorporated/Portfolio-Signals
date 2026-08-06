@@ -1,9 +1,13 @@
 // Copy to runtime-config.js at deploy time (gitignored). Do not commit secrets.
-// Load this file before workspace.js / import-review.js in authenticated deployments only.
-// Staging project ref: ecxkhihlbrcwpavfoaoq — see docs/STAGING-BOOTSTRAP.md
-window.HACKER_DOJO_CONFIG = {
-  supabaseUrl: 'https://ecxkhihlbrcwpavfoaoq.supabase.co',
+// Load before workspace.js / import-review.js. Anon key only — never service-role.
+// Platform Supabase: utdioxwiskzatwoejgiu — Hacker Dojo is defaultClientSlug (tenant), not product.
+window.AGI_FUND_INTEL_CONFIG = {
+  supabaseUrl: 'https://utdioxwiskzatwoejgiu.supabase.co',
   supabaseAnonKey: 'YOUR_PUBLIC_ANON_KEY',
   defaultClientSlug: 'hacker-dojo',
-  impactRelayApiBase: 'https://impact-relay.example.run.app'
+  productName: 'Fund Intel',
+  platformName: 'Autonomously Giving Incorporated',
+  impactRelayApiBase: 'https://impact-relay.example.run.app',
 };
+window.HACKER_DOJO_CONFIG = window.AGI_FUND_INTEL_CONFIG;
+window.__HD_CONFIG__ = window.AGI_FUND_INTEL_CONFIG;
