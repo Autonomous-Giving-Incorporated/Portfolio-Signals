@@ -51,14 +51,38 @@ Then director: membership on `org_hacker_dojo` → `/login.html` → allocate (o
 
 After stable seed: set `SEED_ON_BOOT=0` in env and recreate the container.
 
-## C — Public HTTPS (Render / Railway / Fly — Phase 3b)
+## C — Public HTTPS (Phase 3b)
 
-Not required for director-auth close. Use when you need a public webhook URL or remote director access.
+Use when every.org or remote directors need a public origin. **Docker not required** for the ephemeral path.
+
+### C1 — Cloudflare quick tunnel (ephemeral, no SaaS account)
+
+Runs against local Node (or Compose) on `:8787`:
+
+```bash
+# terminal 1 — allocation host (Node)
+cd services/allocation-middleware
+set -a && source .env.pilot && set +a
+npm run start:hacker-dojo   # or :seed first time
+
+# terminal 2 — public HTTPS
+cloudflared tunnel --url http://127.0.0.1:8787
+# copy the https://*.trycloudflare.com URL
+
+BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run pilot:smoke
+BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run verify:director
+# Optionally set PUBLIC_BASE_URL to the same URL in the host env and restart
+```
+
+URL changes each session — fine for pilot smoke; use C2 for durable every.org webhooks.
+
+### C2 — Render / Railway / Fly (durable)
 
 | Host | Path |
 | --- | --- |
 | **Render** | Blueprint `services/allocation-middleware/render.yaml` or Docker web service + disk at `/data` |
-| **Railway** | GitHub deploy, root `services/allocation-middleware`, volume at `/data`, env from `.env.example` |
+| **Railway** | GitHub deploy, root `services/allocation-middleware`, volume at `/data` |
+| **Fly** | Optional `fly.toml` + `npm run bootstrap:fly` |
 
 Details: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
 
@@ -66,9 +90,10 @@ After deploy:
 
 ```bash
 BASE_URL=https://YOUR_HOST npm run pilot:smoke
+BASE_URL=https://YOUR_HOST npm run verify:director
 ```
 
-Set `PUBLIC_BASE_URL` to that same https origin before smoke if setup wizard URLs matter.
+Set dashboard `PUBLIC_BASE_URL` to that https origin. After first stable seed: `SEED_ON_BOOT=0`. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0` with Supabase director login.
 
 ## D — every.org later (Phase 3c)
 

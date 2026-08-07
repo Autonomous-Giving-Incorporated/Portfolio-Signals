@@ -44,7 +44,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
 | Vercel path suite under autogive.app | OBSERVED |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
-| Allocation middleware production host | PENDING |
+| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host PENDING operator |
 | every.org live webhook | PENDING (operator) |
 | Custom SMTP for Auth email volume | PENDING (operator) |
 | Production CRM / workbook import | BLOCKED |
@@ -61,12 +61,13 @@ local_host_process: node src/http/server.mjs   # Node path; Docker not required
 local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_pilot_env
-production_public_host: NOT_DEPLOYED  # Phase 3b / #71
+public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Durable Render/Railway/Fly still optional operator dashboard step.
 every_org_live_webhook: PENDING  # Phase 3c / #73
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
-Design: [superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md](superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md)
+Design 3a: [superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md](superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md)  
+Design 3b: [superpowers/specs/2026-08-07-allocation-pilot-public-host-design.md](superpowers/specs/2026-08-07-allocation-pilot-public-host-design.md)
 
 ## Phase 3a — Director auth close (#72)
 
@@ -76,7 +77,17 @@ path: local_node_no_docker
 org_id: org_hacker_dojo
 verify_director: PASS  # config only; optional --login needs director password in operator hands
 membership: director on platform (prior OBSERVED)
-next: public host #71 optional; every.org webhook #73; human acceptance #74
+next: every.org webhook #73; human acceptance #74; durable named host optional
+```
+
+## Phase 3b — Public HTTPS host (#71)
+
+```yaml
+status: OBSERVED_EPHEMERAL
+path: cloudflared_quick_tunnel_to_local_node
+smoke: PASS  # pilot:smoke + verify:director over HTTPS
+durable_render_recipe: READY  # services/allocation-middleware/render.yaml (ALLOW_OPERATOR_TOKEN_FALLBACK=0)
+durable_named_host: PENDING_OPERATOR  # Render/Railway/Fly dashboard deploy when every.org needs stable URL
 ```
 
 ## Historical evidence (do not treat as current-main GO)

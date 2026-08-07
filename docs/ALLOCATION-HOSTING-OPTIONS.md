@@ -8,14 +8,25 @@ No payment processing, no multi-region requirement.
 | Rank | Host | Role | CLI |
 | --- | --- | --- | --- |
 | **1** | **Local Node** | **Phase 3a default** — no Docker; director auth against platform Supabase | Node 22 |
-| **2** | **Docker Compose** | Durable pilot volume (local or any VPS) | Docker |
-| **3** | **Render** | Managed public host, dashboard secrets (Phase 3b) | No (web UI) |
-| **4** | **Railway** | Managed public host + volume (Phase 3b) | No (web UI) |
-| **Optional** | **Fly.io** | Public host when flyctl works (Phase 3b) | flyctl |
+| **2** | **Cloudflare quick tunnel** | **Phase 3b ephemeral public HTTPS** — no Docker/SaaS | cloudflared |
+| **3** | **Docker Compose** | Durable pilot volume (local or any VPS) | Docker |
+| **4** | **Render** | Managed durable public host (Phase 3b) | Dashboard |
+| **5** | **Railway** | Managed public host + volume | Dashboard |
+| **Optional** | **Fly.io** | Public host when flyctl works | flyctl |
 
-**Day-to-day director-auth pilot:** Local Node (`npm run start:hacker-dojo` + `.env.pilot`).  
-**Durable/VPS-shaped:** Docker Compose.  
-**Public HTTPS / remote webhook URL:** Render, Railway, or Fly — see sections below.
+**Day-to-day director-auth pilot:** Local Node.  
+**Public HTTPS without account:** Cloudflare quick tunnel → local Node.  
+**Durable public / every.org webhook:** Render (or Railway / Fly / VPS).
+
+## 0a) Cloudflare quick tunnel (ephemeral public HTTPS)
+
+```bash
+# allocation already on :8787 (Node or Compose)
+cloudflared tunnel --url http://127.0.0.1:8787
+BASE_URL=https://….trycloudflare.com npm run pilot:smoke
+```
+
+No Docker, no Render account. URL is temporary.
 
 ## 0) Local Node (no Docker)
 

@@ -31,12 +31,14 @@ services:
         value: /data/state.json
       - key: PROOF_SLA_HOURS
         value: "72"
+      # First deploy: "1" to seed; after stable pilot set "0" in dashboard
       - key: SEED_ON_BOOT
         value: "1"
       - key: SEED_ALLOCATE
         value: "1"
+      # Prefer director JWT (Phase 3a); emergency token optional
       - key: ALLOW_OPERATOR_TOKEN_FALLBACK
-        value: "1"
+        value: "0"
       - key: PUBLIC_BASE_URL
         sync: false
       - key: WEBHOOK_TOKEN
