@@ -55,7 +55,7 @@ test('two tenants retain independent branding, modules, and navigation context',
   await expect(page.locator('.brand-mark')).toHaveAttribute('alt', 'Autonomously Giving Incorporated');
   await expect(page.locator('.brand-product')).toContainText('Portfolio Signals');
   await expect(page.locator('h1').first()).toHaveText('Second tenant independent campaign');
-  await expect(page).toHaveTitle('Second Tenant A.G.I. Campaign Control');
+  await expect(page).toHaveTitle('AGI Portfolio Signals · Second Tenant');
   await expect(page.locator('a[href*="grants.html"]')).toBeVisible();
   await expect(page.locator('a[href*="sponsors.html"]')).toBeHidden();
   await expect(page.locator('a[href*="grants.html"]')).toHaveAttribute('href', /client=second-tenant/);
