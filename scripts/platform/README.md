@@ -4,66 +4,77 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 
 **Never put service-role keys, DB passwords, or other secrets in this directory or in chat logs.**
 
+**Canonical people path:** [docs/OPERATOR-ACCESS-ONBOARDING.md](../../docs/OPERATOR-ACCESS-ONBOARDING.md)
+
 ## Prerequisites
 
-- Migrations applied through at least `012_agi_tenant_foundation.sql` (creates `clients`, `platform_administrators`, seeds `org_hacker_dojo`).
-- Supabase Dashboard access with SQL Editor (postgres) or `psql` as a privileged role.
+- Platform project only: `utdioxwiskzatwoejgiu` (not legacy `ecxkhihlbrcwpavfoaoq` for new people).
+- Migrations applied through tenant foundation + MFA helpers (`012`+ and current main).
+- Supabase Dashboard SQL Editor (postgres) or privileged `psql`.
+- Auth user invited/created **before** any script that needs their UUID.
 
-## 1. Invite the operator
+## Script index
 
-1. Open Supabase Dashboard → **Authentication** → **Users**.
-2. Invite **`scrimshawlife@gmail.com`** (or create the user via approved Auth flow).
-3. Confirm the user exists and copy their **User UUID**.
+| Script | Purpose |
+| --- | --- |
+| `bootstrap-master-admin.sql` | **First** master_admin only |
+| `ensure-profile.sql` | Upsert active profile (does not set MFA) |
+| `set-mfa-enforced.sql` | Set `mfa_enforced` after Auth MFA enrollment confirmed |
+| `grant-master-admin.sql` | Grant/reactivate platform admin (rationale ≥ 12) |
+| `revoke-master-admin.sql` | Soft-revoke platform admin |
+| `verify-operator-access.sql` | Read-only profile / admin / optional membership check |
+| `verify-platform-isolation.sql` | Reference + isolation fixture clients |
+| `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
 
-## 2. Bootstrap master_admin
+## Order of operations
 
-1. Open `bootstrap-master-admin.sql`.
-2. Replace `00000000-0000-0000-0000-000000000000` with the operator Auth UUID (inside the `DO` block).
-3. Run the script in the SQL Editor as postgres.
-4. Confirm:
-   - `org_hacker_dojo` row is returned.
-   - `platform_administrators` shows an active row for that user (`revoked_at` null).
+### Flow A — additional master_admin
 
-What the script does:
+1. Dashboard → Authentication → Users → Invite (or confirm user).
+2. Copy User UUID.
+3. `ensure-profile.sql` (set UUID + display name).
+4. User enrolls MFA in Auth; operator confirms.
+5. `set-mfa-enforced.sql` with `desired_mfa_enforced := true`.
+6. `grant-master-admin.sql` with real rationale ≥ 12 chars.
+7. `verify-operator-access.sql`.
+8. Browser: magic link → https://autogive.app/portfolio-signals/workspace
+9. Confirm Platform admin visible; no private tenant data without membership.
 
-| Step | Table | Notes |
-|------|--------|--------|
-| Ensure profile | `public.profiles` | Requires `display_name` (schema 001); sets `active`, optional `mfa_enforced` |
-| Grant platform admin | `public.platform_administrators` | This is master_admin; **not** an `app_role` value |
+### Flow B — first director (client shell already exists)
 
-Re-running is safe: conflict updates re-activate and clear `revoked_at`.
+1. Invite/confirm Auth user; copy UUID.
+2. `ensure-profile.sql` → MFA enroll → `set-mfa-enforced.sql` true.
+3. Prefer workspace RPC while logged in as master_admin with MFA:
+   - `provision_client(..., p_initial_director := <uuid>, ...)` for new shells, or
+   - `set_client_membership(client_id, user_id, 'director', true, rationale)`.
+4. `verify-operator-access.sql` with `target_client_id` set.
+5. Browser login: client listed; director can open client config for that client only.
 
-## 3. Auth redirect URLs
+### First operator (historical)
 
-In Supabase Dashboard → **Authentication** → **URL configuration**, set allowed redirect URLs for the Fund-Intel workspace:
+Use `bootstrap-master-admin.sql` once for the initial platform operator. Additional admins use Flow A.
 
-- `https://autogive.app/portfolio-signals/workspace`
-- `https://autogive.app/portfolio-signals/workspace.html`
+## Safety
 
-Also set Site URL per environment policy. Do not commit project-specific secrets.
+```bash
+./scripts/platform/check-script-safety.sh
+```
 
-## 4. Verify platform isolation
+Every mutating script must hard-fail if the sentinel UUID `00000000-0000-0000-0000-000000000000` remains.
 
-1. Run `verify-platform-isolation.sql` as postgres.
-2. Expect:
-   - `org_hacker_dojo` present (`reference_tenant = true` from migration 012).
-   - `org_platform_isolation` inserted if missing (`reference_tenant = false`).
-   - Notice: `platform isolation fixtures present`.
-3. **Manual RLS check** (recommended before multi-tenant production use):
-   - As a director-only member of one tenant, `select * from public.clients` must not return the other tenant.
-   - Use patterns in `supabase/tests/007_agi_tenant_foundation.sql` (`set local role authenticated` + JWT `sub`).
-   - Master admins intentionally see all clients via `is_master_admin()`; isolation is for non-platform members.
-
-## 5. What not to do
+## What not to do
 
 - Do not paste the **service role** key into README, SQL, git, or tickets.
 - Do not commit real Auth UUIDs into this repo (keep placeholders).
 - Do not load production CRM data via these scripts.
-- Do not treat `platform_administrators` as tenant membership; platform authority does not imply client-private record access by itself (see migration 012 comments).
+- Do not treat `platform_administrators` as tenant membership.
+- Do not set `mfa_enforced = true` before Auth MFA enrollment is confirmed.
+- Do not use legacy staging `ecxkhihlbrcwpavfoaoq` for new people.
 
 ## Related docs
 
-- `docs/STAGING-BOOTSTRAP.md` — staging project bootstrap
-- `docs/PLATFORM.md` / `docs/PLATFORM-CONFORMANCE.md` — platform expectations
-- `supabase/migrations/012_agi_tenant_foundation.sql` — schema source of truth
-- `supabase/tests/007_agi_tenant_foundation.sql` — automated isolation patterns
+- `docs/OPERATOR-ACCESS-ONBOARDING.md` — full runbook
+- `docs/STAGING-BOOTSTRAP.md` — migrations / bootstrap
+- `docs/AUTHENTICATED-WORKSPACE.md` — roles and workspace
+- `docs/PLATFORM.md` — suite platform alignment
+- `docs/CURRENT-STATE.md` — live evidence labels

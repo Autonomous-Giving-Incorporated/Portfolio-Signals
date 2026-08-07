@@ -1,8 +1,14 @@
 -- scripts/platform/bootstrap-master-admin.sql
--- Bootstrap AGI platform master_admin for suite operations.
+-- FIRST platform master_admin bootstrap only (initial suite operator).
 --
--- Run in Supabase SQL editor as postgres (Dashboard → SQL) AFTER the Auth
--- user exists (invite scrimshawlife@gmail.com first).
+-- For ADDITIONAL master_admins, do not re-copy this file ad-hoc. Use the
+-- parameterized path instead:
+--   docs/OPERATOR-ACCESS-ONBOARDING.md  (Flow A)
+--   ensure-profile.sql → set-mfa-enforced.sql → grant-master-admin.sql
+--   verify-operator-access.sql
+--
+-- Run in Supabase SQL editor as postgres AFTER the Auth user exists
+-- (invite the operator email first).
 --
 -- Replace the UUID string in the DO block with the id from
 -- Authentication → Users (or: select id from auth.users where email = '...').
