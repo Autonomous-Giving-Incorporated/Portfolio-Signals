@@ -7,15 +7,30 @@ No payment processing, no multi-region requirement.
 
 | Rank | Host | Role | CLI |
 | --- | --- | --- | --- |
-| **1** | **Docker Compose** | **Default pilot** (local or any VPS) | Docker only |
-| **2** | **Render** | Managed public host, dashboard secrets | No (web UI) |
-| **3** | **Railway** | Managed public host + volume | No (web UI) |
-| **Optional** | **Fly.io** | Same shape as original plan; try when flyctl works | flyctl |
+| **1** | **Local Node** | **Phase 3a default** — no Docker; director auth against platform Supabase | Node 22 |
+| **2** | **Docker Compose** | Durable pilot volume (local or any VPS) | Docker |
+| **3** | **Render** | Managed public host, dashboard secrets (Phase 3b) | No (web UI) |
+| **4** | **Railway** | Managed public host + volume (Phase 3b) | No (web UI) |
+| **Optional** | **Fly.io** | Public host when flyctl works (Phase 3b) | flyctl |
 
-Default day-to-day path: Docker Compose.  
-Optional public/SaaS: Render, Railway, or **Fly** when the operator can run flyctl.
+**Day-to-day director-auth pilot:** Local Node (`npm run start:hacker-dojo` + `.env.pilot`).  
+**Durable/VPS-shaped:** Docker Compose.  
+**Public HTTPS / remote webhook URL:** Render, Railway, or Fly — see sections below.
 
-## 1) Docker Compose (default)
+## 0) Local Node (no Docker)
+
+```bash
+cd services/allocation-middleware
+# Edit .env.pilot with platform Supabase keys (never commit)
+set -a && source .env.pilot && set +a
+npm run start:hacker-dojo:seed    # or start:hacker-dojo after seed
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
+```
+
+Director login details: [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md).
+
+## 1) Docker Compose (optional durable)
 
 ```bash
 cd services/allocation-middleware

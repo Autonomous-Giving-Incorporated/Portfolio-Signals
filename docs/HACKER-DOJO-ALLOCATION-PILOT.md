@@ -11,14 +11,20 @@ Use **Hacker Dojo** (`org_hacker_dojo`) until live every.org gift data is integr
 | Hosting choices | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) |
 | Specs plan | [hacker-dojo-pilot-hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md) |
 
-## A — Local (Node)
+## A — Local Node (**no Docker** — Phase 3a default)
+
+Does **not** require Docker. Load gitignored `.env.pilot` (platform Supabase + `ALLOW_OPERATOR_TOKEN_FALLBACK=0`) into the shell, then:
 
 ```bash
 cd services/allocation-middleware
 npm test
-npm run start:hacker-dojo:seed    # SEED_ON_BOOT=1 + serve
+set -a && source .env.pilot && set +a
+npm run start:hacker-dojo:seed    # SEED_ON_BOOT=1 first time; then start:hacker-dojo
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
 ```
+
+Director JWT path: [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md).
 
 | Path | Use |
 | --- | --- |
@@ -26,7 +32,7 @@ BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 | `/login.html` | Director login (Supabase) |
 | `/setup.html` | every.org webhook wizard (later) |
 
-## B — Hosted (recommended: Docker Compose)
+## B — Docker Compose (optional durable host)
 
 **No Fly CLI.** Same production image, durable volume, works with Docker Desktop on macOS or any VPS.
 
@@ -45,7 +51,9 @@ Then director: membership on `org_hacker_dojo` → `/login.html` → allocate (o
 
 After stable seed: set `SEED_ON_BOOT=0` in env and recreate the container.
 
-## C — Hosted (Render / Railway — Fly-like, dashboard only)
+## C — Public HTTPS (Render / Railway / Fly — Phase 3b)
+
+Not required for director-auth close. Use when you need a public webhook URL or remote director access.
 
 | Host | Path |
 | --- | --- |
@@ -62,7 +70,7 @@ BASE_URL=https://YOUR_HOST npm run pilot:smoke
 
 Set `PUBLIC_BASE_URL` to that same https origin before smoke if setup wizard URLs matter.
 
-## D — every.org later
+## D — every.org later (Phase 3c)
 
 1. `/setup.html` → copy webhook  
 2. every.org Hacker Dojo admin → Advanced → paste  
