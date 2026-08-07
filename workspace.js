@@ -44,49 +44,103 @@ function setBusy(isBusy) {
   content?.setAttribute('aria-busy', isBusy ? 'true' : 'false');
 }
 
-/** Consume ?code= / hash tokens from magic-link or invite before session reads. */
+function cleanAuthUrl() {
+  const url = new URL(window.location.href);
+  history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ''));
+  // Drop auth hash after session is stored so reloads don't re-process tokens.
+  if (window.location.hash) {
+    history.replaceState({}, '', window.location.pathname + window.location.search);
+  }
+}
+
+/**
+ * Consume auth redirect payloads before session reads.
+ * Supabase email/admin magic links redirect as:
+ *   /workspace#access_token=…&refresh_token=…&type=magiclink
+ * PKCE email returns may use ?code=…. Either must establish a session.
+ */
 async function settleAuthFromUrl(client) {
   const url = new URL(window.location.href);
-  const hasCode = url.searchParams.has('code');
-  const hasTokenHash =
-    url.hash.includes('access_token') ||
-    url.hash.includes('refresh_token') ||
-    url.searchParams.has('token_hash') ||
-    url.searchParams.get('type') === 'invite' ||
-    url.searchParams.get('type') === 'magiclink' ||
-    url.searchParams.get('type') === 'signup';
+  const hashParams = new URLSearchParams(
+    url.hash.startsWith('#') ? url.hash.slice(1) : url.hash
+  );
 
-  if (!hasCode && !hasTokenHash) {
-    return client.auth.getSession().then(({ data }) => data.session);
+  // Surface verify failures (expired OTP, access denied) instead of silent loop.
+  const hashError = hashParams.get('error') || hashParams.get('error_code');
+  if (hashError) {
+    const detail =
+      hashParams.get('error_description') ||
+      hashParams.get('error_code') ||
+      hashParams.get('error') ||
+      'sign-in link invalid';
+    showMessage(`Sign-in link failed: ${decodeURIComponent(detail.replace(/\+/g, ' '))}. Request a new link.`);
+    history.replaceState({}, '', url.pathname);
+    return null;
+  }
+
+  const code = url.searchParams.get('code');
+  const tokenHash = url.searchParams.get('token_hash');
+  const otpType = url.searchParams.get('type') || hashParams.get('type');
+  const accessToken = hashParams.get('access_token');
+  const refreshToken = hashParams.get('refresh_token');
+
+  const hasAuthPayload = Boolean(code || tokenHash || accessToken || refreshToken);
+  if (!hasAuthPayload) {
+    const { data } = await client.auth.getSession();
+    return data.session;
   }
 
   showMessage('Completing secure sign-in…');
 
-  // PKCE: exchange ?code=
-  if (hasCode) {
-    const { data, error } = await client.auth.exchangeCodeForSession(url.searchParams.get('code'));
+  // PKCE authorization code
+  if (code) {
+    const { data, error } = await client.auth.exchangeCodeForSession(code);
     if (error) {
       showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-      // Strip broken params so retry is clean
-      url.searchParams.delete('code');
-      url.searchParams.delete('type');
-      history.replaceState({}, '', url.pathname + url.search);
+      history.replaceState({}, '', url.pathname);
       return null;
     }
-    // Clean URL after success
-    history.replaceState({}, '', url.pathname);
+    cleanAuthUrl();
     return data.session;
   }
 
-  // Implicit / verify redirects: let client parse hash then re-read session
+  // Email OTP token_hash query (some verify paths)
+  if (tokenHash && otpType) {
+    const { data, error } = await client.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: otpType
+    });
+    if (error) {
+      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
+      history.replaceState({}, '', url.pathname);
+      return null;
+    }
+    cleanAuthUrl();
+    return data.session;
+  }
+
+  // Implicit / admin generate_link: hash carries access + refresh tokens
+  if (accessToken && refreshToken) {
+    const { data, error } = await client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken
+    });
+    if (error) {
+      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
+      history.replaceState({}, '', url.pathname);
+      return null;
+    }
+    cleanAuthUrl();
+    return data.session;
+  }
+
+  // Fallback: client auto-detect (implicit flowType)
   const { data, error } = await client.auth.getSession();
   if (error) {
     showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
     return null;
   }
-  if (data.session) {
-    history.replaceState({}, '', url.pathname);
-  }
+  if (data.session) cleanAuthUrl();
   return data.session;
 }
 
