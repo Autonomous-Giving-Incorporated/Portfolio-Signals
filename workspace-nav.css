@@ -1,5 +1,6 @@
 .workspace-shell #roleNav {
   display: flex;
+  align-items: center;
   gap: .55rem;
   overflow-x: auto;
   scrollbar-width: thin;
@@ -7,16 +8,23 @@
   padding-block: .75rem;
 }
 
+/* Label + AGI accent token (not HD-hardcoded; tenant theme may override --accent) */
 .workspace-shell #roleNav::before {
   content: "Authorized tools";
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
   align-self: center;
   flex: 0 0 auto;
   color: var(--muted);
+  font-family: var(--agi-mono, ui-monospace, monospace);
   font-size: .72rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: .09em;
   text-transform: uppercase;
-  margin-right: .25rem;
+  margin-right: .35rem;
+  padding-left: .85rem;
+  border-left: 3px solid var(--accent, var(--agi-accent, #e6b23c));
 }
 
 .workspace-shell #roleNav .workspace-nav-button {
@@ -34,13 +42,14 @@
 }
 
 .workspace-shell #roleNav .workspace-nav-button.is-active {
-  background: var(--hd-red);
-  border-color: var(--hd-red);
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(237, 28, 36, .18);
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--surface);
+  box-shadow: none;
 }
 
-.workspace-shell #roleNav .workspace-nav-button[aria-selected="true"]::after {
+.workspace-shell #roleNav .workspace-nav-button[aria-selected="true"]::after,
+.workspace-shell #roleNav .workspace-nav-button.is-active::after {
   content: "";
   position: absolute;
   left: 25%;
@@ -48,7 +57,7 @@
   bottom: -7px;
   height: 3px;
   border-radius: 999px;
-  background: var(--hd-red);
+  background: var(--accent, var(--agi-accent, #e6b23c));
 }
 
 .workspace-shell #workspaceContent {

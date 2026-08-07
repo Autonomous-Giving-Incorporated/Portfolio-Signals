@@ -29,6 +29,9 @@ let activeProfile = null;
 let selectedClient = null;
 let isMasterAdmin = false;
 let enabledModules = { sponsors: false, grants: false };
+let renderGeneration = 0;
+let lastSessionUserId = null;
+let renderInFlight = null;
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -179,17 +182,29 @@ if (activeClient) {
     await activeClient.auth.signOut();
   });
 
-  activeClient.auth.onAuthStateChange((_event, session) => {
-    renderSession(session).catch((error) => showMessage(error.message));
+  // Only re-mount UI on meaningful auth transitions. TOKEN_REFRESHED / repeated
+  // INITIAL_SESSION would wipe nav and flash assets if we re-render every time.
+  activeClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
+    if (event === 'INITIAL_SESSION' && !session) return;
+    scheduleRender(session).catch((error) => showMessage(error.message));
   });
 
   settleAuthFromUrl(activeClient)
-    .then((session) => renderSession(session))
+    .then((session) => scheduleRender(session))
     .catch((error) => showMessage(error.message));
+}
+
+async function scheduleRender(session) {
+  // Serialize renders; drop stale runs that finish out of order.
+  const run = async () => renderSession(session);
+  renderInFlight = (renderInFlight || Promise.resolve()).then(run, run);
+  return renderInFlight;
 }
 
 async function renderSession(session) {
   if (!session) {
+    lastSessionUserId = null;
     gate.hidden = false;
     workspace.hidden = true;
     activeProfile = null;
@@ -197,16 +212,25 @@ async function renderSession(session) {
     return;
   }
 
+  const userId = session.user?.id || null;
+  // Same signed-in user already mounted — skip full rebuild (stops flash).
+  if (userId && userId === lastSessionUserId && !workspace.hidden && activeProfile) {
+    return;
+  }
+
+  const generation = ++renderGeneration;
   clearWorkspaceSessionCache();
   let workspaceSession;
   try {
     workspaceSession = await requireWorkspaceSession();
   } catch (error) {
+    if (generation !== renderGeneration) return;
     gate.hidden = false;
     workspace.hidden = true;
     showMessage(`Access blocked: ${error.message}`);
     return;
   }
+  if (generation !== renderGeneration) return;
 
   const { profile, clients, selectedClient: currentClient, isMasterAdmin: masterAdmin } = workspaceSession;
   const mfaRequired = PRIVILEGED_ROLES.has(profile.role) || masterAdmin;
@@ -219,13 +243,17 @@ async function renderSession(session) {
     if (configError) throw configError;
     enabledModules = { sponsors: publishedConfig?.config?.modules?.sponsors !== false, grants: publishedConfig?.config?.modules?.grants !== false };
   }
+  if (generation !== renderGeneration) return;
+
   gate.hidden = true;
   workspace.hidden = false;
+  lastSessionUserId = userId;
+  const roleLabel = profile.role || selectedClient?.role || (masterAdmin ? 'platform administration' : 'member');
   document.getElementById('identityLine').textContent =
-    `${profile.display_name || session.user.email} · ${profile.role || 'platform administration'}`;
+    `${profile.display_name || session.user.email} · ${roleLabel}`;
   renderClientSelector(clients, currentClient);
-  renderNavigation(profile.role);
-  await loadDashboard(profile.role);
+  renderNavigation(profile.role || selectedClient?.role);
+  await loadDashboard(profile.role || selectedClient?.role);
 }
 
 function renderClientSelector(clients, currentClient) {
@@ -265,6 +293,7 @@ function renderNavigation(role) {
   }
 
   const nav = document.getElementById('roleNav');
+  const previousSection = nav.querySelector('.workspace-nav-button.is-active')?.dataset.section;
   nav.innerHTML = items.map(item => `
     <button class="workspace-nav-button" type="button" data-section="${item.id}">
       ${item.label}
@@ -279,6 +308,14 @@ function renderNavigation(role) {
       });
     });
   });
+
+  // Restore prior section or open first once — do not re-click on every auth event.
+  const preferred =
+    nav.querySelector(`[data-section="${previousSection}"]`) ||
+    nav.querySelector('.workspace-nav-button');
+  if (preferred && !preferred.classList.contains('is-active')) {
+    preferred.classList.add('is-active');
+  }
 }
 
 async function loadDashboard(role) {
