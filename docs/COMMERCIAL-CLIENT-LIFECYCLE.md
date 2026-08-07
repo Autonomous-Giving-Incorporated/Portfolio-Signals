@@ -93,10 +93,16 @@ Checklist:
 
 Prefer disposable ids such as `org_lifecycle_dry_run`. Do **not** use this runbook to re-activate `org_hacker_dojo` if already active.
 
+## Next: second tenant (suite)
+
+After one client is active, stand up a second nonprofit (FI + Impact Relay template clone):
+[SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md).
+
 ## Related
 
 - [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md) — config fields and director workflow
 - [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — people path
+- [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) — second nonprofit + IR clone
 - [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — roles
 - [CURRENT-STATE.md](CURRENT-STATE.md) — live evidence
 - [scripts/platform/README.md](../scripts/platform/README.md)

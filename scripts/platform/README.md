@@ -24,6 +24,7 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | `revoke-master-admin.sql` | Soft-revoke platform admin |
 | `verify-operator-access.sql` | Read-only profile / admin / optional membership check |
 | `verify-client-lifecycle.sql` | Read-only commercial lifecycle readiness (state, director, published config, modules) |
+| `verify-second-tenant-isolation.sql` | Read-only second client vs HD reference (not reference_tenant; public projection notice) |
 | `verify-platform-isolation.sql` | Reference + isolation fixture clients |
 | `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
 
@@ -64,6 +65,14 @@ See [docs/COMMERCIAL-CLIENT-LIFECYCLE.md](../../docs/COMMERCIAL-CLIENT-LIFECYCLE
 3. master_admin activates client.
 4. `verify-client-lifecycle.sql` with `target_client_id` set.
 
+### Second tenant (after one active client)
+
+See [docs/SECOND-TENANT-ONBOARDING.md](../../docs/SECOND-TENANT-ONBOARDING.md).
+
+1. Complete commercial lifecycle for a new `org_*` (not HD).
+2. IR: `clone_tenant_from_hacker_dojo` with the **same** id.
+3. `verify-second-tenant-isolation.sql` with second client id.
+
 ## Safety
 
 ```bash
@@ -85,6 +94,7 @@ Every mutating script must hard-fail if the sentinel UUID `00000000-0000-0000-00
 
 - `docs/OPERATOR-ACCESS-ONBOARDING.md` — people path runbook
 - `docs/COMMERCIAL-CLIENT-LIFECYCLE.md` — provision → publish → activate
+- `docs/SECOND-TENANT-ONBOARDING.md` — second nonprofit + IR template clone
 - `docs/STAGING-BOOTSTRAP.md` — migrations / bootstrap
 - `docs/AUTHENTICATED-WORKSPACE.md` — roles and workspace
 - `docs/PLATFORM.md` — suite platform alignment
