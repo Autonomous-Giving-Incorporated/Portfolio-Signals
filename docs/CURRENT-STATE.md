@@ -92,6 +92,16 @@ verify_script: scripts/platform/verify-client-lifecycle.sql
 dry_run: PENDING  # 2026-08-06 Option C — runbook + verify helper shipped; full provision→publish→activate on synthetic org_* requires operator workspace session (master_admin + director MFA); do not re-activate org_hacker_dojo if already active
 ```
 
+## Second-tenant product path (slice D)
+
+```yaml
+runbook: docs/SECOND-TENANT-ONBOARDING.md
+verify_script: scripts/platform/verify-second-tenant-isolation.sql
+ir_clone: impact_relay.storage.template.clone_tenant_from_hacker_dojo
+id_contract: client_id == tenant_id
+dry_run: PENDING  # 2026-08-06 Option C — suite runbook shipped; full FI activate + IR clone needs operator sessions and IR data-dir
+```
+
 ## Related
 
 - Suite phase map: [AGI docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)
