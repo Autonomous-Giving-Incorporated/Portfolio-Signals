@@ -14,7 +14,7 @@ let cached = null;
 let sharedClient = null;
 
 export function getRuntimeConfig() {
-  return window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+  return window.AGI_PORTFOLIO_SIGNALS_CONFIG || window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 }
 
 /** Canonical workspace return URLs (path-prefixed production + local). */

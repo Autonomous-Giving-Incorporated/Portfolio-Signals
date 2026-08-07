@@ -37,8 +37,8 @@ Re-running is safe: conflict updates re-activate and clear `revoked_at`.
 
 In Supabase Dashboard → **Authentication** → **URL configuration**, set allowed redirect URLs for the Fund-Intel workspace:
 
-- `https://autogive.app/fund-intel/workspace`
-- `https://autogive.app/fund-intel/workspace.html`
+- `https://autogive.app/portfolio-signals/workspace`
+- `https://autogive.app/portfolio-signals/workspace.html`
 
 Also set Site URL per environment policy. Do not commit project-specific secrets.
 

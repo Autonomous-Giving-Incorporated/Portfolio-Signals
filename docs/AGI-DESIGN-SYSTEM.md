@@ -1,6 +1,6 @@
 # AGI shared interface contract
 
-Autonomously Giving Incorporated is the corporate master brand for AGI, Fund Intel, and Impact Relay. Their information density differs, but their identity, visual grammar, status language, and cross-product navigation remain consistent. Zero State is a footer-only software-builder credit.
+Autonomously Giving Incorporated is the corporate master brand for AGI, Portfolio Signals, and Impact Relay. Their information density differs, but their identity, visual grammar, status language, and cross-product navigation remain consistent. Zero State is a footer-only software-builder credit.
 
 ## Shared primitives
 
@@ -16,7 +16,7 @@ Canonical CSS custom properties use the `--agi-` prefix. Repository-local tokens
 ## Identity hierarchy
 
 1. AGI mark and wordmark
-2. Fund Intel product name and “Decision Workspace” role
+2. Portfolio Signals product name and “Decision Workspace” role
 3. Tenant or campaign context, such as Hacker Dojo
 
 The masthead includes reciprocal links to AGI and Impact Relay. Tenant branding can add an accent or mark, but cannot replace AGI, product identity, semantic colors, or interaction behavior. Canonical navigation uses `autogive.app`; Tokens, Logo use, Legal, and “Software by Zero State” appear in the footer.
@@ -39,8 +39,8 @@ Operational host surfaces use the same AGI shell contract as the public portal a
 |---|---|
 | `finance-impact.html` | Impact Relay · Finance review |
 | `donor-impact.html` | Impact Relay · Donor receipts |
-| `import-review.html` | Fund Intel · Import review |
-| `services/allocation-middleware/public/*` | Fund Intel · Allocation middleware |
+| `import-review.html` | Portfolio Signals · Import review |
+| `services/allocation-middleware/public/*` | Portfolio Signals · Allocation middleware |
 
 Each must show:
 

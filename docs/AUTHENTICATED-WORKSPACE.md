@@ -6,11 +6,24 @@ Move Hacker Dojo campaign operations from a read-only aggregate dashboard to an 
 
 ## Production workspace URL
 
-https://autogive.app/fund-intel/workspace
+https://autogive.app/portfolio-signals/workspace
 
 (Also reachable as `workspace.html` depending on rewrite configuration.)
 
 Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Legacy HD staging `ecxkhihlbrcwpavfoaoq` is **frozen** for new tenancy.
+
+### Operator status (2026-08-07)
+
+| Item | State |
+| --- | --- |
+| Migrations on platform | Applied |
+| Vercel `PLATFORM_SUPABASE_URL` + `ANON_KEY` | Set; `runtime-config.js` generated with platform host |
+| Primary master_admin | `scrimshawlife@gmail.com` bootstrapped |
+| Reference tenant HD director membership | Active |
+| Magic-link login (implicit hash + session persist) | **Verified** on production |
+| Built-in Auth email rate limit | Still low without custom SMTP — use admin `generate_link` or configure SMTP |
+
+Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md).
 
 ## Deployment boundary
 
@@ -80,7 +93,7 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 
 ## Director workflow
 
-1. Sign in with magic link (or approved Auth path) on https://autogive.app/fund-intel/workspace .
+1. Sign in with magic link (or approved Auth path) on https://autogive.app/portfolio-signals/workspace .
 2. Review campaign readiness and blocked gates.
 3. Approve, reject, or defer decisions with rationale.
 4. Assign relationship and execution owners.

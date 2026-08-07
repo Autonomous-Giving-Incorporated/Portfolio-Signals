@@ -10,7 +10,7 @@ document.head.appendChild(brandStyles);
 if (!document.documentElement.dataset.tenant) {
   const slug =
     new URLSearchParams(location.search).get('client') ||
-    window.AGI_FUND_INTEL_CONFIG?.defaultClientSlug ||
+    window.AGI_PORTFOLIO_SIGNALS_CONFIG?.defaultClientSlug || window.AGI_FUND_INTEL_CONFIG?.defaultClientSlug ||
     'hacker-dojo';
   document.documentElement.dataset.tenant = slug;
   const tenantTheme = document.createElement('link');
@@ -36,7 +36,7 @@ if (header && headerCopy) {
   identity.innerHTML = `
     <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
     <span class="brand-divider" aria-hidden="true"></span>
-    <span class="brand-product">Fund Intel<br />Decision Workspace</span>
+    <span class="brand-product">Portfolio Signals<br />Decision Workspace</span>
     <span class="tenant-chip" data-tenant-chip>
       <img class="tenant-mark" src="assets/tenants/hacker-dojo/icon.svg" alt="" />
       Tenant · <span data-tenant-name>Hacker Dojo</span>
@@ -48,11 +48,11 @@ if (header && headerCopy) {
   `;
   header.prepend(identity);
 
-  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html') || location.pathname.endsWith('/fund-intel');
+  const isOverview = location.pathname.endsWith('/') || location.pathname.endsWith('/index.html') || location.pathname.endsWith('/portfolio-signals');
   if (isOverview) {
     const eyebrow = headerCopy.querySelector('.eyebrow');
     const title = headerCopy.querySelector('h1');
-    if (eyebrow) eyebrow.textContent = 'AGI product · Fund Intel';
+    if (eyebrow) eyebrow.textContent = 'AGI product · Portfolio Signals';
     if (title) title.textContent = 'Decision workspace';
   }
 }
@@ -89,7 +89,7 @@ if (footer) {
   footer.innerHTML = `
     <div class="footer-brand">
       <img src="assets/brand/agi-mark.png" alt="" width="38" height="38" />
-      <span>Autonomously Giving Incorporated · Fund Intel</span>
+      <span>Autonomously Giving Incorporated · Portfolio Signals</span>
     </div>
     <div class="footer-meta">
       <small data-tenant-prefix="Tenant · " data-tenant-name>Tenant · Hacker Dojo</small>

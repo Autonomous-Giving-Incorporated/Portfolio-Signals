@@ -3,7 +3,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 /** Static fallback = reference tenant (Hacker Dojo), not product identity. */
 const FALLBACK = {
   organization_name: 'Hacker Dojo',
-  product_name: 'Fund Intel',
+  product_name: 'Portfolio Signals',
   campaign_title: 'Keep the room where builders become possible.',
   campaign_tagline: 'Come home. Build something. Fund the next builder.',
   modules: { sponsors: true, grants: true },
@@ -21,7 +21,7 @@ const validColor = (value, fallback) =>
 
 /** Prefer AGI platform config; keep legacy aliases for older deploys. */
 function getConfig() {
-  return window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
+  return window.AGI_PORTFOLIO_SIGNALS_CONFIG || window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
 }
 
 function clientSlug() {
@@ -91,9 +91,9 @@ function applyPublicConfig(config) {
   document.documentElement.style.setProperty('--brand-teal', safe.theme.accent);
   document.documentElement.style.setProperty('--brand-navy', safe.theme.background);
 
-  // Product identity stays AGI Fund Intel; organization is the tenant.
+  // Product identity stays AGI Portfolio Signals; organization is the tenant.
   document.querySelectorAll('title').forEach((node) => {
-    node.textContent = `AGI Fund Intel · ${safe.organization_name}`;
+    node.textContent = `AGI Portfolio Signals · ${safe.organization_name}`;
   });
   document.querySelectorAll('.tenant-product').forEach((node) => {
     node.textContent = safe.product_name;

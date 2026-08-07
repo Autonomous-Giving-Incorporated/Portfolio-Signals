@@ -11,13 +11,14 @@ if [[ -z "${PLATFORM_SUPABASE_URL:-${STAGING_SUPABASE_URL:-}}" || -z "${PLATFORM
   echo "No Supabase env on this build — writing public-only runtime-config stub"
   cat > runtime-config.js <<'EOF'
 // Public static deploy without Supabase credentials (workspace login needs PLATFORM_* env).
-window.AGI_FUND_INTEL_CONFIG = {
+window.AGI_PORTFOLIO_SIGNALS_CONFIG = {
   defaultClientSlug: "hacker-dojo",
-  productName: "Fund Intel",
+  productName: "Portfolio Signals",
   platformName: "Autonomously Giving Incorporated",
 };
-window.HACKER_DOJO_CONFIG = window.AGI_FUND_INTEL_CONFIG;
-window.__HD_CONFIG__ = window.AGI_FUND_INTEL_CONFIG;
+window.AGI_FUND_INTEL_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
+window.HACKER_DOJO_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
+window.__HD_CONFIG__ = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
 EOF
   chmod 600 runtime-config.js
   exit 0

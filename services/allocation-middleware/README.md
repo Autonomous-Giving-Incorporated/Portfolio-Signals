@@ -2,12 +2,14 @@
 
 MVP package for AGI allocation middleware: **every.org gift summaries → pots → allocate → proof → packet**.
 
-Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`**.
+Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`** (Hacker Dojo reference tenant — not AGI product brand).
+
+**Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Production public host not deployed yet.
 
 | Doc | Purpose |
 | --- | --- |
 | [HACKER-DOJO-ALLOCATION-PILOT.md](../../docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Local + hosted pilot runbook |
-| [ALLOCATION-MIDDLEWARE.md](../../docs/ALLOCATION-MIDDLEWARE.md) | Fund Intel role + status |
+| [ALLOCATION-MIDDLEWARE.md](../../docs/ALLOCATION-MIDDLEWARE.md) | Portfolio Signals role + status |
 | [ALLOCATION-DIRECTOR-LOGIN.md](../../docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
 | [ALLOCATION-MIDDLEWARE-PRODUCTION.md](../../docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [Design (Specs)](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md) | Product design |

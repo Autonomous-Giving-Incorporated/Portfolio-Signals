@@ -40,7 +40,7 @@ Platform and any remaining HD-staging environments must not publish personal CRM
 | Dashboard | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu | OBSERVED |
 | API host | `https://utdioxwiskzatwoejgiu.supabase.co` | OBSERVED |
 | Linked to GitHub repo | Yes (operator-reported) | OBSERVED |
-| Migrations applied | **Operator applies migrations** (`remote-linked` or `supabase db push`) | PENDING until operator confirms |
+| Migrations applied | Platform migrations applied (2026-08-06/07); further changes via `supabase db push` | **APPLIED** on platform |
 | Real CRM data | Not loaded | REQUIRED |
 | Legacy HD staging | `ecxkhihlbrcwpavfoaoq` | **Freeze** — not for new tenancy |
 
@@ -116,7 +116,7 @@ Keep the evidence file outside the repository. It contains only timestamp, mode,
 
 Authenticated pages:
 
-- Production workspace: https://autogive.app/fund-intel/workspace
+- Production workspace: https://autogive.app/portfolio-signals/workspace
 - `workspace.html` / `workspace` (path as deployed)
 - `import-review.html?batch=<id>`
 
@@ -146,7 +146,7 @@ signed_document_access_audit: true
 service_role_in_git: false
 production_data: false
 master_development_list_loaded: false
-workspace_url: https://autogive.app/fund-intel/workspace
+workspace_url: https://autogive.app/portfolio-signals/workspace
 master_admin_primary: scrimshawlife@gmail.com
 ```
 

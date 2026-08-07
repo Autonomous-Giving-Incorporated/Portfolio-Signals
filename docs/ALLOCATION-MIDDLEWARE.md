@@ -1,4 +1,4 @@
-# Allocation middleware — Fund Intel role
+# Allocation middleware — Portfolio Signals role
 
 **Status:** MVP shipped · local pilot smoke green against platform Supabase (`utdioxwiskzatwoejgiu`) · production public host still open  
 **Canonical design:** [Specs design doc](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
@@ -7,13 +7,13 @@
 
 ## Positioning
 
-Fund Intel remains the **intelligence / observe** boundary: signals, opportunities, recommendations, and—in the middleware product—**gift summary ingestion and pot credits** from donation platforms.
+Portfolio Signals remains the **intelligence / observe** boundary: signals, opportunities, recommendations, and—in the middleware product—**gift summary ingestion and pot credits** from donation platforms.
 
 It does **not** own human approval of allocations (Autonomous Giving capability) or deep evidence verification (Impact Relay capability). The MVP co-locates allocate/proof/packet UI with credit ingestion in a modular monolith package (Specs SPEC-002A / SPEC-020 Profile B).
 
-## Relevance to Fund Intel
+## Relevance to Portfolio Signals
 
-| Middleware concept | Fund Intel affinity |
+| Middleware concept | Portfolio Signals affinity |
 | --- | --- |
 | every.org / connector adapters | Observation of external fundraising state |
 | Campaign pot / program slice credits | Normalized “what came in” without full ledger |

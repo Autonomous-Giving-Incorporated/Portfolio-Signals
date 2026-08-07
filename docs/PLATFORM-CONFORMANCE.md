@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Platform specification release | `v1.0.0` |
-| Repository role | Fund Intel — intelligence implementation |
+| Repository role | Portfolio Signals — intelligence implementation |
 | Current conformance level | Experimental |
 | Declaration | [`platform-conformance.yml`](../platform-conformance.yml) |
 | Governing canon | [Autonomous-Giving-Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0) |
@@ -16,7 +16,7 @@ The existing decision and approval screens are local campaign controls. They are
 
 ## Intended boundary
 
-Fund Intel is responsible for observing, normalizing, and recommending. It never allocates. The target platform surface is:
+Portfolio Signals is responsible for observing, normalizing, and recommending. It never allocates. The target platform surface is:
 
 | Capability | Target platform artifacts |
 | --- | --- |
@@ -30,7 +30,7 @@ Fund Intel is responsible for observing, normalizing, and recommending. It never
 1. Introduce an implementation-neutral Signal-to-Opportunity boundary with source provenance and idempotency.
 2. Validate produced Opportunity payloads against SCHEMA-001 and publish EVENT-002.
 3. Validate produced Recommendation payloads against SCHEMA-002 and publish EVENT-003.
-4. Remove or isolate any allocation behavior from the Fund Intel responsibility boundary.
+4. Remove or isolate any allocation behavior from the Portfolio Signals responsibility boundary.
 5. Add contract fixtures and integration evidence; update `platform-conformance.yml` with the exact IDs implemented.
 
 ## Non-goals
