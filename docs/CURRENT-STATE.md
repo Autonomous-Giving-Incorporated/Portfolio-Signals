@@ -75,6 +75,15 @@ Older HD-OI-041 / staging receipts against `ecxkhihlbrcwpavfoaoq` or pre-rename 
 2. Configure custom SMTP on platform Supabase for sustainable magic-link email (built-in mail is rate-limited).
 3. Keep `scripts/staging/bootstrap.env` and `services/allocation-middleware/.env.pilot` gitignored.
 
+## Operator access onboarding (slice C)
+
+```yaml
+runbook: docs/OPERATOR-ACCESS-ONBOARDING.md
+scripts_platform: ensure-profile set-mfa-enforced grant/revoke-master-admin verify-operator-access
+safety_check: PASS  # ./scripts/platform/check-script-safety.sh
+dry_run: OBSERVED  # 2026-08-06 Option B — read-only verify primary admin (scrimshawlife@gmail.com): profile active, platform_admin active, mfa_enforced true; via platform Admin/REST API (equivalent to verify-operator-access.sql); UUID not committed
+```
+
 ## Related
 
 - Suite phase map: [AGI docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)
