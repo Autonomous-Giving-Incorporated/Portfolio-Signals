@@ -1,6 +1,6 @@
 # Allocation middleware — Portfolio Signals role
 
-**Status:** MVP shipped · local pilot smoke green against platform Supabase (`utdioxwiskzatwoejgiu`) · production public host still open  
+**Status:** MVP shipped · local pilot smoke green against platform Supabase (`utdioxwiskzatwoejgiu`) · director JWT OBSERVED · public HTTPS OBSERVED (ephemeral cloudflared) · live every.org webhook still open (#73) · seed-loop accept OBSERVED
 **Canonical design:** [Specs design doc](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
 **Suite summary:** [AGI PRODUCT-ALLOCATION-MIDDLEWARE](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PRODUCT-ALLOCATION-MIDDLEWARE.md)  
 **Director login:** platform project + HD membership (see [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)); operator already has master_admin + HD director on production Auth.
@@ -49,8 +49,10 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Hacker Dojo pilot seed + `SEED_ON_BOOT` | Shipped |
 | Docker Compose pilot host | Shipped (default) |
 | Optional Fly / Render / Railway recipes | Shipped |
-| Live every.org gifts for Hacker Dojo | **Operator step** (not yet wired) |
-| Named public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
+| Live every.org gifts for Hacker Dojo | **Operator step** (#73 — not yet wired) |
+| Public HTTPS (ephemeral tunnel) | OBSERVED (Phase 3b) |
+| Named durable public host | **Optional** (Render / Railway / Fly / VPS) |
+| Seed allocate→proof→packet | OBSERVED — `npm run accept:seed-loop` |
 
 ### Local (Hacker Dojo default)
 

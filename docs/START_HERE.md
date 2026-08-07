@@ -43,7 +43,9 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
-| Phase 3 allocation middleware pilot | Local smoke green; **production host open** |
+| Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
+| Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
+| Phase 3c every.org webhook | **PENDING** operator (#73) |
 | Production CRM import | Blocked |
 
 ## Quick operator commands
@@ -56,12 +58,14 @@ service_role_on_vercel: PROHIBITED
 #   PLATFORM_SUPABASE_URL
 #   PLATFORM_SUPABASE_ANON_KEY
 
-# Allocation pilot (local)
+# Allocation pilot (local Node — no Docker required)
 cd services/allocation-middleware
-# create .env.pilot from platform keys (never commit)
+# .env.pilot with platform Supabase keys (never commit)
 npm test
-# start: see package.json start:hacker-dojo:seed / compose:up
+# set -a && source .env.pilot && set +a && npm run start:hacker-dojo:seed
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
+npm run accept:seed-loop   # allocate→proof→packet on seed (no every.org)
 ```
 
 ## Current baseline (suite)

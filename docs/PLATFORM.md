@@ -52,6 +52,16 @@ Config: `vercel.json`, `.vercelignore` (excludes `node_modules`, services, secre
 
 Build generates gitignored `runtime-config.js`. Do **not** set service-role keys on the Vercel project.
 
-## Phase 3 (next)
+## Phase 3 (allocation pilot)
 
-Allocation middleware local pilot is green against platform Auth. Production middleware host + every.org webhook remain operator deploy steps. See [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md).
+| Item | Status |
+| --- | --- |
+| Local Node pilot + unit tests | OBSERVED |
+| Director JWT path (#72) | OBSERVED — [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) |
+| Public HTTPS ephemeral (#71) | OBSERVED — Cloudflare quick tunnel |
+| Seed allocate→proof→packet (#74 partial) | OBSERVED — `npm run accept:seed-loop` |
+| Durable named host | Optional operator (Render/Railway/Fly) |
+| Live every.org webhook (#73) | **PENDING** (operator tomorrow) |
+| Full director acceptance (#74) | Partial — needs live gift + browser sign-off |
+
+See [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
