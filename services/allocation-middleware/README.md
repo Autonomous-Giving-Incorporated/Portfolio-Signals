@@ -4,7 +4,7 @@ MVP package for AGI allocation middleware: **every.org gift summaries → pots �
 
 Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`** (Hacker Dojo reference tenant — not AGI product brand).
 
-**Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Production public host not deployed yet.
+**Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Public HTTPS OBSERVED via Cloudflare quick tunnel (ephemeral); durable Render/Railway/Fly optional.
 
 | Doc | Purpose |
 | --- | --- |
@@ -23,20 +23,19 @@ npm test
 npm run start:hacker-dojo:seed   # local Node, SEED_ON_BOOT=1
 # open http://127.0.0.1:8787
 
-# Default host path — Docker Compose
-npm run gen:env                  # .env.pilot with tokens
-npm run compose:up               # Docker Compose + volume
-BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
-
-# Director login (Fund-Intel #72) — after SUPABASE_* in .env.pilot
-# DIRECTOR_EMAIL=you@example.com npm run grant:director
-# npm run compose:up
+# Local Node (no Docker) — Phase 3a default
+# set -a && source .env.pilot && set +a && npm run start:hacker-dojo:seed
+# BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 # BASE_URL=http://127.0.0.1:8787 npm run verify:director
-# DIRECTOR_EMAIL=… DIRECTOR_PASSWORD=… npm run verify:director -- --login
 
-# Optional — Fly.io (when flyctl works)
-# fly auth login && npm run bootstrap:fly
-# BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
+# Public HTTPS without SaaS (Phase 3b ephemeral)
+# cloudflared tunnel --url http://127.0.0.1:8787
+# BASE_URL=https://….trycloudflare.com npm run pilot:smoke
+
+# Optional durable — Docker Compose / Render / Railway / Fly
+npm run gen:env                  # .env.pilot with tokens
+# npm run compose:up
+# Director: DIRECTOR_EMAIL=… npm run grant:director
 
 npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
