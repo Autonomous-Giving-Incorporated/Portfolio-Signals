@@ -4,7 +4,8 @@ import {
   requireWorkspaceSession,
   roleCan,
   selectWorkspaceClient,
-  workspaceRedirectUrl
+  workspaceRedirectUrl,
+  getRecoveredSession
 } from './workspace/session.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
@@ -182,28 +183,39 @@ if (activeClient) {
     await activeClient.auth.signOut();
   });
 
-  // Only re-mount UI on meaningful auth transitions. TOKEN_REFRESHED / repeated
-  // INITIAL_SESSION would wipe nav and flash assets if we re-render every time.
+  // Only re-mount UI on meaningful auth transitions. TOKEN_REFRESHED would
+  // flash the shell if we rebuilt; never treat a transient null as sign-out
+  // unless we get an explicit SIGNED_OUT.
   activeClient.auth.onAuthStateChange((event, session) => {
     if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
     if (event === 'INITIAL_SESSION' && !session) return;
-    scheduleRender(session).catch((error) => showMessage(error.message));
+    if (!session && event !== 'SIGNED_OUT') return;
+    scheduleRender(session, { allowNull: event === 'SIGNED_OUT' }).catch((error) =>
+      showMessage(error.message)
+    );
   });
 
+  // Boot: recover hash tokens first, then localStorage session (refresh path).
   settleAuthFromUrl(activeClient)
-    .then((session) => scheduleRender(session))
+    .then(async (session) => {
+      if (session) return scheduleRender(session, { allowNull: false });
+      const recovered = await getRecoveredSession(activeClient);
+      return scheduleRender(recovered, { allowNull: true });
+    })
     .catch((error) => showMessage(error.message));
 }
 
-async function scheduleRender(session) {
+async function scheduleRender(session, { allowNull = false } = {}) {
   // Serialize renders; drop stale runs that finish out of order.
-  const run = async () => renderSession(session);
+  const run = async () => renderSession(session, { allowNull });
   renderInFlight = (renderInFlight || Promise.resolve()).then(run, run);
   return renderInFlight;
 }
 
-async function renderSession(session) {
+async function renderSession(session, { allowNull = false } = {}) {
   if (!session) {
+    // Ignore spurious nulls (init race) unless caller allows logout UI.
+    if (!allowNull && lastSessionUserId) return;
     lastSessionUserId = null;
     gate.hidden = false;
     workspace.hidden = true;
