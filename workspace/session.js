@@ -12,7 +12,6 @@ const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 
 let cached = null;
 let sharedClient = null;
-let authReady = null;
 
 export function getRuntimeConfig() {
   return window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
@@ -29,8 +28,7 @@ export function workspaceRedirectUrl() {
 
 /**
  * Single shared browser client so setSession / refresh / getSession share one
- * localStorage slot. Creating a new client on every call races init and looks
- * like a sign-out on refresh.
+ * localStorage slot.
  */
 export function createWorkspaceClient() {
   if (sharedClient) return sharedClient;
@@ -41,11 +39,13 @@ export function createWorkspaceClient() {
   }
 
   // Magic-link verify redirects use #access_token=…&refresh_token=… (implicit).
+  // detectSessionInUrl is OFF: we parse the hash ourselves so we never race
+  // the client initializer (which can deadlock with onAuthStateChange).
   sharedClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       flowType: 'implicit',
       storage: window.localStorage
     }
@@ -53,38 +53,30 @@ export function createWorkspaceClient() {
   return sharedClient;
 }
 
-/** Wait until supabase-js has finished reading storage / URL for a session. */
-export async function waitForAuthReady(client = createWorkspaceClient()) {
-  if (!authReady) {
-    // getSession() resolves after internal initialize() in supabase-js v2.
-    authReady = client.auth.getSession().then((result) => result).catch((error) => {
-      authReady = null;
-      throw error;
-    });
-  }
-  return authReady;
-}
-
 export async function getRecoveredSession(client = createWorkspaceClient()) {
-  await waitForAuthReady(client);
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
   if (data.session) return data.session;
 
-  // Secondary recovery: some browsers delay storage hydration.
-  await new Promise((r) => setTimeout(r, 50));
+  // Brief second chance for storage hydration after redirect.
+  await new Promise((r) => setTimeout(r, 75));
   const again = await client.auth.getSession();
   if (again.error) throw again.error;
   return again.data.session;
 }
 
-export async function requireWorkspaceSession() {
+/**
+ * @param {import('@supabase/supabase-js').Session | null | undefined} knownSession
+ *   Prefer the session just established via setSession so we don't re-enter
+ *   getSession while auth locks are held.
+ */
+export async function requireWorkspaceSession(knownSession = null) {
   if (cached?.session && cached?.profile && cached?.supabase && cached?.context) {
     return cached;
   }
 
   const supabase = createWorkspaceClient();
-  const session = await getRecoveredSession(supabase);
+  const session = knownSession || (await getRecoveredSession(supabase));
   if (!session) {
     throw new Error('Authentication required.');
   }
