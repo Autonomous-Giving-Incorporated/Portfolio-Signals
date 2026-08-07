@@ -89,7 +89,7 @@ dry_run: OBSERVED  # 2026-08-06 Option B — read-only verify primary admin (scr
 ```yaml
 runbook: docs/COMMERCIAL-CLIENT-LIFECYCLE.md
 verify_script: scripts/platform/verify-client-lifecycle.sql
-dry_run: PENDING  # 2026-08-06 Option C — runbook + verify helper shipped; full provision→publish→activate on synthetic org_* requires operator workspace session (master_admin + director MFA); do not re-activate org_hacker_dojo if already active
+dry_run: OBSERVED  # 2026-08-07 Option B — platform read-only verify of org_hacker_dojo (active client): 1 active director, 1 published config, modules.sponsors+grants true (lifecycle_ready); API equivalent of verify-client-lifecycle.sql against utdioxwiskzatwoejgiu; UUID/keys not committed. Full synthetic provision→activate still optional operator exercise (do not re-activate HD).
 ```
 
 ## Second-tenant product path (slice D)
@@ -99,7 +99,7 @@ runbook: docs/SECOND-TENANT-ONBOARDING.md
 verify_script: scripts/platform/verify-second-tenant-isolation.sql
 ir_clone: impact_relay.storage.template.clone_tenant_from_hacker_dojo
 id_contract: client_id == tenant_id
-dry_run: PENDING  # 2026-08-06 Option C — suite runbook shipped; full FI activate + IR clone needs operator sessions and IR data-dir
+dry_run: OBSERVED  # 2026-08-07 Option B — (1) FI platform: org_hacker_dojo reference_tenant=true + org_platform_isolation active non-reference second client; public get_public_client_config('hacker-dojo') returns org_hacker_dojo / Hacker Dojo; (2) IR local: clone_tenant_from_hacker_dojo(tenant_id=org_second_makerspace) + upsert_from_policy template_source=org_hacker_dojo in disposable data-dir (IR_CLONE_OK). Full paired synthetic org_* FI activate + same-id IR clone still optional operator exercise.
 ```
 
 ## Related
