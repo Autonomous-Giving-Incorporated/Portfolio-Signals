@@ -114,11 +114,41 @@ What it checks:
 
 **Not covered here:** live every.org gift (Phase 3c / #73) or director browser JWT allocate (use `/login.html` + 3a path). After webhook works, re-run a director session allocate for full #74 sign-off.
 
-## E — every.org later (Phase 3c)
+## E — every.org live webhook (Phase 3c / #73)
 
-1. `/setup.html` → copy webhook  
-2. every.org Hacker Dojo admin → Advanced → paste  
-3. $1 test gift → Connected  
+**Not OAuth.** every.org POSTs each completed donation to your public HTTPS webhook.
+
+### Prerequisites
+
+1. Allocation host running (local Node is fine).  
+2. **Public HTTPS** in front of it (cloudflared tunnel or durable Render/Railway).  
+3. `PUBLIC_BASE_URL` = that https origin (so `/setup` shows the correct URL).  
+4. `WEBHOOK_TOKEN` set (min 16 chars; in `.env.pilot`).
+
+```bash
+cd services/allocation-middleware
+set -a && source .env.pilot && set +a
+# After tunnel URL is known:
+# export PUBLIC_BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com
+export SEED_ON_BOOT=0 SEED_ALLOCATE=0 ALLOW_OPERATOR_TOKEN_FALLBACK=0
+npm run start:hacker-dojo
+# other terminal:
+# cloudflared tunnel --url http://127.0.0.1:8787
+```
+
+### Wire every.org
+
+1. Open **`https://YOUR_PUBLIC_HOST/setup.html`** (or `GET /setup` JSON).  
+2. **Copy the webhook URL** (includes `?token=`).  
+3. every.org → **Hacker Dojo** nonprofit admin → **Settings → Advanced** (or donation webhooks).  
+4. Paste webhook URL → **Save**.  
+5. Send a **$1 test gift** on https://www.every.org/hacker-dojo (or your fundraiser).  
+6. Refresh setup page: `lastGift.chargeId` should be the live charge (not `fixture-hd-gift-*`).  
+7. `GET /available` should show a **new** credit for that gift (may create pots keyed by every.org fundraiser title).
+
+**Note:** Seed fixtures also use `source: every.org`, so “received gift” can look true before the first *live* post. Confirm by **new chargeId** + Available delta after the $1 gift.
+
+Keep the tunnel (or durable host) **up** while every.org delivers the webhook.
 
 ## F — Fly.io (optional)
 
