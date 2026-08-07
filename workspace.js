@@ -49,19 +49,30 @@ function setBusy(isBusy) {
 }
 
 function cleanAuthUrl() {
-  const url = new URL(window.location.href);
-  history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ''));
-  // Drop auth hash after session is stored so reloads don't re-process tokens.
-  if (window.location.hash) {
-    history.replaceState({}, '', window.location.pathname + window.location.search);
-  }
+  // Drop auth hash/query so reloads don't re-process one-time tokens.
+  history.replaceState({}, '', window.location.pathname);
+}
+
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
 }
 
 /**
  * Consume auth redirect payloads before session reads.
  * Supabase email/admin magic links redirect as:
  *   /workspace#access_token=…&refresh_token=…&type=magiclink
- * PKCE email returns may use ?code=…. Either must establish a session.
  */
 async function settleAuthFromUrl(client) {
   const url = new URL(window.location.href);
@@ -69,7 +80,6 @@ async function settleAuthFromUrl(client) {
     url.hash.startsWith('#') ? url.hash.slice(1) : url.hash
   );
 
-  // Surface verify failures (expired OTP, access denied) instead of silent loop.
   const hashError = hashParams.get('error') || hashParams.get('error_code');
   if (hashError) {
     const detail =
@@ -77,8 +87,10 @@ async function settleAuthFromUrl(client) {
       hashParams.get('error_code') ||
       hashParams.get('error') ||
       'sign-in link invalid';
-    showMessage(`Sign-in link failed: ${decodeURIComponent(detail.replace(/\+/g, ' '))}. Request a new link.`);
-    history.replaceState({}, '', url.pathname);
+    showMessage(
+      `Sign-in link failed: ${decodeURIComponent(detail.replace(/\+/g, ' '))}. Request a new link.`
+    );
+    cleanAuthUrl();
     return null;
   }
 
@@ -90,62 +102,61 @@ async function settleAuthFromUrl(client) {
 
   const hasAuthPayload = Boolean(code || tokenHash || accessToken || refreshToken);
   if (!hasAuthPayload) {
-    const { data } = await client.auth.getSession();
-    return data.session;
+    return getRecoveredSession(client);
   }
 
   showMessage('Completing secure sign-in…');
 
-  // PKCE authorization code
-  if (code) {
-    const { data, error } = await client.auth.exchangeCodeForSession(code);
-    if (error) {
-      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-      history.replaceState({}, '', url.pathname);
-      return null;
+  try {
+    if (code) {
+      const { data, error } = await withTimeout(
+        client.auth.exchangeCodeForSession(code),
+        12000,
+        'Code exchange'
+      );
+      if (error) throw error;
+      cleanAuthUrl();
+      showMessage('');
+      return data.session;
     }
-    cleanAuthUrl();
-    return data.session;
-  }
 
-  // Email OTP token_hash query (some verify paths)
-  if (tokenHash && otpType) {
-    const { data, error } = await client.auth.verifyOtp({
-      token_hash: tokenHash,
-      type: otpType
-    });
-    if (error) {
-      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-      history.replaceState({}, '', url.pathname);
-      return null;
+    if (tokenHash && otpType) {
+      const { data, error } = await withTimeout(
+        client.auth.verifyOtp({ token_hash: tokenHash, type: otpType }),
+        12000,
+        'OTP verify'
+      );
+      if (error) throw error;
+      cleanAuthUrl();
+      showMessage('');
+      return data.session;
     }
-    cleanAuthUrl();
-    return data.session;
-  }
 
-  // Implicit / admin generate_link: hash carries access + refresh tokens
-  if (accessToken && refreshToken) {
-    const { data, error } = await client.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken
-    });
-    if (error) {
-      showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-      history.replaceState({}, '', url.pathname);
-      return null;
+    if (accessToken && refreshToken) {
+      // Strip hash BEFORE setSession so a re-entry cannot re-process tokens,
+      // and so detect/init never re-reads the same fragment.
+      cleanAuthUrl();
+      const { data, error } = await withTimeout(
+        client.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        }),
+        12000,
+        'Session establish'
+      );
+      if (error) throw error;
+      showMessage('');
+      return data.session;
     }
-    cleanAuthUrl();
-    return data.session;
-  }
 
-  // Fallback: client auto-detect (implicit flowType)
-  const { data, error } = await client.auth.getSession();
-  if (error) {
+    showMessage('Sign-in link incomplete. Request a new link.');
+    cleanAuthUrl();
+    return null;
+  } catch (error) {
     showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
+    cleanAuthUrl();
     return null;
   }
-  if (data.session) cleanAuthUrl();
-  return data.session;
 }
 
 if (!document.getElementById('loginForm')) {
@@ -183,19 +194,20 @@ if (activeClient) {
     await activeClient.auth.signOut();
   });
 
-  // Only re-mount UI on meaningful auth transitions. TOKEN_REFRESHED would
-  // flash the shell if we rebuilt; never treat a transient null as sign-out
-  // unless we get an explicit SIGNED_OUT.
+  // CRITICAL: never await auth APIs inside onAuthStateChange — supabase-js
+  // holds a lock during setSession and deadlocks if listeners call getSession.
+  // Defer UI work off the auth callback stack.
   activeClient.auth.onAuthStateChange((event, session) => {
     if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
     if (event === 'INITIAL_SESSION' && !session) return;
     if (!session && event !== 'SIGNED_OUT') return;
-    scheduleRender(session, { allowNull: event === 'SIGNED_OUT' }).catch((error) =>
-      showMessage(error.message)
-    );
+    const allowNull = event === 'SIGNED_OUT';
+    setTimeout(() => {
+      scheduleRender(session, { allowNull }).catch((error) => showMessage(error.message));
+    }, 0);
   });
 
-  // Boot: recover hash tokens first, then localStorage session (refresh path).
+  // Boot: hash tokens first, then localStorage (refresh path).
   settleAuthFromUrl(activeClient)
     .then(async (session) => {
       if (session) return scheduleRender(session, { allowNull: false });
@@ -206,7 +218,6 @@ if (activeClient) {
 }
 
 async function scheduleRender(session, { allowNull = false } = {}) {
-  // Serialize renders; drop stale runs that finish out of order.
   const run = async () => renderSession(session, { allowNull });
   renderInFlight = (renderInFlight || Promise.resolve()).then(run, run);
   return renderInFlight;
@@ -214,7 +225,6 @@ async function scheduleRender(session, { allowNull = false } = {}) {
 
 async function renderSession(session, { allowNull = false } = {}) {
   if (!session) {
-    // Ignore spurious nulls (init race) unless caller allows logout UI.
     if (!allowNull && lastSessionUserId) return;
     lastSessionUserId = null;
     gate.hidden = false;
@@ -225,8 +235,8 @@ async function renderSession(session, { allowNull = false } = {}) {
   }
 
   const userId = session.user?.id || null;
-  // Same signed-in user already mounted — skip full rebuild (stops flash).
   if (userId && userId === lastSessionUserId && !workspace.hidden && activeProfile) {
+    showMessage('');
     return;
   }
 
@@ -234,7 +244,12 @@ async function renderSession(session, { allowNull = false } = {}) {
   clearWorkspaceSessionCache();
   let workspaceSession;
   try {
-    workspaceSession = await requireWorkspaceSession();
+    // Pass the known session so we don't call getSession under auth locks.
+    workspaceSession = await withTimeout(
+      requireWorkspaceSession(session),
+      15000,
+      'Workspace authorization'
+    );
   } catch (error) {
     if (generation !== renderGeneration) return;
     gate.hidden = false;
@@ -260,6 +275,7 @@ async function renderSession(session, { allowNull = false } = {}) {
   gate.hidden = true;
   workspace.hidden = false;
   lastSessionUserId = userId;
+  showMessage('');
   const roleLabel = profile.role || selectedClient?.role || (masterAdmin ? 'platform administration' : 'member');
   document.getElementById('identityLine').textContent =
     `${profile.display_name || session.user.email} · ${roleLabel}`;
