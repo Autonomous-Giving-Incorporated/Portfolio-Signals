@@ -26,8 +26,9 @@ function enhanceNavigation() {
     }
   });
 
+  // Mark first tab selected without synthetic click storms (avoids content flash).
   if (!buttons.some(button => button.classList.contains('is-active'))) {
-    buttons[0].click();
+    activateButton(buttons[0]);
   }
 }
 
