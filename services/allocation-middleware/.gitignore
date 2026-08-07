@@ -1,7 +1,8 @@
-node_modules
-data
+!.env.example
 *.log
-test
 .env
 .env.*
-!.env.example
+data
+data/hacker-dojo-acceptance-loop.json
+node_modules
+test

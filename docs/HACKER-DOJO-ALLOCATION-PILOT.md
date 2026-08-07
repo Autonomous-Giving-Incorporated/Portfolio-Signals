@@ -95,13 +95,32 @@ BASE_URL=https://YOUR_HOST npm run verify:director
 
 Set dashboard `PUBLIC_BASE_URL` to that https origin. After first stable seed: `SEED_ON_BOOT=0`. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0` with Supabase director login.
 
-## D — every.org later (Phase 3c)
+## D — Seed-loop acceptance (no live every.org) — #74 partial
+
+Proves **allocate → proof → packet** on seeded Community Hardware Fund without a live gift. Uses a disposable data file and ephemeral port so day-to-day pilot env (token fallback off) is unchanged.
+
+```bash
+cd services/allocation-middleware
+npm run accept:seed-loop
+# expect: SEED_LOOP_ACCEPTANCE_PASS
+```
+
+What it checks:
+
+1. Seed pots load (`SEED_ON_BOOT=1`, no auto-allocate).  
+2. `POST /allocations` $100 Community Hardware Fund → 201.  
+3. `POST /proofs` evidence URI → 201.  
+4. `GET /packet` shows allocation with `proofCount ≥ 1` and totals.  
+
+**Not covered here:** live every.org gift (Phase 3c / #73) or director browser JWT allocate (use `/login.html` + 3a path). After webhook works, re-run a director session allocate for full #74 sign-off.
+
+## E — every.org later (Phase 3c)
 
 1. `/setup.html` → copy webhook  
 2. every.org Hacker Dojo admin → Advanced → paste  
 3. $1 test gift → Connected  
 
-## E — Fly.io (optional)
+## F — Fly.io (optional)
 
 Optional public host when flyctl works. Default remains Docker Compose (section B). Full notes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) §4.
 

@@ -90,6 +90,16 @@ durable_render_recipe: READY  # services/allocation-middleware/render.yaml (ALLO
 durable_named_host: PENDING_OPERATOR  # Render/Railway/Fly dashboard deploy when every.org needs stable URL
 ```
 
+## Phase 3 / #74 — Seed-loop acceptance (no live gift)
+
+```yaml
+status: OBSERVED
+command: cd services/allocation-middleware && npm run accept:seed-loop
+result: SEED_LOOP_ACCEPTANCE_PASS  # 2026-08-07 — allocate $100 Community Hardware Fund → proof URI → packet proofCount≥1
+scope: seed pots only; does not require every.org webhook or director browser session
+remaining_for_full_74: live gift via #73 + director JWT allocate in browser + sign-off comment
+```
+
 ## Historical evidence (do not treat as current-main GO)
 
 Older HD-OI-041 / staging receipts against `ecxkhihlbrcwpavfoaoq` or pre-rename `Hacker-Dojo` commits remain provenance only. See prior sections of git history and HD-OI-* docs.
