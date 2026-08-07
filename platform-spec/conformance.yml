@@ -5,7 +5,7 @@ platform_spec:
 service:
   id: fund-intel
   role: intelligence
-  name: Fund Intel
+  name: Portfolio Signals
 
 implements:
   specs:

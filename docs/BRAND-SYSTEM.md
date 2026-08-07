@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how the Hacker Dojo tenant identity sits inside the AGI Fund Intel product shell across the public director portal and authenticated campaign workspace. Zero State is the software builder, not the customer-facing suite brand.
+This document defines how the Hacker Dojo tenant identity sits inside the AGI Portfolio Signals product shell across the public director portal and authenticated campaign workspace. Zero State is the software builder, not the customer-facing suite brand.
 
 The system must remain operational, legible, privacy-safe, and consistent across desktop, mobile, light mode, and dark mode.
 
@@ -11,10 +11,10 @@ The system must remain operational, legible, privacy-safe, and consistent across
 The persistent masthead order is:
 
 1. AGI mark and wordmark
-2. Fund Intel product name and Decision Workspace role
+2. Portfolio Signals product name and Decision Workspace role
 3. Hacker Dojo campaign context
 
-AGI and Impact Relay remain available as reciprocal suite links. Tenant identity never replaces AGI or Fund Intel identity.
+AGI and Impact Relay remain available as reciprocal suite links. Tenant identity never replaces AGI or Portfolio Signals identity.
 
 ## Canonical marks
 
@@ -67,7 +67,7 @@ Semantic success, warning, and error colors remain separate from tenant colors. 
 ## Layout hierarchy
 
 1. AGI corporate identity
-2. Fund Intel product identity
+2. Portfolio Signals product identity
 3. Hacker Dojo tenant context
 4. Campaign event and approval-state band
 5. Director metrics and decisions
@@ -113,4 +113,4 @@ New brand assets require:
 4. accessibility review;
 5. confirmation that the asset contains no private campaign data.
 
-Public navigation uses `autogive.app`, with Fund Intel at `/fund-intel/` and Impact Relay at `/impact-relay/`. Every footer includes Tokens, Logo use, Legal, and the restrained credit “Software by Zero State.”
+Public navigation uses `autogive.app`, with Portfolio Signals at `/portfolio-signals/` and Impact Relay at `/impact-relay/`. Every footer includes Tokens, Logo use, Legal, and the restrained credit “Software by Zero State.”

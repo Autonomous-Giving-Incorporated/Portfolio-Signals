@@ -1,12 +1,15 @@
-# AGI Fund Intel
+# AGI Portfolio Signals
 
-Fund Intel is the GitHub Pages-compatible decision workspace of **Autonomously Giving Incorporated (AGI)**. AGI is the customer-facing corporate brand; Zero State is credited only as the software builder. Impact Relay is the tenant-isolated financial and impact backend. Hacker Dojo is the canonical reference tenant for the reusable suite, using its **$420K minimum campaign** and **$2M transformation path** as the regression plan.
+Portfolio Signals is the multi-tenant **decision workspace** of **Autonomously Giving Incorporated (AGI)**. AGI is the customer-facing corporate brand; Zero State is credited only as the software builder. Impact Relay is the tenant-isolated financial and impact backend.
 
-See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for component boundaries, authority, tenancy, hosting, and delivery milestones.
+**Live:** [autogive.app/portfolio-signals](https://autogive.app/portfolio-signals/) · **Workspace:** [autogive.app/portfolio-signals/workspace](https://autogive.app/portfolio-signals/workspace)  
+**Platform Supabase:** `utdioxwiskzatwoejgiu` · **Reference tenant:** Hacker Dojo (`org_hacker_dojo`) — pilot/regression fixture, **not** product identity (tenant assets under `assets/tenants/hacker-dojo/`).
+
+See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for boundaries, and [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) / [docs/START_HERE.md](docs/START_HERE.md) for live ops status.
 
 ## Platform specification status
 
-Fund Intel currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
@@ -20,14 +23,15 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-**Status (2026-08-03):** MVP shipped in `services/allocation-middleware/` with Hacker Dojo pilot seed (`org_hacker_dojo`), file-backed durability, every.org webhook (not OAuth), setup wizard, Supabase director login. **Default host:** Docker Compose. **Optional hosts:** Fly.io, Render, Railway.
+**Status (2026-08-07):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host and live every.org webhook still open. **Default host:** Docker Compose / local Node. **Optional hosts:** Fly.io, Render, Railway.
 
 ```bash
 cd services/allocation-middleware
 npm test
-npm run gen:env && npm run compose:up   # Docker pilot (default)
-# optional Fly: fly auth login && npm run bootstrap:fly
+# .env.pilot from platform keys (gitignored) — see docs/ALLOCATION-DIRECTOR-LOGIN.md
+npm run compose:up   # or: npm run start:hacker-dojo:seed
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
 ```
 
 | Doc | Purpose |
@@ -39,47 +43,31 @@ BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 | [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
 
-Fund Intel’s suite role is **observe/credit** (gift summaries → pot balances). Deep evidence verification remains Impact Relay’s long-term boundary; the MVP co-locates allocate/proof/packet for the modular-monolith pilot.
+Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot balances). Deep evidence verification remains Impact Relay’s long-term boundary; the MVP co-locates allocate/proof/packet for the modular-monolith pilot.
 
 ## Current evidence boundary
 
-As of 2026-08-02, the current `main` baseline is `251549f1e2142c35d1807cc9412d596ce82e360d`. The implementation rows below describe repository capability; they do not prove hosted acceptance of this commit.
-
-HD-OI-041 records a current-main `NO_GO` until disposable execution, hosted parity, browser smoke, and director acceptance are recorded for one exact commit. PR #44 completed a green **pre-merge** disposable local acceptance run for `e124375bfd60758df9857b03dfc171c9210b78b1`; that result is useful evidence but is not proof for current `main`.
+**As of 2026-08-07** (suite production on `autogive.app` + platform Supabase). See [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) for the full live receipt. Older HD-OI-041 staging receipts are **historical** only.
 
 | Capability | State |
 |---|---|
-| Public director portal | Implemented |
-| Allocation middleware MVP | Implemented (`services/allocation-middleware/`; Hacker Dojo pilot seed) |
-| every.org live webhook (hosted) | Operator-owned (setup wizard ready) |
+| Public director portal | **Live** on https://autogive.app/portfolio-signals/ |
+| Authenticated workspace login | **Live** — operator magic-link login verified |
+| Allocation middleware MVP | Implemented; **local pilot smoke PASS** |
+| every.org live webhook (hosted) | Operator-owned (setup wizard ready; production host pending) |
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
-| GitHub Pages validation workflow | Passing |
-| GitHub Pages deployment | Historical state only; exact current-main deployment acceptance is NOT_RUN |
 | Static security policy checks | Passing |
-| Workbook parser contract | Passing; executable quarantine tests cover provenance, input rejection, fail-closed parsing, and overwrite protection |
-| Authenticated database schema | Implemented |
-| Six application roles | Implemented |
-| Row-level-security policies | Implemented; six-role disposable suite green |
-| MFA / active-profile hardening | Implemented in schema; hosted enforcement for exact current main is NOT_RUN |
-| Append-only audit model | Implemented |
-| Sponsor and grant workflow schema | Implemented |
-| Decision approval workflow | Implemented |
-| Import quarantine and suppression controls | Implemented |
-| Import-gate executable corpus | Wired into local Supabase CI |
-| Client/schema alignment | Hardened in HD-OI-019 |
-| Private storage policies | Implemented |
-| Signed-document URL function | Implemented against `document_records` |
-| Native `.xlsx` parser | Implemented; patched SheetJS 0.20.3 and Node 22 ESM execution verified; quarantine-only |
-| Synthetic role fixtures | Implemented with MFA flags |
-| Production environment checklist | Documented |
-| Platform Supabase (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
-| Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — freeze for new tenancy; migrate then retire |
-| Private data placement | Local workbook + Supabase (not GitHub, not Notion SoR) |
-| Impact Relay finance/donor host screens | Implemented (console API + Supabase role/MFA bridge) |
-| Impact Relay shadow + live-cohort runbooks | Documented; live cohort execution operator-owned |
-| Production data import | Blocked |
-| Outreach authority | Not granted |
+| Workbook parser contract | Passing (quarantine-only; production import blocked) |
+| Authenticated database schema | **Applied** on platform `utdioxwiskzatwoejgiu` |
+| Six application roles + RLS | Implemented |
+| MFA / active-profile hardening | Schema + profile flags; real TOTP enrollment optional next |
+| Platform Supabase (canonical) | `utdioxwiskzatwoejgiu` |
+| Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
+| Private data placement | Local workbook + platform Supabase (not GitHub, not Notion SoR) |
+| Impact Relay host screens / runbooks | Implemented / documented; live cohort operator-owned |
+| Production data import | **Blocked** |
+| Outreach authority | **Not granted** |
 
 ## Repository map
 

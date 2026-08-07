@@ -13,13 +13,13 @@ Do **not** track floating `main` of the specs repository for production behavior
 
 ## Manifest
 
-[`conformance.yml`](conformance.yml) declares which SPECs, contracts, and events Fund Intel implements (produces/consumes). Schema:
+[`conformance.yml`](conformance.yml) declares which SPECs, contracts, and events Portfolio Signals implements (produces/consumes). Schema:
 
 https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/v1.0.0/schemas/meta/conformance-manifest.schema.json
 
 ## Boundary (from platform canon)
 
-Fund Intel observes, normalizes, and recommends only. It **must not** allocate funds or grant Approval.
+Portfolio Signals observes, normalizes, and recommends only. It **must not** allocate funds or grant Approval.
 
 ## Updating the pin
 
