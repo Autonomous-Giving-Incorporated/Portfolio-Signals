@@ -28,11 +28,12 @@ service_role_on_vercel: PROHIBITED
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — live production vs historical evidence  
 2. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
 3. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
-4. [BRAND-SYSTEM.md](BRAND-SYSTEM.md) — AGI product chrome vs `assets/tenants/<slug>/`  
-5. [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) + [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — Phase 3 pilot  
-6. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
-7. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
-8. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
+4. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  
+5. [BRAND-SYSTEM.md](BRAND-SYSTEM.md) — AGI product chrome vs `assets/tenants/<slug>/`  
+6. [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) + [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — Phase 3 pilot  
+7. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
+8. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
+9. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
 
 ## Phase status (2026-08-07)
 

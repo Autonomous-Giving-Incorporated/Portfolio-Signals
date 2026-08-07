@@ -13,7 +13,7 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
 | Primary `master_admin` | `scrimshawlife@gmail.com` |
-| Second admin (deferred) | Qi Diaz — `platform_administrators` insert, rationale ≥ 12 chars |
+| Second admin (deferred ops) | Use [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) Flow A (e.g. Qi Diaz); rationale ≥ 12 chars |
 
 Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
@@ -30,6 +30,7 @@ Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://gith
 4. Schema source of truth: this repo’s `supabase/migrations`. Platform has been migrated; further changes: `supabase link --project-ref utdioxwiskzatwoejgiu` then `supabase db push`.
 5. Operator SQL: [scripts/platform/README.md](../scripts/platform/README.md).
 6. Tenant brand assets: `assets/tenants/<slug>/` (Hacker Dojo is not product chrome).
+7. Operator people path (master_admin / director): [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md).
 
 Bootstrap runbook: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Workspace: [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md). Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md). Placement: [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 
