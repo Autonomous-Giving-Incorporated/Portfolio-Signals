@@ -99,6 +99,11 @@ Use `scripts/platform/bootstrap-master-admin.sql` once for the initial operator.
 | Cross-tenant private data visible | Stop; isolation regression |
 | Rate-limited magic link email | Dashboard generate_link / custom SMTP |
 
+## Next: commercial client shell
+
+After people access works, provision and activate a client:
+[COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md).
+
 ## Related
 
 - [scripts/platform/README.md](../scripts/platform/README.md)
@@ -106,3 +111,4 @@ Use `scripts/platform/bootstrap-master-admin.sql` once for the initial operator.
 - [CURRENT-STATE.md](CURRENT-STATE.md)
 - [PLATFORM.md](PLATFORM.md)
 - [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md)
+- [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md)

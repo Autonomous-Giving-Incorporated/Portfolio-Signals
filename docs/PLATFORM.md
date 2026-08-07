@@ -31,6 +31,7 @@ Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://gith
 5. Operator SQL: [scripts/platform/README.md](../scripts/platform/README.md).
 6. Tenant brand assets: `assets/tenants/<slug>/` (Hacker Dojo is not product chrome).
 7. Operator people path (master_admin / director): [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md).
+8. Commercial client lifecycle (provision → publish → activate): [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md).
 
 Bootstrap runbook: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Workspace: [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md). Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md). Placement: [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 

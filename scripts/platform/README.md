@@ -23,6 +23,7 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | `grant-master-admin.sql` | Grant/reactivate platform admin (rationale ≥ 12) |
 | `revoke-master-admin.sql` | Soft-revoke platform admin |
 | `verify-operator-access.sql` | Read-only profile / admin / optional membership check |
+| `verify-client-lifecycle.sql` | Read-only commercial lifecycle readiness (state, director, published config, modules) |
 | `verify-platform-isolation.sql` | Reference + isolation fixture clients |
 | `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
 
@@ -54,6 +55,15 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 
 Use `bootstrap-master-admin.sql` once for the initial platform operator. Additional admins use Flow A.
 
+### Commercial client lifecycle (after people path)
+
+See [docs/COMMERCIAL-CLIENT-LIFECYCLE.md](../../docs/COMMERCIAL-CLIENT-LIFECYCLE.md).
+
+1. master_admin provisions client (workspace Platform admin).
+2. Director publishes Brand & content (≥1 fundraising module).
+3. master_admin activates client.
+4. `verify-client-lifecycle.sql` with `target_client_id` set.
+
 ## Safety
 
 ```bash
@@ -73,7 +83,8 @@ Every mutating script must hard-fail if the sentinel UUID `00000000-0000-0000-00
 
 ## Related docs
 
-- `docs/OPERATOR-ACCESS-ONBOARDING.md` — full runbook
+- `docs/OPERATOR-ACCESS-ONBOARDING.md` — people path runbook
+- `docs/COMMERCIAL-CLIENT-LIFECYCLE.md` — provision → publish → activate
 - `docs/STAGING-BOOTSTRAP.md` — migrations / bootstrap
 - `docs/AUTHENTICATED-WORKSPACE.md` — roles and workspace
 - `docs/PLATFORM.md` — suite platform alignment
