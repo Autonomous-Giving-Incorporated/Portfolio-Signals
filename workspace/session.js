@@ -30,12 +30,15 @@ export function createWorkspaceClient() {
   if (!config.supabaseUrl || !config.supabaseAnonKey) {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
+  // Magic-link / invite verify redirects use implicit hash tokens
+  // (#access_token=…&refresh_token=…). PKCE-only clients ignore that hash and
+  // leave the operator on the "send another link" form.
   return createClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: 'pkce'
+      flowType: 'implicit'
     }
   });
 }
