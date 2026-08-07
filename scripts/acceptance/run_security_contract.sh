@@ -28,7 +28,7 @@ grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
 grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
 grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
 grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
-grep -q "Refusing to emit runtime config for a non-staging Supabase project" scripts/staging/generate-runtime-config.mjs
+grep -q "Refusing to emit runtime config for unlisted Supabase host" scripts/staging/generate-runtime-config.mjs
 ! grep -q "SUPABASE_SERVICE_ROLE_KEY" scripts/staging/generate-runtime-config.mjs
 grep -B1 'src="workspace.js"' workspace.html | grep -q 'src="runtime-config.js"'
 grep -B1 'src="import-review.js"' import-review.html | grep -q 'src="runtime-config.js"'
