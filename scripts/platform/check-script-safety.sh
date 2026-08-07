@@ -33,13 +33,15 @@ for f in "${MUTATORS[@]}"; do
   fi
 done
 
-# verify-operator-access may be read-only; if present, still ban secrets
-if [[ -f "$ROOT/verify-operator-access.sql" ]]; then
-  if grep -qiE 'service_role|eyJhbGci|sb_secret_' "$ROOT/verify-operator-access.sql"; then
-    echo "FAIL: verify-operator-access.sql appears to contain a secret marker" >&2
-    errors=$((errors + 1))
+# Read-only verify scripts: still ban secret markers
+for readonly_script in verify-operator-access.sql verify-client-lifecycle.sql; do
+  if [[ -f "$ROOT/$readonly_script" ]]; then
+    if grep -qiE 'service_role|eyJhbGci|sb_secret_' "$ROOT/$readonly_script"; then
+      echo "FAIL: $readonly_script appears to contain a secret marker" >&2
+      errors=$((errors + 1))
+    fi
   fi
-fi
+done
 
 if [[ "$errors" -gt 0 ]]; then
   echo "check-script-safety: $errors issue(s)" >&2

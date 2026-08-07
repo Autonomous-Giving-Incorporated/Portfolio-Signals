@@ -57,6 +57,8 @@ GitHub Pages receives only the public Supabase URL and anonymous key in generate
 
 The master administrator completes onboarding from **Platform admin** only after the client has an active director, one published valid configuration, and at least one enabled fundraising module. Activation is MFA-gated, rationale-bound, auditable, and may only transition a client from `provisioning` to `active` once.
 
+Full operator path (provision → publish → activate): [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md).
+
 ## Acceptance boundary
 
 Completion requires:

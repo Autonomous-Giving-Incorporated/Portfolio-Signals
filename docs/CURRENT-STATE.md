@@ -84,6 +84,14 @@ safety_check: PASS  # ./scripts/platform/check-script-safety.sh
 dry_run: OBSERVED  # 2026-08-06 Option B — read-only verify primary admin (scrimshawlife@gmail.com): profile active, platform_admin active, mfa_enforced true; via platform Admin/REST API (equivalent to verify-operator-access.sql); UUID not committed
 ```
 
+## Commercial client lifecycle (slice B)
+
+```yaml
+runbook: docs/COMMERCIAL-CLIENT-LIFECYCLE.md
+verify_script: scripts/platform/verify-client-lifecycle.sql
+dry_run: PENDING  # 2026-08-06 Option C — runbook + verify helper shipped; full provision→publish→activate on synthetic org_* requires operator workspace session (master_admin + director MFA); do not re-activate org_hacker_dojo if already active
+```
+
 ## Related
 
 - Suite phase map: [AGI docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)
