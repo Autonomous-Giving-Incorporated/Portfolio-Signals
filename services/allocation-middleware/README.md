@@ -32,6 +32,9 @@ npm run start:hacker-dojo:seed   # local Node, SEED_ON_BOOT=1
 # cloudflared tunnel --url http://127.0.0.1:8787
 # BASE_URL=https://….trycloudflare.com npm run pilot:smoke
 
+# Seed-loop accept (no every.org) — allocate → proof → packet
+npm run accept:seed-loop
+
 # Optional durable — Docker Compose / Render / Railway / Fly
 npm run gen:env                  # .env.pilot with tokens
 # npm run compose:up

@@ -11,11 +11,13 @@
 | Secrets for webhook/operator | Ready when `NODE_ENV=production` |
 | Health checks | `/healthz`, `/readyz` |
 | Mapping UX (label + merge) | API + UI |
-| Hosted deploy recipe | Docker Compose (default); optional Fly / Render / Railway |
+| Hosted deploy recipe | Local Node (default); Compose; optional Fly / Render / Railway |
 | Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
-| Director SSO / Supabase session | Ready (`/login.html` + membership JWT) |
-| every.org live webhook | **Pilot operator step** |
-| Named public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
+| Director SSO / Supabase session | OBSERVED (`/login.html` + membership JWT; #72 closed) |
+| every.org live webhook | **Pilot operator step** (#73) |
+| Public HTTPS (ephemeral) | OBSERVED (cloudflared; #71 closed) |
+| Named durable public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
+| Seed-loop accept (no live gift) | OBSERVED (`npm run accept:seed-loop`) |
 | Multi-region HA | Not required for pilot |
 
 Pilot runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md). Director auth: [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md).
