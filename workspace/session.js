@@ -39,8 +39,7 @@ export function createWorkspaceClient() {
   }
 
   // Magic-link verify redirects use #access_token=…&refresh_token=… (implicit).
-  // detectSessionInUrl is OFF: we parse the hash ourselves so we never race
-  // the client initializer (which can deadlock with onAuthStateChange).
+  // detectSessionInUrl OFF: we parse the hash ourselves to avoid init races.
   sharedClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -58,7 +57,6 @@ export async function getRecoveredSession(client = createWorkspaceClient()) {
   if (error) throw error;
   if (data.session) return data.session;
 
-  // Brief second chance for storage hydration after redirect.
   await new Promise((r) => setTimeout(r, 75));
   const again = await client.auth.getSession();
   if (again.error) throw again.error;
@@ -66,9 +64,71 @@ export async function getRecoveredSession(client = createWorkspaceClient()) {
 }
 
 /**
+ * Fetch workspace context with the session JWT via plain fetch.
+ * Avoids supabase-js auth-lock issues that can hang .rpc() after setSession.
+ */
+async function fetchWorkspaceContext(session) {
+  const config = getRuntimeConfig();
+  const accessToken = session?.access_token;
+  if (!accessToken) throw new Error('Authentication required.');
+  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+    throw new Error('Workspace is not configured with public Supabase values.');
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/get_workspace_context`, {
+      method: 'POST',
+      headers: {
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: '{}',
+      signal: controller.signal
+    });
+    const text = await response.text();
+    let payload;
+    try {
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error(`Workspace context invalid response (${response.status})`);
+    }
+    if (!response.ok) {
+      const msg =
+        payload?.message ||
+        payload?.error_description ||
+        payload?.error ||
+        `Workspace context failed (${response.status})`;
+      throw new Error(msg);
+    }
+    // PostgREST may return the jsonb value directly or wrapped.
+    if (payload && typeof payload === 'object' && !Array.isArray(payload) && payload.profile) {
+      return payload;
+    }
+    if (Array.isArray(payload) && payload[0]?.profile) return payload[0];
+    if (typeof payload === 'string') {
+      try {
+        return JSON.parse(payload);
+      } catch {
+        /* fall through */
+      }
+    }
+    throw new Error('Workspace context missing profile');
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Workspace authorization timed out contacting Supabase');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * @param {import('@supabase/supabase-js').Session | null | undefined} knownSession
- *   Prefer the session just established via setSession so we don't re-enter
- *   getSession while auth locks are held.
  */
 export async function requireWorkspaceSession(knownSession = null) {
   if (cached?.session && cached?.profile && cached?.supabase && cached?.context) {
@@ -77,12 +137,15 @@ export async function requireWorkspaceSession(knownSession = null) {
 
   const supabase = createWorkspaceClient();
   const session = knownSession || (await getRecoveredSession(supabase));
-  if (!session) {
+  if (!session?.access_token) {
     throw new Error('Authentication required.');
   }
 
-  const { data: context, error: contextError } = await supabase.rpc('get_workspace_context');
-  if (contextError) throw contextError;
+  // Context uses the JWT directly (no supabase.rpc lock). Later panel queries
+  // use the shared client, which should already hold this session after setSession
+  // in settleAuthFromUrl or localStorage recovery.
+
+  const context = await fetchWorkspaceContext(session);
   const profile = context?.profile;
   if (!profile?.active) throw new Error('Active A.G.I. profile required.');
 

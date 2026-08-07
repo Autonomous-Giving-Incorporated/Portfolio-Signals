@@ -244,12 +244,9 @@ async function renderSession(session, { allowNull = false } = {}) {
   clearWorkspaceSessionCache();
   let workspaceSession;
   try {
-    // Pass the known session so we don't call getSession under auth locks.
-    workspaceSession = await withTimeout(
-      requireWorkspaceSession(session),
-      15000,
-      'Workspace authorization'
-    );
+    showMessage('Loading workspace…');
+    // Pass the known session; context fetch uses raw JWT (no supabase-js lock).
+    workspaceSession = await requireWorkspaceSession(session);
   } catch (error) {
     if (generation !== renderGeneration) return;
     gate.hidden = false;
