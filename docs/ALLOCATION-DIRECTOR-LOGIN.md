@@ -29,20 +29,61 @@ PUBLIC_BASE_URL=http://127.0.0.1:8787
 # OPERATOR_TOKEN=   # optional emergency only
 ```
 
-## One-shot pilot (Docker)
+## Host paths (Docker not required)
+
+| Path | Use |
+| --- | --- |
+| **Local Node (no Docker)** | Default for Phase 3a director-auth evidence |
+| **Docker Compose** | Durable volume / VPS-shaped pilot |
+| **Render / Railway / Fly** | Public HTTPS — Phase 3b ([ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md)) |
+
+### A — Local Node (no Docker)
+
+```bash
+cd services/allocation-middleware
+
+# 1) Secrets in .env.pilot only (never commit)
+#    SUPABASE_URL=https://utdioxwiskzatwoejgiu.supabase.co
+#    SUPABASE_ANON_KEY=…
+#    SUPABASE_SERVICE_ROLE_KEY=…
+#    ALLOW_OPERATOR_TOKEN_FALLBACK=0
+#    DATA_FILE=./data/hacker-dojo-pilot.json
+#    PUBLIC_BASE_URL=http://127.0.0.1:8787
+#    ORG_ID=org_hacker_dojo
+#    PORT=8787
+
+# 2) Membership (if not already director on org_hacker_dojo)
+set -a && source .env.pilot && set +a
+DIRECTOR_EMAIL=you@example.com npm run grant:director
+
+# 3) Start host with env loaded (pick one)
+set -a && source .env.pilot && set +a
+npm run start:hacker-dojo:seed    # SEED_ON_BOOT=1 first time
+# or: npm run start:hacker-dojo   # after stable seed
+
+# 4) Verify
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
+# Optional JWT allocate probe (needs password or magic-link session export):
+# DIRECTOR_EMAIL=… DIRECTOR_PASSWORD=… BASE_URL=http://127.0.0.1:8787 \
+#   npm run verify:director -- --login
+```
+
+Open **http://127.0.0.1:8787/login.html** → sign in → allocate.
+
+### B — Docker Compose (optional)
 
 ```bash
 cd services/allocation-middleware
 
 # 1) Put Supabase secrets into .env.pilot (do not commit)
 #    SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY
+#    ALLOW_OPERATOR_TOKEN_FALLBACK=0
 
-# 2) Grant membership (creates user if missing; prints temp password once)
-export $(grep -E '^SUPABASE_|^ORG_ID=' .env.pilot | xargs)   # local only
+# 2) Grant membership if needed
+set -a && source .env.pilot && set +a
 DIRECTOR_EMAIL=you@example.com npm run grant:director
 
-# 3) Recreate host with Supabase env
-#    Optional: ALLOW_OPERATOR_TOKEN_FALLBACK=0 in .env.pilot
+# 3) Recreate host
 npm run compose:up
 
 # 4) Config + optional live login probe

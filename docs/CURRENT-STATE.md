@@ -57,13 +57,27 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 package: services/allocation-middleware/
 unit_tests: 34_PASS
 local_host: http://127.0.0.1:8787
+local_host_process: node src/http/server.mjs   # Node path; Docker not required
 local_smoke: PASS
-director_auth_config: enabled against platform Supabase
+director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_pilot_env
-production_public_host: NOT_DEPLOYED
+production_public_host: NOT_DEPLOYED  # Phase 3b / #71
+every_org_live_webhook: PENDING  # Phase 3c / #73
 ```
 
-Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)
+Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
+Design: [superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md](superpowers/specs/2026-08-07-allocation-pilot-director-auth-design.md)
+
+## Phase 3a — Director auth close (#72)
+
+```yaml
+status: OBSERVED
+path: local_node_no_docker
+org_id: org_hacker_dojo
+verify_director: PASS  # config only; optional --login needs director password in operator hands
+membership: director on platform (prior OBSERVED)
+next: public host #71 optional; every.org webhook #73; human acceptance #74
+```
 
 ## Historical evidence (do not treat as current-main GO)
 
