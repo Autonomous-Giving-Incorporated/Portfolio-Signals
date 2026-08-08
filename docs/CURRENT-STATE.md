@@ -27,8 +27,8 @@ vercel_platform_anon_env: SET  # PLATFORM_SUPABASE_URL + PLATFORM_SUPABASE_ANON_
 runtime_config_js: GENERATED_WITH_PLATFORM_ANON
 schema_migrations: APPLIED_ON_PLATFORM
 master_admin: scrimshawlife@gmail.com
-second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; email_confirmed false until first link; mfa_enforced false; action_link regenerated 2026-08-08 operator-local only
-hacker_dojo_tenant_director: ed@hackerdojo.org  # 2026-08-08 — profile + active director on org_hacker_dojo only (not master_admin); mfa_enforced false; action_link regenerated operator-local gitignored
+second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; last_sign_in never; TOTP factors 0; mfa_enforced false; OTP send HTTP 200 once 2026-08-08; action_link operator-local gitignored
+hacker_dojo_tenant_director: ed@hackerdojo.org  # director on org_hacker_dojo only (not master_admin); last_sign_in never; TOTP 0; mfa_enforced false; Auth email rate-limited (use action_link, not resend OTP)
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07

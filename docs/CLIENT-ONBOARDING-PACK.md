@@ -2,7 +2,7 @@
 
 Director / master_admin path for the **document-phase** Onboarding Pack in Portfolio Signals workspace: private multi-file upload, human-confirmed checklist slots, pack `ready` when required slots are filled. CRM workbooks are **parked**—never promoted to constituents.
 
-**Status (2026-08-08):** **Code shipped** on main ([Portofolio-Signals #104](https://github.com/scrimshawlife-ctrl/Portofolio-Signals/pull/104)). Platform migrate + Edge deploy + MFA dry-run still **PENDING** — see [CURRENT-STATE.md](CURRENT-STATE.md).
+**Status (2026-08-08):** **Code shipped** on main ([#104](https://github.com/scrimshawlife-ctrl/Portofolio-Signals/pull/104)). **Platform schema + Edge OBSERVED** on `utdioxwiskzatwoejgiu` ([#113](https://github.com/scrimshawlife-ctrl/Portofolio-Signals/pull/113)). **MFA workspace dry-run still PENDING** before full pack OBSERVED — see [CURRENT-STATE.md](CURRENT-STATE.md).
 
 **Platform:** Supabase `utdioxwiskzatwoejgiu`  
 **Workspace:** https://autogive.app/portfolio-signals/workspace → nav **Onboarding pack**  

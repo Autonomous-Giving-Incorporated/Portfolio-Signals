@@ -45,7 +45,7 @@ These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says 
 | Durable host **recipe** + preflight | `cd services/allocation-middleware && npm run preflight:durable` |
 | IR console host path (#48) | Bridge Bearer only; docs default-deny without `--trusted-proxy` |
 | Secret hygiene / SMTP runbooks | Docs ready; dashboard actions still operator |
-| **Doc pack code** (main #104) | Classifier + SQL tests + workspace UI **in repo**; platform apply still operator |
+| **Doc pack code + platform schema/Edge** (#104 / #113) | Tables REST 200 + Edge unauth 401 OBSERVED; MFA dry-run still operator |
 
 Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Connected**.
 
@@ -55,7 +55,8 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 | --- | --- |
 | Live every.org webhook ([#73](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/73)) | every.org **Hacker Dojo nonprofit admin** |
 | Full director acceptance ([#74](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/74)) | Live gift + director browser session + sign-off |
-| **Doc pack platform OBSERVED** | Platform migrate + Edge deploy + MFA workspace dry-run — [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) |
+| **Doc pack MFA dry-run → full OBSERVED** | MFA director/master → Workspace Onboarding pack (5 required + park xlsx) — [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) |
+| **Qi / Ed first login + TOTP** | Operator-local links `scripts/platform/.onboarding-invite-links.md` (gitignored); then `set-mfa-enforced` |
 | Durable **named public** host (optional) | Render / Railway / Fly (or VPS) **dashboard** — recipe READY |
 | Custom SMTP (optional) | Platform Supabase Dashboard — [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | Secret rotation after share/offboard | Operator secret manager — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
