@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPOSITORY = "scrimshawlife-ctrl/Fund-Intel"
+# Prefer GITHUB_REPOSITORY (Actions) so renames (Fund-Intel → Portofolio-Signals) do not break CI.
+REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "scrimshawlife-ctrl/Portofolio-Signals")
 PASS_GATES = (
     "publicContract",
     "securityContract",

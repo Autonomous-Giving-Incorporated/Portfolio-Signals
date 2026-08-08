@@ -27,6 +27,7 @@ Allocation pilot  pots → allocate → proof → packet (+ every.org)
 | **SMTP** | [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) | Auth email volume |
 | **Secrets** | [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) | Rotation checklist |
 | **IR bridge** | [IMPACT-RELAY.md](IMPACT-RELAY.md) | Console auth (no forge headers) |
+| **Doc pack** | [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) | Director/master_admin private org docs (≠ import) |
 
 ## Done without every.org (or other blocked) login
 

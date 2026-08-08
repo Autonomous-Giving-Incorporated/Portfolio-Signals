@@ -73,6 +73,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/013_agi_impact_relay_jwt.sql
       - name: Execute A.G.I. two-tenant acceptance
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
+      - name: Execute client onboarding pack checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then

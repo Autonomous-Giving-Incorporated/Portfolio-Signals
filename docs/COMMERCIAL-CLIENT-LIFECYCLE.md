@@ -74,6 +74,12 @@ Checklist:
 - [ ] Audit action `client_onboarding_completed` present
 - [ ] Platform admin shows onboarding complete for that client
 
+## Parallel: document pack (optional, not a gate)
+
+After (or alongside) activate, directors and master_admins can collect **private org-proof documents** via the workspace **Onboarding pack**. Pack `ready` is **not** required for `activate_client` and does **not** authorize production CRM import or outreach.
+
+Full runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).
+
 ## Failure modes (activate / provision)
 
 | Symptom / exception | Fix |
@@ -101,6 +107,7 @@ After one client is active, stand up a second nonprofit (FI + Impact Relay templ
 ## Related
 
 - [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md) — config fields and director workflow
+- [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — private document pack (parallel; not an activate gate)
 - [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — people path
 - [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) — second nonprofit + IR clone
 - [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — roles

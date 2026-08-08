@@ -1,0 +1,15 @@
+{
+  "name": "onboarding-pack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Client onboarding pack classifier and template (pure JS)",
+  "type": "module",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [],
+  "license": "UNLICENSED"
+}

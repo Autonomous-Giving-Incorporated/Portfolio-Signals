@@ -164,6 +164,36 @@ id_contract: client_id == tenant_id
 dry_run: OBSERVED  # 2026-08-07 Option B — (1) FI platform: org_hacker_dojo reference_tenant=true + org_platform_isolation active non-reference second client; public get_public_client_config('hacker-dojo') returns org_hacker_dojo / Hacker Dojo; (2) IR local: clone_tenant_from_hacker_dojo(tenant_id=org_second_makerspace) + upsert_from_policy template_source=org_hacker_dojo in disposable data-dir (IR_CLONE_OK). Full paired synthetic org_* FI activate + same-id IR clone still optional operator exercise.
 ```
 
+## Client onboarding pack (document phase)
+
+```yaml
+client_onboarding_pack:
+  status: PENDING  # 2026-08-08 Task 7 — not OBSERVED; platform dry-run blocked (no Supabase CLI access token / link, no browser MFA session)
+  template: onboarding_pack_v1
+  production_import: BLOCKED
+  path: docs/CLIENT-ONBOARDING-PACK.md
+  migration: 202608080001_client_onboarding_pack.sql
+  edge_functions:
+    - upload-onboarding-document
+    - onboarding-document-url
+  verified_locally:  # not production evidence
+    classifier_unit_tests: PASS  # node --test services/onboarding-pack/test/classifier.test.mjs — 8/8
+    sql_test_015_local: PASS  # supabase/tests/015_client_onboarding_pack.sql on local stack (tables present; ROLLBACK)
+    code_complete: true  # migration + both Edge functions + UI/runbook in repo
+  platform_probe_utdioxwiskzatwoejgiu:  # service_role REST; no secrets committed
+    client_onboarding_packs: ABSENT  # PostgREST PGRST205
+    client_onboarding_documents: ABSENT
+    upload-onboarding-document: NOT_DEPLOYED  # functions 404
+    onboarding-document-url: NOT_DEPLOYED
+  operator_remaining:
+    - supabase login / SUPABASE_ACCESS_TOKEN then link utdioxwiskzatwoejgiu
+    - PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu ./scripts/staging/apply-migrations.sh remote-linked
+    - deploy upload-onboarding-document + onboarding-document-url
+    - MFA director/master_admin synthetic PDF dry-run → then status OBSERVED
+```
+
+Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See runbook for director/master_admin MFA flow and operator deploy notes.
+
 ## Related
 
 - Suite phase map: [AGI docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)

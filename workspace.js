@@ -302,6 +302,9 @@ function renderNavigation(role) {
   if (isMasterAdmin) items.push({ id: 'platform_admin', label: 'Platform admin' });
   if (roleCan(role, 'client_admin')) items.push({ id: 'client_admin', label: 'Client admin' });
   if (roleCan(role, 'brand_configuration')) items.push({ id: 'brand_configuration', label: 'Brand & content' });
+  if (roleCan(role, 'onboarding_pack') || isMasterAdmin) {
+    items.push({ id: 'onboarding_pack', label: 'Onboarding pack' });
+  }
   if (roleCan(role, 'decisions')) items.push({ id: 'decisions', label: 'Decisions' });
   if (roleCan(role, 'opportunities')) {
     if (enabledModules.sponsors) items.push({ id: 'sponsors', label: 'Sponsors' });
@@ -414,6 +417,14 @@ async function openSection(section) {
     await mountPlatformAdmin();
   } else if (section === 'brand_configuration') {
     await mountBrandConfiguration(content);
+  } else if (section === 'onboarding_pack') {
+    if (!selectedClient?.id) throw new Error('Select a client to open the onboarding pack.');
+    const { mountOnboardingPack } = await import('./workspace/onboarding-pack.js');
+    await mountOnboardingPack(content, {
+      clientId: selectedClient.id,
+      session: await requireWorkspaceSession(),
+      isMasterAdmin
+    });
   } else if (section === 'decisions') {
     await mountDecisionQueue(content);
   } else if (section === 'sponsors') {

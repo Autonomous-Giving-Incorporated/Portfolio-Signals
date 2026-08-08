@@ -200,6 +200,7 @@ export function roleCan(role, capability) {
     audit: ['director', 'data_steward', 'auditor'],
     client_admin: ['director'],
     brand_configuration: ['director'],
+    onboarding_pack: ['director'],
     impact_finance: ['director', 'campaign_lead', 'development'],
     impact_donor_staff: [
       'director',
