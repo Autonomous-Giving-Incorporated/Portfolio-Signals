@@ -97,6 +97,8 @@ if (footer) {
       <a href="https://autogive.app/brand#tokens">Tokens</a>
       <a href="https://autogive.app/brand#logo">Logo use</a>
       <a href="https://autogive.app/legal">Legal</a>
+      <a href="https://autogive.app/legal/privacy">Privacy</a>
+      <a href="https://autogive.app/legal/terms">Terms</a>
     </div>
   `;
 }

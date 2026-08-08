@@ -13,6 +13,8 @@ private_data_in_github: PROHIBITED
 service_role_on_vercel: PROHIBITED
 ```
 
+**Public legal:** [autogive.app/legal](https://autogive.app/legal) · [Privacy](https://autogive.app/legal/privacy) · [Terms](https://autogive.app/legal/terms) · operator map [LEGAL-NOTICES.md](LEGAL-NOTICES.md).
+
 ## Live URLs
 
 | Surface | URL |
