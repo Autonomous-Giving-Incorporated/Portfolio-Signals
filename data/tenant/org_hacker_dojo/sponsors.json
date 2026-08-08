@@ -1,0 +1,85 @@
+{
+  "client_id": "org_hacker_dojo",
+  "rows": [
+    {
+      "priority": "p0",
+      "stage": "identified",
+      "company": "Google / Google.org",
+      "sector": "AI, philanthropy",
+      "stage_label": "Identified",
+      "priority_label": "P0",
+      "ask": "AI skills and workforce partnership",
+      "control": "Route unverified"
+    },
+    {
+      "priority": "p0",
+      "stage": "historical",
+      "company": "Microsoft",
+      "sector": "Cloud, nonprofit technology",
+      "stage_label": "Historical relationship",
+      "priority_label": "P0",
+      "ask": "AI capacity, cloud, reactivation",
+      "control": "Owner unknown"
+    },
+    {
+      "priority": "p0",
+      "stage": "identified",
+      "company": "NVIDIA",
+      "sector": "AI hardware, STEM",
+      "stage_label": "Identified",
+      "priority_label": "P0",
+      "ask": "Physical-AI lab and compute",
+      "control": "Open route unverified"
+    },
+    {
+      "priority": "p0",
+      "stage": "identified",
+      "company": "Anthropic",
+      "sector": "Responsible AI",
+      "stage_label": "Identified",
+      "priority_label": "P0",
+      "ask": "Nonprofit AI capacity",
+      "control": "Host eligibility unknown"
+    },
+    {
+      "priority": "p0",
+      "stage": "prospecting",
+      "company": "Applied Intuition",
+      "sector": "Autonomy software",
+      "stage_label": "Prospecting",
+      "priority_label": "P0",
+      "ask": "Simulation and physical-AI programs",
+      "control": "Duplicate source rows"
+    },
+    {
+      "priority": "p0",
+      "stage": "contacted",
+      "company": "Groq",
+      "sector": "AI compute",
+      "stage_label": "Contacted",
+      "priority_label": "P0",
+      "ask": "Compute and AI workshops",
+      "control": "No response recorded"
+    },
+    {
+      "priority": "p0",
+      "stage": "contacted",
+      "company": "Moveworks",
+      "sector": "Enterprise AI",
+      "stage_label": "Contacted",
+      "priority_label": "P0",
+      "ask": "AI workforce cohort",
+      "control": "No response recorded"
+    },
+    {
+      "priority": "p1",
+      "stage": "contacted",
+      "company": "Waymo",
+      "sector": "Autonomous mobility",
+      "stage_label": "Contacted",
+      "priority_label": "P1",
+      "ask": "Workforce and lab sponsorship",
+      "control": "Needs requalification"
+    }
+  ]
+}

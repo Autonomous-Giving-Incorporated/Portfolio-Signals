@@ -24,7 +24,8 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | `revoke-master-admin.sql` | Soft-revoke platform admin |
 | `verify-operator-access.sql` | Read-only profile / admin / optional membership check |
 | `verify-client-lifecycle.sql` | Read-only commercial lifecycle readiness (state, director, published config, modules) |
-| `verify-second-tenant-isolation.sql` | Read-only second client vs HD reference (not reference_tenant; public projection notice) |
+| `verify-second-tenant-isolation.sql` |
+| `activate-onboarding-pack.sh` | Apply onboarding pack migrations + deploy Edge functions to platform (needs `supabase login`) | Read-only second client vs HD reference (not reference_tenant; public projection notice) |
 | `verify-platform-isolation.sql` | Reference + isolation fixture clients |
 | `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
 

@@ -197,6 +197,7 @@ client_onboarding_pack:
     client_onboarding_documents: ABSENT
     upload-onboarding-document: NOT_DEPLOYED
     onboarding-document-url: NOT_DEPLOYED
+  activate_script: scripts/platform/activate-onboarding-pack.sh  # requires supabase login
   operator_remaining:
     - supabase login / SUPABASE_ACCESS_TOKEN then link utdioxwiskzatwoejgiu
     - PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu ./scripts/staging/apply-migrations.sh remote-linked
