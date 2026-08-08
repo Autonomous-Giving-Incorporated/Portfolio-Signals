@@ -13,7 +13,7 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
 | Primary `master_admin` | `scrimshawlife@gmail.com` |
-| Second admin (deferred ops) | Use [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) Flow A (e.g. Qi Diaz); rationale ≥ 12 chars |
+| Second `master_admin` | `qi@enkeyai.com` (Qi Diaz) — granted 2026-08-08; MFA enroll still required before privileged ops |
 
 Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
