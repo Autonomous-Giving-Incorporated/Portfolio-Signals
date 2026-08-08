@@ -5,6 +5,7 @@ No improvised SQL: use scripts under `scripts/platform/` only.
 
 **Platform:** Supabase `utdioxwiskzatwoejgiu`  
 **Workspace:** https://autogive.app/portfolio-signals/workspace  
+**Live people + pack handoff:** [PEOPLE-AND-PACK-HANDOFF.md](PEOPLE-AND-PACK-HANDOFF.md)  
 **Design:** [docs/superpowers/specs/2026-08-06-operator-access-onboarding-design.md](superpowers/specs/2026-08-06-operator-access-onboarding-design.md)
 
 ## Authority gates
