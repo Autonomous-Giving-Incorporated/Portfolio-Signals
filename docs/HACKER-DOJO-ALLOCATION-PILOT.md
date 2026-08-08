@@ -76,6 +76,8 @@ BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run verify:director
 
 URL changes each session — fine for pilot smoke; use C2 for durable every.org webhooks.
 
+Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable`).
+
 ### C2 — Render / Railway / Fly (durable)
 
 | Host | Path |

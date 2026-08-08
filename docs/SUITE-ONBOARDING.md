@@ -23,7 +23,10 @@ Allocation pilot  pots → allocate → proof → packet (+ every.org)
 | **D** | [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) | Second tenant + IR |
 | **Pilot** | [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) | Allocation middleware |
 | **Director JWT** | [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) | `/login.html` |
-| **Hosting** | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) | Node / tunnel / Render |
+| **Hosting** | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) · [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) | Node / tunnel / durable |
+| **SMTP** | [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) | Auth email volume |
+| **Secrets** | [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) | Rotation checklist |
+| **IR bridge** | [IMPACT-RELAY.md](IMPACT-RELAY.md) | Console auth (no forge headers) |
 
 ## Done without every.org (or other blocked) login
 
@@ -38,6 +41,9 @@ These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says 
 | Public HTTPS (ephemeral) | cloudflared + `pilot:smoke` |
 | Seed allocate → proof → packet | `cd services/allocation-middleware && npm run accept:seed-loop` |
 | Setup wizard seed vs live | `/setup.html` shows **Seed only** until a **non-fixture** chargeId arrives |
+| Durable host **recipe** + preflight | `cd services/allocation-middleware && npm run preflight:durable` |
+| IR console host path (#48) | Bridge Bearer only; docs default-deny without `--trusted-proxy` |
+| Secret hygiene / SMTP runbooks | Docs ready; dashboard actions still operator |
 
 Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Connected**.
 
@@ -47,8 +53,10 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 | --- | --- |
 | Live every.org webhook ([#73](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/73)) | every.org **Hacker Dojo nonprofit admin** |
 | Full director acceptance ([#74](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/74)) | Live gift + director browser session + sign-off |
-| Durable named host (optional) | Render / Railway / Fly dashboard |
-| Vercel team invite acceptance | Invitee’s email / Vercel account |
+| Durable **named public** host (optional) | Render / Railway / Fly (or VPS) **dashboard** — recipe READY |
+| Custom SMTP (optional) | Platform Supabase Dashboard — [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
+| Secret rotation after share/offboard | Operator secret manager — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
+| Vercel team invite acceptance | **Invitee only** (owner cannot accept for them) |
 
 ### every.org when you have admin
 

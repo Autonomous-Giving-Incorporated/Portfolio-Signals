@@ -36,6 +36,7 @@ Still complete the human UI steps below before claiming shadow exit.
 
 ```bash
 cd ../Impact-Relay
+# Default-deny; no --trusted-proxy for host-bridge / fixture Bearer.
 python -m impact_relay.console_server \
   --data-dir .impact-relay/hacker-dojo-shadow \
   --port 8787
@@ -43,15 +44,18 @@ python -m impact_relay.console_server \
 
 ### 2. Seed and approve (no production)
 
-Open `finance-impact.html` (or curl):
+Open `finance-impact.html` (or curl with **fixture Bearer**, not forgeable identity headers):
 
 ```bash
 curl -X POST http://127.0.0.1:8787/api/pilot/seed \
   -H 'Authorization: Bearer finance.approver@hackersdojo.example'
 curl http://127.0.0.1:8787/api/finance/queue \
-  -H 'X-Impact-Email: lead@hackersdojo.org' \
-  -H 'X-HD-Campaign-Role: campaign_lead'
+  -H 'Authorization: Bearer finance.approver@hackersdojo.example'
 ```
+
+`X-Impact-*` / `X-HD-Campaign-Role` are ignored unless the server is started with
+`--trusted-proxy` (gateway-only; gateway must strip client copies). Prefer Bearer
+fixture email or a real Supabase JWT.
 
 With Supabase: load `runtime-config.js`, sign in as director/campaign_lead, use UI **Seed** → **Approve**.
 

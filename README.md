@@ -146,16 +146,17 @@ This repo is the **canonical host app** for Impact Relay (campaign UX + Supabase
 |---------|---------|
 | `finance-impact.html` | L3 expense approval queue |
 | `donor-impact.html` | Donor timeline / UOF receipt detail |
-| `workspace/impact-relay-bridge.js` | Supabase session → IR request headers |
+| `workspace/impact-relay-bridge.js` | Supabase JWT / fixture Bearer → IR console (no X-Impact forge headers) |
 | `docs/IMPACT-RELAY.md` | Bridge runbook (roles, MFA, auth modes) |
 | `docs/IMPACT-RELAY-SHADOW.md` | Finance shadow mode (no live notify) |
 | `docs/IMPACT-RELAY-LIVE-COHORT.md` | Limited live cohort procedure |
 
 ```bash
-# from Impact-Relay checkout
+# from Impact-Relay checkout — default-deny; no --trusted-proxy for host UI
 python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --port 8787
 # then open finance-impact.html / donor-impact.html from this repo
-# (fixture auth without runtime-config.js; Supabase OTP when configured)
+# (fixture Bearer without runtime-config.js; Supabase JWT when configured)
+# See docs/IMPACT-RELAY.md — --trusted-proxy only behind a stripping gateway
 ```
 
 Privileged campaign roles must have MFA enforced before Impact Relay screens accept the session (same rule as director workspace).

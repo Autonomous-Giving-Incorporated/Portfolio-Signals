@@ -29,6 +29,7 @@ Live cohort means **real staff identities** and **optional real donor-facing not
 
 ```bash
 # Dedicated live-cohort data-dir (not shadow, not git)
+# Host bridge uses Bearer JWT — do not enable --trusted-proxy on a public port.
 python -m impact_relay.console_server \
   --data-dir .impact-relay/hacker-dojo-live-cohort \
   --port 8787

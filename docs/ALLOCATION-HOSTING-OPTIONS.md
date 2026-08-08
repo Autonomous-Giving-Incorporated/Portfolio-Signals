@@ -16,7 +16,8 @@ No payment processing, no multi-region requirement.
 
 **Day-to-day director-auth pilot:** Local Node.  
 **Public HTTPS without account:** Cloudflare quick tunnel → local Node.  
-**Durable public / every.org webhook:** Render (or Railway / Fly / VPS).
+**Durable public / every.org webhook:** Render (or Railway / Fly / VPS).  
+**Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · `npm run preflight:durable`.
 
 ## 0a) Cloudflare quick tunnel (ephemeral public HTTPS)
 

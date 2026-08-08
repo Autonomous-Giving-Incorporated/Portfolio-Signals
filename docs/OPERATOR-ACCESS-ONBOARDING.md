@@ -27,7 +27,7 @@ legacy_staging_for_new_people: PROHIBITED  # ecxkhihlbrcwpavfoaoq frozen
 3. Auth URL allowlist includes:
    - `https://autogive.app/portfolio-signals/workspace`
    - `https://autogive.app/portfolio-signals/workspace.html`
-4. Optional: custom SMTP for Auth email volume; if rate-limited, use Dashboard invite / generate_link.
+4. Optional: custom SMTP for Auth email volume ([PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md)); if rate-limited, use Dashboard invite / generate_link.
 
 ## MFA policy
 
@@ -85,7 +85,7 @@ Use `scripts/platform/bootstrap-master-admin.sql` once for the initial operator.
 1. `revoke-master-admin.sql` if they had platform admin.
 2. Deactivate client memberships via `set_client_membership(..., active := false, ...)` when possible.
 3. Optionally deactivate profile (operator SQL outside this pack if needed).
-4. If they had secret-manager access, rotate service-role and related secrets.
+4. If they had secret-manager access, rotate service-role and related secrets ([OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md)).
 5. Do not leave elevated `mfa_enforced` or admin rows active after offboarding intent.
 
 ## Failure modes
@@ -97,7 +97,7 @@ Use `scripts/platform/bootstrap-master-admin.sql` once for the initial operator.
 | Profile missing | `ensure-profile.sql` |
 | `mfa_required` / enforced MFA errors | Complete MFA path |
 | Cross-tenant private data visible | Stop; isolation regression |
-| Rate-limited magic link email | Dashboard generate_link / custom SMTP |
+| Rate-limited magic link email | Dashboard generate_link / [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 
 ## Next: commercial client shell
 
@@ -112,3 +112,5 @@ After people access works, provision and activate a client:
 - [PLATFORM.md](PLATFORM.md)
 - [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md)
 - [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md)
+- [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md)
+- [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md)

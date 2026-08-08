@@ -46,9 +46,11 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
 | Vercel path suite under autogive.app | OBSERVED |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
-| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host PENDING operator |
+| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host recipe READY (Compose/Render/Railway/Fly) — public dashboard deploy PENDING operator |
 | every.org live webhook | PENDING (operator) |
-| Custom SMTP for Auth email volume | PENDING (operator) |
+| Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
+| IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
+| Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
 | Secret service_role on Vercel | PROHIBITED (anon only) |
@@ -89,7 +91,11 @@ status: OBSERVED_EPHEMERAL
 path: cloudflared_quick_tunnel_to_local_node
 smoke: PASS  # pilot:smoke + verify:director over HTTPS
 durable_render_recipe: READY  # services/allocation-middleware/render.yaml (ALLOW_OPERATOR_TOKEN_FALLBACK=0)
-durable_named_host: PENDING_OPERATOR  # Render/Railway/Fly dashboard deploy when every.org needs stable URL
+durable_host_runbook: docs/ALLOCATION-DURABLE-HOST.md
+durable_preflight: npm run preflight:durable  # services/allocation-middleware
+durable_named_host: PENDING_OPERATOR  # Render/Railway/Fly (or VPS+TLS) dashboard when every.org needs stable URL
+durable_preflight_local: OBSERVED  # 2026-08-08 npm run preflight:durable PASS (.env.pilot + recipe files)
+compose_build_this_host: BLOCKED  # docker credential helper exec format error (desktop.exe under WSL); recipe still READY
 ```
 
 ## Phase 3 / #74 — Seed-loop acceptance (no live gift)
@@ -115,11 +121,21 @@ ui: Seed only — waiting for live gift | Connected (live only)
 
 Older HD-OI-041 / staging receipts against `ecxkhihlbrcwpavfoaoq` or pre-rename `Hacker-Dojo` commits remain provenance only. See prior sections of git history and HD-OI-* docs.
 
-## Operator hygiene still recommended
+## Operator hygiene (optional tracks)
 
-1. Rotate any secrets shared outside a secret manager (service_role JWT, `sb_secret_…`, personal access tokens).
-2. Configure custom SMTP on platform Supabase for sustainable magic-link email (built-in mail is rate-limited).
+```yaml
+secret_hygiene_runbook: docs/OPERATOR-SECRET-HYGIENE.md
+custom_smtp_runbook: docs/PLATFORM-AUTH-SMTP.md
+custom_smtp: PENDING  # dashboard only; fallback invite / generate_link
+vercel_team_invite: N/A_OR_INVITEE  # owner CLI on scrimshawlife-8819s-projects; invitee accepts their own invite
+ir_console_trusted_proxy: DOCUMENTED  # #48 — default off; bridge does not send X-Impact headers
+suite_track_fi: docs/SUITE-ONBOARDING.md + AGI docs/GITHUB-PROJECT.md
+```
+
+1. Rotate any secrets shared outside a secret manager — follow [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md).
+2. Configure custom SMTP on platform Supabase when invite volume needs it — [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md).
 3. Keep `scripts/staging/bootstrap.env` and `services/allocation-middleware/.env.pilot` gitignored.
+4. Durable public host when every.org needs a stable URL — [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md).
 
 ## Operator access onboarding (slice C)
 

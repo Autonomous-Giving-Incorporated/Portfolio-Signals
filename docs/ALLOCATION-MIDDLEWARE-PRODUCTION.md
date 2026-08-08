@@ -69,7 +69,7 @@ BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
 
 ### Optional — Render / Railway
 
-Dashboard deploy; see [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
+Dashboard deploy; see [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) and [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable`).
 
 Dockerfile includes `fixtures/` so `SEED_ON_BOOT=1` works on any host.
 

@@ -16,6 +16,8 @@ Public impact: https://autogive.app/impact-relay/
 
 ```bash
 cd ../Impact-Relay
+# Default-deny: no --trusted-proxy needed for the browser bridge.
+# Preferred: Bearer Supabase JWT (runtime-config) or Bearer fixture pilot email.
 python -m impact_relay.console_server --data-dir .impact-relay/hacker-dojo --port 8787
 ```
 
@@ -32,10 +34,21 @@ Both screens use the **AGI host shell** (wordmark lockup, suite links, Tokens / 
 
 | Mode | When | How |
 |------|------|-----|
-| **Fixture** | No `runtime-config.js` | Pilot email mapped in Impact Relay |
+| **Fixture** | No `runtime-config.js` | `Authorization: Bearer finance.approver@hackersdojo.example` (fixture OIDC map) |
 | **Supabase** | `runtime-config.js` present | OTP login → short-lived Supabase JWT → Impact Relay JWKS validation |
+| **Trusted proxy** | Only behind an auth gateway | Start with `--trusted-proxy` and accept `X-Impact-*` / `X-HD-Campaign-Role` **only if** the gateway strips client-supplied copies |
 
-Shared bridge: `workspace/impact-relay-bridge.js`
+Shared bridge: `workspace/impact-relay-bridge.js` — **does not** send `X-Impact-*` headers. It sends Bearer JWT (Supabase) or Bearer fixture email only. Issue track: #48.
+
+### When to use `--trusted-proxy`
+
+| Situation | Flag |
+| --- | --- |
+| Browser host screens via `impact-relay-bridge.js` | **Off** (default) |
+| curl/scripts with `Authorization: Bearer <fixture-email>` | **Off** |
+| Gateway that authenticates users and injects identity headers | **On** — gateway must strip inbound `X-Impact-*` / `X-HD-Campaign-Role` from clients |
+
+Never expose `--trusted-proxy` on a port clients can reach without the authenticating gateway.
 
 ### Authorization sent to Impact Relay (Supabase mode)
 
