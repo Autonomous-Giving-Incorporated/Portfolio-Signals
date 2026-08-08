@@ -28,6 +28,7 @@ runtime_config_js: GENERATED_WITH_PLATFORM_ANON
 schema_migrations: APPLIED_ON_PLATFORM
 master_admin: scrimshawlife@gmail.com
 second_master_admin: qi@enkeyai.com  # Qi Diaz — Auth invited + platform_administrators active 2026-08-08; mfa_enforced still false until TOTP enroll
+hacker_dojo_tenant_director: ed@hackerdojo.org  # 2026-08-08 — profile + active director on org_hacker_dojo; mfa_enforced false until TOTP; email OTP rate-limited (action_link in operator-local gitignored file)
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07
