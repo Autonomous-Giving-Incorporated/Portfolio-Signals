@@ -6,6 +6,8 @@
 
 This document separates **live production evidence** from older Hacker Dojo campaign receipts. It does not authorize production CRM import, outreach, or money movement.
 
+**Onboarding hub:** [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — map of C→B→D→pilot, what is done without external login vs what still needs every.org/admin.
+
 ## Evidence labels
 
 - **OBSERVED** — supported by current production or a recorded executed check on current stack
@@ -98,6 +100,15 @@ command: cd services/allocation-middleware && npm run accept:seed-loop
 result: SEED_LOOP_ACCEPTANCE_PASS  # 2026-08-07 — allocate $100 Community Hardware Fund → proof URI → packet proofCount≥1
 scope: seed pots only; does not require every.org webhook or director browser session
 remaining_for_full_74: live gift via #73 + director JWT allocate in browser + sign-off comment
+```
+
+## Setup wizard — seed vs live (#73 prep)
+
+```yaml
+status: OBSERVED  # 2026-08-08
+rule: chargeId matching /^fixture[-_]/i does not set steps.receivedTestGift / Connected
+api: counts.fixtureGifts, counts.liveGifts, lastLiveGift; steps.receivedFixtureGifts
+ui: Seed only — waiting for live gift | Connected (live only)
 ```
 
 ## Historical evidence (do not treat as current-main GO)

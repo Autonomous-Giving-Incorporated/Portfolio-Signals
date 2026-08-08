@@ -6,6 +6,24 @@ import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
 import { createMemoryStore, ensureExtras } from './store.mjs';
 
+/** Seed/fixture chargeIds must not count as live every.org connect. */
+export function isFixtureChargeId(id) {
+  return /^fixture[-_]/i.test(String(id || ''));
+}
+
+function giftSummary(gift) {
+  if (!gift) return null;
+  return {
+    chargeId: gift.chargeId,
+    campaignKey: gift.campaignKey,
+    programKey: gift.programKey,
+    netCents: gift.netCents.toString(),
+    donatedAt: gift.donatedAt,
+    source: gift.source,
+    fixture: isFixtureChargeId(gift.chargeId),
+  };
+}
+
 export function createService({
   orgId,
   now = () => new Date().toISOString(),
@@ -247,13 +265,19 @@ export function createService({
       const gifts = [...state.gifts.values()].filter((g) => g.orgId === orgId);
       const pots = [...state.pots.values()].filter((p) => p.orgId === orgId);
       const allocations = [...state.allocations.values()].filter((a) => a.orgId === orgId);
-      const lastGift = gifts
-        .slice()
-        .sort((a, b) => String(b.donatedAt).localeCompare(String(a.donatedAt)))[0];
+      const byDonatedDesc = (a, b) => String(b.donatedAt).localeCompare(String(a.donatedAt));
+      const fixtureGifts = gifts.filter((g) => isFixtureChargeId(g.chargeId));
+      const liveGifts = gifts.filter((g) => !isFixtureChargeId(g.chargeId));
+      const lastGift = gifts.slice().sort(byDonatedDesc)[0];
+      const lastLiveGift = liveGifts.slice().sort(byDonatedDesc)[0];
+      const receivedLive = liveGifts.length > 0;
       const steps = {
         copyWebhookUrl: Boolean(meta.webhookUrl),
         pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see every.org admin
-        receivedTestGift: gifts.length > 0,
+        receivedFixtureGifts: fixtureGifts.length > 0,
+        // API name kept for clients; meaning is live (non-fixture) gift only
+        receivedTestGift: receivedLive,
+        receivedLiveGift: receivedLive,
         hasAvailableBalance: pots.some((p) => p.creditedCents > p.allocatedCents),
         firstAllocation: allocations.length > 0,
       };
@@ -267,19 +291,13 @@ export function createService({
         steps,
         counts: {
           gifts: gifts.length,
+          fixtureGifts: fixtureGifts.length,
+          liveGifts: liveGifts.length,
           pots: pots.length,
           allocations: allocations.length,
         },
-        lastGift: lastGift
-          ? {
-              chargeId: lastGift.chargeId,
-              campaignKey: lastGift.campaignKey,
-              programKey: lastGift.programKey,
-              netCents: lastGift.netCents.toString(),
-              donatedAt: lastGift.donatedAt,
-              source: lastGift.source,
-            }
-          : null,
+        lastGift: giftSummary(lastGift),
+        lastLiveGift: giftSummary(lastLiveGift),
         instructions: [
           {
             id: 1,
@@ -298,13 +316,15 @@ export function createService({
           },
           {
             id: 4,
-            title: 'Send a small test gift',
-            detail: 'Donate $1 (or use a known test gift) to your nonprofit page.',
+            title: 'Send a small live test gift',
+            detail:
+              'Donate $1 on your nonprofit page. Seed/fixture gifts do not count as Connected.',
           },
           {
             id: 5,
-            title: 'Confirm Available',
-            detail: 'This page shows Received when the first gift lands. Then allocate.',
+            title: 'Confirm live gift landed',
+            detail:
+              'Status becomes Connected when a non-fixture chargeId is received. Then allocate.',
           },
         ],
       };

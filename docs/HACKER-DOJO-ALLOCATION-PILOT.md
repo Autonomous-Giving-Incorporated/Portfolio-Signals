@@ -146,7 +146,7 @@ npm run start:hacker-dojo
 6. Refresh setup page: `lastGift.chargeId` should be the live charge (not `fixture-hd-gift-*`).  
 7. `GET /available` should show a **new** credit for that gift (may create pots keyed by every.org fundraiser title).
 
-**Note:** Seed fixtures also use `source: every.org`, so “received gift” can look true before the first *live* post. Confirm by **new chargeId** + Available delta after the $1 gift.
+**Seed vs live:** Fixture chargeIds (`fixture-hd-gift-*`) never mark setup **Connected**. The wizard shows **Seed only — waiting for live gift** until a **non-fixture** `chargeId` is POSTed. Confirm by `lastLiveGift.chargeId` + Available delta after the $1 gift.
 
 Keep the tunnel (or durable host) **up** while every.org delivers the webhook.
 

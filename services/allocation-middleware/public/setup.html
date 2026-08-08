@@ -38,8 +38,9 @@
       Gifts then appear as <strong>Available</strong> balances to allocate.
     </p>
     <p class="note" style="margin:0.75rem 0 1.25rem">
-      <strong>Hacker Dojo pilot:</strong> until live every.org data is wired, use Docker seed
-      (<code>SEED_ON_BOOT=1</code> / <code>npm run compose:up</code>) for demo balances.
+      <strong>Hacker Dojo pilot:</strong> seed/fixture gifts can fill demo <strong>Available</strong>
+      balances. They do <em>not</em> mark this page <strong>Connected</strong> — only a live
+      every.org POST with a non-fixture <code>chargeId</code> does.
     </p>
 
     <nav class="local-nav" aria-label="Setup navigation">
@@ -110,19 +111,28 @@
       const data = await res.json();
       urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the server)';
 
-      const done = data.steps.receivedTestGift;
-      pill.textContent = done ? 'Connected' : 'Waiting for first gift';
-      pill.className = 'status-pill ' + (done ? 'ready' : 'pending');
-      statusLine.textContent = done
-        ? `Org ${data.orgId} · ${data.counts.gifts} gift(s) · last ${data.lastGift?.chargeId || ''}`
-        : `Org ${data.orgId} · no gifts yet · waiting for every.org POST`;
+      const live = Boolean(data.steps.receivedLiveGift ?? data.steps.receivedTestGift);
+      const fixtures = Number(data.counts?.fixtureGifts || 0);
+      const liveCount = Number(data.counts?.liveGifts ?? (live ? 1 : 0));
+      if (live) {
+        pill.textContent = 'Connected';
+        pill.className = 'status-pill ready';
+        statusLine.textContent = `Org ${data.orgId} · ${liveCount} live gift(s)${fixtures ? ` · ${fixtures} seed/fixture` : ''} · last live ${data.lastLiveGift?.chargeId || data.lastGift?.chargeId || ''}`;
+      } else if (fixtures > 0) {
+        pill.textContent = 'Seed only — waiting for live gift';
+        pill.className = 'status-pill pending';
+        statusLine.textContent = `Org ${data.orgId} · ${fixtures} fixture gift(s) · no live every.org POST yet (seed ≠ Connected)`;
+      } else {
+        pill.textContent = 'Waiting for first live gift';
+        pill.className = 'status-pill pending';
+        statusLine.textContent = `Org ${data.orgId} · no live gifts yet · waiting for every.org POST`;
+      }
 
       stepsEl.innerHTML = '';
       for (const step of data.instructions) {
         let state = 'wait';
         if (step.id <= 3) state = data.webhookUrl ? 'done' : 'wait';
-        if (step.id === 4 || step.id === 5) state = data.steps.receivedTestGift ? 'done' : 'wait';
-        if (step.id === 5 && data.steps.hasAvailableBalance) state = 'done';
+        if (step.id === 4 || step.id === 5) state = live ? 'done' : 'wait';
         const div = document.createElement('div');
         div.className = 'step';
         div.innerHTML = `<div class="num ${state}" aria-hidden="true">${state === 'done' ? '✓' : step.id}</div>

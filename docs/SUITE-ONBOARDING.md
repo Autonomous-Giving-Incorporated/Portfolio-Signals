@@ -1,0 +1,88 @@
+# Suite onboarding hub
+
+Single entry for **finishing onboarding** across Autonomously Giving Incorporated products. Full runbooks live in linked docs; this page is the map.
+
+**Evidence source of truth:** [CURRENT-STATE.md](CURRENT-STATE.md) (`OBSERVED` / `PENDING` / `BLOCKED`).
+
+## Map
+
+```text
+C  People (master_admin / director Auth + MFA)
+     ↓
+B  Commercial client shell (provision → publish config → activate)
+     ↓
+D  Second nonprofit (FI client + IR template clone)
+     ↓
+Allocation pilot  pots → allocate → proof → packet (+ every.org)
+```
+
+| Step | Runbook | Role |
+| --- | --- | --- |
+| **C** | [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) | Platform people path |
+| **B** | [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md) | Client lifecycle |
+| **D** | [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) | Second tenant + IR |
+| **Pilot** | [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) | Allocation middleware |
+| **Director JWT** | [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) | `/login.html` |
+| **Hosting** | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) | Node / tunnel / Render |
+
+## Done without every.org (or other blocked) login
+
+These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says so:
+
+| Work | How to verify |
+| --- | --- |
+| People path (C) scripts + runbook | Follow OPERATOR-ACCESS; platform memberships |
+| Client lifecycle (B) runbook | COMMERCIAL-CLIENT-LIFECYCLE |
+| Second tenant (D) runbook | SECOND-TENANT-ONBOARDING |
+| Director JWT **config** on pilot | `BASE_URL=… npm run verify:director` |
+| Public HTTPS (ephemeral) | cloudflared + `pilot:smoke` |
+| Seed allocate → proof → packet | `cd services/allocation-middleware && npm run accept:seed-loop` |
+| Setup wizard seed vs live | `/setup.html` shows **Seed only** until a **non-fixture** chargeId arrives |
+
+Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Connected**.
+
+## Needs login (or external admin)
+
+| Work | Login / access |
+| --- | --- |
+| Live every.org webhook ([#73](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/73)) | every.org **Hacker Dojo nonprofit admin** |
+| Full director acceptance ([#74](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/74)) | Live gift + director browser session + sign-off |
+| Durable named host (optional) | Render / Railway / Fly dashboard |
+| Vercel team invite acceptance | Invitee’s email / Vercel account |
+
+### every.org when you have admin
+
+1. Public HTTPS host (tunnel or durable) with `PUBLIC_BASE_URL` set.  
+2. Open `/setup.html` → copy webhook URL.  
+3. every.org admin → Settings → Advanced → paste.  
+4. $1 test gift.  
+5. Setup shows **Connected** only for a **live** (non-fixture) chargeId.  
+6. Allocate via director login; complete #74.
+
+## Quick commands
+
+```bash
+cd services/allocation-middleware
+# .env.pilot with platform Supabase (gitignored)
+set -a && source .env.pilot && set +a
+npm test
+npm run start:hacker-dojo:seed   # or start:hacker-dojo after seed
+BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
+BASE_URL=http://127.0.0.1:8787 npm run verify:director
+npm run accept:seed-loop
+# optional public edge:
+# cloudflared tunnel --url http://127.0.0.1:8787
+```
+
+## Related suite surfaces
+
+| Surface | URL |
+| --- | --- |
+| AGI workbench | https://autogive.app/ |
+| Portfolio Signals | https://autogive.app/portfolio-signals/ |
+| Workspace | https://autogive.app/portfolio-signals/workspace |
+| Impact Relay public | https://autogive.app/impact-relay/ |
+| Platform Supabase | ref `utdioxwiskzatwoejgiu` |
+
+Suite GitHub Project notes: AGI [docs/GITHUB-PROJECT.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/GITHUB-PROJECT.md).  
+Specs progress map: [IMPLEMENTATION-PROGRESS](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/IMPLEMENTATION-PROGRESS.md).

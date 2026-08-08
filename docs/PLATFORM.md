@@ -64,4 +64,4 @@ Build generates gitignored `runtime-config.js`. Do **not** set service-role keys
 | Live every.org webhook (#73) | **PENDING** (operator tomorrow) |
 | Full director acceptance (#74) | Partial — needs live gift + browser sign-off |
 
-See [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
+See [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) (hub) · [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
