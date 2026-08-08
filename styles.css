@@ -54,13 +54,14 @@ html[data-theme="dark"] {
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--agi-font);
   line-height: 1.55;
+  overflow-x: clip;
 }
 h1, h2, blockquote { font-family: var(--agi-display); font-weight: 600; }
 .eyebrow, .metric-label, .tag, .status-pill, .gate { font-family: var(--agi-mono); }
@@ -161,7 +162,11 @@ blockquote { margin: 1.3rem 0 .5rem; font-size: clamp(1.6rem, 3vw, 2.7rem); line
 .tab-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); }
 .table-toolbar { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: .8rem; color: var(--muted); }
 .table-toolbar input { border: 1px solid var(--line); border-radius: 10px; padding: .6rem .75rem; background: var(--bg); color: var(--text); min-width: 260px; }
-.table-wrap { overflow-x: auto; }
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
 table { width: 100%; border-collapse: collapse; min-width: 780px; }
 th, td { text-align: left; padding: .85rem .75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; }
@@ -272,9 +277,32 @@ dialog form { padding: 1.5rem; }
 .auth-form input { border: 1px solid var(--line); border-radius: 10px; padding: .7rem .8rem; background: var(--bg); color: var(--text); }
 
 @media (max-width: 620px) {
-  .site-header { padding-top: 2.5rem; }
+  .site-header { padding: 1.25rem clamp(1rem, 4vw, 1.5rem) 1.5rem; }
   .metric-grid, .funding-ladder, .segment-grid, .risk-grid, .resource-grid, .control-grid, .pillar-grid { grid-template-columns: 1fr; }
-  .primary-nav { overflow-x: auto; flex-wrap: nowrap; }
+  .primary-nav {
+    flex-wrap: wrap;
+    gap: .25rem .35rem;
+    overflow-x: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+  .primary-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .5rem .7rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+    gap: .55rem;
+  }
+  .header-actions .button {
+    min-height: 44px;
+    flex: 1 1 calc(50% - .4rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   .section { padding-block: 3rem; }
   footer { flex-direction: column; }
   .table-toolbar { align-items: stretch; flex-direction: column; }
