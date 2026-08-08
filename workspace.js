@@ -276,9 +276,26 @@ async function renderSession(session, { allowNull = false } = {}) {
   const roleLabel = profile.role || selectedClient?.role || (masterAdmin ? 'platform administration' : 'member');
   document.getElementById('identityLine').textContent =
     `${profile.display_name || session.user.email} · ${roleLabel}`;
+  updateAuthenticatedTenantChrome(currentClient);
   renderClientSelector(clients, currentClient);
   renderNavigation(profile.role || selectedClient?.role);
   await loadDashboard(profile.role || selectedClient?.role);
+}
+
+/** Tenant label/chip only after sign-in (never on public pages or auth gate). */
+function updateAuthenticatedTenantChrome(client) {
+  const name = client?.display_name || 'No client selected';
+  document.querySelectorAll('#workspace [data-tenant-name]').forEach((node) => {
+    node.textContent = name;
+  });
+  document.querySelectorAll('#workspace .tenant-chip').forEach((node) => {
+    node.hidden = false;
+    node.removeAttribute('aria-hidden');
+    node.setAttribute('aria-label', `Tenant: ${name}`);
+  });
+  document.title = client?.display_name
+    ? `AGI Portfolio Signals · ${client.display_name}`
+    : 'AGI Portfolio Signals · Workspace';
 }
 
 function renderClientSelector(clients, currentClient) {

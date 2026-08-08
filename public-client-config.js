@@ -91,35 +91,58 @@ function applyPublicConfig(config) {
   document.documentElement.style.setProperty('--brand-teal', safe.theme.accent);
   document.documentElement.style.setProperty('--brand-navy', safe.theme.background);
 
-  // Product identity stays AGI Portfolio Signals; organization is the tenant.
+  // Product identity stays AGI Portfolio Signals. Tenant chrome is authenticated-only.
+  const authenticatedWorkspace =
+    document.body.classList.contains('workspace-shell') &&
+    Boolean(document.getElementById('workspace') && !document.getElementById('workspace')?.hidden);
+
   document.querySelectorAll('title').forEach((node) => {
-    node.textContent = `AGI Portfolio Signals · ${safe.organization_name}`;
+    // Public titles: product only. Workspace may include organization after sign-in.
+    node.textContent = authenticatedWorkspace
+      ? `AGI Portfolio Signals · ${safe.organization_name}`
+      : 'AGI Portfolio Signals · Decision Workspace';
   });
   document.querySelectorAll('.tenant-product').forEach((node) => {
     node.textContent = safe.product_name;
   });
-  document.querySelectorAll('.tenant-chip').forEach((node) => {
+
+  document.querySelectorAll('.tenant-chip, [data-tenant-chip], .workspace-tenant-lockup').forEach((node) => {
+    if (!authenticatedWorkspace) {
+      node.hidden = true;
+      node.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    node.hidden = false;
+    node.removeAttribute('aria-hidden');
     node.setAttribute('aria-label', `Tenant: ${safe.organization_name}`);
     const mark = node.querySelector('.tenant-mark');
     const label = `Tenant · ${safe.organization_name}`;
-    if (mark) {
-      node.replaceChildren(mark, document.createTextNode(` ${label}`));
-    } else {
-      node.textContent = label;
+    if (node.classList.contains('tenant-chip')) {
+      if (mark) {
+        node.replaceChildren(mark, document.createTextNode(` ${label}`));
+      } else if (!node.querySelector('[data-tenant-name]')) {
+        node.textContent = label;
+      }
     }
   });
-  document.querySelectorAll('[data-tenant-name]').forEach((node) => {
-    // Footer may include "Tenant ·" prefix already in parent; set org name only.
-    node.textContent = node.dataset.tenantPrefix
-      ? `${node.dataset.tenantPrefix}${safe.organization_name}`
-      : safe.organization_name;
-  });
-  document.querySelectorAll('h1').forEach((node, index) => {
-    if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title;
-  });
-  document.querySelectorAll('.lede, .cta-line').forEach((node, index) => {
-    if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline;
-  });
+
+  if (authenticatedWorkspace) {
+    document.querySelectorAll('[data-tenant-name]').forEach((node) => {
+      node.textContent = node.dataset.tenantPrefix
+        ? `${node.dataset.tenantPrefix}${safe.organization_name}`
+        : safe.organization_name;
+    });
+  }
+
+  // Public campaign copy may still show published campaign title/tagline (content, not tenant chrome).
+  if (!authenticatedWorkspace) {
+    document.querySelectorAll('h1').forEach((node, index) => {
+      if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title;
+    });
+    document.querySelectorAll('.lede, .cta-line').forEach((node, index) => {
+      if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline;
+    });
+  }
 
   // Prefer published storage assets; else static tenant pack icon.
   const remoteMark = assetUrl(safe.assets.logo_path || safe.assets.icon_path);

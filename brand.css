@@ -283,3 +283,12 @@
   margin-bottom: 1.5rem;
 }
 .impact-host-auth .lede { max-width: 36rem; }
+
+/* Tenant chrome is authenticated workspace only (not public portal). */
+body:not(.workspace-shell) .tenant-chip,
+body:not(.workspace-shell) [data-tenant-chip],
+body:not(.workspace-shell) .workspace-tenant-lockup,
+#authGate .tenant-chip,
+#authGate .workspace-tenant-lockup {
+  display: none !important;
+}

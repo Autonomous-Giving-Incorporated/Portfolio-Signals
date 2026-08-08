@@ -33,14 +33,11 @@ if (header && headerCopy) {
 
   const identity = document.createElement('div');
   identity.className = 'brand-identity';
+  // Tenant chip is authenticated-only (workspace). Public shell shows product chrome only.
   identity.innerHTML = `
     <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290" />
     <span class="brand-divider" aria-hidden="true"></span>
     <span class="brand-product">Portfolio Signals<br />Decision Workspace</span>
-    <span class="tenant-chip" data-tenant-chip>
-      <img class="tenant-mark" src="assets/tenants/hacker-dojo/icon.svg" alt="" />
-      Tenant · <span data-tenant-name>Hacker Dojo</span>
-    </span>
     <nav class="brand-suite-links" aria-label="AGI product suite">
       <a href="https://autogive.app/">AGI</a>
       <a href="https://autogive.app/impact-relay/">Impact Relay</a>
@@ -92,7 +89,6 @@ if (footer) {
       <span>Autonomously Giving Incorporated · Portfolio Signals</span>
     </div>
     <div class="footer-meta">
-      <small data-tenant-prefix="Tenant · " data-tenant-name>Tenant · Hacker Dojo</small>
       <small>Software by Zero State</small>
       <a href="https://autogive.app/brand#tokens">Tokens</a>
       <a href="https://autogive.app/brand#logo">Logo use</a>
