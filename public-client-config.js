@@ -83,7 +83,26 @@ function applyPublicConfig(config) {
   const safe = safeConfig(config);
   const slug = clientSlug();
 
-  // Tenant identity is data-tenant + tenant asset pack — never product chrome.
+  // Canonical tenant content (incl. Hacker Dojo) requires auth gate. Do not paint
+  // reference-tenant identity onto the public product shell.
+  const tenantAuthorized = document.documentElement.dataset.tenantAccess === 'org_hacker_dojo'
+    || document.documentElement.dataset.tenantAccess === slug
+    || (
+      document.body.classList.contains('workspace-shell')
+      && Boolean(document.getElementById('workspace') && !document.getElementById('workspace')?.hidden)
+    );
+
+  if (!tenantAuthorized) {
+    document.querySelectorAll('title').forEach((node) => {
+      node.textContent = 'AGI Portfolio Signals · Decision Workspace';
+    });
+    document.querySelectorAll('.tenant-chip, [data-tenant-chip], .workspace-tenant-lockup').forEach((node) => {
+      node.hidden = true;
+      node.setAttribute('aria-hidden', 'true');
+    });
+    return;
+  }
+
   document.documentElement.dataset.tenant = slug;
   ensureTenantTheme(slug);
 
@@ -91,58 +110,38 @@ function applyPublicConfig(config) {
   document.documentElement.style.setProperty('--brand-teal', safe.theme.accent);
   document.documentElement.style.setProperty('--brand-navy', safe.theme.background);
 
-  // Product identity stays AGI Portfolio Signals. Tenant chrome is authenticated-only.
-  const authenticatedWorkspace =
-    document.body.classList.contains('workspace-shell') &&
-    Boolean(document.getElementById('workspace') && !document.getElementById('workspace')?.hidden);
-
   document.querySelectorAll('title').forEach((node) => {
-    // Public titles: product only. Workspace may include organization after sign-in.
-    node.textContent = authenticatedWorkspace
-      ? `AGI Portfolio Signals · ${safe.organization_name}`
-      : 'AGI Portfolio Signals · Decision Workspace';
+    node.textContent = `AGI Portfolio Signals · ${safe.organization_name}`;
   });
   document.querySelectorAll('.tenant-product').forEach((node) => {
     node.textContent = safe.product_name;
   });
 
-  document.querySelectorAll('.tenant-chip, [data-tenant-chip], .workspace-tenant-lockup').forEach((node) => {
-    if (!authenticatedWorkspace) {
-      node.hidden = true;
-      node.setAttribute('aria-hidden', 'true');
-      return;
-    }
+  document.querySelectorAll('.tenant-chip, [data-tenant-chip]').forEach((node) => {
     node.hidden = false;
     node.removeAttribute('aria-hidden');
     node.setAttribute('aria-label', `Tenant: ${safe.organization_name}`);
     const mark = node.querySelector('.tenant-mark');
     const label = `Tenant · ${safe.organization_name}`;
-    if (node.classList.contains('tenant-chip')) {
-      if (mark) {
-        node.replaceChildren(mark, document.createTextNode(` ${label}`));
-      } else if (!node.querySelector('[data-tenant-name]')) {
-        node.textContent = label;
-      }
+    if (mark) {
+      node.replaceChildren(mark, document.createTextNode(` ${label}`));
+    } else if (!node.querySelector('[data-tenant-name]')) {
+      node.textContent = label;
     }
   });
 
-  if (authenticatedWorkspace) {
-    document.querySelectorAll('[data-tenant-name]').forEach((node) => {
-      node.textContent = node.dataset.tenantPrefix
-        ? `${node.dataset.tenantPrefix}${safe.organization_name}`
-        : safe.organization_name;
-    });
-  }
+  document.querySelectorAll('[data-tenant-name]').forEach((node) => {
+    node.textContent = node.dataset.tenantPrefix
+      ? `${node.dataset.tenantPrefix}${safe.organization_name}`
+      : safe.organization_name;
+  });
 
-  // Public campaign copy may still show published campaign title/tagline (content, not tenant chrome).
-  if (!authenticatedWorkspace) {
-    document.querySelectorAll('h1').forEach((node, index) => {
-      if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title;
-    });
-    document.querySelectorAll('.lede, .cta-line').forEach((node, index) => {
-      if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline;
-    });
-  }
+  document.querySelectorAll('.tenant-data-root h1, [data-tenant-data] h1').forEach((node, index) => {
+    if (index === 0 && safe.campaign_title) node.textContent = safe.campaign_title;
+  });
+  document.querySelectorAll('.tenant-data-root .lede, .tenant-data-root .cta-line').forEach((node, index) => {
+    if (index === 0 && safe.campaign_tagline) node.textContent = safe.campaign_tagline;
+  });
 
   // Prefer published storage assets; else static tenant pack icon.
   const remoteMark = assetUrl(safe.assets.logo_path || safe.assets.icon_path);
@@ -182,8 +181,23 @@ function applyPublicConfig(config) {
   }
 }
 
-async function loadPublicConfig() {
+export async function loadPublicConfig() {
   const runtime = getConfig();
+  // Until tenant access is authorized, do not apply Hacker Dojo / reference fallbacks.
+  const authorized = Boolean(document.documentElement.dataset.tenantAccess);
+  if (!authorized) {
+    applyPublicConfig({
+      organization_name: 'Portfolio Signals',
+      product_name: 'Portfolio Signals',
+      campaign_title: 'Decision workspace',
+      campaign_tagline:
+        'Sign in to access canonical data for your client tenant.',
+      theme: { primary: '#112233', accent: '#2a5bd7', background: '#f6f7f9' },
+      modules: { sponsors: false, grants: false },
+      assets: {},
+    });
+    return;
+  }
   if (!runtime.supabaseUrl || !runtime.supabaseAnonKey) {
     applyPublicConfig(FALLBACK);
     return;

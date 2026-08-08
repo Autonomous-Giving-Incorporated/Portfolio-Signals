@@ -32,6 +32,7 @@ hacker_dojo_tenant_director: ed@hackerdojo.org  # 2026-08-08 — profile + activ
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07
+tenant_canonical_data_auth: REQUIRED  # 2026-08-08 — Hacker Dojo campaign data gated behind membership on org_hacker_dojo (or master_admin); public shell is product-only
 edge_functions_deployed:
   - signed-document-url
   - upload-client-asset

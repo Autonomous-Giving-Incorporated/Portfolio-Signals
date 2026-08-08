@@ -1,54 +1,36 @@
 {
   "$schema": "../schemas/public-campaign.schema.json",
   "version": "1.0.0",
-  "updatedAt": "2026-08-03",
+  "updatedAt": "2026-08-08",
   "authority": "advisory_only",
   "campaign": {
-    "minimumTarget": 420000,
-    "stretchTarget": 2000000,
+    "minimumTarget": 0,
+    "stretchTarget": 0,
     "currency": "USD",
-    "minimumCaseState": "requires_use_of_funds_approval",
-    "stretchCaseState": "requires_board_transformation_plan"
+    "minimumCaseState": "not_public",
+    "stretchCaseState": "not_public"
   },
   "registry": {
-    "normalizedMemberIds": 5212,
-    "bayAreaRecords": 1862,
-    "organizerLabels": 62,
-    "privateRelayOccurrences": 723,
-    "highEngagementRecords": 70,
+    "normalizedMemberIds": 0,
+    "bayAreaRecords": 0,
+    "organizerLabels": 0,
+    "privateRelayOccurrences": 0,
+    "highEngagementRecords": 0,
     "outreachReadyRecords": 0,
-    "qualification": "partial_pdf_derived_extract"
+    "qualification": "tenant_data_authenticated_only"
   },
   "execution": {
     "state": "blocked",
-    "reason": "consent_list_authorization_and_use_of_funds_are_unresolved"
+    "reason": "canonical_tenant_data_requires_authenticated_membership"
   },
-  "gates": [
-    {"id": "campaign_target", "label": "Campaign target approved", "state": "pending"},
-    {"id": "use_of_funds", "label": "Use of funds approved", "state": "pending"},
-    {"id": "donation_system", "label": "Donation system tested", "state": "pending"},
-    {"id": "privacy_policy", "label": "Privacy and consent rules approved", "state": "pending"},
-    {"id": "sponsor_benefits", "label": "Sponsor benefits approved", "state": "pending"},
-    {"id": "claim_ledger", "label": "Claim ledger verified", "state": "pending"},
-    {"id": "relationship_owners", "label": "Relationship owners assigned", "state": "pending"},
-    {"id": "outreach_lists", "label": "Outreach lists authorized", "state": "pending"},
-    {"id": "event_tracking", "label": "Event tracking ready", "state": "pending"},
-    {"id": "stewardship", "label": "Stewardship owners assigned", "state": "pending"}
-  ],
-  "allocations": [
-    {
-      "allocationId": "alloc_community_hardware",
-      "fundName": "Community Hardware Fund",
-      "status": "approved",
-      "rationale": "Hands-on computing equipment enables an accessible introductory robotics workshop.",
-      "publishedAt": "2026-08-02T16:00:00.000Z"
-    }
-  ],
+  "gates": [],
+  "allocations": [],
   "privacy": {
     "classification": "public_aggregate_only",
     "piiAllowed": false,
     "rawRegistryAllowed": false,
     "donorHistoryAllowed": false,
-    "privateNotesAllowed": false
+    "privateNotesAllowed": false,
+    "note": "Canonical Hacker Dojo campaign data is available only to authenticated org_hacker_dojo members (or platform master_admin) in the workspace."
   }
 }

@@ -6,19 +6,8 @@ brandStyles.rel = 'stylesheet';
 brandStyles.href = 'brand.css?v=agi-shell-2';
 document.head.appendChild(brandStyles);
 
-// Default reference tenant until public-client-config resolves slug/config.
-if (!document.documentElement.dataset.tenant) {
-  const slug =
-    new URLSearchParams(location.search).get('client') ||
-    window.AGI_PORTFOLIO_SIGNALS_CONFIG?.defaultClientSlug || window.AGI_FUND_INTEL_CONFIG?.defaultClientSlug ||
-    'hacker-dojo';
-  document.documentElement.dataset.tenant = slug;
-  const tenantTheme = document.createElement('link');
-  tenantTheme.id = 'agi-tenant-theme';
-  tenantTheme.rel = 'stylesheet';
-  tenantTheme.href = `assets/tenants/${encodeURIComponent(slug)}/theme.css?v=1`;
-  document.head.appendChild(tenantTheme);
-}
+// Do not load reference-tenant (Hacker Dojo) theme on the unauthenticated product shell.
+// Tenant theme is applied only after requireTenantAccess grants dataset.tenantAccess.
 
 const favicon = document.createElement('link');
 favicon.rel = 'icon';
@@ -54,11 +43,14 @@ if (header && headerCopy) {
   }
 }
 
-const nav = document.querySelector('.primary-nav');
-if (nav) {
+// Campaign status bar is tenant-canonical data — only inject inside authorized tenant-data root.
+const tenantDataRoot = document.querySelector('.tenant-data-root, [data-tenant-data]');
+const nav = tenantDataRoot?.querySelector('.primary-nav') || null;
+if (nav && tenantDataRoot) {
   const statusBar = document.createElement('aside');
   statusBar.className = 'campaign-status-bar';
   statusBar.setAttribute('aria-label', 'Campaign status');
+  statusBar.setAttribute('data-tenant-data', '');
   statusBar.innerHTML = `
     <div class="status-event">
       <span>Campaign event</span>

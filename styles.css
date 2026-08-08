@@ -199,6 +199,18 @@ th { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-s
 .workspace-legal-footer nav { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; }
 .workspace-legal-footer a { color: var(--brand-2, #2a5bd7); font-weight: 700; text-decoration: none; }
 .workspace-legal-footer a:hover { text-decoration: underline; }
+.tenant-auth-gate { padding-top: 0.5rem; }
+.tenant-auth-panel {
+  max-width: 40rem;
+  margin: 0 clamp(1.25rem, 5vw, 5rem) 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.tenant-auth-panel h2 { margin: 0.25rem 0 0.75rem; font-size: 1.35rem; }
+.tenant-auth-panel .button { margin-right: 0.5rem; margin-top: 0.5rem; }
+.tenant-data-root[hidden] { display: none !important; }
 
 .control-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1.2rem; }
 .control-grid label { padding: 1rem; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; color: var(--muted); }

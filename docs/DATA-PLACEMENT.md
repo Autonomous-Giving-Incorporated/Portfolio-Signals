@@ -83,3 +83,7 @@ Outreach from historical membership, attendance, or this list alone remains **no
 6. Smoke magic-link on https://autogive.app/portfolio-signals/workspace
 7. Only then consider HD-OI-020 quarantine import of the authorized workbook
 8. Keep `ecxkhihlbrcwpavfoaoq` frozen; retire after data confirmation
+
+## Authenticated tenant data (2026-08-08)
+
+Canonical Hacker Dojo (`org_hacker_dojo`) campaign intelligence (portal metrics, sponsor/grant/member pipelines, public-campaign.json content for that tenant) is **not** shown on unauthenticated suite pages. Operators must sign in to Portfolio Signals with an active membership for that client (or platform master_admin).

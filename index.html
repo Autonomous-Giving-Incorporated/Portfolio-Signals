@@ -32,7 +32,7 @@
     <div>
       <p class="eyebrow">AGI product · Portfolio Signals</p>
       <h1>Decision workspace</h1>
-      <p class="lede">Leadership campaign intelligence for the active AGI tenant. Reference campaign metrics below are illustrative ($420K minimum · $2M transformation path).</p>
+      <p class="lede">Multi-tenant decision workspace for nonprofit operators. Canonical client campaign data is available only after sign-in to your tenant.</p>
     </div>
     <div class="header-actions">
       <span class="status-pill status-blocked">Execution blocked</span>
@@ -45,12 +45,27 @@
     <strong>Important.</strong>
     Portfolio Signals is <strong>decision-support software</strong> for nonprofit operators—not a bank, payment processor, or escrow.
     It does <strong>not</strong> provide legal, tax, or financial advice, and it does <strong>not</strong> authorize outreach or production CRM import by itself.
-    Public pages show <strong>privacy-safe aggregates only</strong>.
+    Canonical tenant campaign data (including Hacker Dojo) requires <strong>authenticated membership</strong> for that client.
     <a href="https://autogive.app/legal">Legal</a> ·
     <a href="https://autogive.app/legal/privacy">Privacy</a> ·
     <a href="https://autogive.app/legal/terms">Terms</a>
   </aside>
 
+
+  <section id="tenantAuthGate" class="section tenant-auth-gate" aria-label="Sign in required for tenant data">
+    <div class="panel tenant-auth-panel">
+      <p class="eyebrow">Authenticated tenant data</p>
+      <h2>Sign in to view campaign intelligence</h2>
+      <p data-gate-reason>Canonical Hacker Dojo campaign data is available only to operators with an active <strong>org_hacker_dojo</strong> membership (or platform master_admin).</p>
+      <p class="note">Public product information only appears above. Pipelines, registry metrics, and director resources for a client are not public.</p>
+      <p>
+        <a class="button" href="workspace.html">Sign in to workspace</a>
+        <a class="button secondary" href="https://autogive.app/legal">Legal notices</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="tenant-data-root" data-tenant-data hidden>
   <nav class="primary-nav" aria-label="Dashboard sections">
     <a href="#overview">Overview</a>
     <a href="#campaign">Campaign</a>
@@ -243,6 +258,7 @@
       </div>
     </section>
   </main>
+  </div>
 
   <dialog id="decisionDialog">
     <form method="dialog">
@@ -263,6 +279,10 @@
 
   <script src="runtime-config.js"></script>
   <script src="app.js?v=agi-1"></script>
-  <script type="module" src="public-client-config.js?v=agi-1"></script>
+  <script type="module" src="public-client-config.js?v=agi-2"></script>
+  <script type="module">
+    import { requireTenantAccess } from "./workspace/require-tenant-access.js";
+    requireTenantAccess({ clientId: "org_hacker_dojo" });
+  </script>
 </body>
 </html>
