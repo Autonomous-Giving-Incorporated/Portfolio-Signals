@@ -78,6 +78,8 @@ Checklist:
 
 After (or alongside) activate, directors and master_admins can collect **private org-proof documents** via the workspace **Onboarding pack**. Pack `ready` is **not** required for `activate_client` and does **not** authorize production CRM import or outreach.
 
+**Code:** on main ([#104](https://github.com/scrimshawlife-ctrl/Portofolio-Signals/pull/104)). **Platform:** migrate + Edge deploy still operator — evidence in [CURRENT-STATE.md](CURRENT-STATE.md).
+
 Full runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).
 
 ## Failure modes (activate / provision)

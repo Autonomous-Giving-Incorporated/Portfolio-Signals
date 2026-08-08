@@ -1,7 +1,7 @@
 # Client Onboarding Pack (document phase) — design
 
 **Date:** 2026-08-08  
-**Status:** Approved for implementation planning (pending user review of this file)  
+**Status:** Implementation shipped on main (Portofolio-Signals #104, 2026-08-08). Platform dry-run / OBSERVED still PENDING operator.  
 **Suite project:** [AGI GitHub Project #3](https://github.com/users/scrimshawlife-ctrl/projects/3)  
 **Primary repo:** Fund-Intel / Portfolio Signals (`scrimshawlife-ctrl/Portofolio-Signals` / Fund-Intel checkout)  
 **Related:** commercial shell lifecycle (slice B), governed import (HD-OI-015), DATA-PLACEMENT

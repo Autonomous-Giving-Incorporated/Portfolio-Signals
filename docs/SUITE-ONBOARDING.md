@@ -10,7 +10,7 @@ Single entry for **finishing onboarding** across Autonomously Giving Incorporate
 C  People (master_admin / director Auth + MFA)
      ↓
 B  Commercial client shell (provision → publish config → activate)
-     ↓
+     ↓  (parallel)  Document pack — private org-proof upload + confirm
 D  Second nonprofit (FI client + IR template clone)
      ↓
 Allocation pilot  pots → allocate → proof → packet (+ every.org)
@@ -20,6 +20,7 @@ Allocation pilot  pots → allocate → proof → packet (+ every.org)
 | --- | --- | --- |
 | **C** | [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) | Platform people path |
 | **B** | [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md) | Client lifecycle |
+| **Doc pack** | [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) | Private org docs (workspace **Onboarding pack**) |
 | **D** | [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) | Second tenant + IR |
 | **Pilot** | [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) | Allocation middleware |
 | **Director JWT** | [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) | `/login.html` |
@@ -27,7 +28,6 @@ Allocation pilot  pots → allocate → proof → packet (+ every.org)
 | **SMTP** | [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) | Auth email volume |
 | **Secrets** | [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) | Rotation checklist |
 | **IR bridge** | [IMPACT-RELAY.md](IMPACT-RELAY.md) | Console auth (no forge headers) |
-| **Doc pack** | [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) | Director/master_admin private org docs (≠ import) |
 
 ## Done without every.org (or other blocked) login
 
@@ -45,6 +45,7 @@ These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says 
 | Durable host **recipe** + preflight | `cd services/allocation-middleware && npm run preflight:durable` |
 | IR console host path (#48) | Bridge Bearer only; docs default-deny without `--trusted-proxy` |
 | Secret hygiene / SMTP runbooks | Docs ready; dashboard actions still operator |
+| **Doc pack code** (main #104) | Classifier + SQL tests + workspace UI **in repo**; platform apply still operator |
 
 Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Connected**.
 
@@ -54,6 +55,7 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 | --- | --- |
 | Live every.org webhook ([#73](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/73)) | every.org **Hacker Dojo nonprofit admin** |
 | Full director acceptance ([#74](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/74)) | Live gift + director browser session + sign-off |
+| **Doc pack platform OBSERVED** | Platform migrate + Edge deploy + MFA workspace dry-run — [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) |
 | Durable **named public** host (optional) | Render / Railway / Fly (or VPS) **dashboard** — recipe READY |
 | Custom SMTP (optional) | Platform Supabase Dashboard — [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | Secret rotation after share/offboard | Operator secret manager — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |

@@ -51,6 +51,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
+| Client Onboarding Pack (document phase) | **Code MERGED** main #104 — platform migrate + Edge deploy + MFA dry-run still **PENDING** ([CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
 | Secret service_role on Vercel | PROHIBITED (anon only) |
@@ -168,31 +169,39 @@ dry_run: OBSERVED  # 2026-08-07 Option B — (1) FI platform: org_hacker_dojo re
 
 ```yaml
 client_onboarding_pack:
-  status: PENDING  # 2026-08-08 Task 7 — not OBSERVED; platform dry-run blocked (no Supabase CLI access token / link, no browser MFA session)
+  status: PENDING_PLATFORM  # 2026-08-08 — code on main (#104 MERGED); not OBSERVED until platform migrate + Edge deploy + MFA dry-run
+  code_merged: true  # Portofolio-Signals / Fund-Intel PR #104 → main c373eeb (+ follow-up CI receipt fix)
   template: onboarding_pack_v1
   production_import: BLOCKED
   path: docs/CLIENT-ONBOARDING-PACK.md
-  migration: 202608080001_client_onboarding_pack.sql
+  design: docs/superpowers/specs/2026-08-08-client-onboarding-pack-design.md
+  plan: docs/superpowers/plans/2026-08-08-client-onboarding-pack.md
+  migrations:
+    - 202608080001_client_onboarding_pack.sql
+    - 202608080002_onboarding_pack_mime_types.sql
   edge_functions:
     - upload-onboarding-document
     - onboarding-document-url
+  workspace_ui: onboarding_pack section (director | master_admin + MFA)
   verified_locally:  # not production evidence
-    classifier_unit_tests: PASS  # node --test services/onboarding-pack/test/classifier.test.mjs — 8/8
-    sql_test_015_local: PASS  # supabase/tests/015_client_onboarding_pack.sql on local stack (tables present; ROLLBACK)
-    code_complete: true  # migration + both Edge functions + UI/runbook in repo
-  platform_probe_utdioxwiskzatwoejgiu:  # service_role REST; no secrets committed
-    client_onboarding_packs: ABSENT  # PostgREST PGRST205
+    classifier_unit_tests: PASS  # node --test services/onboarding-pack — 8/8
+    sql_test_015_local: PASS  # supabase/tests/015_client_onboarding_pack.sql (ROLLBACK)
+    local_acceptance_ci: PASS  # HD-OI-041 on #104 after GITHUB_REPOSITORY receipt fix
+    code_complete: true
+  platform_probe_utdioxwiskzatwoejgiu:  # last probe before merge; re-check after operator apply
+    client_onboarding_packs: ABSENT  # PostgREST PGRST205 until migrate
     client_onboarding_documents: ABSENT
-    upload-onboarding-document: NOT_DEPLOYED  # functions 404
+    upload-onboarding-document: NOT_DEPLOYED
     onboarding-document-url: NOT_DEPLOYED
   operator_remaining:
     - supabase login / SUPABASE_ACCESS_TOKEN then link utdioxwiskzatwoejgiu
     - PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu ./scripts/staging/apply-migrations.sh remote-linked
-    - deploy upload-onboarding-document + onboarding-document-url
-    - MFA director/master_admin synthetic PDF dry-run → then status OBSERVED
+    - supabase functions deploy upload-onboarding-document --project-ref utdioxwiskzatwoejgiu
+    - supabase functions deploy onboarding-document-url --project-ref utdioxwiskzatwoejgiu
+    - MFA director/master_admin: Workspace → Onboarding pack → 5 required + park xlsx → then status OBSERVED
 ```
 
-Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See runbook for director/master_admin MFA flow and operator deploy notes.
+Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).
 
 ## Related
 

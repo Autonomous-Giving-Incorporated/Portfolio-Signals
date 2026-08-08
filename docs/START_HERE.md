@@ -31,20 +31,22 @@ service_role_on_vercel: PROHIBITED
 4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
 5. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  
 6. [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md) — provision → publish → activate  
-7. [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) — second nonprofit + IR template clone  
-8. [BRAND-SYSTEM.md](BRAND-SYSTEM.md) — AGI product chrome vs `assets/tenants/<slug>/`  
-9. [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) + [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — Phase 3 pilot  
-10. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
-11. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
-12. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
+7. [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — document pack (workspace **Onboarding pack**; ≠ CRM import)  
+8. [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md) — second nonprofit + IR template clone  
+9. [BRAND-SYSTEM.md](BRAND-SYSTEM.md) — AGI product chrome vs `assets/tenants/<slug>/`  
+10. [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) + [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — Phase 3 pilot  
+11. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
+12. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
+13. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
 
-## Phase status (2026-08-07)
+## Phase status (2026-08-08)
 
 | Phase | Status |
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
+| **Client Onboarding Pack** (docs) | **Code on main** (#104); platform migrate + Edge deploy + MFA dry-run **PENDING** |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
 | Phase 3c every.org webhook | **PENDING** operator (#73) |
 | Production CRM import | Blocked |
@@ -72,9 +74,10 @@ npm run accept:seed-loop   # allocate→proof→packet on seed (no every.org)
 ## Current baseline (suite)
 
 ```yaml
-repository: scrimshawlife-ctrl/Fund-Intel
+repository: scrimshawlife-ctrl/Portofolio-Signals  # Fund-Intel checkout / redirect
 platform_supabase: utdioxwiskzatwoejgiu
 legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: scrimshawlife@gmail.com
+client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```

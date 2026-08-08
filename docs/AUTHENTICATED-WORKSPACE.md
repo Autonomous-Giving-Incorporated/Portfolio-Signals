@@ -115,6 +115,15 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - Board/advisor status cannot be granted automatically as a donor benefit.
 - Browser config is **anon-only**; never place service-role keys in `runtime-config.js`, Vercel public env, or git.
 
+## Onboarding pack (document phase)
+
+Workspace nav **Onboarding pack** (director of selected client, or master_admin): private multi-file upload to `campaign-private`, heuristic type suggest, human confirm onto org-proof checklist, pack `ready` when required slots confirmed. CRM xlsx/csv are **parked** (not import).
+
+- Runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)  
+- Evidence: [CURRENT-STATE.md](CURRENT-STATE.md) (`client_onboarding_pack`)  
+- Code on main (#104); platform migration + Edge functions must be applied before production use.  
+- Pack `ready` does **not** authorize CRM import, outreach, or client activation.
+
 ## Import quarantine
 
 The import API accepts a Supabase user access token in the standard `Authorization: Bearer <token>` header. It verifies the token with Supabase Auth, calls `require_privileged_mfa()` using that same user session, and permits writes only for active, MFA-enforced `director` or `data_steward` profiles. Caller-supplied identity headers are not trusted. Batch metadata and staged rows are written through `create_import_batch()` in one database transaction under the caller's user session, so a rejected row cannot leave an orphaned batch. The service-role credential remains server-only and is used as the Supabase API key, not as the database authorization identity for this operation.

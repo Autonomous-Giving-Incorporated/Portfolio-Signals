@@ -66,6 +66,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 | Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
 | Private data placement | Local workbook + platform Supabase (not GitHub, not Notion SoR) |
 | Impact Relay host screens / runbooks | Implemented / documented; live cohort operator-owned |
+| Client Onboarding Pack (org docs) | **Code on main** (#104); platform migrate + Edge deploy **PENDING** — [docs/CLIENT-ONBOARDING-PACK.md](docs/CLIENT-ONBOARDING-PACK.md) |
 | Production data import | **Blocked** |
 | Outreach authority | **Not granted** |
 
@@ -82,7 +83,7 @@ finance-impact.html / .js               Impact Relay L3 expense approval UI
 donor-impact.html / .js                 Impact Relay donor timeline / UOF detail
 import-review.html / .js                Import quarantine review UI
 workspace.html / workspace.js           Authenticated campaign workspace shell
-workspace/                              Session, decisions, pipelines, IR bridge
+workspace/                              Session, decisions, pipelines, onboarding-pack, IR bridge
   impact-relay-bridge.js                Supabase → Impact Relay console headers
 
 supabase/migrations/                    Governed database schema and controls
