@@ -231,22 +231,93 @@
   .site-header {
     grid-template-columns: 1fr;
     grid-template-areas: "brand" "actions" "hero";
-    gap: .75rem;
+    gap: .85rem 0;
+    padding-top: 1rem;
   }
-  .header-actions { justify-content: flex-start; }
-  .campaign-status-bar { grid-template-columns: 1fr; }
+  .brand-identity {
+    flex-wrap: wrap;
+    min-height: 0;
+    gap: .55rem .75rem;
+    width: 100%;
+  }
+  .brand-mark { width: min(148px, 44vw); }
   .brand-divider, .brand-product { display: none; }
-  .brand-suite-links { width: 100%; margin-left: 0; }
-  .primary-nav a.is-active::after { bottom: -.35rem; }
+  .brand-suite-links {
+    width: 100%;
+    margin-left: 0;
+    order: 3;
+    gap: .25rem .15rem;
+  }
+  .brand-suite-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem .55rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+    flex-wrap: wrap;
+    gap: .55rem;
+  }
+  .header-actions .button,
+  .header-actions .status-pill {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header-actions .button {
+    flex: 1 1 calc(50% - .4rem);
+  }
+  .header-actions .status-pill {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+  .site-header h1 {
+    font-size: clamp(2rem, 9vw, 3.25rem);
+    line-height: 1.02;
+  }
+  .site-header > div:not(.header-actions):not(.brand-identity) {
+    padding-top: .85rem;
+  }
+  .campaign-status-bar { grid-template-columns: 1fr; }
+  .primary-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .55rem .7rem;
+  }
+  .primary-nav a.is-active::after { bottom: .15rem; }
   footer { align-items: flex-start; flex-direction: column; }
-  .footer-meta { justify-content: flex-start; text-align: left; }
+  .footer-meta { justify-content: flex-start; text-align: left; gap: .15rem .5rem; }
+  .footer-meta a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem .4rem;
+  }
+  .auth-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem .4rem;
+  }
   .auth-gate { grid-template-columns: 1fr; align-content: start; padding-top: 2rem; }
   .workspace-brand-lockup { align-items: flex-start; flex-wrap: wrap; }
+  .workspace-brand-lockup > img { width: min(180px, 55vw); }
   .workspace-brand-lockup span { width: 100%; padding: .65rem 0 0; border-left: 0; border-top: 1px solid var(--line); }
   .workspace-authority-note { flex-direction: column; }
   .impact-host-header .brand-product { display: block; max-width: none; }
   .impact-host-header .brand-identity { flex-wrap: wrap; }
   .impact-host-header .brand-suite-links { margin-left: 0; width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .header-actions .button {
+    flex: 1 1 100%;
+  }
+  .brand-mark { width: min(128px, 48vw); }
 }
 
 /* Impact Relay host pilot screens */
