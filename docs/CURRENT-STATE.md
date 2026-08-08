@@ -1,6 +1,6 @@
 # Portfolio Signals — current state
 
-**Recorded:** 2026-08-07  
+**Recorded:** 2026-08-08  
 **Canonical repository:** `scrimshawlife-ctrl/Fund-Intel`  
 **Suite:** Autonomously Giving Incorporated (AGI)
 
@@ -27,8 +27,8 @@ vercel_platform_anon_env: SET  # PLATFORM_SUPABASE_URL + PLATFORM_SUPABASE_ANON_
 runtime_config_js: GENERATED_WITH_PLATFORM_ANON
 schema_migrations: APPLIED_ON_PLATFORM
 master_admin: scrimshawlife@gmail.com
-second_master_admin: qi@enkeyai.com  # Qi Diaz — Auth invited + platform_administrators active 2026-08-08; mfa_enforced still false until TOTP enroll
-hacker_dojo_tenant_director: ed@hackerdojo.org  # 2026-08-08 — profile + active director on org_hacker_dojo; mfa_enforced false until TOTP; email OTP rate-limited (action_link in operator-local gitignored file)
+second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; email_confirmed false until first link; mfa_enforced false; action_link regenerated 2026-08-08 operator-local only
+hacker_dojo_tenant_director: ed@hackerdojo.org  # 2026-08-08 — profile + active director on org_hacker_dojo only (not master_admin); mfa_enforced false; action_link regenerated operator-local gitignored
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07
@@ -36,6 +36,8 @@ tenant_canonical_data_auth: REQUIRED  # 2026-08-08 — Hacker Dojo campaign data
 edge_functions_deployed:
   - signed-document-url
   - upload-client-asset
+  - upload-onboarding-document  # 2026-08-08 platform deploy OBSERVED
+  - onboarding-document-url     # 2026-08-08 platform deploy OBSERVED
 tenant_assets_layout: assets/tenants/<slug>/  # HD under assets/tenants/hacker-dojo/
 legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 ```
@@ -54,7 +56,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
-| Client Onboarding Pack (document phase) | **Code MERGED** main #104 — platform migrate + Edge deploy + MFA dry-run still **PENDING** ([CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)) |
+| Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
 | Secret service_role on Vercel | PROHIBITED (anon only) |
@@ -173,8 +175,8 @@ dry_run: OBSERVED  # 2026-08-07 Option B — (1) FI platform: org_hacker_dojo re
 
 ```yaml
 client_onboarding_pack:
-  status: PENDING_PLATFORM  # 2026-08-08 — code on main (#104 MERGED); not OBSERVED until platform migrate + Edge deploy + MFA dry-run
-  code_merged: true  # Portofolio-Signals / Fund-Intel PR #104 → main c373eeb (+ follow-up CI receipt fix)
+  status: PLATFORM_SCHEMA_AND_EDGE_OBSERVED  # 2026-08-08 — migrations + Edge on utdioxwiskzatwoejgiu; MFA dry-run still PENDING before full pack OBSERVED
+  code_merged: true  # Portofolio-Signals / Fund-Intel PR #104 → main (+ #112 activate script)
   template: onboarding_pack_v1
   production_import: BLOCKED
   path: docs/CLIENT-ONBOARDING-PACK.md
@@ -192,18 +194,18 @@ client_onboarding_pack:
     sql_test_015_local: PASS  # supabase/tests/015_client_onboarding_pack.sql (ROLLBACK)
     local_acceptance_ci: PASS  # HD-OI-041 on #104 after GITHUB_REPOSITORY receipt fix
     code_complete: true
-  platform_probe_utdioxwiskzatwoejgiu:  # last probe before merge; re-check after operator apply
-    client_onboarding_packs: ABSENT  # PostgREST PGRST205 until migrate
-    client_onboarding_documents: ABSENT
-    upload-onboarding-document: NOT_DEPLOYED
-    onboarding-document-url: NOT_DEPLOYED
-  activate_script: scripts/platform/activate-onboarding-pack.sh  # requires supabase login
+  platform_probe_utdioxwiskzatwoejgiu:  # 2026-08-08 operator activate
+    client_onboarding_packs: OBSERVED  # REST 200 empty array (service role)
+    client_onboarding_documents: OBSERVED  # REST 200 empty array
+    onboarding_rpcs: OBSERVED  # 14 public *onboarding* functions present
+    upload-onboarding-document: OBSERVED  # OPTIONS 200; POST without JWT → 401 bearer_token_required
+    onboarding-document-url: OBSERVED  # OPTIONS 200; POST without JWT → 401 unauthorized
+    schema_migrations: RECORDED  # 202608080001, 202608080002 in supabase_migrations.schema_migrations
+  activate_script: scripts/platform/activate-onboarding-pack.sh  # Edge via CLI; SQL also applied via Management API when db password absent
   operator_remaining:
-    - supabase login / SUPABASE_ACCESS_TOKEN then link utdioxwiskzatwoejgiu
-    - PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu ./scripts/staging/apply-migrations.sh remote-linked
-    - supabase functions deploy upload-onboarding-document --project-ref utdioxwiskzatwoejgiu
-    - supabase functions deploy onboarding-document-url --project-ref utdioxwiskzatwoejgiu
-    - MFA director/master_admin: Workspace → Onboarding pack → 5 required + park xlsx → then status OBSERVED
+    - MFA director/master_admin: Workspace → Onboarding pack → 5 required + park xlsx → then status full OBSERVED
+    - Qi/Ed action_links regenerated operator-local (scripts/platform/.onboarding-invite-links.md); humans open link → enroll TOTP → set-mfa-enforced
+    - REVOKE any personal access token pasted into chat after activate
 ```
 
 Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).

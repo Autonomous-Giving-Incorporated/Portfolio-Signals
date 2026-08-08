@@ -29,11 +29,20 @@
   </section>
 
 <nav class="primary-nav" aria-label="Campaign intelligence pages"><a href="index.html">Overview</a><a href="sponsors.html" data-agi-module="sponsors">Sponsors</a><a href="grants.html" data-agi-module="grants">Grants</a><a href="members.html" aria-current="page">Member segments</a></nav>
-<div class="tenant-data-root" data-tenant-data hidden><main id="main"><section class="section"><div class="section-heading"><div><p class="eyebrow">SEGMENT</p><h2>Aggregate member evidence</h2></div><p>Scores support analysis only. They do not establish consent or outreach authority.</p></div>
+<main id="main">
+<section class="section public-page-shell" data-public-shell>
+  <div class="panel">
+    <p class="eyebrow">Published tenant view</p>
+    <h2>Member segments</h2>
+    <p>Aggregate Hacker Dojo member evidence is available only to authenticated tenant operators. Other tenants do not inherit reference-tenant registry metrics.</p>
+  </div>
+</section>
+<div class="tenant-data-root" data-tenant-data hidden><section class="section"><div class="section-heading"><div><p class="eyebrow">SEGMENT</p><h2>Aggregate member evidence</h2></div><p>Scores support analysis only. They do not establish consent or outreach authority.</p></div>
 <div class="segment-grid"><article><strong>5,212</strong><span>Deduplicated member IDs</span></article><article><strong>1,862</strong><span>Bay Area records in normalized extract</span></article><article><strong>62</strong><span>Organizer/co-organizer source labels</span></article><article><strong>723</strong><span>Private-relay source occurrences</span></article><article><strong>70</strong><span>Records with engagement score ≥ 60</span></article><article><strong>0</strong><span>Authorized outreach-ready records</span></article></div>
 <article class="panel"><div class="panel-heading"><h3>Engagement threshold explorer <span data-tooltip="This illustrative control filters aggregate bands only and never reveals person-level records.">?</span></h3><output id="engagementOutput">60 points</output></div><label>Minimum score<input type="range" min="0" max="100" step="10" value="60" data-range-output="engagementOutput" data-range-suffix=" points" data-range-target="#engagementBands article"></label><div id="engagementBands" class="segment-grid"><article data-score="20"><strong>20+</strong><span>Light observed engagement</span></article><article data-score="40"><strong>40+</strong><span>Repeat participation indicators</span></article><article data-score="60"><strong>60+</strong><span>High-engagement research band</span></article><article data-score="80"><strong>80+</strong><span>Very high evidence threshold</span></article></div></article>
 <div class="privacy-callout"><strong>Restricted data boundary</strong><p>GitHub Pages must never contain raw member registries, personal emails, addresses, or attendance-level PII. These aggregates do not grant outreach authority.</p></div>
-</section></main></div><footer></footer><script src="runtime-config.js"></script><script src="app.js"></script><script type="module" src="public-client-config.js"></script><script src="ui-controls.js"></script>
+</section></div>
+</main><footer></footer><script src="runtime-config.js"></script><script src="app.js"></script><script type="module" src="public-client-config.js"></script><script src="ui-controls.js"></script>
   <script type="module">
     import { requireTenantAccess } from "./workspace/require-tenant-access.js";
     requireTenantAccess({ clientId: "org_hacker_dojo" });

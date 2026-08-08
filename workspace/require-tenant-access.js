@@ -1,7 +1,7 @@
 /**
- * Gate canonical tenant campaign data behind authenticated membership.
- * Public visitors see product shell only; Hacker Dojo (and other client) data
- * requires an active session with membership on that client or master_admin.
+ * Gate canonical Hacker Dojo campaign data behind authenticated membership.
+ * Public visitors see product shell + published multi-tenant chrome; HD pipeline
+ * tables/metrics require membership on org_hacker_dojo (or master_admin).
  */
 import {
   createWorkspaceClient,
@@ -11,6 +11,15 @@ import {
 
 export const HACKER_DOJO_CLIENT_ID = 'org_hacker_dojo';
 export const HACKER_DOJO_SLUG = 'hacker-dojo';
+
+function publicClientSlug() {
+  const cfg = getRuntimeConfig();
+  return (
+    new URLSearchParams(location.search).get('client') ||
+    cfg.defaultClientSlug ||
+    HACKER_DOJO_SLUG
+  );
+}
 
 /**
  * @param {object} [opts]
@@ -23,6 +32,7 @@ export async function requireTenantAccess(opts = {}) {
   const clientId = opts.clientId || HACKER_DOJO_CLIENT_ID;
   const revealSelectors = opts.revealSelectors || ['.tenant-data-root', '[data-tenant-data]'];
   const gateSelector = opts.gateSelector || '#tenantAuthGate';
+  const slug = publicClientSlug();
 
   const hideTenantData = () => {
     for (const sel of revealSelectors) {
@@ -33,6 +43,20 @@ export async function requireTenantAccess(opts = {}) {
     }
   };
 
+  const hidePublicShell = () => {
+    document.querySelectorAll('[data-public-shell]').forEach((el) => {
+      el.hidden = true;
+      el.setAttribute('aria-hidden', 'true');
+    });
+  };
+
+  const showPublicShell = () => {
+    document.querySelectorAll('[data-public-shell]').forEach((el) => {
+      el.hidden = false;
+      el.removeAttribute('aria-hidden');
+    });
+  };
+
   const showTenantData = () => {
     for (const sel of revealSelectors) {
       document.querySelectorAll(sel).forEach((el) => {
@@ -40,6 +64,7 @@ export async function requireTenantAccess(opts = {}) {
         el.removeAttribute('aria-hidden');
       });
     }
+    hidePublicShell();
     const gate = document.querySelector(gateSelector);
     if (gate) {
       gate.hidden = true;
@@ -49,6 +74,7 @@ export async function requireTenantAccess(opts = {}) {
 
   const showGate = (reason) => {
     hideTenantData();
+    showPublicShell();
     const gate = document.querySelector(gateSelector);
     if (gate) {
       gate.hidden = false;
@@ -58,7 +84,30 @@ export async function requireTenantAccess(opts = {}) {
     }
   };
 
+  const hideGateOnly = () => {
+    hideTenantData();
+    showPublicShell();
+    const gate = document.querySelector(gateSelector);
+    if (gate) {
+      gate.hidden = true;
+      gate.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  // Always start with HD pipeline payloads hidden; keep public shell for a11y/main visibility.
   hideTenantData();
+  showPublicShell();
+
+  // Non-HD published tenants: product/module shell is public; do not force HD login gate.
+  // Canonical HD tables stay hidden (no leak).
+  if (
+    clientId === HACKER_DOJO_CLIENT_ID &&
+    slug !== HACKER_DOJO_SLUG &&
+    slug !== HACKER_DOJO_CLIENT_ID
+  ) {
+    hideGateOnly();
+    return { authorized: false, reason: 'non_hd_public_shell', clientId, publicSlug: slug };
+  }
 
   const cfg = getRuntimeConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
@@ -88,7 +137,6 @@ export async function requireTenantAccess(opts = {}) {
 
     showTenantData();
     document.documentElement.dataset.tenantAccess = clientId;
-    // Re-apply published client config now that tenant data may be revealed.
     try {
       const { loadPublicConfig } = await import('../public-client-config.js');
       if (typeof loadPublicConfig === 'function') await loadPublicConfig();

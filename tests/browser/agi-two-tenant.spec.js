@@ -56,9 +56,13 @@ test('two tenants retain independent branding, modules, and navigation context',
   await expect(page.locator('.brand-product')).toContainText('Portfolio Signals');
   await expect(page.locator('h1').first()).toHaveText('Second tenant independent campaign');
   await expect(page).toHaveTitle('AGI Portfolio Signals · Second Tenant');
-  await expect(page.locator('a[href*="grants.html"]')).toBeVisible();
-  await expect(page.locator('a[href*="sponsors.html"]')).toBeHidden();
-  await expect(page.locator('a[href*="grants.html"]')).toHaveAttribute('href', /client=second-tenant/);
+  // Public primary-nav module links (pipeline route-cards stay inside gated HD root).
+  await expect(page.locator('[data-public-shell] a[href*="grants.html"]')).toBeVisible();
+  await expect(page.locator('[data-public-shell] a[href*="sponsors.html"]')).toBeHidden();
+  await expect(page.locator('[data-public-shell] a[href*="grants.html"]')).toHaveAttribute(
+    'href',
+    /client=second-tenant/
+  );
 
   await page.goto('/sponsors.html?client=second-tenant');
   await expect(page.getByText('Module not enabled')).toBeVisible();
@@ -70,8 +74,8 @@ test('two tenants retain independent branding, modules, and navigation context',
   await page.goto('/index.html?client=hacker-dojo');
   await expect(page.locator('.brand-product')).toContainText('Portfolio Signals');
   await expect(page.locator('h1').first()).toHaveText('Keep the room where builders become possible.');
-  await expect(page.locator('a[href*="sponsors.html"]')).toBeVisible();
-  await expect(page.locator('a[href*="grants.html"]')).toBeHidden();
+  await expect(page.locator('[data-public-shell] a[href*="sponsors.html"]')).toBeVisible();
+  await expect(page.locator('[data-public-shell] a[href*="grants.html"]')).toBeHidden();
 });
 
 for (const path of ['index.html', 'members.html', 'sponsors.html', 'grants.html']) {

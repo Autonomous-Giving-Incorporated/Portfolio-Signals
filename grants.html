@@ -29,10 +29,19 @@
   </section>
 
 <nav class="primary-nav" aria-label="Campaign intelligence pages"><a href="index.html">Overview</a><a href="sponsors.html" data-agi-module="sponsors">Sponsors</a><a href="grants.html" aria-current="page" data-agi-module="grants">Grants</a><a href="members.html">Member segments</a></nav>
-<div class="tenant-data-root" data-tenant-data hidden><main id="main"><section class="section"><div class="section-heading"><div><p class="eyebrow">QUALIFY</p><h2>Grant opportunities</h2></div><p>Recommendations remain conditional until every eligibility gate is evidenced.</p></div>
+<main id="main">
+<section class="section public-page-shell" data-public-shell>
+  <div class="panel">
+    <p class="eyebrow">Published tenant view</p>
+    <h2>Module workspace</h2>
+    <p>Canonical pipeline rows load only for authenticated Hacker Dojo operators. Other tenants use published modules from client configuration.</p>
+  </div>
+</section>
+<div class="tenant-data-root" data-tenant-data hidden><section class="section"><div class="section-heading"><div><p class="eyebrow">QUALIFY</p><h2>Grant opportunities</h2></div><p>Recommendations remain conditional until every eligibility gate is evidenced.</p></div>
 <div class="table-toolbar control-grid"><label>Decision<select data-filter-table="grantTable" data-filter-field="decision"><option value="all">All decisions</option><option value="go">Go</option><option value="conditional">Conditional</option><option value="partner">Partner route</option></select></label><span><strong data-visible-count="grantTable">5</strong> visible opportunities</span></div>
 <div class="table-wrap"><table id="grantTable"><thead><tr><th>Opportunity</th><th>Decision <span data-tooltip="A decision label summarizes current eligibility evidence and may change after review.">?</span></th><th>Timing</th><th>Primary gate</th></tr></thead><tbody>
-    </tbody></table></div></section></main></div><footer></footer><script src="runtime-config.js"></script><script src="app.js"></script><script type="module" src="public-client-config.js"></script><script src="ui-controls.js"></script>
+    </tbody></table></div></section></div>
+</main><footer></footer><script src="runtime-config.js"></script><script src="app.js"></script><script type="module" src="public-client-config.js"></script><script src="ui-controls.js"></script>
   <script type="module">
     import { requireTenantAccess } from "./workspace/require-tenant-access.js";
     requireTenantAccess({ clientId: "org_hacker_dojo" });

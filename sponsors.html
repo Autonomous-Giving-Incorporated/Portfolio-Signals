@@ -36,7 +36,15 @@
   </section>
 
   <nav class="primary-nav" aria-label="Campaign intelligence pages"><a href="index.html">Overview</a><a href="sponsors.html" aria-current="page" data-agi-module="sponsors">Sponsors</a><a href="grants.html" data-agi-module="grants">Grants</a><a href="members.html">Member segments</a></nav>
-  <div class="tenant-data-root" data-tenant-data hidden><main id="main"><section class="section">
+  <main id="main">
+  <section class="section public-page-shell" data-public-shell>
+    <div class="panel">
+      <p class="eyebrow">Published tenant view</p>
+      <h2>Module workspace</h2>
+      <p>Canonical pipeline rows load only for authenticated Hacker Dojo operators. Other tenants use published modules from client configuration.</p>
+    </div>
+  </section>
+  <div class="tenant-data-root" data-tenant-data hidden><section class="section">
     <div class="section-heading"><div><p class="eyebrow">ASCEND</p><h2>Sponsor candidates</h2></div><p>Public fit is not relationship evidence or outreach authorization.</p></div>
     <div class="table-toolbar control-grid">
       <label>Priority<select data-filter-table="sponsorTable" data-filter-field="priority"><option value="all">All priorities</option><option value="p0">P0</option><option value="p1">P1</option></select></label>
@@ -46,7 +54,8 @@
     <div class="table-wrap"><table id="sponsorTable"><thead><tr><th>Company</th><th>Sector</th><th>Stage <span data-tooltip="Stage records observed workflow state, not relationship strength.">?</span></th><th>Priority <span data-tooltip="Priority is an internal research order, not outreach permission.">?</span></th><th>Recommended ask</th><th>Control</th></tr></thead><tbody>
       <!-- filled after tenant auth from data/tenant/org_hacker_dojo/sponsors.json -->
     </tbody></table></div>
-  </section></main></div>
+  </section></div>
+  </main>
   <footer></footer><script src="runtime-config.js"></script><script src="app.js"></script><script type="module" src="public-client-config.js"></script><script src="ui-controls.js"></script>
 
   <script type="module">
