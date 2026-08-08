@@ -1,5 +1,21 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Aggregate Tenant (Hacker Dojo) member segment intelligence."><title>Member Segments · Tenant: Hacker Dojo</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="brand.css"></head>
+<html lang="en"><head>  <script>
+    /* Suite hosts pages at /portfolio-signals without a trailing slash; relative
+       CSS/JS would resolve to /styles.css (404). Force the asset base. */
+    (function () {
+      var path = location.pathname || "";
+      var baseHref = "/";
+      if (path === "/portfolio-signals" || path.indexOf("/portfolio-signals/") === 0) {
+        baseHref = "/portfolio-signals/";
+      } else if (path === "/impact-relay" || path.indexOf("/impact-relay/") === 0) {
+        baseHref = "/impact-relay/";
+      }
+      var el = document.createElement("base");
+      el.href = baseHref;
+      document.head.insertBefore(el, document.head.firstChild);
+    })();
+  </script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Aggregate Tenant (Hacker Dojo) member segment intelligence."><title>Member Segments · Tenant: Hacker Dojo</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="brand.css"></head>
 <body><a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div><p class="eyebrow">A.G.I. Fund-Intel</p><h1>Member Segments</h1><p class="lede">Aggregate-only audience intelligence with strict privacy and outreach boundaries.</p></div><div class="header-actions"><a class="button secondary" href="workspace.html">Director workspace</a><button id="themeToggle" class="button secondary" type="button">Toggle theme</button></div></header>
 <nav class="primary-nav" aria-label="Campaign intelligence pages"><a href="index.html">Overview</a><a href="sponsors.html" data-agi-module="sponsors">Sponsors</a><a href="grants.html" data-agi-module="grants">Grants</a><a href="members.html" aria-current="page">Member segments</a></nav>
