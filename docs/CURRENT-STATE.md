@@ -27,8 +27,8 @@ vercel_platform_anon_env: SET  # PLATFORM_SUPABASE_URL + PLATFORM_SUPABASE_ANON_
 runtime_config_js: GENERATED_WITH_PLATFORM_ANON
 schema_migrations: APPLIED_ON_PLATFORM
 master_admin: scrimshawlife@gmail.com
-second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; last_sign_in never; TOTP factors 0; mfa_enforced false; OTP send HTTP 200 once 2026-08-08; action_link operator-local gitignored
-hacker_dojo_tenant_director: ed@hackerdojo.org  # director on org_hacker_dojo only (not master_admin); last_sign_in never; TOTP 0; mfa_enforced false; Auth email rate-limited (use action_link, not resend OTP)
+second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; last_sign_in never; TOTP 0; mfa_enforced false; OTP rate-limited; action_link operator-local (see PEOPLE-AND-PACK-HANDOFF)
+hacker_dojo_tenant_director: ed@hackerdojo.org  # director on org_hacker_dojo only (not master_admin); last_sign_in never; TOTP 0; mfa_enforced false; OTP rate-limited; action_link operator-local
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07
@@ -202,9 +202,11 @@ client_onboarding_pack:
     onboarding-document-url: OBSERVED  # OPTIONS 200; POST without JWT → 401 unauthorized
     schema_migrations: RECORDED  # 202608080001, 202608080002 in supabase_migrations.schema_migrations
   activate_script: scripts/platform/activate-onboarding-pack.sh  # Edge via CLI; SQL also applied via Management API when db password absent
+  handoff: docs/PEOPLE-AND-PACK-HANDOFF.md
   operator_remaining:
-    - MFA director/master_admin: Workspace → Onboarding pack → 5 required + park xlsx → then status full OBSERVED
-    - Qi/Ed action_links regenerated operator-local (scripts/platform/.onboarding-invite-links.md); humans open link → enroll TOTP → set-mfa-enforced
+    - Primary (mfa_enforced true) can run pack dry-run now without waiting on Qi/Ed
+    - Workspace → Onboarding pack (org_hacker_dojo) → 5 required + park xlsx → mark full OBSERVED
+    - Qi/Ed: action_links operator-local; enroll TOTP → set-mfa-enforced (parallel)
     - REVOKE any personal access token pasted into chat after activate
 ```
 
