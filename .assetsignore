@@ -1,0 +1,51 @@
+# Fail-closed public publish: only the director portal, workspace shell, and
+# public aggregates. Mirrors .vercelignore and also drops operator/source trees
+# that must not ship on the CDN.
+
+.git
+.github
+.idea
+.vscode
+.vercel
+.wrangler
+node_modules
+out
+test-results
+playwright-report
+supabase
+services
+scripts
+docs
+tests
+templates
+platform-spec
+.cursor
+.nvmrc
+.tool-versions
+
+.env
+.env.*
+*.xlsx
+*.csv
+
+# Tooling / source control (not the public portal)
+wrangler.toml
+vercel.json
+.vercelignore
+.assetsignore
+.gitignore
+package.json
+package-lock.json
+playwright.config.js
+deno.json
+platform-conformance.yml
+LICENSE
+SECURITY.md
+README.md
+ROADMAP.md
+TODO.md
+design-qa.md
+*.md
+
+runtime-config.example.js
+scripts/staging/bootstrap.env

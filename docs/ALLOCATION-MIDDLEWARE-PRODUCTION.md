@@ -11,12 +11,12 @@
 | Secrets for webhook/operator | Ready when `NODE_ENV=production` |
 | Health checks | `/healthz`, `/readyz` |
 | Mapping UX (label + merge) | API + UI |
-| Hosted deploy recipe | Local Node (default); Compose; optional Fly / Render / Railway |
+| Hosted deploy recipe | Local Node (pilot); production webhook/public host is Cloudflare Workers |
 | Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
 | Director SSO / Supabase session | OBSERVED (`/login.html` + membership JWT; #72 closed) |
-| every.org live webhook | **Pilot operator step** (#73) |
+| every.org live webhook | **PENDING** Worker port (#73) — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Public HTTPS (ephemeral) | OBSERVED (cloudflared; #71 closed) |
-| Named durable public host | **Optional** (Compose VPS, Render, Railway, or Fly) |
+| Named durable public host | **Cloudflare Workers** (designed); not Render/Fly/Railway |
 | Seed-loop accept (no live gift) | OBSERVED (`npm run accept:seed-loop`) |
 | Multi-region HA | Not required for pilot |
 

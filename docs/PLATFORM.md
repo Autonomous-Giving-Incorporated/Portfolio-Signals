@@ -8,7 +8,8 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | --- | --- |
 | Public URL (production intent) | `https://autogive.app/portfolio-signals/` |
 | **Authenticated workspace** | `https://autogive.app/portfolio-signals/workspace` |
-| Vercel project | `fund-intel` (team `scrimshawlife-8819s-projects`) |
+| **Designed public host** | Cloudflare Workers static assets (`portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| Vercel project (fallback until DNS cutover) | `fund-intel` (team `scrimshawlife-8819s-projects`) |
 | GitHub Pages fallback | repository Actions fallback; production remains `autogive.app/portfolio-signals/` |
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
@@ -26,7 +27,7 @@ Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://gith
 
 1. New tenancy, AGI admin, and multi-client work use **platform** `utdioxwiskzatwoejgiu` only.
 2. Legacy `ecxkhihlbrcwpavfoaoq` is frozen for new tenancy; migrate then retire.
-3. Browser / Vercel runtime config: **anon** key only — never service role.
+3. Browser / Workers / Vercel runtime config: **anon** key only — never service role.
 4. Schema source of truth: this repo’s `supabase/migrations`. Platform has been migrated; further changes: `supabase link --project-ref utdioxwiskzatwoejgiu` then `supabase db push`.
 5. Operator SQL: [scripts/platform/README.md](../scripts/platform/README.md).
 6. Tenant brand assets: `assets/tenants/<slug>/` (Hacker Dojo is not product chrome).
@@ -40,6 +41,10 @@ Bootstrap runbook: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Workspace: [AUT
 
 ## Deploy (public)
 
+**Intended production:** Cloudflare Workers — [CLOUDFLARE.md](CLOUDFLARE.md) (`wrangler.toml`, `.github/workflows/cloudflare-workers.yml`). Requires GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+**Fallback until DNS cutover** (keep `vercel.json`):
+
 ```bash
 vercel link --yes --scope scrimshawlife-8819s-projects --project fund-intel
 vercel deploy --prod --yes --scope scrimshawlife-8819s-projects
@@ -47,12 +52,12 @@ vercel deploy --prod --yes --scope scrimshawlife-8819s-projects
 
 Config: `vercel.json`, `.vercelignore` (excludes `node_modules`, services, secrets).
 
-**Vercel env (set on `fund-intel` project):**
+**Vercel env (set on `fund-intel` project; same anon pair for Workers CI):**
 
 - `PLATFORM_SUPABASE_URL=https://utdioxwiskzatwoejgiu.supabase.co` — **set**
 - `PLATFORM_SUPABASE_ANON_KEY=<public anon key only>` — **set**
 
-Build generates gitignored `runtime-config.js`. Do **not** set service-role keys on the Vercel project.
+Build generates gitignored `runtime-config.js`. Do **not** set service-role keys on the Vercel project or the Worker.
 
 ## Phase 3 (allocation pilot)
 
@@ -62,8 +67,8 @@ Build generates gitignored `runtime-config.js`. Do **not** set service-role keys
 | Director JWT path (#72) | OBSERVED — [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) |
 | Public HTTPS ephemeral (#71) | OBSERVED — Cloudflare quick tunnel |
 | Seed allocate→proof→packet (#74 partial) | OBSERVED — `npm run accept:seed-loop` |
-| Durable named host | Optional operator (Render/Railway/Fly) |
-| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | Partial — needs durable host, live gift + browser sign-off |
+| Durable named host | **Cloudflare Workers** (designed); local Node for pilot only |
+| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | PENDING Worker port; needs live gift + browser sign-off |
 
 See [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) (hub) · [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
 

@@ -21,8 +21,7 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public portal | https://autogive.app/portfolio-signals/ |
 | Authenticated workspace | https://autogive.app/portfolio-signals/workspace |
-| Suite home | https://autogive.app/ |
-| Impact Relay public | https://autogive.app/impact-relay/ |
+| Designed public host | Cloudflare Workers (`portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md); Vercel fallback until DNS cutover |
 | Platform Supabase | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
 
 ## Read in this order
@@ -30,6 +29,7 @@ service_role_on_vercel: PROHIBITED
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — live production vs historical evidence  
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
+3a. [CLOUDFLARE.md](CLOUDFLARE.md) — Workers public host + webhook remaining work  
 4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
    - [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) — role-aware magic links and tenant-scoped infrastructure delegates
 5. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  

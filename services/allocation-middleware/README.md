@@ -4,7 +4,7 @@ MVP package for AGI allocation middleware: **every.org gift summaries → pots �
 
 Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`** (Hacker Dojo reference tenant — not AGI product brand).
 
-**Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Public HTTPS OBSERVED via Cloudflare quick tunnel (ephemeral); durable Render/Railway/Fly optional.
+**Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Public HTTPS OBSERVED via Cloudflare quick tunnel (ephemeral). Designed durable host is **Cloudflare Workers** ([CLOUDFLARE.md](../../docs/CLOUDFLARE.md)) — not Render/Fly/Railway.
 
 | Doc | Purpose |
 | --- | --- |
@@ -35,10 +35,8 @@ npm run start:hacker-dojo:seed   # local Node, SEED_ON_BOOT=1
 # Seed-loop accept (no every.org) — allocate → proof → packet
 npm run accept:seed-loop
 
-# Optional durable — Docker Compose / Render / Railway / Fly
-npm run gen:env                  # .env.pilot with tokens
-# npm run compose:up
-# Director: DIRECTOR_EMAIL=… npm run grant:director
+# Designed durable host: Cloudflare Workers (see docs/CLOUDFLARE.md)
+# Local Node remains valid for pilot smoke.
 
 npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
@@ -46,8 +44,8 @@ npm run pilot:smoke              # health checks (BASE_URL=...)
 npm run pilot:env                # env checklist
 ```
 
-**Other hosts:** Render (`render.yaml`), Railway (`railway.toml`), or optional Fly (`fly.toml` + `bootstrap:fly`).  
-See [ALLOCATION-HOSTING-OPTIONS.md](../../docs/ALLOCATION-HOSTING-OPTIONS.md).
+**Other hosts:** historical Compose/Render/Railway/Fly recipes remain in-tree for local use only. Designed production: Workers + Supabase.  
+See [ALLOCATION-HOSTING-OPTIONS.md](../../docs/ALLOCATION-HOSTING-OPTIONS.md) and [CLOUDFLARE.md](../../docs/CLOUDFLARE.md).
 
 Generic demo (non-Hacker Dojo):
 

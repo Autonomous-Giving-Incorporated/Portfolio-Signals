@@ -1,0 +1,21 @@
+# Portfolio Signals — Cloudflare Workers static assets (designed production host).
+# Designed stack: Workers (public site + future webhook Worker) + platform Supabase
+# (utdioxwiskzatwoejgiu). Do not treat Render / Fly / Railway as the durable host.
+#
+# Assets-only today: HTML/JS/CSS/data/assets. No Worker script (`main`) until the
+# every.org webhook is ported onto this Worker (or a sibling) — see docs/CLOUDFLARE.md.
+# After that port, add main + assets.run_worker_first = ["/webhooks/*"].
+
+name = "portfolio-signals"
+compatibility_date = "2026-08-13"
+workers_dev = true
+
+[assets]
+directory = "."
+# /workspace → workspace.html; /workspace/session.js still served from workspace/.
+# Not an SPA: unknown paths 404 (not_found_handling default is none).
+html_handling = "auto-trailing-slash"
+
+[observability]
+enabled = true
+head_sampling_rate = 1

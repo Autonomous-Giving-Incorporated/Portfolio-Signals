@@ -1,16 +1,20 @@
-# Allocation middleware — durable named host (optional)
+# Allocation middleware — durable named host
 
-Ephemeral Cloudflare quick tunnel is **OBSERVED** for pilot smoke. A **named durable** host is optional until every.org needs a stable webhook URL.
+Designed durable host is **Cloudflare Workers** (static site live in this repo; every.org webhook is a Worker port). Platform data and Auth stay on Supabase `utdioxwiskzatwoejgiu`. **Do not** treat Render / Railway / Fly as the production webhook host.
 
-This page is the operator preflight + deploy checklist. Runtime recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
+Ephemeral Cloudflare quick tunnel remains valid for **local** Node pilot smoke only.
+
+This page is the **local** operator preflight. Production webhook remaining work: [CLOUDFLARE.md](CLOUDFLARE.md). Historical Compose/VPS recipes below are for local durability, not the named public host.
 
 ## Status labels
 
 | State | Meaning |
 | --- | --- |
-| Recipe READY | In-repo Dockerfile, `render.yaml`, `railway.toml`, `fly.toml`, Compose |
-| Local durable OBSERVED | Docker Compose volume on this machine / VPS smoke |
-| Named public PENDING | Render / Railway / Fly (or VPS + TLS) dashboard deploy |
+| Designed host | Cloudflare Workers + Supabase — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| Public static site | Worker `portfolio-signals` (CI deploy once CF secrets are set) |
+| Webhook on Workers | PENDING port of `POST /webhooks/every-org` |
+| Local durable OBSERVED | Docker Compose volume / local Node smoke |
+| Render / Railway / Fly | Not the designed durable host |
 
 ## Preflight (no dashboard)
 

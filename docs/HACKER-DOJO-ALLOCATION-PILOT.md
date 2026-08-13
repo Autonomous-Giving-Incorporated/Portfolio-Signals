@@ -74,28 +74,16 @@ BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run verify:director
 # Optionally set PUBLIC_BASE_URL to the same URL in the host env and restart
 ```
 
-URL changes each session — fine for pilot smoke; use C2 for durable every.org webhooks.
+URL changes each session — fine for local smoke. Production every.org webhooks belong on **Cloudflare Workers**, not Render/Fly/Railway — [CLOUDFLARE.md](CLOUDFLARE.md).
 
-Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable`).
+Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable` for local). Webhook remaining work: Worker port of `POST /webhooks/every-org`.
 
-### C2 — Render / Railway / Fly (durable)
+### C2 — Cloudflare Workers (designed durable host)
 
-| Host | Path |
-| --- | --- |
-| **Render** | Blueprint `services/allocation-middleware/render.yaml` or Docker web service + disk at `/data` |
-| **Railway** | GitHub deploy, root `services/allocation-middleware`, volume at `/data` |
-| **Fly** | Optional `fly.toml` + `npm run bootstrap:fly` |
+Public portal: Worker `portfolio-signals` in this repo.  
+every.org webhook: remaining Worker port (same account; not a Render/Fly/Railway service).
 
-Details: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
-
-After deploy:
-
-```bash
-BASE_URL=https://YOUR_HOST npm run pilot:smoke
-BASE_URL=https://YOUR_HOST npm run verify:director
-```
-
-Set dashboard `PUBLIC_BASE_URL` to that https origin. After first stable seed: `SEED_ON_BOOT=0`. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0` with Supabase director login.
+Details: [CLOUDFLARE.md](CLOUDFLARE.md). Historical Compose/Render recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) (not production).
 
 ## D — Seed-loop acceptance (no live every.org) — #74 partial
 
@@ -120,10 +108,14 @@ What it checks:
 
 **Not OAuth.** every.org POSTs each completed donation to your public HTTPS webhook.
 
-### Prerequisites
+**Designed production host:** a **Cloudflare Worker** (`POST /webhooks/every-org`) on the same account as `portfolio-signals`, with platform Supabase as the data plane. See [CLOUDFLARE.md](CLOUDFLARE.md). Do **not** deploy this webhook to Render, Fly, or Railway.
+
+Until that Worker port ships, local Node + an ephemeral tunnel is valid **smoke only** (URL is not durable).
+
+### Prerequisites (local smoke)
 
 1. Allocation host running (local Node is fine).  
-2. **Public HTTPS** in front of it (cloudflared tunnel or durable Render/Railway).  
+2. Public HTTPS in front of it for the test session (cloudflared tunnel).  
 3. `PUBLIC_BASE_URL` = that https origin (so `/setup` shows the correct URL).  
 4. `WEBHOOK_TOKEN` set (min 16 chars; in `.env.pilot`).
 
