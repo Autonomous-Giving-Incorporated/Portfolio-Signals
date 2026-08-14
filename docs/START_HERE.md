@@ -31,6 +31,7 @@ service_role_on_vercel: PROHIBITED
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
 4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
+   - [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) — role-aware magic links and tenant-scoped infrastructure delegates
 5. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  
 6. [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md) — provision → publish → activate  
 7. [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — document pack (workspace **Onboarding pack**; ≠ CRM import)  
@@ -76,10 +77,12 @@ npm run accept:seed-loop   # allocate→proof→packet on seed (no every.org)
 ## Current baseline (suite)
 
 ```yaml
-repository: scrimshawlife-ctrl/Portofolio-Signals  # Fund-Intel checkout / redirect
+repository: Autonomous-Giving-Incorporated/Portfolio-Signals  # authoritative post-migration production repository
 platform_supabase: utdioxwiskzatwoejgiu
 legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: scrimshawlife@gmail.com
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

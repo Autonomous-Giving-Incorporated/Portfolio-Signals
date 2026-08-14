@@ -5,7 +5,8 @@ const PRIVILEGED_ROLES = new Set([
   'campaign_lead',
   'development',
   'data_steward',
-  'auditor'
+  'auditor',
+  'infrastructure_delegate'
 ]);
 
 const CLIENT_STORAGE_KEY = 'agi.activeClientId';
@@ -201,6 +202,7 @@ export function roleCan(role, capability) {
     client_admin: ['director'],
     brand_configuration: ['director'],
     onboarding_pack: ['director'],
+    infrastructure_access: ['infrastructure_delegate'],
     impact_finance: ['director', 'campaign_lead', 'development'],
     impact_donor_staff: [
       'director',
@@ -213,3 +215,5 @@ export function roleCan(role, capability) {
   };
   return (matrix[capability] || []).includes(role);
 }
+
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

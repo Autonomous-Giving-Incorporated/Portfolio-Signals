@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-08-14",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice16-delegate-auth-org",
+  "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
+  "validated_commit": "9ba45d21db9cacacc2fbf5f3a59fac5b044c1860",
+  "boundary": {
+    "production_mutation": true,
+    "production_email_sent": false,
+    "synthetic_fixtures_only": true,
+    "outreach_authority_granted": false
+  },
+  "results": {
+    "javascript_parse": "pass",
+    "email_template_tests": {
+      "status": "pass",
+      "passed": 4,
+      "failed": 0
+    },
+    "edge_function_typecheck": "pass",
+    "browser_regression": {
+      "status": "pass",
+      "passed": 16,
+      "failed": 0
+    },
+    "workbook_parser": {
+      "status": "pass",
+      "passed": 4,
+      "failed": 0,
+      "high_severity_audit_findings": 0
+    },
+    "import_api": {
+      "status": "pass",
+      "passed": 5,
+      "failed": 0
+    },
+    "security_contract": "pass",
+    "yaml_parse": "pass",
+    "local_migration_chain": "pass",
+    "synthetic_database_policy_files": {
+      "status": "pass",
+      "passed": 17,
+      "failed": 0
+    },
+    "delegate_runtime_privilege_contract": "pass"
+  },
+  "hosted_validation": {
+    "status": "pending_organization_pull_request",
+    "reason": "Implementation rebased onto the authoritative organization repository after production-host reconciliation",
+    "source_failure": false
+  },
+  "production_preflight": {
+    "project_ref": "utdioxwiskzatwoejgiu",
+    "vercel_project": "scrimshawlife-8819s-projects/fund-intel",
+    "migration_history_reconciliation_required": false,
+    "migration_history_repair_status": "complete",
+    "migration_history_repair_semantics": "mark these legacy versions applied without executing their SQL",
+    "legacy_migration_versions_marked_applied": [
+      "001",
+      "003",
+      "005",
+      "006",
+      "007",
+      "008",
+      "009",
+      "010",
+      "011",
+      "012",
+      "202608010002",
+      "202608020001",
+      "202608020002",
+      "202608020003",
+      "202608020004",
+      "202608020005",
+      "202608020006",
+      "202608020007",
+      "202608020008",
+      "202608030001"
+    ],
+    "include_all_push_used": false,
+    "applied_delegate_migration_versions": [
+      "20260814214657",
+      "20260814214716",
+      "20260814214800"
+    ],
+    "database_up_to_date": true,
+    "production_schema_verification": {
+      "status": "pass",
+      "source": "post-deployment schema-only dump",
+      "tables_present": 3,
+      "row_level_security_enabled": true,
+      "authenticated_delegate_rpcs": 5,
+      "service_only_email_rpcs": 3,
+      "anonymous_delegate_or_email_rpc_grants": 0
+    },
+    "email_transport_secrets_present": false,
+    "auth_email_function_deployed": false
+  },
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59"
+}
