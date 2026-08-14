@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-08-14",
+  "repository": "scrimshawlife-ctrl/Portofolio-Signals",
+  "branch": "loop-805-slice16-delegate-auth",
+  "validated_commit": "bef3f2c0f3c0c3108dd8ba522158e8bd62cd4ec8",
+  "boundary": {
+    "production_mutation": false,
+    "production_email_sent": false,
+    "synthetic_fixtures_only": true,
+    "outreach_authority_granted": false
+  },
+  "results": {
+    "javascript_parse": "pass",
+    "email_template_tests": {
+      "status": "pass",
+      "passed": 4,
+      "failed": 0
+    },
+    "edge_function_typecheck": "pass",
+    "browser_regression": {
+      "status": "pass",
+      "passed": 10,
+      "failed": 0
+    },
+    "workbook_parser": {
+      "status": "pass",
+      "passed": 4,
+      "failed": 0,
+      "high_severity_audit_findings": 0
+    },
+    "import_api": {
+      "status": "pass",
+      "passed": 5,
+      "failed": 0
+    },
+    "security_contract": "pass",
+    "yaml_parse": "pass",
+    "local_migration_chain": "pass",
+    "synthetic_database_policy_files": {
+      "status": "pass",
+      "passed": 17,
+      "failed": 0
+    }
+  },
+  "hosted_validation": {
+    "status": "blocked_external",
+    "reason": "GitHub Actions jobs did not start because account payments failed or the spending limit must be increased",
+    "source_failure": false
+  },
+  "production_preflight": {
+    "project_ref": "utdioxwiskzatwoejgiu",
+    "migration_history_reconciliation_required": true,
+    "email_transport_secrets_present": false,
+    "auth_email_function_deployed": false
+  },
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601"
+}
