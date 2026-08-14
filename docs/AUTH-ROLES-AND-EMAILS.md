@@ -91,12 +91,13 @@ Supabase custom SMTP remains required for Auth emails that bypass this Edge Func
 
 Production publication is operator-gated. From an exact approved commit:
 
-Production project `utdioxwiskzatwoejgiu` has 20 legacy local migration versions that are not recorded in remote migration history. Do **not** use `supabase db push --include-all`: that would attempt to execute those legacy migrations against production. The exact versions and expected post-repair state are recorded in `out/audit/auth-delegate-validation.latest.json`.
+OBSERVED on 2026-08-14: production project `utdioxwiskzatwoejgiu` has reconciled migration history and all three delegate-auth migrations applied. A post-deployment schema dump verified the tables, RLS, policies, and least-privilege RPC grants. The ordinary linked dry run reports the database is up to date.
 
-The history-only repair is a separate operator gate. Run it only after explicit informed authorization to mark the listed legacy versions as applied without executing their SQL. Then verify the linked history and fail closed unless a normal dry run proposes exactly these two migrations, in order:
+The history-only repair was executed under a separate explicit operator gate. Do not repeat it and never use `supabase db push --include-all`; the exact repaired versions and production verification evidence are recorded in `out/audit/auth-delegate-validation.latest.json`.
 
 - `20260814214657_delegate_access_and_auth_invites.sql`
 - `20260814214716_delegate_invitation_workflow.sql`
+- `20260814214800_delegate_auth_privilege_hardening.sql`
 
 ```bash
 supabase link --project-ref utdioxwiskzatwoejgiu
@@ -104,10 +105,9 @@ supabase migration list --linked
 supabase db push --linked --dry-run
 ```
 
-Abort if the dry run proposes any other migration. Only after that proof and a distinct production-apply gate:
+Abort if a future dry run proposes an unexpected migration. Database publication is complete; the remaining mail-transport deployment requires provider secrets:
 
 ```bash
-supabase db push --linked
 supabase secrets set RESEND_API_KEY=... AUTH_EMAIL_FROM='A.G.I. <auth@autogive.app>'
 supabase secrets set AUTH_EMAIL_REPLY_TO=... AUTH_ALLOWED_ORIGINS='https://autogive.app'
 supabase functions deploy auth-email --project-ref utdioxwiskzatwoejgiu --no-verify-jwt

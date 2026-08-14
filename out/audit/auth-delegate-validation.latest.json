@@ -3,9 +3,9 @@
   "generated_on": "2026-08-14",
   "repository": "scrimshawlife-ctrl/Portofolio-Signals",
   "branch": "loop-805-slice16-delegate-auth",
-  "validated_commit": "bef3f2c0f3c0c3108dd8ba522158e8bd62cd4ec8",
+  "validated_commit": "3ba177a97423a19f20696ac1118256d23446adfd",
   "boundary": {
-    "production_mutation": false,
+    "production_mutation": true,
     "production_email_sent": false,
     "synthetic_fixtures_only": true,
     "outreach_authority_granted": false
@@ -41,7 +41,8 @@
       "status": "pass",
       "passed": 17,
       "failed": 0
-    }
+    },
+    "delegate_runtime_privilege_contract": "pass"
   },
   "hosted_validation": {
     "status": "blocked_external",
@@ -50,10 +51,10 @@
   },
   "production_preflight": {
     "project_ref": "utdioxwiskzatwoejgiu",
-    "migration_history_reconciliation_required": true,
-    "migration_history_repair_status": "explicit_operator_authorization_required",
+    "migration_history_reconciliation_required": false,
+    "migration_history_repair_status": "complete",
     "migration_history_repair_semantics": "mark these legacy versions applied without executing their SQL",
-    "missing_legacy_migration_versions": [
+    "legacy_migration_versions_marked_applied": [
       "001",
       "003",
       "005",
@@ -75,11 +76,22 @@
       "202608020008",
       "202608030001"
     ],
-    "include_all_push_prohibited": true,
-    "post_repair_dry_run_expected_versions": [
+    "include_all_push_used": false,
+    "applied_delegate_migration_versions": [
       "20260814214657",
-      "20260814214716"
+      "20260814214716",
+      "20260814214800"
     ],
+    "database_up_to_date": true,
+    "production_schema_verification": {
+      "status": "pass",
+      "source": "post-deployment schema-only dump",
+      "tables_present": 3,
+      "row_level_security_enabled": true,
+      "authenticated_delegate_rpcs": 5,
+      "service_only_email_rpcs": 3,
+      "anonymous_delegate_or_email_rpc_grants": 0
+    },
     "email_transport_secrets_present": false,
     "auth_email_function_deployed": false
   },
