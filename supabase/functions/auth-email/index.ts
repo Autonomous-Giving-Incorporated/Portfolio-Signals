@@ -260,4 +260,4 @@ Deno.serve(async (request) => {
     : json(request, { invitation_id: invitationId, status: 'sent' }, 200);
 });
 
-// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601

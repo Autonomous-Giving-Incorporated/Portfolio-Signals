@@ -137,4 +137,4 @@ Production acceptance requires synthetic addresses only:
 
 Run the complete local acceptance workflow, review the migration diff, then promote the exact commit through the existing platform deployment gates. Record only non-secret provider and delivery receipts in `out/audit/`.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601

@@ -63,4 +63,4 @@ Do **not** commit host, username, or password.
 - [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md)
 - [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) — SMTP password is a secret
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
