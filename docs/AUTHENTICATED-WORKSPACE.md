@@ -180,4 +180,4 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 - Donation tracking reconciled.
 - Stewardship owners assigned.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

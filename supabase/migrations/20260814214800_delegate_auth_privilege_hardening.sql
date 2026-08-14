@@ -48,4 +48,4 @@ grant execute on function public.begin_auth_email_dispatch(text, public.auth_ema
 grant execute on function public.complete_auth_email_dispatch(uuid, text, text, text)
   to service_role;
 
--- Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

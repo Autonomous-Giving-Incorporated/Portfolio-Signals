@@ -1,9 +1,10 @@
 {
   "schema_version": "1.0",
   "generated_on": "2026-08-14",
-  "repository": "scrimshawlife-ctrl/Portofolio-Signals",
-  "branch": "loop-805-slice16-delegate-auth",
-  "validated_commit": "3ba177a97423a19f20696ac1118256d23446adfd",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice16-delegate-auth-org",
+  "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
+  "validated_commit": "9ba45d21db9cacacc2fbf5f3a59fac5b044c1860",
   "boundary": {
     "production_mutation": true,
     "production_email_sent": false,
@@ -20,7 +21,7 @@
     "edge_function_typecheck": "pass",
     "browser_regression": {
       "status": "pass",
-      "passed": 10,
+      "passed": 16,
       "failed": 0
     },
     "workbook_parser": {
@@ -45,12 +46,13 @@
     "delegate_runtime_privilege_contract": "pass"
   },
   "hosted_validation": {
-    "status": "blocked_external",
-    "reason": "GitHub Actions jobs did not start because account payments failed or the spending limit must be increased",
+    "status": "pending_organization_pull_request",
+    "reason": "Implementation rebased onto the authoritative organization repository after production-host reconciliation",
     "source_failure": false
   },
   "production_preflight": {
     "project_ref": "utdioxwiskzatwoejgiu",
+    "vercel_project": "scrimshawlife-8819s-projects/fund-intel",
     "migration_history_reconciliation_required": false,
     "migration_history_repair_status": "complete",
     "migration_history_repair_semantics": "mark these legacy versions applied without executing their SQL",
@@ -95,5 +97,5 @@
     "email_transport_secrets_present": false,
     "auth_email_function_deployed": false
   },
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59"
 }

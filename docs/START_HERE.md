@@ -77,7 +77,7 @@ npm run accept:seed-loop   # allocate→proof→packet on seed (no every.org)
 ## Current baseline (suite)
 
 ```yaml
-repository: scrimshawlife-ctrl/Portofolio-Signals  # Fund-Intel checkout / redirect
+repository: Autonomous-Giving-Incorporated/Portfolio-Signals  # authoritative post-migration production repository
 platform_supabase: utdioxwiskzatwoejgiu
 legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
@@ -85,4 +85,4 @@ primary_master_admin: scrimshawlife@gmail.com
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
