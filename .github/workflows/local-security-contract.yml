@@ -33,6 +33,8 @@ jobs:
       - name: Test import API authentication boundary
         working-directory: services/import-api
         run: npm test
+      - name: Test role-aware Auth email templates
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts
       - name: Type-check Edge Functions
         run: |
           set -euo pipefail
@@ -43,9 +45,11 @@ jobs:
             if deno cache --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/auth-email/index.ts \
               && deno check --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
-              supabase/functions/upload-client-asset/index.ts; then
+              supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/auth-email/index.ts; then
               break
             fi
             if [ "$attempt" -ge "$max" ]; then
@@ -91,7 +95,10 @@ jobs:
           test -f docs/STAGING-BOOTSTRAP.md
           grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
           grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
-          grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
+          grep -q 'suite_count": 8' scripts/staging/verify-policy-suite.sh
+          test -f supabase/tests/016_delegate_auth.sql
+          grep -q "verify_jwt = false" supabase/config.toml
+          grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
           test -f scripts/staging/generate-runtime-config.mjs
           grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
           grep -q "Refusing to emit runtime config for unlisted Supabase host" scripts/staging/generate-runtime-config.mjs
@@ -134,3 +141,4 @@ jobs:
           grep -q "only native .xlsx files are accepted" services/workbook-parser/src/cli.js
 
 # Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

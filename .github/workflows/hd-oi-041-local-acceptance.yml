@@ -52,6 +52,9 @@ jobs:
           node --check finance-impact.js
           node --check donor-impact.js
 
+      - name: Test role-aware Auth email templates
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts
+
       - name: Install and audit workbook parser
         working-directory: services/workbook-parser
         run: |
@@ -74,9 +77,11 @@ jobs:
             if deno cache --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/auth-email/index.ts \
               && deno check --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
-              supabase/functions/upload-client-asset/index.ts; then
+              supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/auth-email/index.ts; then
               break
             fi
             if [ "$attempt" -ge "$max" ]; then
@@ -129,6 +134,7 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/013_agi_impact_relay_jwt.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
 
       - name: Reject committed sensitive exports
         run: |
@@ -170,3 +176,5 @@ jobs:
       - name: Emergency disposable-stack cleanup
         if: failure()
         run: supabase stop --no-backup || true
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

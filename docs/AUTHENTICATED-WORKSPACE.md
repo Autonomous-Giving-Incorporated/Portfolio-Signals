@@ -78,6 +78,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Platform bootstrap: [
 | Board viewer | Read-only aggregate and board-approved records |
 | Data steward | Imports, deduplication, consent, suppression, provenance |
 | Auditor | Read-only audit log and control verification |
+| Infrastructure delegate | Tenant-approved infrastructure scopes only; no campaign or donor authority |
 
 Roles are assigned per A.G.I. client through `client_memberships`. The profile role is retained only for compatibility and MFA policy evaluation. Workspace authorization and navigation use the selected client's live membership role.
 
@@ -86,6 +87,7 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - `get_workspace_context()` returns the active profile, master-admin flag, and only the client shells the caller may enumerate.
 - The browser stores only the selected public client identifier. Every operational query also filters by that `client_id`; database RLS remains authoritative.
 - Client directors manage existing authenticated profiles through `set_client_membership()`. Changes are audited and cannot remove the final active director.
+- Client directors invite, resend sign-ins for, and revoke scoped infrastructure delegates through the dedicated audited workflow. Unscoped delegates cannot be created through `set_client_membership()`.
 - Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
 - Master-admin and privileged client mutations require an active MFA-enforced profile.
 - **Primary `master_admin`:** `scrimshawlife@gmail.com` (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
@@ -114,6 +116,8 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - Every returned private-document signed URL uses a 30-300 second TTL and has an append-only audit event containing the actor, document ID, bucket, TTL, and expiry without recording the object path or URL.
 - Board/advisor status cannot be granted automatically as a donor benefit.
 - Browser config is **anon-only**; never place service-role keys in `runtime-config.js`, Vercel public env, or git.
+
+Role-aware templates, delegate scopes, mail transport, revocation, and acceptance tests are specified in [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md).
 
 ## Onboarding pack (document phase)
 
@@ -175,3 +179,5 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 - Lists authorized.
 - Donation tracking reconciled.
 - Stewardship owners assigned.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

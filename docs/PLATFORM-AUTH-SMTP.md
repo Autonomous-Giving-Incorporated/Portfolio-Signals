@@ -1,9 +1,9 @@
 # Platform Auth — custom SMTP (operator)
 
-Supabase **built-in** Auth email is rate-limited. For sustainable magic-link / invite volume on platform project `utdioxwiskzatwoejgiu`, configure **custom SMTP**. This is dashboard-only; nothing in this repo sends Auth mail.
+Supabase **built-in** Auth email is rate-limited. For provider-managed Auth messages on platform project `utdioxwiskzatwoejgiu`, configure **custom SMTP**. The repository's `auth-email` Edge Function separately sends role-aware magic links through Resend; see [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md).
 
 **Status:** PENDING operator until dashboard SMTP is saved and a test invite/magic-link succeeds.  
-**Fallback while PENDING:** Dashboard → Authentication → Users → Invite, or generate magic link (`generate_link`) and deliver out-of-band.
+**Fallback while PENDING:** use the reviewed `auth-email` Edge Function after its sender secrets and deployment are verified, or generate an operator-only link and deliver it through an approved channel.
 
 ## When you need it
 
@@ -62,3 +62,5 @@ Do **not** commit host, username, or password.
 - [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — people path (uses invite / magic link)
 - [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md)
 - [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) — SMTP password is a secret
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

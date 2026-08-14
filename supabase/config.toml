@@ -26,9 +26,14 @@ additional_redirect_urls = ["http://127.0.0.1:8080/workspace.html"]
 jwt_expiry = 3600
 enable_signup = false
 
+[functions.auth-email]
+verify_jwt = false
+
 [storage]
 enabled = true
 file_size_limit = "25MiB"
 
 [analytics]
 enabled = false
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

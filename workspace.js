@@ -22,7 +22,8 @@ const PRIVILEGED_ROLES = new Set([
   'campaign_lead',
   'development',
   'data_steward',
-  'auditor'
+  'auditor',
+  'infrastructure_delegate'
 ]);
 
 let activeClient = null;
@@ -33,6 +34,7 @@ let enabledModules = { sponsors: false, grants: false };
 let renderGeneration = 0;
 let lastSessionUserId = null;
 let renderInFlight = null;
+let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -175,17 +177,13 @@ if (activeClient) {
     event.preventDefault();
     const email = document.getElementById('email').value.trim();
     const redirectTo = workspaceRedirectUrl();
-    const { error } = await activeClient.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectTo,
-        shouldCreateUser: false
-      }
+    const { error } = await activeClient.functions.invoke('auth-email', {
+      body: { action: 'self_sign_in', email, redirect_to: redirectTo }
     });
     showMessage(
       error
-        ? error.message
-        : `Check your email for the secure sign-in link. Return to this exact page (${redirectTo}).`
+        ? 'Unable to request a sign-in link right now. Try again shortly.'
+        : `If this email is eligible, a secure sign-in link is on its way. Return to this exact page (${redirectTo}).`
     );
   });
 
@@ -245,6 +243,15 @@ async function renderSession(session, { allowNull = false } = {}) {
   let workspaceSession;
   try {
     showMessage('Loading workspace…');
+    if (pendingDelegateInvitationId) {
+      const { error: acceptanceError } = await activeClient.rpc('accept_delegate_invitation', {
+        p_invitation_id: pendingDelegateInvitationId
+      });
+      if (acceptanceError) throw acceptanceError;
+      pendingDelegateInvitationId = null;
+      cleanAuthUrl();
+      showMessage('Delegate invitation accepted. Loading assigned access.');
+    }
     // Pass the known session; context fetch uses raw JWT (no supabase-js lock).
     workspaceSession = await requireWorkspaceSession(session);
   } catch (error) {
@@ -317,6 +324,9 @@ function renderClientSelector(clients, currentClient) {
 function renderNavigation(role) {
   const items = [];
   if (isMasterAdmin) items.push({ id: 'platform_admin', label: 'Platform admin' });
+  if (roleCan(role, 'infrastructure_access')) {
+    items.push({ id: 'infrastructure_access', label: 'Infrastructure access' });
+  }
   if (roleCan(role, 'client_admin')) items.push({ id: 'client_admin', label: 'Client admin' });
   if (roleCan(role, 'brand_configuration')) items.push({ id: 'brand_configuration', label: 'Brand & content' });
   if (roleCan(role, 'onboarding_pack') || isMasterAdmin) {
@@ -364,6 +374,9 @@ function renderNavigation(role) {
 }
 
 async function loadDashboard(role) {
+  if (role === 'infrastructure_delegate') {
+    return mountInfrastructureAccess();
+  }
   if (!selectedClient?.role) {
     document.getElementById('decisionCount').textContent = '—';
     document.getElementById('opportunityCount').textContent = '—';
@@ -430,6 +443,8 @@ async function openSection(section) {
 
   if (section === 'client_admin') {
     await mountClientAdmin();
+  } else if (section === 'infrastructure_access') {
+    await mountInfrastructureAccess();
   } else if (section === 'platform_admin') {
     await mountPlatformAdmin();
   } else if (section === 'brand_configuration') {
@@ -538,19 +553,55 @@ async function mountClientAdmin() {
   if (activeProfile.role !== 'director' || !selectedClient?.role) {
     throw new Error('Client director access required.');
   }
-  const { data, error } = await activeClient
-    .from('client_memberships')
-    .select('user_id,role,active,membership_version,profiles(display_name)')
-    .eq('client_id', selectedClient.id)
-    .order('role');
-  if (error) throw error;
+  const [memberships, delegations, invitations] = await Promise.all([
+    activeClient.from('client_memberships')
+      .select('user_id,role,active,membership_version,profiles(display_name)')
+      .eq('client_id', selectedClient.id).order('role'),
+    activeClient.from('infrastructure_delegations')
+      .select('user_id,scopes,active,delegation_version')
+      .eq('client_id', selectedClient.id),
+    activeClient.from('client_delegate_invitations')
+      .select('id,email,scopes,state,expires_at,send_count')
+      .eq('client_id', selectedClient.id).eq('state', 'pending')
+  ]);
+  if (memberships.error) throw memberships.error;
+  if (delegations.error) throw delegations.error;
+  if (invitations.error) throw invitations.error;
+  const delegationByUser = new Map(delegations.data.map(item => [item.user_id, item]));
+  const data = memberships.data;
 
   content.innerHTML = `
     <div class="workspace-toolbar"><div><strong>Client administration</strong><span>${selectedClient.display_name}</span></div></div>
     <div class="table-wrap"><table class="workspace-table">
-      <thead><tr><th>Member</th><th>Role</th><th>State</th><th>Version</th></tr></thead>
-      <tbody>${data.map(member => `<tr><td>${escapeHtml(member.profiles?.display_name || member.user_id)}<small>${escapeHtml(member.user_id)}</small></td><td>${escapeHtml(member.role)}</td><td>${member.active ? 'active' : 'inactive'}</td><td>${member.membership_version}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Member</th><th>Role / scope</th><th>State</th><th>Actions</th></tr></thead>
+      <tbody>${data.map(member => {
+        const delegation = delegationByUser.get(member.user_id);
+        const scope = delegation?.scopes?.join(', ') || 'none';
+        const actions = member.role === 'infrastructure_delegate' && member.active
+          ? `<button class="button secondary" type="button" data-send-delegate="${escapeHtml(member.user_id)}">Send sign-in</button>
+             <button class="button secondary" type="button" data-revoke-delegate="${escapeHtml(member.user_id)}">Revoke</button>`
+          : 'none';
+        return `<tr><td>${escapeHtml(member.profiles?.display_name || member.user_id)}<small>${escapeHtml(member.user_id)}</small></td><td>${escapeHtml(member.role)}<small>${escapeHtml(scope)}</small></td><td>${member.active ? 'active' : 'inactive'}</td><td>${actions}</td></tr>`;
+      }).join('')}</tbody>
     </table></div>
+    <h3>Invite infrastructure delegate</h3>
+    <form id="delegateInviteForm" class="control-grid">
+      <label>Email address<input name="email" type="email" autocomplete="off" required></label>
+      <fieldset><legend>Approved infrastructure scope</legend>
+        ${[
+          ['workspace_access', 'Workspace access'],
+          ['identity_support', 'Identity support'],
+          ['integration_operations', 'Integration operations'],
+          ['delivery_observability', 'Delivery observability'],
+          ['configuration_support', 'Configuration support']
+        ].map(([value, label]) => `<label><input name="scopes" type="checkbox" value="${value}" ${value === 'workspace_access' ? 'checked' : ''}> ${label}</label>`).join('')}
+      </fieldset>
+      <label>Invitation rationale<input name="rationale" required minlength="12" placeholder="Why this delegate needs access"></label>
+      <button class="button" type="submit">Invite delegate</button>
+    </form>
+    ${invitations.data.length ? `<h4>Pending delegate invitations</h4><ul>${invitations.data.map(item => `<li>${escapeHtml(item.email)} &middot; ${escapeHtml(item.scopes.join(', '))} &middot; expires ${escapeHtml(item.expires_at)} <button class="button secondary" type="button" data-revoke-invitation="${escapeHtml(item.id)}">Revoke invitation</button></li>`).join('')}</ul>` : ''}
+    <label>Delegate action rationale<input id="delegateActionRationale" minlength="12" placeholder="Reason for sign-in or revocation"></label>
+    <h3>Manage existing member</h3>
     <form id="membershipForm" class="control-grid">
       <label>User UUID<input name="userId" required pattern="[0-9a-fA-F-]{36}" placeholder="Existing authenticated profile UUID"></label>
       <label>Client role<select name="role">${['director','campaign_lead','development','board_viewer','data_steward','auditor'].map(role => `<option>${role}</option>`).join('')}</select></label>
@@ -558,7 +609,77 @@ async function mountClientAdmin() {
       <label>Rationale<input name="rationale" required minlength="12" placeholder="Reason for membership change"></label>
       <button class="button" type="submit">Save membership</button>
     </form>
-    <p class="note" id="adminMessage">Membership changes are audited. The final active director cannot be removed.</p>`;
+    <p class="note" id="adminMessage">Membership and delegate-email changes are audited. The final active director cannot be removed.</p>`;
+
+  content.querySelector('#delegateInviteForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { error: inviteError } = await activeClient.functions.invoke('auth-email', {
+      body: {
+        action: 'invite_delegate',
+        client_id: selectedClient.id,
+        email: form.get('email').trim(),
+        scopes: form.getAll('scopes').map(String),
+        rationale: form.get('rationale').trim(),
+        redirect_to: workspaceRedirectUrl()
+      }
+    });
+    if (inviteError) {
+      content.querySelector('#adminMessage').textContent = inviteError.message;
+      return;
+    }
+    await mountClientAdmin();
+  });
+
+  content.querySelectorAll('[data-send-delegate]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: sendError } = await activeClient.functions.invoke('auth-email', {
+        body: {
+          action: 'resend_delegate_sign_in',
+          client_id: selectedClient.id,
+          user_id: button.dataset.sendDelegate,
+          rationale,
+          redirect_to: workspaceRedirectUrl()
+        }
+      });
+      content.querySelector('#adminMessage').textContent = sendError
+        ? sendError.message
+        : 'Secure delegate sign-in email sent.';
+    });
+  });
+
+  content.querySelectorAll('[data-revoke-delegate]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: revokeError } = await activeClient.rpc('revoke_infrastructure_delegate', {
+        p_client_id: selectedClient.id,
+        p_user_id: button.dataset.revokeDelegate,
+        p_rationale: rationale
+      });
+      if (revokeError) {
+        content.querySelector('#adminMessage').textContent = revokeError.message;
+        return;
+      }
+      clearWorkspaceSessionCache();
+      await mountClientAdmin();
+    });
+  });
+
+  content.querySelectorAll('[data-revoke-invitation]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: revokeError } = await activeClient.rpc('revoke_delegate_invitation', {
+        p_invitation_id: button.dataset.revokeInvitation,
+        p_rationale: rationale
+      });
+      if (revokeError) {
+        content.querySelector('#adminMessage').textContent = revokeError.message;
+        return;
+      }
+      await mountClientAdmin();
+    });
+  });
 
   content.querySelector('#membershipForm').addEventListener('submit', async event => {
     event.preventDefault();
@@ -577,6 +698,20 @@ async function mountClientAdmin() {
     clearWorkspaceSessionCache();
     await mountClientAdmin();
   });
+}
+
+async function mountInfrastructureAccess() {
+  if (activeProfile?.role !== 'infrastructure_delegate' || !selectedClient?.id) {
+    throw new Error('Active infrastructure delegate access required.');
+  }
+  const scopes = Array.isArray(selectedClient.delegate_scopes)
+    ? selectedClient.delegate_scopes
+    : [];
+  content.innerHTML = `
+    <div class="workspace-toolbar"><div><strong>Infrastructure delegation</strong><span>${escapeHtml(selectedClient.display_name)}</span></div></div>
+    <p>Your access is limited to infrastructure support scopes assigned by this tenant.</p>
+    <ul>${scopes.map(scope => `<li>${escapeHtml(scope.replaceAll('_', ' '))}</li>`).join('') || '<li>No active scopes</li>'}</ul>
+    <p class="note">This role grants no campaign, donor, outreach, allocation, payment, or publication authority. Contact a tenant director to change or revoke access.</p>`;
 }
 
 async function mountPlatformAdmin() {
@@ -640,3 +775,5 @@ async function mountPlatformAdmin() {
 }
 
 void root;
+
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending

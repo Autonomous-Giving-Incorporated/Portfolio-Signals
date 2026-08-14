@@ -31,6 +31,7 @@ service_role_on_vercel: PROHIBITED
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
 4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
+   - [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) — role-aware magic links and tenant-scoped infrastructure delegates
 5. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  
 6. [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md) — provision → publish → activate  
 7. [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — document pack (workspace **Onboarding pack**; ≠ CRM import)  
@@ -83,3 +84,5 @@ reference_tenant: org_hacker_dojo
 primary_master_admin: scrimshawlife@gmail.com
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: pending
