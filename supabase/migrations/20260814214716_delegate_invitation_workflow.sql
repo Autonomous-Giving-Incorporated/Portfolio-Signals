@@ -253,7 +253,10 @@ begin
   ) values (
     v_invitation.client_id, auth.uid(), 'delegate_invitation_revoked',
     'client_delegate_invitation', v_invitation.id::text, trim(p_rationale),
-    jsonb_build_object('email_hash', encode(digest(v_invitation.email, 'sha256'), 'hex'), 'state', 'revoked')
+    jsonb_build_object(
+      'email_hash', encode(extensions.digest(v_invitation.email, 'sha256'), 'hex'),
+      'state', 'revoked'
+    )
   );
   return jsonb_build_object('invitation_id', v_invitation.id, 'state', 'revoked');
 end $$;

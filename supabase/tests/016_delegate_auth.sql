@@ -133,7 +133,7 @@ reset role;
 
 -- Only the service role may resolve recipients or open the dispatch ledger.
 set local role service_role;
-select set_config('request.jwt.claim.role', 'service_role', true);
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
 do $$
 declare
   v_context jsonb;
