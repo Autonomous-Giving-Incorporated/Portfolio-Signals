@@ -1,13 +1,14 @@
 {
   "schema_version": "1.0",
   "generated_on": "2026-08-14",
+  "generated_at": "2026-08-14T23:51:36.8499055Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
-  "branch": "loop-805-slice16-delegate-auth-org",
+  "branch": "main",
   "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
-  "validated_commit": "9ba45d21db9cacacc2fbf5f3a59fac5b044c1860",
+  "validated_commit": "9887a8a5b973fff2db2de7d993ac065efca2db4e",
   "boundary": {
     "production_mutation": true,
-    "production_email_sent": false,
+    "production_email_sent": true,
     "synthetic_fixtures_only": true,
     "outreach_authority_granted": false
   },
@@ -46,8 +47,19 @@
     "delegate_runtime_privilege_contract": "pass"
   },
   "hosted_validation": {
-    "status": "pending_organization_pull_request",
-    "reason": "Implementation rebased onto the authoritative organization repository after production-host reconciliation",
+    "status": "pass",
+    "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/4",
+    "merged_commit": "9887a8a5b973fff2db2de7d993ac065efca2db4e",
+    "organization_checks": {
+      "successful": 8,
+      "skipped": 2,
+      "failed": 0
+    },
+    "vercel_deployment_id": "dpl_6dgG88DC1hyrQVKunJcDFfgRhAnt",
+    "vercel_state": "READY",
+    "production_url": "https://fund-intel-ten.vercel.app",
+    "deployed_git_commit": "9887a8a5b973fff2db2de7d993ac065efca2db4e",
+    "workspace_smoke_test": "pass",
     "source_failure": false
   },
   "production_preflight": {
@@ -94,8 +106,39 @@
       "service_only_email_rpcs": 3,
       "anonymous_delegate_or_email_rpc_grants": 0
     },
-    "email_transport_secrets_present": false,
-    "auth_email_function_deployed": false
+    "email_transport_secrets_present": true,
+    "email_transport": {
+      "provider": "resend",
+      "sending_domain": "auth.autogive.app",
+      "api_key_scope": "sending_access:auth.autogive.app",
+      "dkim": "verified",
+      "spf": "verified",
+      "return_path_mx": "verified",
+      "dmarc": "optional_pending"
+    },
+    "auth_email_function_deployed": true,
+    "auth_email_function_status": "ACTIVE",
+    "auth_email_function_version_observed": 2,
+    "production_origin_preflight": "pass"
   },
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59"
+  "synthetic_acceptance": {
+    "status": "pass",
+    "email_kind": "platform_admin_magic_link",
+    "recipient_storage": "sha256_only",
+    "dispatch_count": 1,
+    "dispatch_status": "sent",
+    "provider_message_id_recorded": true,
+    "provider_status": "delivered",
+    "subject": "Your A.G.I. platform administrator sign-in link",
+    "magic_link_consumed": false
+  },
+  "governance_loop": {
+    "status": "not_computable",
+    "reason": "scripts/abraxas_v2.0_codex_governance_loop.py and Scripts/abx_loop.py are absent from this repository"
+  },
+  "residual_risks": [
+    "Optional DMARC monitoring record is not configured; required DKIM, SPF, and return-path records are verified.",
+    "Pre-existing unrelated Supabase security-advisor warnings remain outside Slice 16 scope."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 9887a8a5b973fff2db2de7d993ac065efca2db4e"
 }
