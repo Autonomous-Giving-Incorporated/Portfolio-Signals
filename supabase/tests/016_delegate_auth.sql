@@ -1,6 +1,35 @@
 -- Synthetic delegate invitation, least-privilege, revocation, and dispatch tests.
 begin;
 
+-- Supabase public-schema defaults must not widen security-definer RPC access.
+do $$
+begin
+  if has_function_privilege(
+    'anon', 'public.request_delegate_invitation(text,text,text[],text)', 'execute'
+  ) then raise exception 'anon can execute delegate invitation RPC'; end if;
+  if not has_function_privilege(
+    'authenticated', 'public.request_delegate_invitation(text,text,text[],text)', 'execute'
+  ) then raise exception 'authenticated cannot execute delegate invitation RPC'; end if;
+  if has_function_privilege(
+    'anon', 'public.resolve_auth_email_context(text)', 'execute'
+  ) then raise exception 'anon can resolve auth email context'; end if;
+  if has_function_privilege(
+    'authenticated', 'public.resolve_auth_email_context(text)', 'execute'
+  ) then raise exception 'authenticated can resolve auth email context'; end if;
+  if not has_function_privilege(
+    'service_role', 'public.resolve_auth_email_context(text)', 'execute'
+  ) then raise exception 'service role cannot resolve auth email context'; end if;
+  if has_function_privilege(
+    'anon',
+    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid)',
+    'execute'
+  ) or has_function_privilege(
+    'authenticated',
+    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid)',
+    'execute'
+  ) then raise exception 'non-service role can open auth email dispatch'; end if;
+end $$;
+
 insert into auth.users (
   id, instance_id, aud, role, email, encrypted_password,
   email_confirmed_at, created_at, updated_at
