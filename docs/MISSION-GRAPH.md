@@ -40,7 +40,7 @@ The projection does not credit, debit, or lock a pot. Recommendations remain adv
 ## Out of scope (do not read this PR as)
 
 - Accept of SPEC-029, or a consumer-pin bump off v2.0.0.
-- SPEC-030 metrics, formulas, forecasting, or historical metric versions.
+- SPEC-030 Accept, formulas, forecasting, or historical metric versions. Fail-closed policies live in [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md); SPEC-030 stays Proposed.
 - Learning-feedback Signal minting.
 - Graph database, materialized SoR, or a new capability.
 
