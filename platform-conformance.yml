@@ -33,3 +33,4 @@ evidence:
   assessment: docs/PLATFORM-CONFORMANCE.md
   fund_intel_records: docs/FUND-INTEL-SIGNALS.md
   mission_graph_projection: docs/MISSION-GRAPH.md
+  mission_intelligence_metrics: docs/MISSION-INTELLIGENCE-METRICS.md
