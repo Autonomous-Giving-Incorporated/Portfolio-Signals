@@ -5,6 +5,16 @@
 
 const WRITE_ROLES = new Set(['director', 'campaign_lead']);
 
+function decodeJwtPayload(token) {
+  try {
+    const encoded = String(token).split('.')[1];
+    if (!encoded) return {};
+    return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+  } catch {
+    return {};
+  }
+}
+
 export function bearerToken(req) {
   const authorization = req.headers.authorization;
   const match = typeof authorization === 'string' ? authorization.match(/^Bearer\s+(\S+)$/i) : null;
@@ -48,12 +58,24 @@ export function createAuthVerifier({
    * Membership rows are read with the service role so RLS cannot hide an existing
    * grant from the server-side verifier (user JWT is only used to identify the actor).
    */
-  async function getMembership(_accessToken, userId) {
+  async function getAuthorization(_accessToken, userId) {
     const headers = {
       apikey: serviceRoleKey,
       authorization: `Bearer ${serviceRoleKey}`,
       accept: 'application/json',
     };
+
+    // Profile lifecycle is authoritative even when a membership remains active.
+    const profUrl =
+      `${supabaseUrl}/rest/v1/profiles` +
+      `?select=role,active,mfa_enforced,display_name` +
+      `&id=eq.${encodeURIComponent(userId)}` +
+      `&limit=1`;
+    const profRes = await fetchImpl(profUrl, { headers });
+    if (!profRes.ok) return null;
+    const profiles = await profRes.json();
+    const profile = Array.isArray(profiles) ? profiles[0] : null;
+    if (!profile?.active) return null;
 
     // Tenant membership (AGI multi-client)
     const memUrl =
@@ -67,26 +89,23 @@ export function createAuthVerifier({
     if (memRes.ok) {
       const rows = await memRes.json();
       if (Array.isArray(rows) && rows[0]?.role) {
-        return { role: rows[0].role, source: 'client_memberships' };
+        return {
+          role: rows[0].role,
+          source: 'client_memberships',
+          displayName: profile.display_name,
+          mfaEnforced: profile.mfa_enforced === true,
+        };
       }
     }
 
     // Legacy profile role on same project
-    const profUrl =
-      `${supabaseUrl}/rest/v1/profiles` +
-      `?select=role,active,display_name` +
-      `&id=eq.${encodeURIComponent(userId)}` +
-      `&limit=1`;
-    const profRes = await fetchImpl(profUrl, { headers });
-    if (profRes.ok) {
-      const rows = await profRes.json();
-      if (Array.isArray(rows) && rows[0]?.active && rows[0]?.role) {
-        return {
-          role: rows[0].role,
-          displayName: rows[0].display_name,
-          source: 'profiles',
-        };
-      }
+    if (profile.role) {
+      return {
+        role: profile.role,
+        displayName: profile.display_name,
+        mfaEnforced: profile.mfa_enforced === true,
+        source: 'profiles',
+      };
     }
     return null;
   }
@@ -100,13 +119,17 @@ export function createAuthVerifier({
       if (!token) return null;
       const user = await getUser(token);
       if (!user) return null;
-      const membership = await getMembership(token, user.id);
+      const membership = await getAuthorization(token, user.id);
       if (!membership) return null;
       const role = membership.role;
+      const aal = decodeJwtPayload(token).aal || 'aal1';
       return {
         user,
         role,
-        canWrite: writeRoles.has(role),
+        canRead: true,
+        canWrite: writeRoles.has(role) && membership.mfaEnforced && aal === 'aal2',
+        aal,
+        mfaEnforced: membership.mfaEnforced,
         email: user.email || '',
         displayName: membership.displayName || user.email || user.id,
         clientId,

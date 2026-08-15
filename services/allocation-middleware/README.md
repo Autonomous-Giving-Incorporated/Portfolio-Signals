@@ -61,11 +61,11 @@ ORG_ID=org_demo DATA_FILE=./data/org_demo.json npm start
 | --- | --- |
 | `/` | Available · Allocate · Inbox · Packet |
 | `/login.html` | Director login (Supabase) |
-| `/setup.html` | every.org webhook wizard (no OAuth) |
+| `/setup.html` | privileged every.org webhook wizard (AAL2 director or operator token) |
 
 ## every.org connect
 
-1. Open `/setup.html` on the deployed host and copy the webhook URL (includes `?token=`).
+1. Sign in with an AAL2 director session, open `/setup.html`, and copy the webhook URL (includes `?token=`). The credential is never returned to anonymous callers.
 2. every.org → nonprofit admin → Settings → Advanced → paste webhook.
 3. Send a $1 test gift; wizard polls until **Connected**.
 4. Map fundraisers/designations via first gifts or Merge/Labels in the UI.

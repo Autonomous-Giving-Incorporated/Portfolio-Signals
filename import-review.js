@@ -18,11 +18,11 @@ function text(id, value) {
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, c => ({
-    '&': '&',
-    '<': '<',
-    '>': '>',
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
     "'": '&#39;',
-    '"': '"'
+    '"': '&quot;'
   }[c]));
 }
 
@@ -78,7 +78,11 @@ async function loadProfile(client) {
   if (error || !profile?.active) throw error || new Error('active_profile_required');
 
   state.profile = profile;
-  state.canAct = ['director', 'data_steward'].includes(profile.role);
+  const { data: assurance, error: assuranceError } =
+    await client.auth.mfa.getAuthenticatorAssuranceLevel(state.session.access_token);
+  if (assuranceError) throw assuranceError;
+  state.canAct = assurance?.currentLevel === 'aal2'
+    && ['director', 'data_steward'].includes(profile.role);
   text('reviewerLine', `${profile.display_name || sessionData.session.user.email} · ${profile.role}`);
   return profile;
 }

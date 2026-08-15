@@ -132,7 +132,7 @@
       "dmarc": "published_reporting_only",
       "dmarc_dns_name": "_dmarc.auth.autogive.app",
       "dmarc_policy": "none",
-      "dmarc_aggregate_reporting": "mailto:scrimshawlife@gmail.com",
+      "dmarc_aggregate_reporting": "restricted_operator_mailbox",
       "dmarc_public_dns_validation": "pass",
       "dmarc_public_resolver": "1.1.1.1",
       "resend_overall_domain_status": "partially_verified",

@@ -10,9 +10,9 @@ Evidence SoT: [CURRENT-STATE.md](CURRENT-STATE.md). Runbooks: [OPERATOR-ACCESS-O
 
 | Email | Role | MFA | Sign-in |
 | --- | --- | --- | --- |
-| `scrimshawlife@gmail.com` | master_admin + HD director | `mfa_enforced=true` | OBSERVED previously |
-| `qi@enkeyai.com` | master_admin | **pending** TOTP | never |
-| `ed@hackerdojo.org` | **director only** on `org_hacker_dojo` | **pending** TOTP | never |
+| Restricted operator registry | master_admin + reference-tenant director | Restricted | Restricted |
+| Restricted operator registry | second master_admin | Restricted | Restricted |
+| Restricted operator registry | reference-tenant director only | Restricted | Restricted |
 
 Ed is **not** platform admin and has **no** other client memberships.
 

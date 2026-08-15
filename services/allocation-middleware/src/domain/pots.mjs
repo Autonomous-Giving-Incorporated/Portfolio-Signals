@@ -30,7 +30,7 @@ export function availableCents(state, orgId, campaignKey, programKey) {
   return subCents(p.creditedCents, p.allocatedCents);
 }
 
-export function creditGift(state, gift) {
+export function creditGift(state, gift, limits = {}) {
   if (state.gifts.has(gift.chargeId)) {
     return { state, created: false };
   }
@@ -44,6 +44,11 @@ export function creditGift(state, gift) {
       createdAt: new Date().toISOString(),
       ref: { chargeId: gift.chargeId },
     };
+    const existing = state.exceptions.find((item) => item.id === ex.id);
+    if (existing) return { state, created: false, exception: existing };
+    if (state.exceptions.length >= (limits.maxExceptions ?? Number.POSITIVE_INFINITY)) {
+      throw new Error('STATE_EXCEPTION_LIMIT');
+    }
     return {
       state: {
         ...state,
@@ -53,10 +58,16 @@ export function creditGift(state, gift) {
       exception: ex,
     };
   }
+  if (state.gifts.size >= (limits.maxGifts ?? Number.POSITIVE_INFINITY)) {
+    throw new Error('STATE_GIFT_LIMIT');
+  }
   const gifts = new Map(state.gifts);
   gifts.set(gift.chargeId, gift);
   const pots = new Map(state.pots);
   const id = potId(gift.orgId, gift.campaignKey, gift.programKey);
+  if (!pots.has(id) && pots.size >= (limits.maxPots ?? Number.POSITIVE_INFINITY)) {
+    throw new Error('STATE_POT_LIMIT');
+  }
   const prev = pots.get(id) || {
     orgId: gift.orgId,
     campaignKey: gift.campaignKey,

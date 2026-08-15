@@ -9,12 +9,22 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((s) => new Promise((r) => s.close(r))));
 });
 
-function mockFetchFactory({ userId = '11111111-1111-4111-8111-111111111111', role = 'director' } = {}) {
+function jwt(aal = 'aal2') {
+  const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  return `${encode({ alg: 'none' })}.${encode({ aal })}.signature`;
+}
+
+function mockFetchFactory({
+  userId = '11111111-1111-4111-8111-111111111111',
+  role = 'director',
+  profileActive = true,
+  mfaEnforced = true,
+} = {}) {
   return async (url, opts = {}) => {
     const u = String(url);
     if (u.includes('/auth/v1/user')) {
       const auth = opts.headers?.authorization || '';
-      if (!auth.includes('good-jwt')) {
+      if (!auth.startsWith('Bearer ')) {
         return { ok: false, status: 401, json: async () => ({}) };
       }
       return {
@@ -29,7 +39,10 @@ function mockFetchFactory({ userId = '11111111-1111-4111-8111-111111111111', rol
       };
     }
     if (u.includes('profiles')) {
-      return { ok: true, json: async () => [] };
+      return {
+        ok: true,
+        json: async () => [{ active: profileActive, mfa_enforced: mfaEnforced, display_name: 'Director' }],
+      };
     }
     return { ok: false, status: 404, json: async () => ({}) };
   };
@@ -78,7 +91,7 @@ test('director JWT can allocate', async () => {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: 'Bearer good-jwt',
+      authorization: `Bearer ${jwt('aal2')}`,
     },
     body: JSON.stringify({
       campaignKey: 'general',
@@ -111,7 +124,7 @@ test('missing JWT denied when supabase auth configured', async () => {
 test('auth/me returns director profile', async () => {
   const base = await start();
   const res = await fetch(`${base}/auth/me`, {
-    headers: { authorization: 'Bearer good-jwt' },
+    headers: { authorization: `Bearer ${jwt('aal2')}` },
   });
   assert.equal(res.status, 200);
   const body = await res.json();
@@ -125,4 +138,37 @@ test('auth/config exposes login flags', async () => {
   const body = await res.json();
   assert.equal(body.directorLoginEnabled, true);
   assert.equal(body.orgId, 'org_hacker_dojo');
+});
+
+test('AAL1 session may read but cannot mutate', async () => {
+  const base = await start();
+  const token = jwt('aal1');
+  const read = await fetch(`${base}/available`, {
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(read.status, 200);
+  const write = await fetch(`${base}/allocations`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      campaignKey: 'general', programKey: 'undesignated', amount: '1.00', purpose: 'x'
+    }),
+  });
+  assert.equal(write.status, 403);
+  assert.equal((await write.json()).error, 'aal2_session_required');
+});
+
+test('inactive profile cannot read or mutate despite active membership', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo' });
+  const authVerifier = createAuthVerifier({
+    supabaseUrl: 'https://example.supabase.co', serviceRoleKey: 'service-role',
+    clientId: 'org_hacker_dojo', fetchImpl: mockFetchFactory({ profileActive: false }),
+  });
+  const server = createAllocationServer({ service, authVerifier });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  servers.push(server);
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/available`, {
+    headers: { authorization: `Bearer ${jwt('aal2')}` },
+  });
+  assert.equal(res.status, 401);
 });

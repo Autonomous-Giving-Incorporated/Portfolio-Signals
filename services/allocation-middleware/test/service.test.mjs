@@ -70,3 +70,48 @@ test('attachProof and missing proof exception after SLA', async () => {
   const trail = await svc.getTrail();
   assert.equal(trail.proofs[alloc.id].length, 1);
 });
+
+test('state cardinality limits reject new gifts and deduplicate invalid-currency exceptions', async () => {
+  const svc = createService({
+    orgId: 'org_1',
+    limits: { maxGifts: 1, maxPots: 2, maxExceptions: 1, maxKeyLength: 32 },
+  });
+  const gift = (chargeId, currency = 'USD') => ({
+    chargeId, amount: '1.00', netAmount: '1.00', currency,
+    donationDate: '2026-08-03T00:00:00Z', toNonprofit: { slug: 'x', name: 'X' },
+  });
+  await svc.ingestEveryOrg(gift('one'));
+  await assert.rejects(() => svc.ingestEveryOrg(gift('two')), /STATE_GIFT_LIMIT/);
+
+  const invalid = createService({
+    orgId: 'org_1', limits: { maxGifts: 2, maxPots: 2, maxExceptions: 1, maxKeyLength: 32 },
+  });
+  await invalid.ingestEveryOrg(gift('bad', 'EUR'));
+  await invalid.ingestEveryOrg(gift('bad', 'EUR'));
+  assert.equal((await invalid.listExceptions()).length, 1);
+});
+
+test('mutations are serialized to prevent lost updates', async () => {
+  let state;
+  let active = 0;
+  let maxActive = 0;
+  const base = (await import('../src/domain/pots.mjs')).emptyState();
+  const store = {
+    async load() { return state || base; },
+    async save(next) {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      state = next;
+      active -= 1;
+    },
+  };
+  const svc = createService({ orgId: 'org_1', store });
+  const payload = (id) => ({
+    chargeId: id, amount: '1.00', netAmount: '1.00', currency: 'USD',
+    donationDate: '2026-08-03T00:00:00Z', toNonprofit: { slug: 'x', name: 'X' },
+  });
+  await Promise.all([svc.ingestEveryOrg(payload('a')), svc.ingestEveryOrg(payload('b'))]);
+  assert.equal(maxActive, 1);
+  assert.equal((await svc.getTrail()).gifts.length, 2);
+});

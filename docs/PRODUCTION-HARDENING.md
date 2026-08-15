@@ -83,7 +83,7 @@ Requirements:
 1. Enable MFA at the Supabase Auth project level for production.
 2. Set `profiles.mfa_enforced = true` for each privileged account before workspace access.
 3. Keep `profiles.active = false` until identity is verified.
-4. Use `deactivate_profile(profile_id, reason)` for emergency revocation; only directors may call it.
+4. Use `deactivate_profile(profile_id, reason)` for global emergency revocation; only AAL2 master admins may call it. Tenant directors must use the tenant-scoped membership lifecycle operation.
 5. Board viewers may remain MFA-optional for aggregate read surfaces, but production operators should still prefer MFA.
 
 ## Backup and recovery

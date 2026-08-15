@@ -26,9 +26,9 @@ platform_supabase_url: https://utdioxwiskzatwoejgiu.supabase.co
 vercel_platform_anon_env: SET  # PLATFORM_SUPABASE_URL + PLATFORM_SUPABASE_ANON_KEY
 runtime_config_js: GENERATED_WITH_PLATFORM_ANON
 schema_migrations: APPLIED_ON_PLATFORM
-master_admin: scrimshawlife@gmail.com
-second_master_admin: qi@enkeyai.com  # Qi Diaz — platform_administrators active; last_sign_in never; TOTP 0; mfa_enforced false; OTP rate-limited; action_link operator-local (see PEOPLE-AND-PACK-HANDOFF)
-hacker_dojo_tenant_director: ed@hackerdojo.org  # director on org_hacker_dojo only (not master_admin); last_sign_in never; TOTP 0; mfa_enforced false; OTP rate-limited; action_link operator-local
+master_admin: RESTRICTED_OPERATOR_REGISTRY
+second_master_admin: RESTRICTED_OPERATOR_REGISTRY
+hacker_dojo_tenant_director: RESTRICTED_OPERATOR_REGISTRY
 reference_tenant: org_hacker_dojo  # Hacker Dojo — fixture / pilot template, not product brand
 isolation_fixture_tenant: org_platform_isolation
 workspace_magic_link_login: PASS  # operator-verified 2026-08-07
@@ -149,8 +149,8 @@ suite_track_fi: docs/SUITE-ONBOARDING.md + AGI docs/GITHUB-PROJECT.md
 runbook: docs/OPERATOR-ACCESS-ONBOARDING.md
 scripts_platform: ensure-profile set-mfa-enforced grant/revoke-master-admin verify-operator-access
 safety_check: PASS  # ./scripts/platform/check-script-safety.sh
-dry_run: OBSERVED  # 2026-08-06 Option B — read-only verify primary admin (scrimshawlife@gmail.com): profile active, platform_admin active, mfa_enforced true; via platform Admin/REST API (equivalent to verify-operator-access.sql); UUID not committed
-second_master_admin: OBSERVED_PARTIAL  # 2026-08-08 — qi@enkeyai.com Auth invited + profile active + platform_administrators active; mfa_enforced=false until user enrolls TOTP then set-mfa-enforced; Supabase invite + magic-link OTP sent (built-in mail rate limits may delay first admin resend)
+dry_run: OBSERVED  # 2026-08-06 read-only primary-admin verification; identity and authentication posture live only in the restricted operator registry
+second_master_admin: OBSERVED_PARTIAL  # identity, enrollment, and sign-in posture live only in the restricted operator registry
 ```
 
 ## Commercial client lifecycle (slice B)

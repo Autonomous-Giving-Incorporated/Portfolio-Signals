@@ -29,6 +29,12 @@ Deno.serve(async (request) => {
   const serviceClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return json({ error: 'invalid_user_token' }, 401);
+  const accessToken = authorization.slice(7).trim();
+  const { data: assurance, error: assuranceError } =
+    await userClient.auth.mfa.getAuthenticatorAssuranceLevel(accessToken);
+  if (assuranceError || assurance?.currentLevel !== 'aal2') {
+    return json({ error: 'aal2_session_required' }, 403);
+  }
 
   const form = await request.formData();
   const clientId = String(form.get('client_id') || '');

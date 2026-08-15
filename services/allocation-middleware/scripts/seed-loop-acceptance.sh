@@ -68,7 +68,7 @@ code=$(curl -sS -o /tmp/am-seed-proof.json -w "%{http_code}" -X POST "http://127
 test "$code" = "201" || { echo "proof failed: $code"; cat /tmp/am-seed-proof.json; exit 1; }
 echo "OK proof"
 
-curl -sS "http://127.0.0.1:${PORT}/packet" -o /tmp/am-seed-packet.json
+curl -sS -H "x-operator-token: ${OPERATOR_TOKEN}" "http://127.0.0.1:${PORT}/packet" -o /tmp/am-seed-packet.json
 python3 - <<'PY'
 import json
 p = json.load(open("/tmp/am-seed-packet.json"))
