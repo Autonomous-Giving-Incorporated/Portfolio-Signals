@@ -1,14 +1,15 @@
 {
   "schema_version": "1.0",
   "generated_on": "2026-08-14",
-  "generated_at": "2026-08-14T23:51:36.8499055Z",
+  "generated_at": "2026-08-15T00:08:31.4224220Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
   "branch": "main",
   "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
-  "validated_commit": "9887a8a5b973fff2db2de7d993ac065efca2db4e",
+  "validated_commit": "3933c32d5ae7ebd12e9475142e72843445e33210",
   "boundary": {
     "production_mutation": true,
     "production_email_sent": true,
+    "production_email_sent_this_reconciliation": false,
     "synthetic_fixtures_only": true,
     "outreach_authority_granted": false
   },
@@ -62,6 +63,19 @@
     "workspace_smoke_test": "pass",
     "source_failure": false
   },
+  "production_reconciliation": {
+    "status": "pass",
+    "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/5",
+    "merged_commit": "3933c32d5ae7ebd12e9475142e72843445e33210",
+    "organization_checks": {
+      "successful": 6,
+      "skipped": 1,
+      "failed": 0
+    },
+    "vercel_deployment_id": "dpl_8EV7J8Lrjh5dJMNw4Swut6918Wrp",
+    "vercel_state": "READY",
+    "deployed_git_commit": "3933c32d5ae7ebd12e9475142e72843445e33210"
+  },
   "production_preflight": {
     "project_ref": "utdioxwiskzatwoejgiu",
     "vercel_project": "scrimshawlife-8819s-projects/fund-intel",
@@ -114,7 +128,14 @@
       "dkim": "verified",
       "spf": "verified",
       "return_path_mx": "verified",
-      "dmarc": "optional_pending"
+      "dmarc": "published_reporting_only",
+      "dmarc_dns_name": "_dmarc.auth.autogive.app",
+      "dmarc_policy": "none",
+      "dmarc_aggregate_reporting": "mailto:scrimshawlife@gmail.com",
+      "dmarc_public_dns_validation": "pass",
+      "dmarc_public_resolver": "1.1.1.1",
+      "resend_overall_domain_status": "partially_verified",
+      "resend_pending_capability": "receiving_mx_unused"
     },
     "auth_email_function_deployed": true,
     "auth_email_function_status": "ACTIVE",
@@ -132,13 +153,23 @@
     "subject": "Your A.G.I. platform administrator sign-in link",
     "magic_link_consumed": false
   },
+  "dmarc_monitoring": {
+    "status": "active",
+    "automation_id": "monitor-auth-dmarc-reports",
+    "cadence": "weekly_monday_09_00_america_los_angeles",
+    "source": "operator_gmail_aggregate_reports",
+    "read_only": true,
+    "minimum_observation_window_days_before_policy_recommendation": 14,
+    "policy_change_requires_operator_approval": true
+  },
   "governance_loop": {
     "status": "not_computable",
     "reason": "scripts/abraxas_v2.0_codex_governance_loop.py and Scripts/abx_loop.py are absent from this repository"
   },
   "residual_risks": [
-    "Optional DMARC monitoring record is not configured; required DKIM, SPF, and return-path records are verified.",
-    "Pre-existing unrelated Supabase security-advisor warnings remain outside Slice 16 scope."
+    "DMARC aggregate reports are asynchronous; no policy escalation is authorized until legitimate senders are observed passing alignment.",
+    "Resend receiving remains enabled but its optional inbound MX is pending and unused; outbound sending records remain verified.",
+    "Pre-existing unrelated Supabase security-advisor warnings remain outside Slices 16 and 17 scope."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 16 + Hash: 9887a8a5b973fff2db2de7d993ac065efca2db4e"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 17 + Hash: 3933c32d5ae7ebd12e9475142e72843445e33210"
 }
