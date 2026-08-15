@@ -10,13 +10,13 @@ See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for boundar
 
 ## Platform specification status
 
-Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v2.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/tree/v2.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts, and it does not claim full runtime conformance. AGI never processes donations; every.org is the P0 connector and Stripe is tenant/SaaS billing only. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
 ## Platform specification
 
-Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
+Pinned platform canon: **[Autonomous Giving Specs v2.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/releases/tag/v2.0.0)** (tag `v2.0.0`, commit `c089739`).
 
 Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
 
@@ -178,7 +178,7 @@ The repository must never contain:
 - production credentials or service-role values;
 - native development workbooks (`.xlsx` / `.csv` exports with campaign records).
 
-GitHub Pages is a public publishing surface, not a CRM access-control layer. Restricted records belong only in **local operator custody** until upload, then in **Supabase** (Postgres RLS + `campaign-private` storage). Notion may hold strategy and aggregate public evidence; it is **not** the CRM system of record.
+A public static surface (designed host: **Cloudflare Workers**; GitHub Pages is historical) is not a CRM access-control layer. Restricted records belong only in **local operator custody** until upload, then in **Supabase** (Postgres RLS + `campaign-private` storage). Notion may hold strategy and aggregate public evidence; it is **not** the CRM system of record.
 
 The source development list is evidence, not outreach authorization. A historical relationship, attendance record, or Meetup export does not establish consent to fundraising contact.
 

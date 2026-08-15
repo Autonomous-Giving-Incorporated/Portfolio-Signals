@@ -1,6 +1,6 @@
-# Autonomous Giving Platform Specification v1.0 conformance declaration
-platformSpecificationRelease: v1.0.0
-repository: Fund-Intel
+# Autonomous Giving Platform Specification v2.0 experimental declaration
+platformSpecificationRelease: v2.0.0
+repository: Portfolio-Signals
 serviceRole: intelligence
 conformance:
   required: []
@@ -15,8 +15,15 @@ conformance:
     - SPEC-006
     - SPEC-007
     - SPEC-008
-produces: []
+    - SPEC-023
+    - SPEC-024
+    - SPEC-026
+    - SPEC-027
+    - SPEC-028
+produces:
+  - CONTRACT-013
 consumes: []
-contracts: []
+contracts:
+  - CONTRACT-013
 evidence:
   assessment: docs/PLATFORM-CONFORMANCE.md
