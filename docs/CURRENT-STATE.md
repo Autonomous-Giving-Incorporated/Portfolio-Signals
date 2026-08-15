@@ -8,6 +8,8 @@ This document separates **live production evidence** from older Hacker Dojo camp
 
 **Onboarding hub:** [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — map of C→B→D→pilot, what is done without external login vs what still needs every.org/admin.
 
+Cloudflare Bindings on the connected Zero State / Noema account can **list and get** Workers, D1, KV, and R2. There is still **no secret-set tool**. Listing `portfolio-signals` failed; the allocation Worker is **absent**. See [CLOUDFLARE.md](CLOUDFLARE.md).
+
 ## Evidence labels
 
 - **OBSERVED** — supported by current production or a recorded executed check on current stack
@@ -42,6 +44,40 @@ tenant_assets_layout: assets/tenants/<slug>/  # HD under assets/tenants/hacker-d
 legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 ```
 
+Connected Supabase MCP lists only project `dezykkherxlaysxyvgbs` (Noema). `get_project utdioxwiskzatwoejgiu` returned permission denied. The platform ref above remains previously OBSERVED; this connector cannot reach it.
+
+## Cloudflare account (OBSERVED 2026-08-15 PT)
+
+Recorded via Cloudflare Bindings + Observability on the connected Zero State / Noema account. **Listing Workers now works.** There is still **no secret-set tool**. Do not treat this as a live allocation Worker, a live gift, MFA, or READY.
+
+```yaml
+cloudflare_account: Zero State / Noema
+bindings_list_workers: OBSERVED  # workers_list / workers_get_worker
+bindings_list_d1_kv_r2: OBSERVED
+bindings_secret_set: ABSENT  # no secret-set tool; secrets were not set
+workers_on_account:
+  - agi-public  # id 2d4fca83de814951afc30791e5b4f27b; created 2026-08-14; modified 2026-08-15
+  - noema-gateway
+worker_portfolio_signals: ABSENT  # workers_get_worker portfolio-signals failed
+workers_builds_agi_public: 0
+agi_public_role: suite_gateway  # workers/suite-gateway.ts + workers/suite-routes.ts; NOT allocation / webhook / CSV
+agi_public_proxy:
+  GET_HEAD /portfolio-signals: https://fund-intel-ten.vercel.app
+  GET_HEAD /impact-relay: https://impact-relay.vercel.app
+  /fund-intel: 301 /portfolio-signals
+  non_GET_HEAD_proxied: 405
+observability_hosts:
+  - autogive.app
+  - agi-public.zer0state-noema.workers.dev
+observability_script_name: agi-public  # only scriptName seen
+allocation_worker: ABSENT
+allocation_apis: CODE_SHIPPED  # /allocations /proofs /packet /seed /import/csv; not live on a named Worker
+every_org_webhook: CODE_SHIPPED  # not live
+impact_notice: CODE_SHIPPED  # not live
+```
+
+`agi-public.zer0state-noema.workers.dev` is the **suite gateway** origin, not an allocation / webhook / CSV host. Do not invent a `portfolio-signals.*.workers.dev` allocation URL.
+
 ## Capability matrix (repository + production)
 
 | Capability | State |
@@ -50,7 +86,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Authenticated workspace login | OBSERVED operator login pass |
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
 | Vercel path suite under autogive.app | OBSERVED (fallback until DNS cutover) |
-| Cloudflare Workers static host | In-repo (`wrangler.toml` + Worker `main`); live `workers.dev` PENDING operator `CLOUDFLARE_*` secrets — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| Cloudflare Workers static host | In-repo Worker name `portfolio-signals` (`wrangler.toml` + `main`); **ABSENT** on the connected account. Live suite path is `agi-public` GET/HEAD-proxy to Vercel. Allocation Worker ABSENT. Bindings listing OBSERVED; secret-set ABSENT — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
 | Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** — not Render/Fly/Railway; live named-host OBSERVED is **not** recorded |
 | Fund Intel Signal / Opportunity / Recommendation | CODE_SHIPPED in-process (`services/allocation-middleware/src/intel/`); not live; not READY — [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) |
@@ -68,7 +104,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Secret service_role in browser / Vercel / runtime-config | PROHIBITED (anon only) |
 | Worker secret `SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — allocation `am_*` + membership lookup only; never in HTML |
 | Allocation API on Workers | CODE_SHIPPED (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`; operator-token fallback off); live host PENDING |
-| Isolated synthetic restore drill | LOCAL_SYNTHETIC_OBSERVED 2026-08-15 ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)); not accepted RTO/RPO; hosted isolated project PENDING |
+| Isolated synthetic restore drill | LOCAL_SYNTHETIC_OBSERVED 2026-08-15 at `2587aa5` ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)); issue **reopened** — hosted isolated restore still PENDING; not accepted RTO/RPO |
 
 ## Allocation middleware pilot (local)
 
@@ -82,11 +118,11 @@ director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config direc
 operator_token_fallback: disabled_on_worker_and_pilot_env
 public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; designed durable host: Workers (not Render/Fly/Railway).
 workers_allocation_api: CODE_SHIPPED  # seed → allocate → proof → packet + POST /import/csv tests; no live director session
-every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org on portfolio-signals; not a live gift
-csv_import_worker: CODE_SHIPPED  # POST /import/csv director-write; same chargeId credit as webhook; not a checkout
+every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org in-repo; not live on a named Worker; not a live gift
+csv_import_worker: CODE_SHIPPED  # POST /import/csv director-write; same chargeId credit as webhook; not a checkout; not live
 every_org_live_webhook: PENDING  # operator: CF secrets, wrangler secret, every.org Advanced URL, controlled gift (#20)
 durable_named_host: NOT_OBSERVED
-cloudflare_deploy_secrets: PENDING  # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID absent in this environment
+cloudflare_deploy_secrets: PENDING  # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID absent in this environment; Bindings has no secret-set tool
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
@@ -254,7 +290,8 @@ Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See [CLIEN
 
 ```yaml
 restore_drill:
-  status: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 — not hosted isolated project; not accepted RTO/RPO
+  status: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 at 2587aa5 — not hosted isolated project; not accepted RTO/RPO
+  issue_19: REOPENED  # local-synthetic landed; hosted isolated restore still PENDING
   code_shipped: true
   receipt: docs/templates/RESTORE-DRILL-EVIDENCE.md
   script: scripts/staging/restore-drill.sh

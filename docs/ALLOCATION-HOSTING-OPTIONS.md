@@ -13,9 +13,9 @@ Render, Fly, and Railway are **not** the durable public or webhook host. In-repo
 | **3** | **Cloudflare quick tunnel** | Ephemeral public HTTPS for local Node smoke (`*.trycloudflare.com`) |
 | **4** | **Docker Compose** | Local durable volume for pilot files; not the named production webhook |
 
-**Production public site:** Workers (`portfolio-signals`).  
-**Production webhook:** Workers (`POST /webhooks/every-org` on `portfolio-signals`; do not deploy this service to Render/Fly/Railway). Live every.org pointing is still operator-owned.  
-**Day-to-day director path:** Worker `/allocation` once CF secrets exist; local Node until then.  
+**Production public site (designed):** Workers (in-repo name `portfolio-signals`). **ABSENT** on the connected account (OBSERVED 2026-08-15). Live HTML is `agi-public` GET/HEAD-proxy to Vercel.  
+**Production webhook (designed):** Workers `POST /webhooks/every-org` in-repo; not live on a named Worker. Do not deploy this service to Render/Fly/Railway. Live every.org pointing is still operator-owned.  
+**Day-to-day director path:** local Node until an allocation Worker exists. Do not use the suite-gateway origin.  
 **Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · [CLOUDFLARE.md](CLOUDFLARE.md).
 
 ## 0a) Cloudflare quick tunnel (ephemeral public HTTPS)

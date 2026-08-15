@@ -21,7 +21,8 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public portal | https://autogive.app/portfolio-signals/ |
 | Authenticated workspace | https://autogive.app/portfolio-signals/workspace |
-| Designed public host | Cloudflare Workers (`portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md); Vercel fallback until DNS cutover |
+| Designed public host | Cloudflare Workers (in-repo name `portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md); Vercel fallback until DNS cutover |
+| Live suite path (OBSERVED 2026-08-15) | `agi-public` GET/HEAD-proxies `/portfolio-signals` to Vercel. No Worker named `portfolio-signals`. Allocation Worker ABSENT. Bindings can list Workers; no secret-set tool. |
 | Platform Supabase | https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
 
 ## Read in this order
@@ -92,7 +93,7 @@ legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
 client_onboarding_pack: PENDING_MFA_DRY_RUN  # platform schema + Edge observed; operator script scripts/platform/dry-run-onboarding-pack.sh; issue #18
-restore_drill: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 host-postgres dump/restore; 21/21 SQL suites; not accepted RTO/RPO; hosted isolated project still PENDING; issue #19
+restore_drill: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 at 2587aa5; issue #19 REOPENED; hosted isolated project still PENDING; not accepted RTO/RPO
 ```
 
 Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

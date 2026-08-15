@@ -8,7 +8,8 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | --- | --- |
 | Public URL (production intent) | `https://autogive.app/portfolio-signals/` |
 | **Authenticated workspace** | `https://autogive.app/portfolio-signals/workspace` |
-| **Designed public host** | Cloudflare Workers static assets (`portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| **Designed public host** | Cloudflare Workers static assets (in-repo name `portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| **Live suite path (OBSERVED 2026-08-15)** | Worker `agi-public` GET/HEAD-proxies `/portfolio-signals` to Vercel. Worker `portfolio-signals` is **ABSENT**. Allocation Worker ABSENT. Bindings listing works; no secret-set tool. |
 | Vercel project (fallback until DNS cutover) | `fund-intel` (team `scrimshawlife-8819s-projects`) |
 | GitHub Pages fallback | repository Actions fallback; production remains `autogive.app/portfolio-signals/` |
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |

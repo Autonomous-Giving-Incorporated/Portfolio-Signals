@@ -80,7 +80,7 @@ Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST
 
 ### C2 — Cloudflare Workers (designed durable host)
 
-Public portal + allocation console + every.org webhook all live on Worker `portfolio-signals` **in repo**. Live `workers.dev` deploy is **PENDING** until the operator sets GitHub `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Do not invent a live URL. Do not point every.org yet.
+Public portal + allocation console + every.org webhook are **CODE_SHIPPED** on in-repo Worker `portfolio-signals`. That name is **ABSENT** on the connected account (OBSERVED 2026-08-15). Live HTML is `agi-public` GET/HEAD-proxy to Vercel — not an allocation Worker. Do not invent a live allocation URL. Do not point every.org yet.
 
 After those secrets exist and `wrangler deploy` succeeds:
 
