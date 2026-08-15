@@ -97,9 +97,10 @@ jobs:
           test -f docs/STAGING-BOOTSTRAP.md
           grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
           grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
-          grep -q 'suite_count": 9' scripts/staging/verify-policy-suite.sh
+          grep -q 'suite_count": 10' scripts/staging/verify-policy-suite.sh
           test -f supabase/tests/016_delegate_auth.sql
           test -f supabase/tests/017_security_definer_privileges.sql
+          test -f supabase/tests/018_authenticated_security_definer_privileges.sql
           grep -q "verify_jwt = false" supabase/config.toml
           grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
           test -f scripts/staging/generate-runtime-config.mjs
@@ -143,5 +144,4 @@ jobs:
           grep -q "promotion_authority: false" services/workbook-parser/src/cli.js
           grep -q "only native .xlsx files are accepted" services/workbook-parser/src/cli.js
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8
