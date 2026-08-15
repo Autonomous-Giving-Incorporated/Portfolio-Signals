@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildEveryOrgWebhookUrl } from '../app/config.mjs';
 import { createAuthVerifier, bearerToken } from '../app/auth.mjs';
+import { authorizeWebhookToken, parseWebhookJson } from './webhook-auth.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startedAt = Date.now();
@@ -148,11 +149,14 @@ export function createAllocationServer({
   }
 
   function requireWebhook(req, res, url) {
+    // Local Node open-dev keeps the historical empty-token allow. The Worker port
+    // fail-closes when WEBHOOK_TOKEN is unset — see workers/portfolio-signals.
     if (!webhookToken) return true;
     const header = req.headers['x-webhook-token'] || '';
     const query = url.searchParams.get('token') || '';
-    if (header === webhookToken || query === webhookToken) return true;
-    unauthorized(res);
+    const auth = authorizeWebhookToken(header, query, webhookToken);
+    if (auth.ok) return true;
+    unauthorized(res, auth.error);
     return false;
   }
 
@@ -302,7 +306,8 @@ export function createAllocationServer({
 
       if (req.method === 'POST' && url.pathname === '/webhooks/every-org') {
         if (!requireWebhook(req, res, url)) return;
-        const payload = await readJson(req, maxJsonBodyBytes);
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes);
         const result = await service.ingestEveryOrg(payload);
         return send(res, 200, { created: result.created });
       }

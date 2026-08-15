@@ -54,7 +54,7 @@ Master-administrator identities are stored only in the restricted operator regis
 
 Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only (or Vercel build from `PLATFORM_SUPABASE_*` env).
 
-Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
+Suite hosting canon: [AGI PLATFORM.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Master Development List (source inventory only)
 

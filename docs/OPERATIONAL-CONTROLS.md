@@ -53,4 +53,4 @@ Run the drill in an isolated project containing synthetic data only:
 7. Record elapsed recovery time and observed recovery point.
 8. Destroy or quarantine the isolated drill environment according to policy.
 
-Use [templates/RESTORE-DRILL-EVIDENCE.md](templates/RESTORE-DRILL-EVIDENCE.md). Leadership owns final RTO and RPO acceptance.
+Use [templates/RESTORE-DRILL-EVIDENCE.md](templates/RESTORE-DRILL-EVIDENCE.md) and `scripts/staging/restore-drill.sh`. Leadership owns final RTO and RPO acceptance. Do not invent those numbers from an unexecuted drill.

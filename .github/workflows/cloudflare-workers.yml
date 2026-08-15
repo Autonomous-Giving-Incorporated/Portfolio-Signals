@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   validate:
+    name: Cloudflare Workers validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -24,6 +25,9 @@ jobs:
           node-version: '22.18.0'
       - name: Verify static entry points
         run: node scripts/validate-static-routes.mjs
+      - name: Test every.org webhook Worker port
+        working-directory: workers/portfolio-signals
+        run: npm test
       - name: Wrangler config dry-run
         run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/wrangler-dry-run
 

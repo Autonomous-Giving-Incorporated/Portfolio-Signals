@@ -8,13 +8,13 @@ Render, Fly, and Railway are **not** the durable public or webhook host. In-repo
 
 | Rank | Host | Role |
 | --- | --- | --- |
-| **1** | **Cloudflare Workers** | **Designed production** — static public site now; every.org webhook as a Worker (remaining port). Data/Auth stay on Supabase. |
+| **1** | **Cloudflare Workers** | **Designed production** — static public site + `POST /webhooks/every-org` in-repo. Live deploy/pointing remain operator-owned. Data/Auth stay on Supabase. |
 | **2** | **Local Node** | **Pilot only** — director auth against platform Supabase; no Docker |
 | **3** | **Cloudflare quick tunnel** | Ephemeral public HTTPS for local Node smoke (`*.trycloudflare.com`) |
 | **4** | **Docker Compose** | Local durable volume for pilot files; not the named production webhook |
 
 **Production public site:** Workers (`portfolio-signals`).  
-**Production webhook:** Workers (port `POST /webhooks/every-org`; do not deploy this service to Render/Fly/Railway).  
+**Production webhook:** Workers (`POST /webhooks/every-org` on `portfolio-signals`; do not deploy this service to Render/Fly/Railway). Live every.org pointing is still operator-owned.  
 **Day-to-day director-auth pilot:** Local Node.  
 **Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · `npm run preflight:durable` (local). Webhook production cutover: [CLOUDFLARE.md](CLOUDFLARE.md).
 

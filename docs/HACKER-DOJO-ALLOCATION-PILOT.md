@@ -9,7 +9,7 @@ Use **Hacker Dojo** (`org_hacker_dojo`) until live every.org gift data is integr
 | every.org page | https://www.every.org/hacker-dojo |
 | Suite allocation story | `alloc_community_hardware` / Community Hardware Fund |
 | Hosting choices | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) |
-| Specs plan | [hacker-dojo-pilot-hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md) |
+| Specs plan | [hacker-dojo-pilot-hosting](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md) |
 
 ## A — Local Node (**no Docker** — Phase 3a default)
 
@@ -76,12 +76,12 @@ BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run verify:director
 
 URL changes each session — fine for local smoke. Production every.org webhooks belong on **Cloudflare Workers**, not Render/Fly/Railway — [CLOUDFLARE.md](CLOUDFLARE.md).
 
-Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable` for local). Webhook remaining work: Worker port of `POST /webhooks/every-org`.
+Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable` for local). Webhook remaining work: live Worker URL + every.org pointing (route is in-repo).
 
 ### C2 — Cloudflare Workers (designed durable host)
 
 Public portal: Worker `portfolio-signals` in this repo.  
-every.org webhook: remaining Worker port (same account; not a Render/Fly/Railway service).
+every.org webhook: Worker route shipped on `portfolio-signals`; live URL and every.org pointing remain operator-owned (not a Render/Fly/Railway service).
 
 Details: [CLOUDFLARE.md](CLOUDFLARE.md). Historical Compose/Render recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) (not production).
 
@@ -110,7 +110,7 @@ What it checks:
 
 **Designed production host:** a **Cloudflare Worker** (`POST /webhooks/every-org`) on the same account as `portfolio-signals`, with platform Supabase as the data plane. See [CLOUDFLARE.md](CLOUDFLARE.md). Do **not** deploy this webhook to Render, Fly, or Railway.
 
-Until that Worker port ships, local Node + an ephemeral tunnel is valid **smoke only** (URL is not durable).
+The Worker route is in-repo. Until a live Worker URL exists and every.org is pointed at it, local Node + an ephemeral tunnel is valid **smoke only** (URL is not durable).
 
 ### Prerequisites (local smoke)
 

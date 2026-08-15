@@ -24,7 +24,7 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-**Status (2026-08-07):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host is **Cloudflare Workers** (this repo’s static Worker). Live every.org webhook is remaining work **on Workers** (not Render/Fly/Railway) — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md). **Local pilot:** Node on `:8787`.
+**Status (2026-08-15):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host is **Cloudflare Workers** (this repo’s Worker, including `POST /webhooks/every-org`). Live every.org pointing and a controlled gift remain operator-owned — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md). **Local pilot:** Node on `:8787`.
 
 ```bash
 cd services/allocation-middleware
@@ -55,7 +55,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 | Public director portal | **Live** on https://autogive.app/portfolio-signals/ (Vercel today; **Workers** intended production — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)) |
 | Authenticated workspace login | **Live** — operator magic-link login verified |
 | Allocation middleware MVP | Implemented; **local pilot smoke PASS** |
-| every.org live webhook (hosted) | Operator-owned (setup wizard ready; production host pending) |
+| every.org live webhook (hosted) | Worker route shipped; live URL / every.org pointing / gift operator-owned ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | Static security policy checks | Passing |
@@ -142,7 +142,7 @@ Live public donation progress, use-of-funds receipts, and event digests are publ
 
 https://autogive.app/impact-relay/
 
-Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
+Repository: https://github.com/Autonomous-Giving-Incorporated/Impact-Relay
 
 This repo is the **canonical host app** for Impact Relay (campaign UX + Supabase auth). The library owns ledger, durable workflows, and console APIs; this app owns screens and identity.
 

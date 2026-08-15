@@ -14,7 +14,7 @@
 | Hosted deploy recipe | Local Node (pilot); production webhook/public host is Cloudflare Workers |
 | Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
 | Director SSO / Supabase session | OBSERVED (`/login.html` + membership JWT; #72 closed) |
-| every.org live webhook | **PENDING** Worker port (#73) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| every.org live webhook | Worker route shipped; live pointing / gift **PENDING** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Public HTTPS (ephemeral) | OBSERVED (cloudflared; #71 closed) |
 | Named durable public host | **Cloudflare Workers** (designed); not Render/Fly/Railway |
 | Seed-loop accept (no live gift) | OBSERVED (`npm run accept:seed-loop`) |

@@ -58,14 +58,14 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 | **Qi / Ed first login + TOTP** | Operator-local links `scripts/platform/.onboarding-invite-links.md` (gitignored); then `set-mfa-enforced` — [PEOPLE-AND-PACK-HANDOFF.md](PEOPLE-AND-PACK-HANDOFF.md) |
 | **Pack dry-run (primary now)** | Primary already `mfa_enforced`; can complete Onboarding pack without waiting on Qi/Ed — handoff above |
 | Durable **named public** host | Cloudflare Workers — [CLOUDFLARE.md](CLOUDFLARE.md); `CLOUDFLARE_*` GitHub secrets |
-| Live every.org webhook | Worker port of `POST /webhooks/every-org` (not Render/Fly/Railway) |
+| Live every.org webhook | Worker route shipped; operator still owns CF secrets, `WEBHOOK_TOKEN`, every.org Advanced URL, and a controlled gift |
 | Custom SMTP (optional) | Platform Supabase Dashboard — [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | Secret rotation after share/offboard | Operator secret manager — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Vercel team invite acceptance | **Invitee only** (owner cannot accept for them) |
 
 ### every.org when you have admin
 
-1. Public HTTPS **Worker** with webhook route (remaining work — [CLOUDFLARE.md](CLOUDFLARE.md)). Local tunnel is for smoke only.  
+1. Public HTTPS **Worker** with webhook route (code in-repo — [CLOUDFLARE.md](CLOUDFLARE.md)). Live deploy and every.org pointing remain operator-owned. Local tunnel is for smoke only.  
 2. Open `/setup.html` → copy webhook URL.  
 3. every.org admin → Settings → Advanced → paste.  
 4. $1 test gift.  

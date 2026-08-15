@@ -5,11 +5,11 @@ Allocation writes (allocate, proof, merge, labels, CSV) accept:
 1. **Preferred:** Supabase user JWT (`Authorization: Bearer <access_token>`) for a user who is an active member of `ORG_ID` (default `org_hacker_dojo`) with role **`director`** or **`campaign_lead`**.
 2. **Fallback (dev/pilot):** shared `OPERATOR_TOKEN` via `x-operator-token` when `ALLOW_OPERATOR_TOKEN_FALLBACK` is enabled.
 
-Tracking: [Fund-Intel#72](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/72).
+Tracking: historical Fund-Intel#72; remaining live acceptance is [Portfolio-Signals#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20).
 
 ## Prerequisites
 
-1. Fund-Intel Supabase project with migrations applied (including `clients` + `client_memberships`).
+1. Platform Supabase `utdioxwiskzatwoejgiu` with migrations applied (including `clients` + `client_memberships`).
 2. Client row: `org_hacker_dojo`.
 3. Auth user exists; `profiles` row active.
 4. Membership `director` or `campaign_lead` on that client.

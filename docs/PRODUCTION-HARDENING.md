@@ -32,13 +32,13 @@ Create **two** managed projects before any real data:
 1. **Staging** — synthetic fixtures only; full migration and RLS suite.
 2. **Production** — empty until a governed pilot import is approved.
 
-### Current hosted project
+### Current hosted projects
 
 | Field | Value |
 |---|---|
-| Ref | `ecxkhihlbrcwpavfoaoq` |
-| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq |
-| Default classification | **Staging** until leadership names production or creates a second project |
+| Platform (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
+| Legacy HD staging | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
+| Isolated restore-drill project | Operator-provisioned empty project only ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)) |
 | Real data | **Not authorized** |
 
 If only one project exists, do not load production CRM data into it until:

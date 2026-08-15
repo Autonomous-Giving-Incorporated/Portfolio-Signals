@@ -50,10 +50,10 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Authenticated workspace login | OBSERVED operator login pass |
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
 | Vercel path suite under autogive.app | OBSERVED (fallback until DNS cutover) |
-| Cloudflare Workers static host | In-repo (`wrangler.toml`); live `workers.dev` PENDING operator `CLOUDFLARE_*` secrets — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| Cloudflare Workers static host | In-repo (`wrangler.toml` + Worker `main`); live `workers.dev` PENDING operator `CLOUDFLARE_*` secrets — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
-| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** (webhook port PENDING) — not Render/Fly/Railway; live acceptance tracked in [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) |
-| every.org live webhook | PENDING Worker port ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** — not Render/Fly/Railway; live named-host OBSERVED is **not** recorded |
+| every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
@@ -73,7 +73,9 @@ local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_pilot_env
 public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Designed durable host: Workers (not Render/Fly/Railway).
-every_org_live_webhook: PENDING  # post-migration issue #20 — port POST /webhooks/every-org to a Worker
+every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org on portfolio-signals; not a live gift
+every_org_live_webhook: PENDING  # operator: CF secrets, wrangler secret, every.org Advanced URL, controlled gift (#20)
+durable_named_host: NOT_OBSERVED
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
@@ -88,7 +90,7 @@ path: local_node_no_docker
 org_id: org_hacker_dojo
 verify_director: PASS  # config only; optional --login needs director password in operator hands
 membership: director on platform (prior OBSERVED)
-next: every.org webhook on Workers + director acceptance issue #20
+next: live Worker URL + every.org pointing + director acceptance issue #20
 ```
 
 ## Phase 3b — Public HTTPS host (#71)
@@ -100,7 +102,7 @@ smoke: PASS  # pilot:smoke + verify:director over HTTPS
 durable_render_recipe: HISTORICAL  # render.yaml remains in-tree; not the designed host
 durable_host_runbook: docs/ALLOCATION-DURABLE-HOST.md
 durable_preflight: npm run preflight:durable  # local only
-durable_named_host: CLOUDFLARE_WORKERS  # designed; webhook Worker port PENDING
+durable_named_host: CLOUDFLARE_WORKERS  # designed host; live named-host OBSERVED not recorded
 durable_preflight_local: OBSERVED  # 2026-08-08 npm run preflight:durable PASS (.env.pilot + recipe files)
 compose_build_this_host: BLOCKED  # docker credential helper exec format error (desktop.exe under WSL); recipe still READY
 ```
@@ -127,6 +129,28 @@ ui: Seed only — waiting for live gift | Connected (live only)
 ## Historical evidence (do not treat as current-main GO)
 
 Older HD-OI-041 / staging receipts against `ecxkhihlbrcwpavfoaoq` or pre-rename `Hacker-Dojo` commits remain provenance only. See prior sections of git history and HD-OI-* docs.
+
+## Repository enforcement (Slice 22 attempt 2026-08-15)
+
+```yaml
+canonical_repository: Autonomous-Giving-Incorporated/Portfolio-Signals
+main_branch_protection: BLOCKED_API
+rulesets: BLOCKED_API
+secret_scanning: BLOCKED_API
+secret_scanning_push_protection: BLOCKED_API
+secret_scanning_validity_checks: BLOCKED_API
+dependabot_security_updates: BLOCKED_API
+vulnerability_alerts: BLOCKED_API
+api_error: "403 Resource not accessible by integration"
+attempted:
+  - PATCH /repos/Autonomous-Giving-Incorporated/Portfolio-Signals security_and_analysis
+  - PUT /repos/.../vulnerability-alerts
+  - PUT /repos/.../automated-security-fixes
+  - POST /repos/.../rulesets
+operator_owned: enable secret scanning, push protection, Dependabot security updates, and a main ruleset (PR required, 0 reviewers, no path-filtered required checks)
+```
+
+GET `/repos/.../rulesets` returned `[]`. GET `security_and_analysis` was `null` on the public repo payload available to this integration. Do not treat this block as OBSERVED enforcement.
 
 ## Operator hygiene (optional tracks)
 
@@ -205,9 +229,11 @@ client_onboarding_pack:
   activate_script: scripts/platform/activate-onboarding-pack.sh  # Edge via CLI; SQL also applied via Management API when db password absent
   handoff: docs/PEOPLE-AND-PACK-HANDOFF.md
   operator_remaining:
-    - Primary (mfa_enforced true) can run pack dry-run now without waiting on Qi/Ed
+    - scripts/platform/dry-run-onboarding-pack.sh local-synthetic (no production credentials)
+    - scripts/platform/dry-run-onboarding-pack.sh operator-mfa after TOTP + mfa_enforced
     - Workspace → Onboarding pack (org_hacker_dojo) → 5 required + park xlsx → mark full OBSERVED
     - Qi/Ed: action_links operator-local; enroll TOTP → set-mfa-enforced (parallel)
+    - Isolated restore drill: scripts/staging/restore-drill.sh (no invented RTO/RPO; #19)
     - REVOKE any personal access token pasted into chat after activate
 ```
 

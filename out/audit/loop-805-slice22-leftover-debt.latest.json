@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-15T06:57:00Z",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "cursor/leftover-debt-1837",
+  "base_commit": "299ef3f4c5478f0d0c324d8e2d1bb333a9bdd927",
+  "status": "code_and_docs_ready_settings_blocked",
+  "boundary": {
+    "surface": "engineering_debt_except_issue_22",
+    "live_every_org_gift": false,
+    "durable_named_host_observed": false,
+    "ready_invented": false,
+    "production_import": false,
+    "outreach": false,
+    "issue_22_pro_plan": "skipped"
+  },
+  "issue_21_actions": {
+    "upload_artifact": "actions/upload-artifact@v6 (runs.using node24; v4 was the Node 20 warning source)",
+    "setup_cli": "supabase/setup-cli@v3 (composite action; CLI pin remains 2.31.8)",
+    "permissions_expanded": false,
+    "artifact_emission_weakened": false,
+    "ci_proof": "pending_required_workflows_on_this_pr"
+  },
+  "issue_17_docs_and_settings": {
+    "canonical_repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+    "docs_reconciled": [
+      "docs/CURRENT-STATE.md",
+      "docs/START_HERE.md",
+      "docs/PLATFORM.md",
+      "docs/CLOUDFLARE.md",
+      "docs/ALLOCATION-DURABLE-HOST.md",
+      "docs/STAGING-ACCEPTANCE.md",
+      "docs/DIRECTOR-WORKSPACE.md"
+    ],
+    "render_path_b": "historical_not_recommended",
+    "settings_get": {
+      "rulesets": [],
+      "security_and_analysis": null
+    },
+    "settings_mutations": [
+      {
+        "method": "PATCH",
+        "path": "/repos/Autonomous-Giving-Incorporated/Portfolio-Signals",
+        "body": "security_and_analysis.secret_scanning / push_protection / dependabot_security_updates / validity_checks enabled",
+        "http_status": 403,
+        "error": "Resource not accessible by integration"
+      },
+      {
+        "method": "PUT",
+        "path": "/repos/Autonomous-Giving-Incorporated/Portfolio-Signals/vulnerability-alerts",
+        "http_status": 403,
+        "error": "Resource not accessible by integration"
+      },
+      {
+        "method": "PUT",
+        "path": "/repos/Autonomous-Giving-Incorporated/Portfolio-Signals/automated-security-fixes",
+        "http_status": 403,
+        "error": "Resource not accessible by integration"
+      },
+      {
+        "method": "POST",
+        "path": "/repos/Autonomous-Giving-Incorporated/Portfolio-Signals/rulesets",
+        "intended": "PR required on main, 0 approving reviews, deletion + non_fast_forward, always-running check names, admin pull_request bypass",
+        "http_status": 403,
+        "error": "Resource not accessible by integration"
+      }
+    ],
+    "enforcement_observed": false,
+    "operator_owned": "enable secret scanning, push protection, Dependabot security updates, and a main ruleset without multi-reviewer or path-filtered required checks"
+  },
+  "issue_20_webhook_worker": {
+    "route": "POST /webhooks/every-org",
+    "worker": "portfolio-signals",
+    "run_worker_first": ["/webhooks/*"],
+    "durable_store": "platform Supabase am_* via service-role binding (not D1, not Render/Fly disk)",
+    "tests": "auth reject, valid token fixture, fail-closed malformed / missing chargeId / oversized / missing persist bindings",
+    "live_url_claimed": false,
+    "every_org_pointed": false,
+    "live_gift_claimed": false,
+    "durable_named_host": "NOT_OBSERVED"
+  },
+  "issue_18_mfa_dry_run": {
+    "script": "scripts/platform/dry-run-onboarding-pack.sh",
+    "local_synthetic": "executable without production credentials",
+    "operator_mfa": "fail-closed; does not write OBSERVED receipt",
+    "commit_scoped_acceptance_receipt": "not_written"
+  },
+  "issue_19_restore_drill": {
+    "script": "scripts/staging/restore-drill.sh",
+    "docs_preflight": "executable without production credentials",
+    "local_synthetic": "requires local supabase + psql + pg_dump; refuses to invent RTO/RPO",
+    "isolated_project": "fail-closed against utdioxwiskzatwoejgiu and ecxkhihlbrcwpavfoaoq",
+    "rto_rpo_invented": false
+  },
+  "validation": {
+    "allocation_middleware_unit_tests": "pass_57",
+    "worker_webhook_unit_tests": "pass_12",
+    "onboarding_local_synthetic": "LOCAL_SYNTHETIC_PASS",
+    "onboarding_operator_mfa_without_credentials": "fail_closed",
+    "restore_docs_preflight": "DOCS_PREFLIGHT_PASS",
+    "restore_isolated_project_without_ref": "fail_closed",
+    "restore_local_synthetic": "blocked_no_local_supabase_cli",
+    "wrangler_dry_run": "pass_wrangler_4.123.0",
+    "static_routes": "pass_5_routes",
+    "script_safety": "pass",
+    "required_workflows": "pending_pull_request"
+  },
+  "residual_risks": [
+    "GitHub administration token available to this agent cannot mutate security_and_analysis or rulesets (403).",
+    "Live Workers deploy remains blocked on operator CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID.",
+    "Supabase leaked-password protection remains issue 22 / Pro plan.",
+    "Production import, outreach, money movement, and live notifications remain separately authority-gated."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 22 leftover debt + Hash: 299ef3f4c5478f0d0c324d8e2d1bb333a9bdd927"
+}

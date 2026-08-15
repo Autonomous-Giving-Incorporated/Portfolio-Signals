@@ -1,20 +1,24 @@
-# Portfolio Signals — Cloudflare Workers static assets (designed production host).
-# Designed stack: Workers (public site + future webhook Worker) + platform Supabase
+# Portfolio Signals — Cloudflare Workers (designed production host).
+# Designed stack: Workers (public site + every.org webhook) + platform Supabase
 # (utdioxwiskzatwoejgiu). Do not treat Render / Fly / Railway as the durable host.
+# Do not add D1 as the canonical store.
 #
-# Assets-only today: HTML/JS/CSS/data/assets. No Worker script (`main`) until the
-# every.org webhook is ported onto this Worker (or a sibling) — see docs/CLOUDFLARE.md.
-# After that port, add main + assets.run_worker_first = ["/webhooks/*"].
+# Static assets stay on this Worker. POST /webhooks/* runs the Worker script first.
+# Durable allocation state is platform Supabase am_* tables (service-role binding).
+# Live every.org pointing and named-host OBSERVED remain operator-owned.
 
 name = "portfolio-signals"
+main = "workers/portfolio-signals/src/index.js"
 compatibility_date = "2026-08-13"
 workers_dev = true
 
 [assets]
 directory = "."
+binding = "ASSETS"
 # /workspace → workspace.html; /workspace/session.js still served from workspace/.
 # Not an SPA: unknown paths 404 (not_found_handling default is none).
 html_handling = "auto-trailing-slash"
+run_worker_first = ["/webhooks/*"]
 
 [observability]
 enabled = true

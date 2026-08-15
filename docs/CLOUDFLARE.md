@@ -1,7 +1,7 @@
 # Cloudflare Workers — Portfolio Signals public host
 
 **Designed production stack:** Cloudflare Workers + platform Supabase (`utdioxwiskzatwoejgiu`).  
-Workers serve the public/static site (and, next, every.org webhooks). Supabase remains Auth, RLS, and private data. This is **not** a database migration and **not** a replacement for Supabase Auth.
+Workers serve the public/static site and the every.org webhook route. Supabase remains Auth, RLS, and private data. This is **not** a database migration and **not** a replacement for Supabase Auth.
 
 Vercel (`vercel.json`, project `fund-intel`) stays in-repo as the **fallback until DNS cutover**. Do not treat Render, Fly, or Railway as the durable public or webhook host.
 
@@ -77,19 +77,29 @@ The Worker may only serve:
 
 It must **not** serve donor records, member registries, workbooks, service-role keys, or Supabase migrations. `.assetsignore` is fail-closed on those trees. Authz for private data remains **Supabase RLS + Edge Functions**, not this CDN.
 
-## Remaining work — every.org webhooks on Workers
+## every.org webhook on this Worker
 
-`POST /webhooks/every-org` today lives in the Node HTTP server under `services/allocation-middleware`. That process is a **local/pilot** implementation. The **designed durable host** for the webhook is a **Cloudflare Worker**, talking to the same platform Supabase project — not Render, Fly, or Railway.
+`POST /webhooks/every-org` is implemented on Worker `portfolio-signals` via `main` + `assets.run_worker_first = ["/webhooks/*"]`. Product semantics stay the allocation middleware contract: token auth (`x-webhook-token` or `?token=`), fail-closed malformed payloads, then pots → credit on platform Supabase `am_*` tables. Director JWT allocate/proof/packet remains the Node/workspace path.
 
-This PR does **not** rewrite the middleware. Product semantics (pots → allocate → proof → exception inbox, director JWT, webhook token) stay unchanged. Remaining operator/engineering work:
+| Item | State |
+| --- | --- |
+| Worker route + deterministic tests | SHIPPED in this repo |
+| Durable store | platform Supabase `am_gifts` / `am_pots` / `am_exceptions` (service-role binding). Not D1, not Render/Fly disk |
+| Live `workers.dev` deploy | PENDING operator `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` |
+| `wrangler secret put WEBHOOK_TOKEN` | PENDING operator |
+| `PLATFORM_SUPABASE_URL` + service-role secret on the Worker | PENDING operator — never commit |
+| every.org Advanced webhook URL | **Do not point yet** — remaining operator step after a live Worker URL exists |
+| Controlled live gift + director browser sign-off | PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| `durable_named_host: OBSERVED` | **Not recorded** until the operator verifies a live host |
 
-1. Port `POST /webhooks/every-org` (and any setup URL the wizard copies) onto Workers — either `main` on `portfolio-signals` with `assets.run_worker_first = ["/webhooks/*"]`, or a sibling Worker on the same account.
-2. Store webhook secrets with `wrangler secret put` (e.g. `WEBHOOK_TOKEN`). Never commit them.
-3. Keep durable allocation state in **platform Supabase** (already the suite data plane). Do not introduce a Render/Fly disk as the system of record.
-4. Point every.org Advanced webhook settings at the Worker HTTPS URL once the port is live.
-5. Leave MFA / onboarding / allocation **behavior** as-is; this is host + runtime only.
+Local Node (`npm run start:hacker-dojo:seed`) remains valid for **pilot smoke**. It is not the production webhook host.
 
-Until that port ships, local Node (`npm run start:hacker-dojo:seed`) remains valid for **pilot smoke**. It is not the production webhook host.
+```bash
+# after GitHub CF secrets exist
+npx wrangler@4 secret put WEBHOOK_TOKEN
+# service-role binding is Worker-only; never put it in runtime-config.js
+npx wrangler@4 secret put SUPABASE_SERVICE_ROLE_KEY
+```
 
 ## Vercel until cutover
 

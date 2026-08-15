@@ -29,7 +29,7 @@ service_role_on_vercel: PROHIBITED
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — live production vs historical evidence  
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
-3a. [CLOUDFLARE.md](CLOUDFLARE.md) — Workers public host + webhook remaining work  
+3a. [CLOUDFLARE.md](CLOUDFLARE.md) — Workers public host + webhook route (live pointing remaining)  
 4. [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — identity, roles, workspace login  
    - [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) — role-aware magic links and tenant-scoped infrastructure delegates
 5. [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md) — master_admin and director people path  
@@ -52,7 +52,7 @@ service_role_on_vercel: PROHIBITED
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
 | **Client Onboarding Pack** (docs) | **Platform schema + Edge OBSERVED**; MFA dry-run **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
-| Phase 3c every.org webhook | **PENDING** operator ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| Phase 3c every.org webhook | Worker **code shipped**; live URL / every.org pointing / gift **PENDING** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Production CRM import | Blocked |
 
 ## Quick operator commands
@@ -83,7 +83,8 @@ platform_supabase: utdioxwiskzatwoejgiu
 legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
-client_onboarding_pack: PENDING_MFA_DRY_RUN  # platform schema + Edge observed; issue #18
+client_onboarding_pack: PENDING_MFA_DRY_RUN  # platform schema + Edge observed; operator script scripts/platform/dry-run-onboarding-pack.sh; issue #18
+restore_drill: PENDING_OPERATOR  # scripts/staging/restore-drill.sh; no invented RTO/RPO; issue #19
 ```
 
 Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

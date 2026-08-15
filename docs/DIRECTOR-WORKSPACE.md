@@ -26,21 +26,20 @@
 9. Obtain leadership approval for retention, consent, suppression, and outreach rules.
 10. Enable production writes only after the launch gate is signed.
 
-## Current staging host decision
+## Current host decision
 
-GitHub Pages is the selected staging web host. The expected URL is
-`https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`. GitHub Actions generates the gitignored
-`runtime-config.js` during deployment from repository variable `STAGING_SUPABASE_URL` and secret
-`STAGING_SUPABASE_ANON_KEY`. Only the browser-public anon key is permitted; the service-role key
-must never be stored in Pages configuration.
+**Canonical repository:** `Autonomous-Giving-Incorporated/Portfolio-Signals`.  
+**Designed public host:** Cloudflare Workers (`portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md).  
+**Fallback until DNS cutover:** Vercel project `fund-intel` at https://autogive.app/portfolio-signals/.  
+GitHub Pages (`https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`) is a **historical** pre-migration origin, not the current production host.
 
-Supabase Auth must allow the following staging URLs after Pages is active:
+GitHub Actions may still generate gitignored `runtime-config.js` from `PLATFORM_SUPABASE_URL` / `PLATFORM_SUPABASE_ANON_KEY` (or the older `STAGING_*` names). Only the browser-public anon key is permitted; the service-role key must never be stored in Pages, Vercel browser env, or `runtime-config.js`.
 
-- site URL: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/`
-- workspace redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/workspace.html`
-- import review redirect: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/import-review.html`
-- Impact Relay finance: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/finance-impact.html`
-- Impact Relay donors: `https://scrimshawlife-ctrl.github.io/Hacker-Dojo/donor-impact.html`
+Supabase Auth must allow the current HTTPS origins:
+
+- site URL: `https://autogive.app/portfolio-signals/`
+- workspace: `https://autogive.app/portfolio-signals/workspace` and `/workspace.html`
+- plus the `workers.dev` origin once the operator deploys Worker `portfolio-signals`
 
 Impact Relay screens call a local/staging **console API** (not Supabase). See [IMPACT-RELAY.md](./IMPACT-RELAY.md). Privileged roles need `mfa_enforced` on the profile before those pages accept a Supabase session.
 

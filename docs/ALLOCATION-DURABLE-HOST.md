@@ -12,7 +12,7 @@ This page is the **local** operator preflight. Production webhook remaining work
 | --- | --- |
 | Designed host | Cloudflare Workers + Supabase — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Public static site | Worker `portfolio-signals` (CI deploy once CF secrets are set) |
-| Webhook on Workers | PENDING port of `POST /webhooks/every-org` |
+| Webhook on Workers | CODE_SHIPPED (`POST /webhooks/every-org` on `portfolio-signals`); live URL + every.org pointing PENDING |
 | Local durable OBSERVED | Docker Compose volume / local Node smoke |
 | Render / Railway / Fly | Not the designed durable host |
 
@@ -51,30 +51,29 @@ BASE_URL=http://127.0.0.1:8787 npm run verify:director   # if Supabase set
 
 VPS: put Caddy/nginx TLS in front of `:8787`, set `PUBLIC_BASE_URL=https://allocation.example.com`.
 
-## Path B — Render (recommended managed public)
+## Path B — Render (historical only — not recommended)
 
-1. [render.com](https://render.com) → Blueprint → connect `Autonomous-Giving-Incorporated/Portfolio-Signals` → `services/allocation-middleware/render.yaml`
-   **or** Docker web service, root `services/allocation-middleware`, disk `/data` 1 GB.
-2. Dashboard secrets: `PUBLIC_BASE_URL`, `SUPABASE_*` (sync:false in blueprint).
-3. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0`.
-4. Smoke: `BASE_URL=https://<service>.onrender.com npm run pilot:smoke`
-5. After stable seed: set `SEED_ON_BOOT=0` in dashboard.
-6. Open `/setup.html` for every.org webhook URL.
+`services/allocation-middleware/render.yaml` remains in-tree as a **historical** local/managed recipe. Render is **not** the designed public or webhook host. Do not treat a Render URL as `durable_named_host`.
 
-## Path C — Railway / Fly
+If an operator still needs the old recipe for a disposable experiment: Blueprint → `render.yaml`, disk `/data`, dashboard secrets, then `SEED_ON_BOOT=0`. That path does not replace Workers + platform Supabase.
 
-See [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md). Fly: `npm run bootstrap:fly` when flyctl authenticated.
+## Path C — Railway / Fly (historical only)
 
-## After host is up
+See [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md). These files are not the production webhook host. Fly: `npm run bootstrap:fly` when flyctl authenticated, for local experiments only.
 
-1. `pilot:smoke` + `verify:director` against public `BASE_URL`  
-2. `/setup.html` → every.org (#73)  
-3. Director allocate in browser (#74 remainder)  
-4. Record in [CURRENT-STATE.md](CURRENT-STATE.md):
+## After a live Worker URL exists (operator — not claimed here)
+
+1. Set Worker secrets (`WEBHOOK_TOKEN`, platform Supabase URL + service role). Never commit them.  
+2. Confirm `POST /webhooks/every-org` rejects a bad token and accepts a fixture token against platform `am_*`.  
+3. Point every.org Advanced settings at the Worker HTTPS URL (do not do this until the live URL is operator-verified).  
+4. Controlled live gift + director JWT allocate/proof/packet + sign-off ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)).  
+5. Only then record in [CURRENT-STATE.md](CURRENT-STATE.md):
 
 ```yaml
-durable_named_host: OBSERVED  # YYYY-MM-DD provider + hostname only (no tokens)
+durable_named_host: OBSERVED  # YYYY-MM-DD workers.dev or custom hostname only (no tokens)
 ```
+
+This change does **not** record `durable_named_host: OBSERVED`.
 
 ## Non-goals
 
