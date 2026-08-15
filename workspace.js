@@ -34,6 +34,7 @@ let enabledModules = { sponsors: false, grants: false };
 let renderGeneration = 0;
 let lastSessionUserId = null;
 let renderInFlight = null;
+let loginRequestInFlight = false;
 let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
 
 function escapeHtml(value = '') {
@@ -175,16 +176,31 @@ if (!document.getElementById('loginForm')) {
 if (activeClient) {
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (loginRequestInFlight) return;
+
+    const form = event.currentTarget;
+    const submitButton = form.querySelector('button[type="submit"]');
     const email = document.getElementById('email').value.trim();
     const redirectTo = workspaceRedirectUrl();
-    const { error } = await activeClient.functions.invoke('auth-email', {
-      body: { action: 'self_sign_in', email, redirect_to: redirectTo }
-    });
-    showMessage(
-      error
-        ? 'Unable to request a sign-in link right now. Try again shortly.'
-        : `If this email is eligible, a secure sign-in link is on its way. Return to this exact page (${redirectTo}).`
-    );
+    loginRequestInFlight = true;
+    submitButton.disabled = true;
+    submitButton.setAttribute('aria-disabled', 'true');
+    showMessage('Requesting a secure sign-in link…');
+
+    try {
+      const { error } = await activeClient.functions.invoke('auth-email', {
+        body: { action: 'self_sign_in', email, redirect_to: redirectTo }
+      });
+      showMessage(
+        error
+          ? 'Unable to request a sign-in link right now. Try again shortly.'
+          : `If this email is eligible, a secure sign-in link is on its way. Return to this exact page (${redirectTo}).`
+      );
+    } finally {
+      loginRequestInFlight = false;
+      submitButton.disabled = false;
+      submitButton.removeAttribute('aria-disabled');
+    }
   });
 
   document.getElementById('signOut').addEventListener('click', async () => {
@@ -776,4 +792,4 @@ async function mountPlatformAdmin() {
 
 void root;
 
-// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72
