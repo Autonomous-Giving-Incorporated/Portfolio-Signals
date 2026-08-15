@@ -4,6 +4,8 @@ MVP package for AGI allocation middleware: **every.org gift summaries → pots �
 
 Fund Intel Signal / Opportunity / Recommendation production is an in-process module at `src/intel/` (SPEC-003 v2.1.0). Status: **CODE_SHIPPED**, not live, not READY. Recommendations never credit, debit, or lock a pot. See [docs/FUND-INTEL-SIGNALS.md](../../docs/FUND-INTEL-SIGNALS.md).
 
+A read-only Mission Graph projection lives next to that module (`src/intel/mission-graph.mjs`). SPEC-029 stays **Proposed**. The projection is **CODE_SHIPPED**, not live, not READY, and not a system of record. See [docs/MISSION-GRAPH.md](../../docs/MISSION-GRAPH.md).
+
 Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`** (Hacker Dojo reference tenant — not AGI product brand).
 
 **Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Public HTTPS OBSERVED via Cloudflare quick tunnel (ephemeral). Designed durable host is **Cloudflare Workers** ([CLOUDFLARE.md](../../docs/CLOUDFLARE.md)) — not Render/Fly/Railway.

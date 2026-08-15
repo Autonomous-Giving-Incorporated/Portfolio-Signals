@@ -40,6 +40,7 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | --- | --- |
 | Domain (pots, gifts, allocate, exceptions, packet) | Shipped |
 | Fund Intel Signal / Opportunity / Recommendation | CODE_SHIPPED in-process (`src/intel/`); not live; not READY |
+| Mission Graph projection (SPEC-029 Proposed) | CODE_SHIPPED read-only (`src/intel/mission-graph.mjs`); not live; not READY; not Accepted |
 | every.org webhook (`POST /webhooks/every-org`) | Shipped |
 | CSV import | Shipped on Node (`POST /import/csv`) and Worker (same path; director write; SPEC-026 twin) |
 | Operator UI (Available · Allocate · Inbox · Packet) | Shipped |

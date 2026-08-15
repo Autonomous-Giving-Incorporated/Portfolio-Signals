@@ -8,3 +8,9 @@ export {
   deserializeIntelState,
 } from './store.mjs';
 export { findDonorPii, assertNoDonorPii } from './pii.mjs';
+export {
+  projectMissionGraph,
+  projectMissionGraphFromRecords,
+  MISSION_GRAPH_SPEC,
+  CONSUMER_PIN,
+} from './mission-graph.mjs';
