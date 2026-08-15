@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-15T04:07:42Z",
+  "generated_at": "2026-08-15T04:40:00Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
-  "branch": "loop-805-slice21-auth-function-hardening",
+  "branch": "main",
   "base_commit": "da66dae31b4c439371561396852822a0257505e8",
-  "status": "local_verified_auth_config_pending",
+  "status": "production_verified_auth_config_pending",
   "boundary": {
     "surface": "execution_and_projection",
-    "production_mutation": false,
-    "production_deployment": false,
+    "production_mutation": true,
+    "production_deployment": true,
     "production_data_mutation": false,
     "governance_or_canon_expansion": false
   },
@@ -39,13 +39,28 @@
     "security_contract": "pass",
     "import_api": "pass_5",
     "auth_shared": "pass_7",
-    "pull_request": "pending",
-    "production_migration": "pending",
-    "hosted_advisors": "pending"
+    "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/12",
+    "merge_commit": "fe5da4a4ac45159bf3638e952a2bb0fd8aaa73c9",
+    "pr_policy_tests": "pass",
+    "pr_full_acceptance": "pass_run_31864520086",
+    "production_migration": "20260815040742_authenticated_security_definer_hardening",
+    "production_migration_ledger": "reconciled_exact_repository_version",
+    "hosted_owner_helper_acl": "pass_anon_authenticated_service_all_false",
+    "hosted_supported_paths": "pass_all_true",
+    "hosted_advisors": "owner_side_helper_warnings_removed_intentional_rpc_warnings_remain",
+    "vercel_production": {
+      "deployment_id": "dpl_J7kqfGcnYHi9WwyzCpVZUfgvdoU1",
+      "state": "READY",
+      "commit": "fe5da4a4ac45159bf3638e952a2bb0fd8aaa73c9"
+    },
+    "production_http": "pass_200_workspace_and_runtime_config",
+    "main_fast_checks": "pass",
+    "main_policy_tests": "pass",
+    "main_full_acceptance": "pass_run_31864764433"
   },
   "residual_risks": [
     "Leaked-password protection remains disabled until the production Supabase dashboard session is available.",
     "Authenticated SECURITY DEFINER warnings will remain for intentional application RPC and RLS helper surfaces."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: fe5da4a4ac45159bf3638e952a2bb0fd8aaa73c9"
 }
