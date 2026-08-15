@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-15T03:23:58.0000000Z",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice20-security-definer-hardening",
+  "base_commit": "36ade3ded86a48abc3b6ba52b25fc34c867caf0a",
+  "status": "locally_verified_publication_pending",
+  "boundary": {
+    "surface": "execution_and_projection",
+    "production_mutation": false,
+    "production_deployment": false,
+    "governance_or_canon_expansion": false,
+    "synthetic_data_only": true
+  },
+  "finding": {
+    "source": "hosted_supabase_security_advisor_and_acl_probe",
+    "path": "anon Data API caller -> /rest/v1/rpc -> postgres-owned SECURITY DEFINER function -> RLS-bypassing owner privileges",
+    "validated_exposure": "anonymous execute grants existed on privileged import, onboarding, configuration, workspace, and internal functions",
+    "concrete_disclosure": "can_user_manage_onboarding_pack(uuid,text) accepted arbitrary user and tenant identifiers and returned privileged-membership state"
+  },
+  "invariant": {
+    "anonymous_allowlist": [
+      "get_public_client_config(text)",
+      "is_master_admin()",
+      "is_client_member(text)",
+      "current_client_role(text)"
+    ],
+    "internal_helpers_external_execute": false,
+    "future_postgres_owned_functions_external_execute_by_default": false,
+    "supported_authenticated_and_service_rpc_contracts_preserved": true
+  },
+  "validation": {
+    "pre_fix_regression": "failed_as_expected",
+    "post_fix_regression": "pass",
+    "ci_initial_policy_test": "failed_on_supabase_schema_specific_default_acl",
+    "ci_failure_reproduced_locally": "pass",
+    "ci_portability_correction": "global_and_public_schema_default_execute_revoked",
+    "ci_acceptance_contract": "pass_after_suite_count_reconciliation",
+    "local_migration_reset": "pass",
+    "synthetic_policy_tests": { "passed_files": 18, "failed_files": 0 },
+    "supabase_db_lint": "pass_no_schema_errors",
+    "supabase_security_advisors": "pass_no_warn_or_error_findings",
+    "allocation_middleware": { "passed": 44, "failed": 0 },
+    "import_api": { "passed": 5, "failed": 0 },
+    "onboarding_pack": { "passed": 8, "failed": 0 },
+    "workbook_parser": { "passed": 4, "failed": 0 },
+    "auth_shared": { "passed": 7, "failed": 0 },
+    "browser_and_accessibility": { "passed": 18, "failed": 0 },
+    "static_routes": "pass"
+  },
+  "residual_risks": [
+    "Four anonymous SECURITY DEFINER functions remain intentionally callable: one bounded public configuration endpoint and three fail-closed RLS helpers.",
+    "Authenticated SECURITY DEFINER RPCs remain externally callable by design and enforce tenant, role, active-profile, session-expiry, and AAL2 checks internally.",
+    "Local advisor retains one INFO-only RLS-without-policy notice for the service-role-only auth_email_dispatches table."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: 36ade3ded86a48abc3b6ba52b25fc34c867caf0a"
+}

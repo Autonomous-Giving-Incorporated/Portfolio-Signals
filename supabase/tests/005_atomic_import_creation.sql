@@ -11,6 +11,9 @@ begin
   perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
+revoke execute on function public.test_set_user(uuid) from public, anon;
+grant execute on function public.test_set_user(uuid) to authenticated;
+
 create or replace function public.test_atomic_batch_valid(test_batch_id uuid) returns boolean
 language sql security definer set search_path = public
 as $$
@@ -25,6 +28,9 @@ as $$
   );
 $$;
 
+revoke execute on function public.test_atomic_batch_valid(uuid) from public, anon;
+grant execute on function public.test_atomic_batch_valid(uuid) to authenticated;
+
 create or replace function public.test_import_audit_exists(test_sha256 text) returns boolean
 language sql security definer set search_path = public
 as $$
@@ -37,11 +43,17 @@ as $$
   );
 $$;
 
+revoke execute on function public.test_import_audit_exists(text) from public, anon;
+grant execute on function public.test_import_audit_exists(text) to authenticated;
+
 create or replace function public.test_import_batch_hash_exists(test_sha256 text) returns boolean
 language sql security definer set search_path = public
 as $$
   select exists (select 1 from public.import_batches where source_sha256 = test_sha256);
 $$;
+
+revoke execute on function public.test_import_batch_hash_exists(text) from public, anon;
+grant execute on function public.test_import_batch_hash_exists(text) to authenticated;
 
 begin;
 set local role authenticated;

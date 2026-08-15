@@ -26,8 +26,9 @@ grep -qx 'postgres 15.8' .tool-versions
 grep -q 'version: 2.31.8' .github/workflows/local-supabase-tests.yml
 grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
 grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
-grep -q 'suite_count": 8' scripts/staging/verify-policy-suite.sh
+grep -q 'suite_count": 9' scripts/staging/verify-policy-suite.sh
 test -f supabase/tests/016_delegate_auth.sql
+test -f supabase/tests/017_security_definer_privileges.sql
 grep -q "verify_jwt = false" supabase/config.toml
 grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
 grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
@@ -70,4 +71,4 @@ if findings:
     raise SystemExit('Potential embedded service credential found:\n' + '\n'.join(findings))
 PY
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: 36ade3ded86a48abc3b6ba52b25fc34c867caf0a
