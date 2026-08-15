@@ -13,7 +13,7 @@ This page is the **local** operator preflight. Production webhook remaining work
 | Designed host | Cloudflare Workers + Supabase — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Public static site | Worker `portfolio-signals` (CI deploy once CF secrets are set) |
 | Webhook on Workers | CODE_SHIPPED (`POST /webhooks/every-org` on `portfolio-signals`); live URL + every.org pointing PENDING |
-| Allocation API on Workers | CODE_SHIPPED (`/seed` `/allocations` `/proofs` `/packet`); operator-token fallback off; live host PENDING |
+| Allocation API on Workers | CODE_SHIPPED (`/seed` `/allocations` `/proofs` `/packet` `/import/csv`); operator-token fallback off; live host PENDING |
 | Local durable OBSERVED | Docker Compose volume / local Node smoke |
 | Render / Railway / Fly | Not the designed durable host |
 

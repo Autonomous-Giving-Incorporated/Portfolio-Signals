@@ -11,6 +11,8 @@ import {
 } from '../../../services/allocation-middleware/src/http/webhook-auth.mjs';
 import fixture from '../../../services/allocation-middleware/fixtures/hacker-dojo-pilot.json' with { type: 'json' };
 
+export const DEFAULT_MAX_CSV_BODY_BYTES = 5 * 1024 * 1024;
+
 export const ALLOCATION_API_PATHS = new Set([
   '/healthz',
   '/readyz',
@@ -27,6 +29,7 @@ export const ALLOCATION_API_PATHS = new Set([
   '/seed',
   '/trail',
   '/waivers',
+  '/import/csv',
 ]);
 
 export function isAllocationApiPath(pathname) {
@@ -113,6 +116,24 @@ async function readJson(request, maxBytes) {
     throw new Error('PAYLOAD_TOO_LARGE');
   }
   return parseWebhookJson(await request.text(), maxBytes);
+}
+
+async function readCsvBody(request, maxBytes) {
+  const declared = Number(request.headers.get('content-length') || 0);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new Error('PAYLOAD_TOO_LARGE');
+  }
+  const raw = await request.text();
+  const bytes = new TextEncoder().encode(raw).byteLength;
+  if (bytes > maxBytes) {
+    throw new Error('PAYLOAD_TOO_LARGE');
+  }
+  const contentType = request.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const body = parseWebhookJson(raw, maxBytes);
+    return String(body.csv || '');
+  }
+  return raw;
 }
 
 export async function handleAllocationApi(request, env, options = {}) {
@@ -272,6 +293,17 @@ export async function handleAllocationApi(request, env, options = {}) {
         giftsCreated: result.giftsCreated,
         liveGift: false,
       });
+    }
+    if (request.method === 'POST' && url.pathname === '/import/csv') {
+      const authz = await authorize(request, 'write', runtime);
+      if (!authz.ok) return authz.response;
+      const maxCsvBytes = options.maxCsvBodyBytes ?? DEFAULT_MAX_CSV_BODY_BYTES;
+      const csvText = await readCsvBody(request, maxCsvBytes);
+      if (!String(csvText).trim()) {
+        return jsonResponse(400, { error: 'csv_required' });
+      }
+      const result = await runtime.service.importCsv(csvText);
+      return jsonResponse(200, result);
     }
     return jsonResponse(405, { error: 'method_not_allowed' });
   } catch (err) {

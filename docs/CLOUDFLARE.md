@@ -19,7 +19,7 @@ Vercel (`vercel.json`, project `fund-intel`) stays in-repo as the **fallback unt
 | `/allocation` | `allocation.html` | Director allocate → proof → packet for `org_hacker_dojo` (JWT only) |
 | `/allocation-login` | `allocation-login.html` | Supabase password login; existing platform JWT |
 | `/allocation-setup` | `allocation-setup.html` | every.org webhook wizard (URL hidden until AAL2 writer) |
-| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/waivers` `/packet` `/seed` `/setup` | Worker script | Allocation API; operator-token fallback **off**. `/setup` also stores tenant `donation_link`. |
+| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/waivers` `/packet` `/seed` `/setup` `/import/csv` | Worker script | Allocation API; operator-token fallback **off**. `/setup` also stores tenant `donation_link`. `POST /import/csv` is the SPEC-026 offline twin of the every.org webhook (director write; observe/credit only). |
 
 This is a **multi-page static site**, not a client-side SPA. `not_found_handling` is left at the default (`none`): unknown paths **404**. `/workspace` works because Wrangler `html_handling = "auto-trailing-slash"` maps `/workspace` → `workspace.html` while `/workspace/session.js` still comes from the `workspace/` directory.
 

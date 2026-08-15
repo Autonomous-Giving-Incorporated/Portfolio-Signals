@@ -63,7 +63,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Outreach authority | NOT_GRANTED |
 | Secret service_role in browser / Vercel / runtime-config | PROHIBITED (anon only) |
 | Worker secret `SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — allocation `am_*` + membership lookup only; never in HTML |
-| Allocation API on Workers | CODE_SHIPPED (`/allocations` `/proofs` `/packet` `/seed`; operator-token fallback off); live host PENDING |
+| Allocation API on Workers | CODE_SHIPPED (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`; operator-token fallback off); live host PENDING |
 
 ## Allocation middleware pilot (local)
 
@@ -76,8 +76,9 @@ local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_worker_and_pilot_env
 public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; designed durable host: Workers (not Render/Fly/Railway).
-workers_allocation_api: CODE_SHIPPED  # seed → allocate → proof → packet tests; no live director session
+workers_allocation_api: CODE_SHIPPED  # seed → allocate → proof → packet + POST /import/csv tests; no live director session
 every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org on portfolio-signals; not a live gift
+csv_import_worker: CODE_SHIPPED  # POST /import/csv director-write; same chargeId credit as webhook; not a checkout
 every_org_live_webhook: PENDING  # operator: CF secrets, wrangler secret, every.org Advanced URL, controlled gift (#20)
 durable_named_host: NOT_OBSERVED
 cloudflare_deploy_secrets: PENDING  # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID absent in this environment
