@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-15T04:40:00Z",
+  "generated_at": "2026-08-15T05:11:48Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
   "branch": "main",
   "base_commit": "da66dae31b4c439371561396852822a0257505e8",
-  "status": "production_verified_auth_config_pending",
+  "status": "production_verified_auth_config_blocked_plan_entitlement",
   "boundary": {
     "surface": "execution_and_projection",
     "production_mutation": true,
@@ -27,7 +27,11 @@
     "invariant": "Only documented application RPCs, Edge assurance RPCs, and RLS-evaluation helpers remain executable by authenticated."
   },
   "auth_configuration": {
-    "leaked_password_protection": "pending_dashboard_operator_session",
+    "leaked_password_protection": "disabled",
+    "management_api_access": "authenticated_project_owner_context",
+    "requested_state": true,
+    "patch_result": "rejected_requires_pro_plan_or_higher",
+    "verified_state_after_patch_attempt": false,
     "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
   },
   "validation": {
@@ -56,11 +60,20 @@
     "production_http": "pass_200_workspace_and_runtime_config",
     "main_fast_checks": "pass",
     "main_policy_tests": "pass",
-    "main_full_acceptance": "pass_run_31864764433"
+    "main_full_acceptance": "pass_run_31864764433",
+    "production_reconciliation_pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/13",
+    "production_reconciliation_merge_commit": "b281bc5c53b6666d841d5adeff9afdbf6b8436e8",
+    "production_reconciliation_full_acceptance": "pass_run_31865906245",
+    "production_reconciliation_vercel": {
+      "deployment_id": "dpl_9fgT9pCELc2qNK9rkpCovA3zsK6R",
+      "state": "READY",
+      "commit": "b281bc5c53b6666d841d5adeff9afdbf6b8436e8"
+    },
+    "hosted_auth_advisor_after_entitlement_check": "auth_leaked_password_protection_warn_present"
   },
   "residual_risks": [
-    "Leaked-password protection remains disabled until the production Supabase dashboard session is available.",
+    "Leaked-password protection remains disabled because Supabase rejected the production configuration update without a Pro-plan-or-higher entitlement.",
     "Authenticated SECURITY DEFINER warnings will remain for intentional application RPC and RLS helper surfaces."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: fe5da4a4ac45159bf3638e952a2bb0fd8aaa73c9"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: b281bc5c53b6666d841d5adeff9afdbf6b8436e8"
 }
