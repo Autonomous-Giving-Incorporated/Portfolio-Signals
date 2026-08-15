@@ -131,6 +131,8 @@ fixture_counts() {
       where id::text like '00000000-0000-0000-0000-00000000010%';
     select 'memberships=' || count(*)::text from public.client_memberships
       where client_id = 'org_hacker_dojo';
+    select 'decisions=' || count(*)::text from public.decisions
+      where client_id = 'org_hacker_dojo';
   "
 }
 
@@ -193,6 +195,14 @@ Do not include credentials, URLs containing tokens, personal data, raw rows, obj
 
 $(printf '%s\n' "${SUITE_RESULTS[@]/#/- }")
 
+## Method
+
+- Engine: ${source_class}
+- Known backup: synthetic six-role fixtures plus seed \`decisions\` rows. No production rows.
+- Empty target: disposable local supabase/postgres image, then repository migrations, then restore, then pending-migration apply.
+- \`supabase start\` full stack is preferred when Docker bridge routing works. This receipt must not be read as a hosted isolated-project drill.
+- Destroyed the disposable target after the suite. No backup retained.
+
 ## Approval
 
 - Engineering result: ${engineering}
@@ -205,9 +215,12 @@ EOF
 HOST_PG_NAME="${RESTORE_DRILL_PG_NAME:-ps-restore-pg}"
 HOST_PG_IMAGE="${RESTORE_DRILL_PG_IMAGE:-public.ecr.aws/supabase/postgres:15.8.1.085}"
 HOST_DB_URL="postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+HOST_ADMIN_DB_URL="postgresql://supabase_admin:postgres@127.0.0.1:5432/postgres"
+DRILL_WORKDIR=""
 
 apply_repo_migrations() {
   local db_url="$1"
+  local apply_seed="${2:-1}"
   psql "$db_url" -v ON_ERROR_STOP=1 <<'SQL'
 create schema if not exists supabase_migrations;
 create table if not exists supabase_migrations.schema_migrations (
@@ -228,7 +241,7 @@ SQL
     psql "$db_url" -v ON_ERROR_STOP=1 -f "$f"
     psql "$db_url" -v ON_ERROR_STOP=1 -c "insert into supabase_migrations.schema_migrations(version,name) values ('${ver}','${ver}')"
   done
-  if [[ -f supabase/seed.sql ]]; then
+  if [[ "$apply_seed" == "1" && -f supabase/seed.sql ]]; then
     echo "Applying seed.sql"
     psql "$db_url" -v ON_ERROR_STOP=1 -f supabase/seed.sql
   fi
@@ -258,7 +271,8 @@ start_host_postgres() {
     -e JWT_SECRET=local-synthetic-restore-drill-not-a-production-secret \
     "$HOST_PG_IMAGE" >/dev/null
   wait_for_pg "$HOST_DB_URL"
-  psql "$HOST_DB_URL" -v ON_ERROR_STOP=1 -f scripts/staging/align-local-storage-schema.sql
+  # Raw image storage objects are owned by supabase_admin / storage admin.
+  psql "$HOST_ADMIN_DB_URL" -v ON_ERROR_STOP=1 -f scripts/staging/align-local-storage-schema.sql
 }
 
 stop_host_postgres() {
@@ -288,15 +302,14 @@ local_synthetic() {
   fi
 
   local cleanup_state="fail"
-  local engine="none"
   local db_url=""
-  local workdir
-  workdir="$(mktemp -d "${TMPDIR:-/tmp}/ps-restore-drill.XXXXXX")"
+  DRILL_ENGINE="none"
+  DRILL_WORKDIR="$(mktemp -d "${TMPDIR:-/tmp}/ps-restore-drill.XXXXXX")"
   cleanup_local() {
-    rm -rf "$workdir"
-    if [[ "$engine" == "supabase-cli" ]]; then
+    rm -rf "${DRILL_WORKDIR:-}"
+    if [[ "${DRILL_ENGINE:-}" == "supabase-cli" ]]; then
       supabase stop --no-backup >/dev/null 2>&1 || true
-    elif [[ "$engine" == "host-postgres" ]]; then
+    elif [[ "${DRILL_ENGINE:-}" == "host-postgres" ]]; then
       stop_host_postgres
     fi
   }
@@ -305,7 +318,7 @@ local_synthetic() {
   if command -v supabase >/dev/null 2>&1 && [[ "${RESTORE_DRILL_ENGINE:-auto}" != "host-postgres" ]]; then
     echo "Trying supabase start (full local stack)."
     if supabase start; then
-      engine="supabase-cli"
+      DRILL_ENGINE="supabase-cli"
       supabase db reset
       eval "$(supabase status -o env)"
       db_url="${DB_URL:-}"
@@ -316,23 +329,26 @@ local_synthetic() {
     fi
   fi
 
-  if [[ "$engine" != "supabase-cli" ]]; then
-    engine="host-postgres"
+  if [[ "$DRILL_ENGINE" != "supabase-cli" ]]; then
+    DRILL_ENGINE="host-postgres"
     start_host_postgres
     db_url="$HOST_DB_URL"
     apply_repo_migrations "$db_url"
   fi
 
-  echo "engine=$engine"
+  echo "engine=$DRILL_ENGINE"
   echo "Loading synthetic fixtures into the known-good local backup source."
   psql "$db_url" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
   local counts_before
   counts_before="$(fixture_counts "$db_url" | tr '\n' ' ')"
   echo "fixture_counts_before=$counts_before"
 
-  local backup="$workdir/synthetic.dump"
-  echo "Creating privacy-safe local dump (synthetic fixtures only)."
-  pg_dump --no-owner --no-acl --format=custom "$db_url" --file="$backup"
+  local backup="$DRILL_WORKDIR/synthetic.dump"
+  echo "Creating privacy-safe local dump of synthetic seed rows."
+  # Migration-seeded catalog rows (clients, published config) already exist on
+  # an empty migrated target. Dump only operator-loaded synthetic seed data.
+  pg_dump --no-owner --no-acl --data-only --inserts --table=public.decisions \
+    "$db_url" --file="$backup"
   [[ -s "$backup" ]] || fail "synthetic dump was empty"
   local backup_sha
   backup_sha="$(sha256sum "$backup" | awk '{print $1}')"
@@ -343,7 +359,10 @@ local_synthetic() {
   echo "migration_head_before_restore=$head_before"
 
   echo "Recreating an empty isolated local target."
-  if [[ "$engine" == "supabase-cli" ]]; then
+  local target_started target_started_epoch
+  target_started="$(iso_now)"
+  target_started_epoch="$(date -u +%s)"
+  if [[ "$DRILL_ENGINE" == "supabase-cli" ]]; then
     supabase db reset
     eval "$(supabase status -o env)"
     db_url="${DB_URL:-}"
@@ -351,21 +370,22 @@ local_synthetic() {
     stop_host_postgres
     start_host_postgres
     db_url="$HOST_DB_URL"
+    echo "Applying repository migrations onto the empty isolated target (no seed)."
+    apply_repo_migrations "$db_url" 0
   fi
 
   local restore_started restore_started_epoch
   restore_started="$(iso_now)"
   restore_started_epoch="$(date -u +%s)"
-  echo "Restoring the synthetic dump into the empty local target."
+  echo "Loading synthetic identities, then restoring seed rows into the empty target."
   echo "restore_started=$restore_started"
-  pg_restore --clean --if-exists --no-owner --no-acl --dbname="$db_url" "$backup" \
-    || echo "WARN: pg_restore exited $?; continuing to migration + fixture verification."
-
+  psql "$db_url" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+  psql "$db_url" -v ON_ERROR_STOP=1 -f "$backup"
   echo "Applying any pending repository migrations onto the restored local target."
-  if [[ "$engine" == "supabase-cli" ]]; then
+  if [[ "$DRILL_ENGINE" == "supabase-cli" ]]; then
     supabase db push --local || supabase migration up --local || true
   else
-    apply_repo_migrations "$db_url"
+    apply_repo_migrations "$db_url" 0
   fi
 
   local restore_completed restore_completed_epoch elapsed
@@ -393,15 +413,18 @@ local_synthetic() {
   run_policy_suite "$db_url"
   local suite_rc=$?
   set -e
+  local recovery_completed recovery_elapsed
+  recovery_completed="$(iso_now)"
+  recovery_elapsed="$(( $(date -u +%s) - target_started_epoch ))"
 
   echo "Destroying the disposable local target (no backup retained)."
-  if [[ "$engine" == "supabase-cli" ]]; then
+  if [[ "$DRILL_ENGINE" == "supabase-cli" ]]; then
     supabase stop --no-backup
   else
     stop_host_postgres
   fi
   cleanup_state="yes"
-  trap 'rm -rf "$workdir"' EXIT
+  trap 'rm -rf "${DRILL_WORKDIR:-}"' EXIT
 
   local engineering="fail"
   local exceptions="none"
@@ -411,9 +434,9 @@ local_synthetic() {
     exceptions="local-synthetic mismatches remain operator-owned; do not treat as accepted RTO/RPO"
   fi
 
-  local source_class="isolated synthetic (local disposable; engine=${engine})"
-  local observed_rto="${elapsed}s local-synthetic restore+migrate wall time; not an accepted RTO"
-  local observed_rpo="recovered synthetic dump ${backup_id} at migration head ${head_after}; not an accepted RPO"
+  local source_class="isolated synthetic (local disposable; engine=${DRILL_ENGINE})"
+  local observed_rto="${recovery_elapsed}s empty-target rebuild through suite complete (${elapsed}s restore+pending-migration); not an accepted RTO"
+  local observed_rpo="recovered synthetic dump ${backup_id} at migration head ${head_after}; fixture counts ${counts_after}; not an accepted RPO"
 
   write_receipt \
     "$(date -u +%Y-%m-%d)" \
@@ -437,7 +460,7 @@ local_synthetic() {
   else
     echo "LOCAL_SYNTHETIC_RESTORE_FAIL"
   fi
-  echo "engine=$engine"
+  echo "engine=$DRILL_ENGINE"
   echo "receipt=$RECEIPT_PATH"
   echo "observed_rto=$observed_rto"
   echo "observed_rpo=$observed_rpo"

@@ -38,7 +38,7 @@ Create **two** managed projects before any real data:
 |---|---|
 | Platform (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
 | Legacy HD staging | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
-| Isolated restore-drill project | Operator-provisioned empty project only ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)) |
+| Isolated restore-drill project | Local-synthetic OBSERVED 2026-08-15. Hosted empty project still operator-provisioned only ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)) |
 | Real data | **Not authorized** |
 
 If only one project exists, do not load production CRM data into it until:

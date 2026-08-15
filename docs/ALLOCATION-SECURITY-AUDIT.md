@@ -29,7 +29,7 @@ Designed stack: **Cloudflare Workers + platform Supabase** (`utdioxwiskzatwoejgi
 | Node file store + leftover `render.yaml` / `fly.toml` | Historical local recipes. Not the durable host. |
 | Display labels persist on `am_org_meta` only after this migration is applied | Worker 503s if the store binding or migration is missing (fail-closed). |
 | AAL2 / `mfa_enforced` dry-run receipts | Not invented. [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18) stays prep-only. |
-| Isolated restore receipts / RTO / RPO | Not invented. [#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19) stays prep-only. |
+| Isolated restore receipts / RTO / RPO | Local-synthetic OBSERVED 2026-08-15 ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)). Hosted isolated project and leadership RTO/RPO still pending. |
 
 ## Operator-only (not claimed here)
 

@@ -68,6 +68,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Secret service_role in browser / Vercel / runtime-config | PROHIBITED (anon only) |
 | Worker secret `SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — allocation `am_*` + membership lookup only; never in HTML |
 | Allocation API on Workers | CODE_SHIPPED (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`; operator-token fallback off); live host PENDING |
+| Isolated synthetic restore drill | LOCAL_SYNTHETIC_OBSERVED 2026-08-15 ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)); not accepted RTO/RPO; hosted isolated project PENDING |
 
 ## Allocation middleware pilot (local)
 
@@ -243,11 +244,35 @@ client_onboarding_pack:
     - scripts/platform/dry-run-onboarding-pack.sh operator-mfa after TOTP + mfa_enforced
     - Workspace → Onboarding pack (org_hacker_dojo) → 5 required + park xlsx → mark full OBSERVED
     - Qi/Ed: action_links operator-local; enroll TOTP → set-mfa-enforced (parallel)
-    - Isolated restore drill: scripts/staging/restore-drill.sh (no invented RTO/RPO; #19)
+    - Isolated hosted restore drill still operator-owned (not utdioxwiskzatwoejgiu / ecxkhihlbrcwpavfoaoq); local-synthetic #19 is OBSERVED below
     - REVOKE any personal access token pasted into chat after activate
 ```
 
 Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).
+
+## Isolated restore drill (#19)
+
+```yaml
+restore_drill:
+  status: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 — not hosted isolated project; not accepted RTO/RPO
+  code_shipped: true
+  receipt: docs/templates/RESTORE-DRILL-EVIDENCE.md
+  script: scripts/staging/restore-drill.sh
+  engine: host-postgres  # supabase/postgres:15.8.1.085 on host network
+  supabase_start_full_stack: BLOCKED_ON_THIS_HOST  # Docker bridge dropped container-to-container traffic
+  production_ref_touched: false
+  legacy_staging_ref_touched: false
+  production_service_role: not_used
+  migration_head: 20260815180000_am_donation_link_and_impact_notices
+  fixture_counts: auth_users=6 profiles=6 memberships=6 decisions=5
+  sql_suites: 21 pass / 0 fail
+  observed_rto: 21s empty-target rebuild through suite complete  # not accepted
+  observed_rpo: synthetic dump sha256:951deddfd377 at migration head above  # not accepted
+  leadership_rto_rpo_acceptance: pending
+  privacy_review: pending
+  production_import: BLOCKED
+  hosted_isolated_project: PENDING_OPERATOR
+```
 
 ## Related
 
