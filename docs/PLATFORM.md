@@ -9,13 +9,13 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | Public URL (production intent) | `https://autogive.app/portfolio-signals/` |
 | **Authenticated workspace** | `https://autogive.app/portfolio-signals/workspace` |
 | Vercel project | `fund-intel` (team `scrimshawlife-8819s-projects`) |
-| GitHub Pages fallback | `https://scrimshawlife-ctrl.github.io/Fund-Intel/` |
+| GitHub Pages fallback | repository Actions fallback; production remains `autogive.app/portfolio-signals/` |
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
 | Primary `master_admin` | Restricted operator registry |
 | Second `master_admin` | Restricted operator registry; AAL2 required before privileged operations |
 
-Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
+Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Roles
 
@@ -33,7 +33,7 @@ Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://gith
 7. Operator people path (master_admin / director): [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md).
 8. Commercial client lifecycle (provision → publish → activate): [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md).
 9. Second-tenant suite path (FI + IR clone): [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md).
-10. Client Onboarding Pack (private org docs; not CRM import): [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — code on main (#104); platform apply still operator.
+10. Client Onboarding Pack (private org docs; not CRM import): [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — schema + Edge OBSERVED; MFA dry-run [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18).
 11. Suite onboarding hub: [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md).
 
 Bootstrap runbook: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Workspace: [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md). Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md). Placement: [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
@@ -63,7 +63,8 @@ Build generates gitignored `runtime-config.js`. Do **not** set service-role keys
 | Public HTTPS ephemeral (#71) | OBSERVED — Cloudflare quick tunnel |
 | Seed allocate→proof→packet (#74 partial) | OBSERVED — `npm run accept:seed-loop` |
 | Durable named host | Optional operator (Render/Railway/Fly) |
-| Live every.org webhook (#73) | **PENDING** (operator tomorrow) |
-| Full director acceptance (#74) | Partial — needs live gift + browser sign-off |
+| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | Partial — needs durable host, live gift + browser sign-off |
 
 See [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) (hub) · [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

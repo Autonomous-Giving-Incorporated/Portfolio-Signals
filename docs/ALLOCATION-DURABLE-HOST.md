@@ -49,7 +49,7 @@ VPS: put Caddy/nginx TLS in front of `:8787`, set `PUBLIC_BASE_URL=https://alloc
 
 ## Path B — Render (recommended managed public)
 
-1. [render.com](https://render.com) → Blueprint → connect `scrimshawlife-ctrl/Fund-Intel` → `services/allocation-middleware/render.yaml`  
+1. [render.com](https://render.com) → Blueprint → connect `Autonomous-Giving-Incorporated/Portfolio-Signals` → `services/allocation-middleware/render.yaml`
    **or** Docker web service, root `services/allocation-middleware`, disk `/data` 1 GB.
 2. Dashboard secrets: `PUBLIC_BASE_URL`, `SUPABASE_*` (sync:false in blueprint).
 3. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0`.
@@ -83,3 +83,5 @@ durable_named_host: OBSERVED  # YYYY-MM-DD provider + hostname only (no tokens)
 - [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md)
 - [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md)
 - [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md)
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

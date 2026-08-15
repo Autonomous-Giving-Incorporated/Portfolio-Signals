@@ -125,7 +125,7 @@ Workspace nav **Onboarding pack** (director of selected client, or master_admin)
 
 - Runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)  
 - Evidence: [CURRENT-STATE.md](CURRENT-STATE.md) (`client_onboarding_pack`)  
-- Code on main (#104); platform migration + Edge functions must be applied before production use.  
+- Platform migration + Edge Functions are OBSERVED; MFA workspace dry-run remains in [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18).
 - Pack `ready` does **not** authorize CRM import, outreach, or client activation.
 
 ## Import quarantine
@@ -180,4 +180,4 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 - Donation tracking reconciled.
 - Stewardship owners assigned.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23
