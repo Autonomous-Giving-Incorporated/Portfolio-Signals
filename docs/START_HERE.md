@@ -41,6 +41,7 @@ service_role_on_vercel: PROHIBITED
 10a. [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) — SPEC-003 v2.1.0 in-process records (CODE_SHIPPED; not live; not READY)  
 10b. [MISSION-GRAPH.md](MISSION-GRAPH.md) — SPEC-029 Proposed read-only projection (CODE_SHIPPED; not live; not READY; not Accepted)  
 10c. [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md) — SPEC-030 Proposed fail-closed policies (CODE_SHIPPED; not live; not READY; not Accepted; no formula)  
+10d. [AGI-CONSOLE.md](AGI-CONSOLE.md) — read-only operator/console projection over existing records + graph + metrics (CODE_SHIPPED; not live; not READY; not a product console)  
 11. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
 12. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
 13. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
@@ -58,6 +59,7 @@ service_role_on_vercel: PROHIBITED
 | Fund Intel Signal / Opportunity / Recommendation | **CODE_SHIPPED** in-process; not live; not READY — [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) |
 | Mission Graph projection (SPEC-029 Proposed) | **CODE_SHIPPED** read-only; not live; not READY; SPEC-029 not Accepted — [MISSION-GRAPH.md](MISSION-GRAPH.md) |
 | Mission Intelligence metrics (SPEC-030 Proposed) | **CODE_SHIPPED** fail-closed policies; not live; not READY; SPEC-030 not Accepted; no formula — [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md) |
+| AGI console projection (read-only view) | **CODE_SHIPPED** in-process; not live; not READY; not a product console; SPEC-029/030 stay Proposed — [AGI-CONSOLE.md](AGI-CONSOLE.md) |
 | Phase 3c every.org webhook | Worker **code shipped**; live URL / every.org pointing / gift **PENDING** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Production CRM import | Blocked |
 

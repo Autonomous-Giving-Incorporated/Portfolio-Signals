@@ -35,7 +35,7 @@ Edges are created only from stored identifiers (`needId`, `signalIds`, `opportun
 
 ## Money and authority lock
 
-The projection does not credit, debit, or lock a pot. Recommendations remain advisory. Stripe and unverified connectors still cannot create Signals. This module does not add donation processing or an AGI console UI.
+The projection does not credit, debit, or lock a pot. Recommendations remain advisory. Stripe and unverified connectors still cannot create Signals. This module does not add donation processing or a live AGI console UI. A read-only in-process console *view* that composes this graph lives in [AGI-CONSOLE.md](AGI-CONSOLE.md); it is not a product console and is not READY.
 
 ## Out of scope (do not read this PR as)
 

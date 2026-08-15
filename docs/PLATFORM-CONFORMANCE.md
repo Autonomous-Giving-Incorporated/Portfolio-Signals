@@ -54,6 +54,7 @@ Portfolio Signals is responsible for observing, normalizing, recommending, and c
 | ImpactNotice after Evidence or waive | SPEC-027, CONTRACT-013 (in-repo); EVENT-011 not yet published |
 | Mission Graph projection | SPEC-029 Proposed — read-only CODE_SHIPPED; not Accepted; not live |
 | Mission Intelligence metrics | SPEC-030 Proposed — fail-closed policies CODE_SHIPPED; not Accepted; no formula; not live |
+| AGI console projection | Read-only in-process view CODE_SHIPPED (`src/intel/console-projection.mjs`). Composes SPEC-029/030 Proposed readers. Not a live product console. Not Accepted. Not READY. Evidence: [AGI-CONSOLE.md](AGI-CONSOLE.md). Consumer pin remains Specs v2.0.0. |
 
 ## Exit criteria for Recommended conformance
 

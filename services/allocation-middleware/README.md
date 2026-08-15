@@ -8,6 +8,8 @@ A read-only Mission Graph projection lives next to that module (`src/intel/missi
 
 Versioned Mission Intelligence metric policies live at `src/intel/metrics.mjs`. SPEC-030 stays **Proposed**. Every family fails closed (`NOT_COMPUTABLE`) because SPEC-030 gives no formula. See [docs/MISSION-INTELLIGENCE-METRICS.md](../../docs/MISSION-INTELLIGENCE-METRICS.md).
 
+A read-only AGI console *projection* composes those two readers (`src/intel/console-projection.mjs`). It is **CODE_SHIPPED**, not live, not READY, and not a product console. SPEC-029 and SPEC-030 stay **Proposed**. See [docs/AGI-CONSOLE.md](../../docs/AGI-CONSOLE.md).
+
 Hosted as a modular capability inside Fund-Intel (`services/allocation-middleware/`). Default pilot tenant: **`org_hacker_dojo`** (Hacker Dojo reference tenant — not AGI product brand).
 
 **Status (2026-08-07):** unit tests green; local pilot smoke PASS against **platform** Supabase `utdioxwiskzatwoejgiu` (director JWT path). Public HTTPS OBSERVED via Cloudflare quick tunnel (ephemeral). Designed durable host is **Cloudflare Workers** ([CLOUDFLARE.md](../../docs/CLOUDFLARE.md)) — not Render/Fly/Railway.
