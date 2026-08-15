@@ -35,7 +35,8 @@ Honest status only. In-repo is not live pointing, not a live gift, and not leade
 | SPEC-026 | Partial. Worker `POST /webhooks/every-org` and Worker `POST /import/csv` are in-repo. Live every.org pointing remains operator-owned. Gift write and Signal write stay separate. |
 | SPEC-027 | In-repo after proof/waive when opt-in contact and tenant `donation_link` exist. Not a live send receipt. |
 | SPEC-028 | Tracked as suite topology and money pointer (Cloudflare + Supabase; no fifth capability). This repo is not the AGI control plane. |
-| SPEC-029 / SPEC-030 | Proposed only. Not Accepted. Not implemented. No Mission Graph, learning feedback, or metrics in this PR. |
+| SPEC-029 | Proposed 0.1.0. Not Accepted. Read-only in-process projection CODE_SHIPPED (`src/intel/mission-graph.mjs`). Not live. Not READY. No SoR, no graph DB, no learning-feedback minting. Evidence: [MISSION-GRAPH.md](MISSION-GRAPH.md). Consumer pin remains Specs v2.0.0. |
+| SPEC-030 | Proposed only. Not Accepted. Not implemented. No metrics, formulas, or forecasting. |
 | CONTRACT-013 | In-repo ImpactNotice records (`am_impact_notices`). Not a live delivery receipt. |
 | EVENT-011 | Not published as a named event. Do not treat CONTRACT-013 persistence as EVENT-011. |
 
@@ -51,6 +52,7 @@ Portfolio Signals is responsible for observing, normalizing, recommending, and c
 | Preserve lifecycle semantics | SPEC-004, SPEC-005, SPEC-008 |
 | Track gifts / credit pots | SPEC-023, SPEC-024, SPEC-026 |
 | ImpactNotice after Evidence or waive | SPEC-027, CONTRACT-013 (in-repo); EVENT-011 not yet published |
+| Mission Graph projection | SPEC-029 Proposed — read-only CODE_SHIPPED; not Accepted; not live |
 
 ## Exit criteria for Recommended conformance
 

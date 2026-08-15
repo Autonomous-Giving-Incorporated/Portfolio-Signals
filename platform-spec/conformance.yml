@@ -37,6 +37,7 @@ implements:
 evidence:
   integration_tests: docs/PLATFORM-CONFORMANCE.md
   fund_intel_records: docs/FUND-INTEL-SIGNALS.md
+  mission_graph_projection: docs/MISSION-GRAPH.md
   notes: >
     Experimental pin to Autonomous Giving Specs v2.0.0 (tag v2.0.0, commit
     c089739). Not a Required/Recommended runtime claim and not READY.
@@ -45,8 +46,10 @@ evidence:
     EVENT-001/002/003 payloads are retained in-process and are not published
     as named live events. Recommendations MUST NOT mutate pots. Gift write
     and Signal write are separate. Stripe MUST NOT create Signals or gifts
-    (/webhooks/stripe returns 404). SPEC-029/030 remain Proposed only — no
-    Mission Graph, learning feedback, or metrics. Intelligence / observe-credit
+    (/webhooks/stripe returns 404).     SPEC-029 remains Proposed 0.1.0 — not Accepted. A read-only
+    in-process Mission Graph projection is CODE_SHIPPED (not live, not
+    READY, not a SoR, no learning-feedback minting). SPEC-030 remains
+    Proposed only — no metrics. Intelligence / observe-credit
     boundary: gift summaries and pot credits; AGI never processes donations.
     every.org is the P0 connector. CONTRACT-013 ImpactNotice records are
     in-repo after proof/waive when contact + donation_link exist; not a live

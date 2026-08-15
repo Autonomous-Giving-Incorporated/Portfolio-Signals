@@ -39,6 +39,7 @@ service_role_on_vercel: PROHIBITED
 9. [BRAND-SYSTEM.md](BRAND-SYSTEM.md) — AGI product chrome vs `assets/tenants/<slug>/`  
 10. [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) + [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — Phase 3 pilot  
 10a. [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) — SPEC-003 v2.1.0 in-process records (CODE_SHIPPED; not live; not READY)  
+10b. [MISSION-GRAPH.md](MISSION-GRAPH.md) — SPEC-029 Proposed read-only projection (CODE_SHIPPED; not live; not READY; not Accepted)  
 11. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
 12. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
 13. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
@@ -54,6 +55,7 @@ service_role_on_vercel: PROHIBITED
 | **Client Onboarding Pack** (docs) | **Platform schema + Edge OBSERVED**; MFA dry-run **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
 | Fund Intel Signal / Opportunity / Recommendation | **CODE_SHIPPED** in-process; not live; not READY — [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) |
+| Mission Graph projection (SPEC-029 Proposed) | **CODE_SHIPPED** read-only; not live; not READY; SPEC-029 not Accepted — [MISSION-GRAPH.md](MISSION-GRAPH.md) |
 | Phase 3c every.org webhook | Worker **code shipped**; live URL / every.org pointing / gift **PENDING** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Production CRM import | Blocked |
 

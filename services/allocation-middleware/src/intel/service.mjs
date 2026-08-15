@@ -290,6 +290,14 @@ export function createFundIntel({
       }));
     },
 
+    async listNeeds() {
+      const state = (await store.load()) || emptyIntelState();
+      return [...state.needs.values()].map((need) => ({
+        needId: need.needId,
+        registeredAt: need.registeredAt,
+      }));
+    },
+
     async getSignal(signalId) {
       const state = (await store.load()) || emptyIntelState();
       const record = state.signals.get(signalId);
