@@ -79,6 +79,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
       - name: Execute SECURITY DEFINER privilege checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
+      - name: Execute authenticated SECURITY DEFINER architecture checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/018_authenticated_security_definer_privileges.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
@@ -89,4 +91,4 @@ jobs:
         if: always()
         run: supabase stop --no-backup
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

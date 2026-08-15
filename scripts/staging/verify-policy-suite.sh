@@ -60,6 +60,7 @@ tests=(
   supabase/tests/006_document_access_audit.sql
   supabase/tests/016_delegate_auth.sql
   supabase/tests/017_security_definer_privileges.sql
+  supabase/tests/018_authenticated_security_definer_privileges.sql
 )
 
 echo "Loading synthetic six-role fixtures. No production workbook is permitted."
@@ -87,7 +88,7 @@ path.write_text(json.dumps({
     "mode": sys.argv[2],
     "repository_commit": sys.argv[3],
     "synthetic_fixtures_only": True,
-    "suite_count": 9,
+    "suite_count": 10,
     "result": "pass",
     "production_import_authorized": False,
 }, indent=2) + "\n", encoding="utf-8")
@@ -97,4 +98,4 @@ fi
 
 echo "Complete synthetic policy suite passed in $MODE mode."
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8
