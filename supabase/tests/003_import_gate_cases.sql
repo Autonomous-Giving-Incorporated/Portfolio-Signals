@@ -14,6 +14,7 @@ begin
   perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
+revoke execute on function public.test_set_user(uuid) from public, anon;
 grant execute on function public.test_set_user(uuid) to authenticated;
 
 create or replace function public.test_import_row_was_promoted(
@@ -31,6 +32,7 @@ as $$
   );
 $$;
 
+revoke execute on function public.test_import_row_was_promoted(bigint, uuid) from public, anon;
 grant execute on function public.test_import_row_was_promoted(bigint, uuid) to authenticated;
 
 begin;

@@ -5,9 +5,11 @@
 
 -- Future postgres-owned functions fail closed until a migration explicitly
 -- grants the exact runtime role. PostgreSQL's built-in PUBLIC function grant
--- is global, so this revoke must be global as well; a per-schema revoke cannot
--- subtract the global default.
+-- is global, while Supabase also seeds schema-specific public defaults, so
+-- both layers must be revoked.
 alter default privileges for role postgres
+  revoke execute on functions from public, anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
   revoke execute on functions from public, anon, authenticated, service_role;
 
 -- PUBLIC is a PostgreSQL pseudo-role inherited by every login role. Hosted

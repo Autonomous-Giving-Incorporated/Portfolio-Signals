@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-15T02:51:24.2443241Z",
+  "generated_at": "2026-08-15T03:20:24.3268375Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
   "branch": "loop-805-slice20-security-definer-hardening",
   "base_commit": "36ade3ded86a48abc3b6ba52b25fc34c867caf0a",
@@ -32,6 +32,9 @@
   "validation": {
     "pre_fix_regression": "failed_as_expected",
     "post_fix_regression": "pass",
+    "ci_initial_policy_test": "failed_on_supabase_schema_specific_default_acl",
+    "ci_failure_reproduced_locally": "pass",
+    "ci_portability_correction": "global_and_public_schema_default_execute_revoked",
     "local_migration_reset": "pass",
     "synthetic_policy_tests": { "passed_files": 18, "failed_files": 0 },
     "supabase_db_lint": "pass_no_schema_errors",
