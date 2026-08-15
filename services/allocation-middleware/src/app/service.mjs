@@ -1,7 +1,7 @@
 import { normalizeEveryOrgDonation } from '../connectors/everyorg.mjs';
-import { parseGiftCsv } from '../connectors/csv.mjs';
+import { csvRowToEveryOrgPayload, parseGiftCsv } from '../connectors/csv.mjs';
 import { extractOptInContact } from '../connectors/contact.mjs';
-import { emptyState, creditGift, availableCents, resolvePotPath } from '../domain/pots.mjs';
+import { creditGift, availableCents } from '../domain/pots.mjs';
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
@@ -144,23 +144,26 @@ export function createService({
     }
   }
 
+  function persistNormalizedGift(state, payload, { source } = {}) {
+    let gift = normalizeEveryOrgDonation(payload, { orgId });
+    const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
+    gift = { ...gift, ...mapped };
+    if (source) gift = { ...gift, source };
+    requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
+    requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
+    requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
+    requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
+    const credited = creditGift(state, gift, limits);
+    const contact = extractOptInContact(payload);
+    if (!contact || !credited.created) return credited;
+    const giftContacts = new Map(credited.state.giftContacts || []);
+    giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
+    return { ...credited, state: { ...credited.state, giftContacts } };
+  }
+
   return {
     async ingestEveryOrg(payload) {
-      return withState((state) => {
-        let gift = normalizeEveryOrgDonation(payload, { orgId });
-        const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
-        gift = { ...gift, ...mapped };
-        requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
-        requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
-        requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
-        requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
-        const credited = creditGift(state, gift, limits);
-        const contact = extractOptInContact(payload);
-        if (!contact || !credited.created) return credited;
-        const giftContacts = new Map(credited.state.giftContacts || []);
-        giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
-        return { ...credited, state: { ...credited.state, giftContacts } };
-      });
+      return withState((state) => persistNormalizedGift(state, payload));
     },
     async importCsv(text) {
       const rows = parseGiftCsv(text);
@@ -168,36 +171,10 @@ export function createService({
       await withState((state) => {
         let s = state;
         for (const row of rows) {
-          let { campaignKey, programKey } = resolvePotPath({
-            fundraiserKey: row.campaignKey,
-            designationKey: row.programKey,
-          });
-          ({ campaignKey, programKey } = mapKeys(s, campaignKey, programKey));
-          const net = parseAmount(row.netAmount);
-          const gross = parseAmount(row.amount || row.netAmount);
-          const gift = {
-            chargeId: row.chargeId,
-            orgId,
-            campaignKey,
-            programKey,
-            netCents: net.cents,
-            grossCents: gross.cents,
-            currency: row.currency || 'USD',
-            donatedAt: row.donatedAt || now(),
-            source: 'csv',
-          };
-          requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
-          requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
-          requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
-          const r = creditGift(s, gift, limits);
+          const payload = csvRowToEveryOrgPayload(row, { donatedAtFallback: now() });
+          const r = persistNormalizedGift(s, payload, { source: 'csv' });
           s = r.state;
           if (r.created) created += 1;
-          const contact = extractOptInContact(row);
-          if (contact && r.created) {
-            const giftContacts = new Map(s.giftContacts || []);
-            giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
-            s = { ...s, giftContacts };
-          }
         }
         return { state: s };
       });
