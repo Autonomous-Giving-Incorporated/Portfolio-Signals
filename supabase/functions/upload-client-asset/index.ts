@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
+import { jwtAssuranceLevel } from '../_shared/auth-assurance.ts';
 
 const BUCKET = 'agi-public-assets';
 const ALLOWED_KINDS = new Set(['logo', 'icon', 'hero', 'background', 'document']);
@@ -30,9 +31,8 @@ Deno.serve(async (request) => {
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return json({ error: 'invalid_user_token' }, 401);
   const accessToken = authorization.slice(7).trim();
-  const { data: assurance, error: assuranceError } =
-    await userClient.auth.mfa.getAuthenticatorAssuranceLevel(accessToken);
-  if (assuranceError || assurance?.currentLevel !== 'aal2') {
+  // Read claims only after getUser() has validated this exact bearer token.
+  if (jwtAssuranceLevel(accessToken) !== 'aal2') {
     return json({ error: 'aal2_session_required' }, 403);
   }
 

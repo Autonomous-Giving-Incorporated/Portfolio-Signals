@@ -34,7 +34,7 @@ jobs:
         working-directory: services/import-api
         run: npm test
       - name: Test role-aware Auth email templates
-        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts
       - name: Type-check Edge Functions
         run: |
           set -euo pipefail
@@ -45,10 +45,12 @@ jobs:
             if deno cache --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
               supabase/functions/auth-email/index.ts \
               && deno check --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
               supabase/functions/auth-email/index.ts; then
               break
             fi

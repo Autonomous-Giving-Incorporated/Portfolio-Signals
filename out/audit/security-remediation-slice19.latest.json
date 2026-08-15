@@ -31,6 +31,8 @@
     "onboarding_pack": { "passed": 8, "failed": 0 },
     "workbook_parser": { "passed": 4, "failed": 0 },
     "auth_email_templates": { "passed": 4, "failed": 0 },
+    "auth_assurance_claim_reader": { "passed": 3, "failed": 0 },
+    "edge_function_typecheck_deno_2_2_7": "pass",
     "browser_and_accessibility": { "passed": 18, "failed": 0 },
     "local_migration_reset": "pass",
     "synthetic_sql_policy_suite": "pass",
