@@ -15,8 +15,8 @@ Render, Fly, and Railway are **not** the durable public or webhook host. In-repo
 
 **Production public site:** Workers (`portfolio-signals`).  
 **Production webhook:** Workers (`POST /webhooks/every-org` on `portfolio-signals`; do not deploy this service to Render/Fly/Railway). Live every.org pointing is still operator-owned.  
-**Day-to-day director-auth pilot:** Local Node.  
-**Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · `npm run preflight:durable` (local). Webhook production cutover: [CLOUDFLARE.md](CLOUDFLARE.md).
+**Day-to-day director path:** Worker `/allocation` once CF secrets exist; local Node until then.  
+**Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · [CLOUDFLARE.md](CLOUDFLARE.md).
 
 ## 0a) Cloudflare quick tunnel (ephemeral public HTTPS)
 

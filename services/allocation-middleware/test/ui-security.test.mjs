@@ -9,6 +9,14 @@ test('operator UI does not interpolate API values into innerHTML', async () => {
   assert.match(html, /fetch\('\/available', \{ headers: opHeaders\(false\) \}\)/);
 });
 
+test('Workers allocation console does not offer an operator-token field', async () => {
+  const html = await readFile(new URL('../../../allocation.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /x-operator-token/);
+  assert.doesNotMatch(html, /id=["']token["']/);
+  assert.doesNotMatch(html, /localStorage\.getItem\(['"]operatorToken['"]\)/);
+  assert.match(html, /fetch\('\/seed'/);
+});
+
 test('import review encodes HTML metacharacters before innerHTML rendering', async () => {
   const source = await readFile(new URL('../../../import-review.js', import.meta.url), 'utf8');
   assert.match(source, /'&':\s*'&amp;'/);

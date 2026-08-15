@@ -40,7 +40,7 @@ These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says 
 | Second tenant (D) runbook | SECOND-TENANT-ONBOARDING |
 | Director JWT **config** on pilot | `BASE_URL=… npm run verify:director` |
 | Public HTTPS (ephemeral) | cloudflared + `pilot:smoke` |
-| Seed allocate → proof → packet | `cd services/allocation-middleware && npm run accept:seed-loop` |
+| Seed allocate → proof → packet | Worker tests + `cd services/allocation-middleware && npm run accept:seed-loop` (Node). Live Worker URL PENDING CF secrets. |
 | Setup wizard seed vs live | `/setup.html` shows **Seed only** until a **non-fixture** chargeId arrives |
 | Durable host **recipe** + preflight | `cd services/allocation-middleware && npm run preflight:durable` |
 | IR console host path (#48) | Bridge Bearer only; docs default-deny without `--trusted-proxy` |

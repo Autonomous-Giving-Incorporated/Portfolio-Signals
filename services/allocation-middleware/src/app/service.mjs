@@ -4,7 +4,7 @@ import { emptyState, creditGift, availableCents, resolvePotPath } from '../domai
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
-import { createMemoryStore, ensureExtras } from './store.mjs';
+import { createMemoryStore, ensureExtras } from './store-core.mjs';
 
 const DEFAULT_LIMITS = Object.freeze({
   maxGifts: 100_000,

@@ -69,15 +69,39 @@
     "operator_owned": "enable secret scanning, push protection, Dependabot security updates, and a main ruleset without multi-reviewer or path-filtered required checks"
   },
   "issue_20_webhook_worker": {
-    "route": "POST /webhooks/every-org",
+    "route": "POST /webhooks/every-org plus /allocations /proofs /packet /seed",
     "worker": "portfolio-signals",
-    "run_worker_first": ["/webhooks/*"],
+    "run_worker_first": ["/webhooks/*", "allocation API paths"],
     "durable_store": "platform Supabase am_* via service-role binding (not D1, not Render/Fly disk)",
-    "tests": "auth reject, valid token fixture, fail-closed malformed / missing chargeId / oversized / missing persist bindings",
+    "operator_token_fallback": false,
+    "tests": "seed allocate proof packet; auth reject; operator token rejected; AAL1 403; webhook fail-closed",
     "live_url_claimed": false,
     "every_org_pointed": false,
     "live_gift_claimed": false,
-    "durable_named_host": "NOT_OBSERVED"
+    "live_director_session_claimed": false,
+    "durable_named_host": "NOT_OBSERVED",
+    "cloudflare_deploy_secrets": "PENDING CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID"
+  },
+  "security_audit": {
+    "doc": "docs/ALLOCATION-SECURITY-AUDIT.md",
+    "exploits_written": false,
+    "fixed": [
+      "membership required (no profiles.role fallback)",
+      "RLS allocation/proof insert limited to director|campaign_lead|master_admin",
+      "Worker operator-token fallback off",
+      "Workers-safe store/seed (no node:fs on the allocation API graph)"
+    ],
+    "remaining": [
+      "webhook token may appear on the query string",
+      "Node file store and historical Render/Fly recipes"
+    ],
+    "operator_only": [
+      "CLOUDFLARE_API_TOKEN",
+      "CLOUDFLARE_ACCOUNT_ID",
+      "WEBHOOK_TOKEN Worker secret",
+      "SUPABASE_SERVICE_ROLE_KEY Worker secret",
+      "every.org pointing after a live URL exists"
+    ]
   },
   "issue_18_mfa_dry_run": {
     "script": "scripts/platform/dry-run-onboarding-pack.sh",
@@ -93,15 +117,17 @@
     "rto_rpo_invented": false
   },
   "validation": {
-    "allocation_middleware_unit_tests": "pass_57",
-    "worker_webhook_unit_tests": "pass_12",
+    "allocation_middleware_unit_tests": "pass_62",
+    "worker_unit_tests": "pass_20",
+    "seed_loop_acceptance": "SEED_LOOP_ACCEPTANCE_PASS",
+    "live_director_session": false,
     "onboarding_local_synthetic": "LOCAL_SYNTHETIC_PASS",
     "onboarding_operator_mfa_without_credentials": "fail_closed",
     "restore_docs_preflight": "DOCS_PREFLIGHT_PASS",
     "restore_isolated_project_without_ref": "fail_closed",
     "restore_local_synthetic": "blocked_no_local_supabase_cli",
     "wrangler_dry_run": "pass_wrangler_4.123.0",
-    "static_routes": "pass_5_routes",
+    "static_routes": "pass_8_routes",
     "script_safety": "pass",
     "required_workflows": "pass_pr_24",
     "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/24",

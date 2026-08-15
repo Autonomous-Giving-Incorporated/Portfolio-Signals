@@ -1,4 +1,5 @@
 import { handleEveryOrgWebhook } from './every-org-webhook.js';
+import { handleAllocationApi, isAllocationApiPath } from './allocation-api.js';
 
 function jsonResponse(status, data) {
   return new Response(JSON.stringify(data), {
@@ -18,6 +19,9 @@ export async function handleWorkerRequest(request, env, options = {}) {
   }
   if (url.pathname.startsWith('/webhooks/')) {
     return jsonResponse(404, { error: 'not_found' });
+  }
+  if (isAllocationApiPath(url.pathname)) {
+    return handleAllocationApi(request, env, options);
   }
   if (env.ASSETS) {
     return env.ASSETS.fetch(request);

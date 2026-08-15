@@ -35,7 +35,7 @@ PUBLIC_BASE_URL=http://127.0.0.1:8787
 | --- | --- |
 | **Local Node (no Docker)** | Default for Phase 3a director-auth evidence |
 | **Docker Compose** | Local durable volume / VPS-shaped pilot |
-| **Cloudflare Workers** | Designed production public site + webhook host — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| **Cloudflare Workers** | Designed production public site + allocation API + webhook — [CLOUDFLARE.md](CLOUDFLARE.md) |
 
 ### A — Local Node (no Docker)
 
@@ -94,6 +94,16 @@ DIRECTOR_EMAIL=you@example.com DIRECTOR_PASSWORD='…' \
 
 Open **http://127.0.0.1:8787/login.html** → sign in → allocate.
 
+### C — Cloudflare Workers (designed host; live URL PENDING)
+
+After the operator sets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` and Worker secrets (`SUPABASE_SERVICE_ROLE_KEY`, `PLATFORM_SUPABASE_ANON_KEY`, `WEBHOOK_TOKEN`):
+
+1. Open `/allocation-login` on the Worker origin (do not invent `workers.dev` here).
+2. Sign in with the existing platform account that is `director` or `campaign_lead` on `org_hacker_dojo`.
+3. `/allocation` → optional **Seed fixtures** → allocate → proof → packet.
+
+Operator-token fallback is **off** on this host. No live director session is claimed in this change.
+
 ## Grant script
 
 ```bash
@@ -127,10 +137,10 @@ Service-role REST upsert is preferred for headless pilot bootstrap (bypasses MFA
 
 ## UI
 
-1. Open `/login.html`  
+1. Open `/allocation-login` on Workers (or `/login.html` on local Node)  
 2. Email + password (Supabase Auth)  
-3. Redirect to `/` — writes use session JWT  
-4. **Sign out** clears session + operator token  
+3. Redirect to `/allocation` (Workers) or `/` (Node) — writes use session JWT  
+4. **Sign out** clears session. Operator-token fallback stays off on Workers / pilot.  
 
 ## API
 

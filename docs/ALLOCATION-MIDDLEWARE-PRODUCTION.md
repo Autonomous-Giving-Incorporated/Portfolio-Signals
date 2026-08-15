@@ -38,8 +38,8 @@ Process **exits on boot** if guards fail.
 
 ## every.org pilot wiring
 
-1. Deploy with HTTPS (Fly/Railway/VPS).
-2. Webhook URL: `https://<host>/webhooks/every-org`
+1. Deploy the **Cloudflare Worker** (`portfolio-signals`). Do not prefer Fly/Railway/Render.
+2. Webhook URL: `https://<workers-origin>/webhooks/every-org`
 3. Webhook URL (every.org):  
    `https://<host>/webhooks/every-org?token=<WEBHOOK_TOKEN>`  
    Also accepts header `x-webhook-token` (preferred when a proxy can inject it).

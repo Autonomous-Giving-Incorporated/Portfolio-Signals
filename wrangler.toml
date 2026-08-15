@@ -3,9 +3,10 @@
 # (utdioxwiskzatwoejgiu). Do not treat Render / Fly / Railway as the durable host.
 # Do not add D1 as the canonical store.
 #
-# Static assets stay on this Worker. POST /webhooks/* runs the Worker script first.
+# Static assets stay on this Worker. Allocation API + POST /webhooks/* run first.
 # Durable allocation state is platform Supabase am_* tables (service-role binding).
 # Live every.org pointing and named-host OBSERVED remain operator-owned.
+# Do not intercept /allocation.html, /allocation-login.html, or /allocation-setup.html.
 
 name = "portfolio-signals"
 main = "workers/portfolio-signals/src/index.js"
@@ -18,7 +19,26 @@ binding = "ASSETS"
 # /workspace → workspace.html; /workspace/session.js still served from workspace/.
 # Not an SPA: unknown paths 404 (not_found_handling default is none).
 html_handling = "auto-trailing-slash"
-run_worker_first = ["/webhooks/*"]
+run_worker_first = [
+  "/webhooks/*",
+  "/healthz",
+  "/readyz",
+  "/auth/*",
+  "/available",
+  "/allocations",
+  "/proofs",
+  "/packet",
+  "/exceptions",
+  "/labels",
+  "/pots/merge",
+  "/setup",
+  "/seed",
+  "/trail",
+]
+
+[vars]
+ORG_ID = "org_hacker_dojo"
+PLATFORM_SUPABASE_URL = "https://utdioxwiskzatwoejgiu.supabase.co"
 
 [observability]
 enabled = true

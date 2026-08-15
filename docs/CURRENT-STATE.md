@@ -54,28 +54,33 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
 | Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** — not Render/Fly/Railway; live named-host OBSERVED is **not** recorded |
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
-| Secret service_role on Workers/Vercel | PROHIBITED (anon only) |
+| Secret service_role in browser / Vercel / runtime-config | PROHIBITED (anon only) |
+| Worker secret `SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — allocation `am_*` + membership lookup only; never in HTML |
+| Allocation API on Workers | CODE_SHIPPED (`/allocations` `/proofs` `/packet` `/seed`; operator-token fallback off); live host PENDING |
 
 ## Allocation middleware pilot (local)
 
 ```yaml
 package: services/allocation-middleware/
-unit_tests: 34_PASS
+unit_tests: REPO  # allocation-middleware + Worker allocation API
 local_host: http://127.0.0.1:8787
 local_host_process: node src/http/server.mjs   # Node path; Docker not required
 local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
-operator_token_fallback: disabled_on_pilot_env
-public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Designed durable host: Workers (not Render/Fly/Railway).
+operator_token_fallback: disabled_on_worker_and_pilot_env
+public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; designed durable host: Workers (not Render/Fly/Railway).
+workers_allocation_api: CODE_SHIPPED  # seed → allocate → proof → packet tests; no live director session
 every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org on portfolio-signals; not a live gift
 every_org_live_webhook: PENDING  # operator: CF secrets, wrangler secret, every.org Advanced URL, controlled gift (#20)
 durable_named_host: NOT_OBSERVED
+cloudflare_deploy_secrets: PENDING  # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID absent in this environment
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  

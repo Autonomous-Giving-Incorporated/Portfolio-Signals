@@ -1,12 +1,10 @@
-import { readFile } from 'node:fs/promises';
 import { resolvePotPath } from '../domain/pots.mjs';
 
 /**
- * Load Hacker Dojo (or other) pilot fixture into a service instance.
- * Idempotent: existing chargeIds are skipped.
+ * Load a parsed fixture object into a service instance.
+ * Idempotent: existing chargeIds are skipped. Workers-safe (no fs).
  */
-export async function seedFromFixture(service, fixturePath, { applySuggestedAllocation = true } = {}) {
-  const raw = JSON.parse(await readFile(fixturePath, 'utf8'));
+export async function seedFromObject(service, raw, { applySuggestedAllocation = true } = {}) {
   const orgId = raw.orgId;
   let giftsCreated = 0;
   let labelsSet = 0;
@@ -87,4 +85,13 @@ export async function seedFromFixture(service, fixturePath, { applySuggestedAllo
     available: await service.listAvailable(),
     packet: await service.getPacket(),
   };
+}
+
+/**
+ * Node helper: read a fixture file, then seedFromObject.
+ */
+export async function seedFromFixture(service, fixturePath, options = {}) {
+  const { readFile } = await import('node:fs/promises');
+  const raw = JSON.parse(await readFile(fixturePath, 'utf8'));
+  return seedFromObject(service, raw, options);
 }

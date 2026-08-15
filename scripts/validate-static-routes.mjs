@@ -1,7 +1,16 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 
-const pages = ['index.html', 'sponsors.html', 'grants.html', 'members.html', 'workspace.html'];
+const pages = [
+  'index.html',
+  'sponsors.html',
+  'grants.html',
+  'members.html',
+  'workspace.html',
+  'allocation.html',
+  'allocation-login.html',
+  'allocation-setup.html',
+];
 const failures = [];
 
 for (const page of pages) {
