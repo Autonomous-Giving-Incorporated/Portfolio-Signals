@@ -48,6 +48,7 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
+| Role-aware Auth email | **Production active**; duplicate-dispatch cooldown remediation in Slice 18 |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
 | **Client Onboarding Pack** (docs) | **Code on main** (#104); platform migrate + Edge deploy + MFA dry-run **PENDING** |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
@@ -85,4 +86,4 @@ primary_master_admin: scrimshawlife@gmail.com
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72

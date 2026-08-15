@@ -48,8 +48,9 @@ Scopes are descriptive infrastructure support boundaries. They do not broaden ex
 1. The browser invokes `auth-email` with `self_sign_in`.
 2. The service resolves the account audience without returning account existence to the browser.
 3. Unknown and unassigned addresses receive the same generic HTTP 202 response.
-4. A per-recipient dispatch limit allows three pending or sent messages per 15 minutes.
-5. The service generates a one-time Auth link and sends the role-aware template.
+4. The browser locks the submit control while a request is in flight.
+5. The database serializes decisions by recipient hash and permits only one pending or sent message per 10-minute cooldown. Failed provider attempts remain immediately retryable.
+6. The service generates a one-time Auth link and sends the role-aware template.
 
 ### Tenant director invites a delegate
 
@@ -141,13 +142,14 @@ Production acceptance requires synthetic addresses only:
 
 ## RESIDUAL RISKS
 
-- Production provider delivery, SPF, DKIM, DMARC, bounce handling, and domain reputation are not computable from repository tests.
+- Production Resend delivery and required SPF, DKIM, return-path MX, and reporting-only DMARC are OBSERVED; aggregate DMARC reports and longer-term domain reputation remain asynchronous.
+- One duplicate platform-administrator message was delivered before the in-flight lock and server cooldown were added. Both observed links remain unconsumed and expire under the provider policy.
 - Revoking application membership does not invalidate a Supabase session globally; RLS denies tenant access immediately because membership is inactive.
 - Scope-specific infrastructure tools must check `delegate_scopes` when they are added. No such tool should infer authority from authentication alone.
 - Platform application and Edge deployment must be the same reviewed commit to keep frontend, schema, and mail behavior aligned.
 
 ## RECOMMENDED NEXT ADVISORY ACTION
 
-Run the complete local acceptance workflow, review the migration diff, then promote the exact commit through the existing platform deployment gates. Record only non-secret provider and delivery receipts in `out/audit/`.
+Run the complete local acceptance workflow, promote the duplicate-dispatch remediation through the existing platform deployment gates, and verify retries inside the cooldown do not create provider messages. Keep DMARC at `p=none` until at least 14 days of aggregate reports prove all legitimate senders align.
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72

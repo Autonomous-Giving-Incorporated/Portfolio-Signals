@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_on": "2026-08-14",
-  "generated_at": "2026-08-15T00:08:31.4224220Z",
+  "generated_at": "2026-08-15T00:22:38.9674730Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
   "branch": "main",
   "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
@@ -23,7 +23,7 @@
     "edge_function_typecheck": "pass",
     "browser_regression": {
       "status": "pass",
-      "passed": 16,
+      "passed": 18,
       "failed": 0
     },
     "workbook_parser": {
@@ -143,15 +143,31 @@
     "production_origin_preflight": "pass"
   },
   "synthetic_acceptance": {
-    "status": "pass",
+    "status": "finding_remediation_in_progress",
     "email_kind": "platform_admin_magic_link",
     "recipient_storage": "sha256_only",
-    "dispatch_count": 1,
+    "authorized_dispatch_count": 1,
+    "dispatch_count": 2,
+    "unexpected_duplicate_count": 1,
     "dispatch_status": "sent",
     "provider_message_id_recorded": true,
-    "provider_status": "delivered",
+    "provider_message_ids_recorded": 2,
+    "provider_status": "both_delivered",
     "subject": "Your A.G.I. platform administrator sign-in link",
-    "magic_link_consumed": false
+    "magic_link_consumed": false,
+    "first_requested_at": "2026-08-14T23:50:30.623201Z",
+    "duplicate_requested_at": "2026-08-14T23:54:10.473421Z"
+  },
+  "duplicate_dispatch_remediation": {
+    "classification": "validated",
+    "vulnerable_path": "workspace login form -> public auth-email Edge Function -> begin_auth_email_dispatch -> Resend",
+    "client_in_flight_lock": "implemented_local",
+    "server_recipient_cooldown": "implemented_local",
+    "server_cooldown_minutes": 10,
+    "concurrent_dispatch_serialization": "pg_advisory_xact_lock_recipient_hash",
+    "non_enumerating_response_preserved": true,
+    "focused_browser_regression": "pass",
+    "production_status": "pending_review_merge_and_deployment"
   },
   "dmarc_monitoring": {
     "status": "active",
@@ -167,9 +183,11 @@
     "reason": "scripts/abraxas_v2.0_codex_governance_loop.py and Scripts/abx_loop.py are absent from this repository"
   },
   "residual_risks": [
+    "A second platform-administrator magic link was delivered before duplicate-dispatch remediation; neither observed link was consumed and both expire under the provider policy.",
+    "Duplicate-dispatch remediation is locally validated but not production-active until Slice 18 review, merge, database migration, and deployment complete.",
     "DMARC aggregate reports are asynchronous; no policy escalation is authorized until legitimate senders are observed passing alignment.",
     "Resend receiving remains enabled but its optional inbound MX is pending and unused; outbound sending records remain verified.",
     "Pre-existing unrelated Supabase security-advisor warnings remain outside Slices 16 and 17 scope."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 17 + Hash: 3933c32d5ae7ebd12e9475142e72843445e33210"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72"
 }

@@ -173,14 +173,22 @@ begin
   if v_context->>'audience' <> 'tenant_member' then
     raise exception 'director email context was not tenant_member';
   end if;
-  perform public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link');
-  perform public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link');
-  perform public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link');
   v_id := public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link');
-  if v_id is not null then raise exception 'recipient rate limit did not fail closed'; end if;
+  if v_id is null then raise exception 'initial recipient dispatch was rejected'; end if;
+  if public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link') is not null then
+    raise exception 'recipient cooldown did not suppress a duplicate dispatch';
+  end if;
+
+  perform public.complete_auth_email_dispatch(v_id, 'failed', null, 'synthetic_provider_failure');
+  v_id := public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link');
+  if v_id is null then raise exception 'failed dispatch blocked a legitimate retry'; end if;
+  perform public.complete_auth_email_dispatch(v_id, 'sent', 'synthetic-provider-id');
+  if public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link') is not null then
+    raise exception 'sent dispatch did not retain the recipient cooldown';
+  end if;
 end $$;
 reset role;
 
 rollback;
 
--- Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59
+-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72
