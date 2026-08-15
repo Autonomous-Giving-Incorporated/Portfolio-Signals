@@ -21,9 +21,14 @@ conformance:
     - SPEC-027
     - SPEC-028
 produces:
+  - CONTRACT-001
+  - CONTRACT-002
   - CONTRACT-013
 consumes: []
 contracts:
+  - CONTRACT-001
+  - CONTRACT-002
   - CONTRACT-013
 evidence:
   assessment: docs/PLATFORM-CONFORMANCE.md
+  fund_intel_records: docs/FUND-INTEL-SIGNALS.md

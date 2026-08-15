@@ -14,6 +14,7 @@ import {
   deliverImpactNotice,
   evaluateImpactNotice,
 } from './impact-notice.mjs';
+import { maybeSignalFromVerifiedGift } from '../intel/gift-signal.mjs';
 
 const DEFAULT_LIMITS = Object.freeze({
   maxGifts: 100_000,
@@ -51,6 +52,8 @@ export function createService({
   proofSlaHours = 72,
   limits: configuredLimits = {},
   notifier = createNoopNotifier(),
+  intel = null,
+  resolveNeedForGift = null,
 }) {
   const limits = { ...DEFAULT_LIMITS, ...configuredLimits };
   let mutationQueue = Promise.resolve();
@@ -155,18 +158,34 @@ export function createService({
     requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
     const credited = creditGift(state, gift, limits);
     const contact = extractOptInContact(payload);
-    if (!contact || !credited.created) return credited;
+    if (!contact || !credited.created) return { ...credited, gift };
     const giftContacts = new Map(credited.state.giftContacts || []);
     giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
-    return { ...credited, state: { ...credited.state, giftContacts } };
+    return { ...credited, gift, state: { ...credited.state, giftContacts } };
   }
 
   return {
+    async maybeRecordGiftSignal(gift, { source, verified } = {}) {
+      if (!intel || !gift) return { created: false, reason: 'INTEL_NOT_ATTACHED' };
+      const needId = typeof resolveNeedForGift === 'function' ? resolveNeedForGift(gift) : null;
+      return maybeSignalFromVerifiedGift(intel, {
+        gift,
+        needId,
+        verified,
+        source: source || gift.source,
+        capturedAt: now(),
+      });
+    },
     async ingestEveryOrg(payload) {
-      return withState((state) => persistNormalizedGift(state, payload));
+      const credited = await withState((state) => persistNormalizedGift(state, payload));
+      if (credited.created && credited.gift) {
+        await this.maybeRecordGiftSignal(credited.gift, { source: credited.gift.source, verified: true });
+      }
+      return credited;
     },
     async importCsv(text) {
       const rows = parseGiftCsv(text);
+      const createdGifts = [];
       let created = 0;
       await withState((state) => {
         let s = state;
@@ -174,10 +193,16 @@ export function createService({
           const payload = csvRowToEveryOrgPayload(row, { donatedAtFallback: now() });
           const r = persistNormalizedGift(s, payload, { source: 'csv' });
           s = r.state;
-          if (r.created) created += 1;
+          if (r.created) {
+            created += 1;
+            if (r.gift) createdGifts.push(r.gift);
+          }
         }
         return { state: s };
       });
+      for (const gift of createdGifts) {
+        await this.maybeRecordGiftSignal(gift, { source: 'csv', verified: true });
+      }
       return { created, total: rows.length };
     },
     async listAvailable() {
