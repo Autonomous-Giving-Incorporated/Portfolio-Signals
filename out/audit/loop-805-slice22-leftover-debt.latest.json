@@ -19,7 +19,7 @@
     "setup_cli": "supabase/setup-cli@v3 (composite action; CLI pin remains 2.31.8)",
     "permissions_expanded": false,
     "artifact_emission_weakened": false,
-    "ci_proof": "pending_required_workflows_on_this_pr"
+    "ci_proof": "pass_pr_24_required_workflows"
   },
   "issue_17_docs_and_settings": {
     "canonical_repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
@@ -103,7 +103,17 @@
     "wrangler_dry_run": "pass_wrangler_4.123.0",
     "static_routes": "pass_5_routes",
     "script_safety": "pass",
-    "required_workflows": "pending_pull_request"
+    "required_workflows": "pass_pr_24",
+    "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/24",
+    "ci": {
+      "current_main_acceptance": "pass",
+      "portal_validate": "pass",
+      "cloudflare_workers_validate": "pass",
+      "local_security_contract": "pass",
+      "hd_oi_041_local_acceptance": "pass",
+      "allocation_middleware": "pass",
+      "local_supabase_policy_tests": "pass"
+    }
   },
   "residual_risks": [
     "GitHub administration token available to this agent cannot mutate security_and_analysis or rulesets (403).",
