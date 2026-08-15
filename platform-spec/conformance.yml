@@ -1,6 +1,6 @@
 platform_spec:
-  repository: scrimshawlife-ctrl/Autonomous-Giving-Specs
-  version: 1.0.0
+  repository: Autonomous-Giving-Incorporated/Autonomous-Giving-Specs
+  version: 2.0.0
 
 service:
   id: fund-intel
@@ -14,28 +14,36 @@ implements:
     - SPEC-003
     - SPEC-004
     - SPEC-005
+    - SPEC-006
     - SPEC-007
     - SPEC-008
     - SPEC-012
     - SPEC-013
+    - SPEC-023
+    - SPEC-024
+    - SPEC-026
+    - SPEC-027
+    - SPEC-028
   contracts:
     produces:
-      - CONTRACT-001
-      - CONTRACT-002
+      - CONTRACT-013
     consumes: []
   events:
-    produces:
-      - EVENT-001
-      - EVENT-002
-      - EVENT-003
-    consumes:
-      - EVENT-004
-      - EVENT-005
+    produces: []
+    consumes: []
 
 evidence:
-  integration_tests: docs/AGI-SUITE-ARCHITECTURE.md
+  integration_tests: docs/PLATFORM-CONFORMANCE.md
   notes: >
-    Intelligence boundary — observes and recommends; never allocates.
-    Pinned to Autonomous Giving Specs v1.0.0 (tag v1.0.0).
-    Public campaign data remains under schemas/public-campaign.schema.json;
-    platform lifecycle contracts are declared here for suite interoperability.
+    Experimental pin to Autonomous Giving Specs v2.0.0 (tag v2.0.0, commit
+    c089739). Not a Required/Recommended runtime claim. Intelligence /
+    observe-credit boundary: gift summaries and pot credits only; AGI never
+    processes donations. every.org is the P0 connector (Worker POST
+    /webhooks/every-org). Stripe donation webhooks are rejected (404); Stripe
+    is tenant/SaaS billing only. SPEC-023/024/026/027/028 are tracked on this
+    Worker. CONTRACT-013 ImpactNotice records are in-repo after proof/waive
+    when contact + donation_link exist; not a live send receipt. EVENT-011 is
+    not published as a named event. CSV import exists on the Node package;
+    Worker POST /import/csv is in-flight (PR 26), not on main. Canonical
+    Signal, Opportunity, and Recommendation contracts are not produced.
+    Designed host is Cloudflare Workers + platform Supabase.

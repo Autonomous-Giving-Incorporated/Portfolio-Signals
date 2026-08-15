@@ -4,13 +4,15 @@
 
 ## Components
 
-| Component | Responsibility | Initial hosting |
+| Component | Responsibility | Designed hosting |
 |---|---|---|
-| Fund-Intel | Public experience, authenticated campaign operations, and client administration | GitHub Pages |
+| Portfolio Signals (Fund Intel) | Public experience, authenticated campaign operations, and client administration | Cloudflare Workers |
 | Supabase | Auth, shared tenant-scoped Postgres, RLS, Storage, and Edge Functions | Supabase |
-| Impact Relay | Financial workflows, ledger truth, impact evidence, donor receipts, and notifications | Google Cloud Run target |
+| Impact Relay | Financial workflows, ledger truth, impact evidence, donor receipts, and notifications | Cloudflare + Supabase |
 
-`clients.id` in Fund-Intel is the same immutable identifier as Impact Relay `tenant_id`.
+Designed stack is **Cloudflare + Supabase**. GitHub Pages and Google Cloud Run are **historical** hosts, not current guidance. Render, Fly, and Railway are likewise historical.
+
+`clients.id` in Portfolio Signals is the same immutable identifier as Impact Relay `tenant_id`.
 Hacker Dojo is the canonical reference tenant: `org_hacker_dojo`. It is a regression fixture and template, not a global product default.
 
 ## Authority
@@ -22,7 +24,7 @@ Hacker Dojo is the canonical reference tenant: `org_hacker_dojo`. It is a regres
 
 ## Configuration and publication
 
-Client configuration is versioned as draft, published, or archived. Rollback creates a new immutable published version from a historical snapshot. Public GitHub Pages surfaces consume only a privacy-safe published projection. Private data remains in tenant-scoped Supabase tables and Storage. See [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md).
+Client configuration is versioned as draft, published, or archived. Rollback creates a new immutable published version from a historical snapshot. Public Worker/static surfaces consume only a privacy-safe published projection. Private data remains in tenant-scoped Supabase tables and Storage. See [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md). GitHub Pages was a historical public surface, not the designed host.
 
 ## Delivery milestones
 
@@ -33,7 +35,7 @@ Client configuration is versioned as draft, published, or archived. Rollback cre
 5. AGI-005 — immutable director customization, public runtime configuration, and governed assets.
 6. AGI-006 — sponsor/grant productization and onboarding.
 7. AGI-007 — onboarding-configurable two-person approvals.
-8. AGI-008 — Supabase JWT integration and Cloud Run boundary.
+8. AGI-008 — Supabase JWT integration (Cloud Run boundary is historical; designed edge is Cloudflare Workers).
 9. AGI-009 — two-tenant acceptance.
 
 Real imports, outreach, money movement, and live notifications remain subject to separate authority gates.
