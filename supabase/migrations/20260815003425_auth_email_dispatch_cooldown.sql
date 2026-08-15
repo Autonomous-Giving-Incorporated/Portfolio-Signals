@@ -1,3 +1,4 @@
+-- Production migration version 20260815003425.
 -- Serialize recipient dispatch decisions and suppress duplicate provider sends
 -- during the magic-link cooldown window.
 create or replace function public.begin_auth_email_dispatch(

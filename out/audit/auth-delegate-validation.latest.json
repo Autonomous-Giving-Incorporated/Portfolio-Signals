@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_on": "2026-08-14",
-  "generated_at": "2026-08-15T00:22:38.9674730Z",
+  "generated_at": "2026-08-15T00:35:38.6340312Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
   "branch": "main",
   "post_migration_base_commit": "6ec558027e243c7ce5b7bfa32503630dc025d9a4",
@@ -108,7 +108,8 @@
     "applied_delegate_migration_versions": [
       "20260814214657",
       "20260814214716",
-      "20260814214800"
+      "20260814214800",
+      "20260815003425"
     ],
     "database_up_to_date": true,
     "production_schema_verification": {
@@ -167,7 +168,11 @@
     "concurrent_dispatch_serialization": "pg_advisory_xact_lock_recipient_hash",
     "non_enumerating_response_preserved": true,
     "focused_browser_regression": "pass",
-    "production_status": "pending_review_merge_and_deployment"
+    "production_status": "database_active_frontend_pending_merge",
+    "production_migration_version": "20260815003425",
+    "production_rollback_boundary_test": "pass",
+    "production_synthetic_rows_after_test": 0,
+    "production_observed_dispatch_count_after_test": 2
   },
   "dmarc_monitoring": {
     "status": "active",
@@ -184,7 +189,7 @@
   },
   "residual_risks": [
     "A second platform-administrator magic link was delivered before duplicate-dispatch remediation; neither observed link was consumed and both expire under the provider policy.",
-    "Duplicate-dispatch remediation is locally validated but not production-active until Slice 18 review, merge, database migration, and deployment complete.",
+    "The server duplicate-dispatch cooldown is production-active; the browser in-flight lock remains pending Slice 18 merge and Vercel deployment.",
     "DMARC aggregate reports are asynchronous; no policy escalation is authorized until legitimate senders are observed passing alignment.",
     "Resend receiving remains enabled but its optional inbound MX is pending and unused; outbound sending records remain verified.",
     "Pre-existing unrelated Supabase security-advisor warnings remain outside Slices 16 and 17 scope."
