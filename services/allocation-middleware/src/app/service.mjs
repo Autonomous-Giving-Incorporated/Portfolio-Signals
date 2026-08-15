@@ -1,10 +1,19 @@
 import { normalizeEveryOrgDonation } from '../connectors/everyorg.mjs';
 import { parseGiftCsv } from '../connectors/csv.mjs';
+import { extractOptInContact } from '../connectors/contact.mjs';
 import { emptyState, creditGift, availableCents, resolvePotPath } from '../domain/pots.mjs';
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
 import { createMemoryStore, ensureExtras } from './store-core.mjs';
+import { normalizeDonationLink, publicDonationLink } from './donation-link.mjs';
+import {
+  buildImpactNoticeRecord,
+  contactsForAllocation,
+  createNoopNotifier,
+  deliverImpactNotice,
+  evaluateImpactNotice,
+} from './impact-notice.mjs';
 
 const DEFAULT_LIMITS = Object.freeze({
   maxGifts: 100_000,
@@ -37,9 +46,11 @@ export function createService({
   orgId,
   now = () => new Date().toISOString(),
   idgen = () => crypto.randomUUID(),
+  noticeIdgen = () => crypto.randomUUID(),
   store = createMemoryStore(),
   proofSlaHours = 72,
   limits: configuredLimits = {},
+  notifier = createNoopNotifier(),
 }) {
   const limits = { ...DEFAULT_LIMITS, ...configuredLimits };
   let mutationQueue = Promise.resolve();
@@ -65,6 +76,74 @@ export function createService({
     return applyAliases(orgId, campaignKey, programKey, state);
   }
 
+  async function issueNoticeBestEffort({ allocationId, evidenceId, proofWaived }) {
+    try {
+      const state = ensureExtras(await store.load());
+      const allocation = state.allocations.get(allocationId);
+      const existing = (state.impactNotices || new Map()).get(allocationId);
+      const decision = evaluateImpactNotice({
+        allocation,
+        donationLink: state.donationLink,
+        contacts: allocation ? contactsForAllocation(state, allocation) : [],
+        existingNotice: existing,
+        evidenceId,
+        proofWaived,
+      });
+      if (!decision.issue) {
+        return { issued: false, reason: decision.reason, notice: decision.notice || null, deliveries: [] };
+      }
+      const notice = buildImpactNoticeRecord({
+        id: noticeIdgen(),
+        orgId,
+        allocationId,
+        evidenceId,
+        proofWaived,
+        channel: decision.channel,
+        donationLink: decision.donationLink,
+        useSummary: decision.useSummary,
+        chargeId: decision.contact.chargeId,
+        createdAt: now(),
+      });
+      let deliveries = [];
+      try {
+        deliveries = await deliverImpactNotice({
+          notice,
+          contact: decision.contact,
+          notifier,
+          idgen: noticeIdgen,
+          now,
+        });
+      } catch {
+        deliveries = [{
+          id: noticeIdgen(),
+          noticeId: notice.impactNoticeId,
+          orgId,
+          channel: decision.channel,
+          status: 'failed',
+          attemptedAt: now(),
+          detail: 'delivery_failed',
+        }];
+      }
+      await withState((current) => {
+        if ((current.impactNotices || new Map()).has(allocationId)) {
+          return { state: current };
+        }
+        const impactNotices = new Map(current.impactNotices || []);
+        impactNotices.set(allocationId, notice);
+        return {
+          state: {
+            ...current,
+            impactNotices,
+            impactDeliveries: [...(current.impactDeliveries || []), ...deliveries],
+          },
+        };
+      });
+      return { issued: true, reason: null, notice, deliveries };
+    } catch {
+      return { issued: false, reason: 'issue_failed', notice: null, deliveries: [] };
+    }
+  }
+
   return {
     async ingestEveryOrg(payload) {
       return withState((state) => {
@@ -75,7 +154,12 @@ export function createService({
         requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
         requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
         requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
-        return creditGift(state, gift, limits);
+        const credited = creditGift(state, gift, limits);
+        const contact = extractOptInContact(payload);
+        if (!contact || !credited.created) return credited;
+        const giftContacts = new Map(credited.state.giftContacts || []);
+        giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
+        return { ...credited, state: { ...credited.state, giftContacts } };
       });
     },
     async importCsv(text) {
@@ -108,6 +192,12 @@ export function createService({
           const r = creditGift(s, gift, limits);
           s = r.state;
           if (r.created) created += 1;
+          const contact = extractOptInContact(row);
+          if (contact && r.created) {
+            const giftContacts = new Map(s.giftContacts || []);
+            giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
+            s = { ...s, giftContacts };
+          }
         }
         return { state: s };
       });
@@ -169,22 +259,32 @@ export function createService({
       await withState((state) => mergePots(state, { orgId, ...input }));
       return { ok: true };
     },
+    async setDonationLink(value) {
+      const donationLink = normalizeDonationLink(value);
+      await withState((state) => ({ state: { ...state, donationLink } }));
+      return { donationLink };
+    },
+    async getDonationLink() {
+      const state = ensureExtras(await store.load());
+      return publicDonationLink(state.donationLink);
+    },
     async attachProof({ allocationId, uri, note, attachedBy }) {
       if (!uri || !String(uri).trim()) throw new Error('PROOF_URI_REQUIRED');
+      const proof = {
+        id: idgen(),
+        allocationId,
+        uri: String(uri).trim(),
+        note: note || '',
+        attachedBy: attachedBy || '',
+        attachedAt: now(),
+      };
       await withState((state) => {
         if (!state.allocations.has(allocationId)) throw new Error('ALLOCATION_NOT_FOUND');
         const proofs = new Map(state.proofs || []);
         const proofCount = [...proofs.values()].reduce((count, rows) => count + rows.length, 0);
         if (proofCount >= limits.maxProofs) throw new Error('STATE_PROOF_LIMIT');
         const list = proofs.get(allocationId) || [];
-        list.push({
-          id: idgen(),
-          allocationId,
-          uri: String(uri).trim(),
-          note: note || '',
-          attachedBy: attachedBy || '',
-          attachedAt: now(),
-        });
+        list.push(proof);
         proofs.set(allocationId, list);
         const exceptions = state.exceptions.map((e) =>
           e.code === 'MISSING_PROOF' && e.ref?.allocationId === allocationId
@@ -193,7 +293,52 @@ export function createService({
         );
         return { state: { ...state, proofs, exceptions } };
       });
-      return { ok: true };
+      const impactNotice = await issueNoticeBestEffort({
+        allocationId,
+        evidenceId: proof.id,
+        proofWaived: false,
+      });
+      return { ok: true, proof, impactNotice };
+    },
+    async waiveProof({ allocationId, note, waivedBy }) {
+      if (!allocationId) throw new Error('ALLOCATION_NOT_FOUND');
+      const waiver = {
+        allocationId,
+        waivedBy: waivedBy || '',
+        waivedAt: now(),
+        note: note || '',
+      };
+      if (!String(waiver.waivedBy).trim()) throw new Error('WAIVE_ACTOR_REQUIRED');
+      await withState((state) => {
+        if (!state.allocations.has(allocationId)) throw new Error('ALLOCATION_NOT_FOUND');
+        const proofWaivers = new Map(state.proofWaivers || []);
+        if (!proofWaivers.has(allocationId)) proofWaivers.set(allocationId, waiver);
+        const exceptions = state.exceptions.map((e) =>
+          e.code === 'MISSING_PROOF' && e.ref?.allocationId === allocationId
+            ? { ...e, open: false }
+            : e,
+        );
+        return { state: { ...state, proofWaivers, exceptions } };
+      });
+      const impactNotice = await issueNoticeBestEffort({
+        allocationId,
+        evidenceId: null,
+        proofWaived: true,
+      });
+      return { ok: true, waiver, impactNotice };
+    },
+    async listImpactNotices() {
+      const state = ensureExtras(await store.load());
+      return [...(state.impactNotices || new Map()).values()].filter((n) => n.orgId === orgId);
+    },
+    async listImpactDeliveries() {
+      const state = ensureExtras(await store.load());
+      const noticeIds = new Set(
+        [...(state.impactNotices || new Map()).values()]
+          .filter((n) => n.orgId === orgId)
+          .map((n) => n.impactNoticeId),
+      );
+      return (state.impactDeliveries || []).filter((d) => noticeIds.has(d.noticeId));
     },
     async listExceptions({ openOnly = true } = {}) {
       const state = ensureExtras(await store.load());
@@ -246,6 +391,10 @@ export function createService({
             return a && a.orgId === orgId;
           }),
         ),
+        donationLink: publicDonationLink(state.donationLink),
+        impactNotices: [...(state.impactNotices || new Map()).values()].filter((n) => n.orgId === orgId),
+        impactDeliveries: (state.impactDeliveries || []).filter((d) => d.orgId === orgId),
+        proofWaivers: [...(state.proofWaivers || new Map()).values()],
       };
     },
     async getPacket() {
@@ -277,6 +426,7 @@ export function createService({
           allocated: formatCents(allocated),
           available: formatCents(credited - allocated),
         },
+        donationLink: publicDonationLink(state.donationLink),
       };
     },
     async health() {
@@ -319,6 +469,7 @@ export function createService({
         orgId,
         connector: 'every.org',
         authModel: 'webhook_url', // not OAuth
+        donationLink: publicDonationLink(state.donationLink),
         webhookUrl: meta.webhookUrl || null,
         hasWebhookToken: Boolean(meta.hasWebhookToken),
         hasOperatorToken: Boolean(meta.hasOperatorToken),

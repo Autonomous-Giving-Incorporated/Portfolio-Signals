@@ -3,6 +3,7 @@ import { createAuthVerifier } from '../../../services/allocation-middleware/src/
 import { createSupabaseStore } from '../../../services/allocation-middleware/src/app/supabase-store.mjs';
 import { seedFromObject } from '../../../services/allocation-middleware/src/app/seed.mjs';
 import { buildEveryOrgWebhookUrl } from '../../../services/allocation-middleware/src/app/config.mjs';
+import { createResendNotifier } from '../../../services/allocation-middleware/src/app/impact-notice.mjs';
 import {
   DEFAULT_MAX_JSON_BODY_BYTES,
   jsonHeaders,
@@ -25,6 +26,7 @@ export const ALLOCATION_API_PATHS = new Set([
   '/setup',
   '/seed',
   '/trail',
+  '/waivers',
 ]);
 
 export function isAllocationApiPath(pathname) {
@@ -65,7 +67,11 @@ export function createAllocationRuntime(env = {}, options = {}) {
     fetchImpl: options.fetchImpl || fetch,
   });
   return {
-    service: createService({ orgId: bindings.orgId, store }),
+    service: createService({
+      orgId: bindings.orgId,
+      store,
+      notifier: options.notifier || createResendNotifier(env, options),
+    }),
     authVerifier: createAuthVerifier({
       supabaseUrl: bindings.supabaseUrl,
       serviceRoleKey: bindings.serviceRoleKey,
@@ -173,8 +179,21 @@ export async function handleAllocationApi(request, env, options = {}) {
       const authz = await authorize(request, 'write', runtime);
       if (!authz.ok) return authz.response;
       const body = await readJson(request, maxBytes);
+      if (body.waive === true || body.proofWaived === true) {
+        if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+        const result = await runtime.service.waiveProof(body);
+        return jsonResponse(201, result);
+      }
       if (!body.attachedBy && authz.actor?.email) body.attachedBy = authz.actor.email;
       const result = await runtime.service.attachProof(body);
+      return jsonResponse(201, result);
+    }
+    if (request.method === 'POST' && url.pathname === '/waivers') {
+      const authz = await authorize(request, 'write', runtime);
+      if (!authz.ok) return authz.response;
+      const body = await readJson(request, maxBytes);
+      if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+      const result = await runtime.service.waiveProof(body);
       return jsonResponse(201, result);
     }
     if (request.method === 'GET' && url.pathname === '/packet') {
@@ -232,6 +251,13 @@ export async function handleAllocationApi(request, env, options = {}) {
         hasOperatorToken: false,
       });
       return jsonResponse(200, { ...status, directorLoginEnabled: true, operatorTokenFallback: false });
+    }
+    if (request.method === 'POST' && url.pathname === '/setup') {
+      const authz = await authorize(request, 'write', runtime);
+      if (!authz.ok) return authz.response;
+      const body = await readJson(request, maxBytes);
+      const result = await runtime.service.setDonationLink(body.donationLink);
+      return jsonResponse(200, result);
     }
     if (request.method === 'POST' && url.pathname === '/seed') {
       const authz = await authorize(request, 'write', runtime);

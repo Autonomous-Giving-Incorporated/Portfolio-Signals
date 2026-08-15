@@ -36,6 +36,19 @@
       <p class="note" id="status-line"></p>
     </section>
     <section class="panel">
+      <div class="panel-heading"><h2>Outbound donation link</h2></div>
+      <p class="note">
+        Tenant HTTPS CTA to the third-party receiver. Missing link omits the CTA.
+        Do not paste a Stripe Checkout Session or an AGI checkout URL.
+      </p>
+      <form id="link-form" class="stack-form">
+        <label>Donation link <input name="donationLink" type="url" placeholder="https://…" /></label>
+        <button type="submit" class="button">Save donation link</button>
+      </form>
+      <p class="note" id="link-msg" role="status"></p>
+      <p class="note" id="cta-preview">CTA omitted until an HTTPS donation link is saved.</p>
+    </section>
+    <section class="panel">
       <div class="panel-heading"><h2>Webhook URL</h2></div>
       <div class="url-box" id="webhook-url">Loading…</div>
       <p class="note" id="copy-msg" role="status"></p>
@@ -63,6 +76,19 @@
         return;
       }
       urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the Worker)';
+      const linkInput = document.querySelector('#link-form [name=donationLink]');
+      const cta = document.getElementById('cta-preview');
+      if (data.donationLink) {
+        linkInput.value = data.donationLink;
+        cta.innerHTML = '';
+        const a = document.createElement('a');
+        a.href = data.donationLink;
+        a.rel = 'noopener noreferrer';
+        a.textContent = data.donationLink;
+        cta.append('CTA: ', a);
+      } else {
+        cta.textContent = 'CTA omitted — no donation_link on the tenant record.';
+      }
       const live = Boolean(data.steps.receivedLiveGift);
       const fixtures = Number(data.counts?.fixtureGifts || 0);
       if (live) {
@@ -85,6 +111,21 @@
       }
     };
     document.getElementById('btn-refresh').onclick = () => load();
+    document.getElementById('link-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const donationLink = new FormData(ev.target).get('donationLink');
+      const res = await fetch('/setup', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ donationLink }),
+      });
+      const data = await res.json();
+      const msg = document.getElementById('link-msg');
+      msg.textContent = res.ok
+        ? (data.donationLink ? 'Saved outbound donation link.' : 'Cleared donation link. CTA omitted.')
+        : (data.error || 'Save failed');
+      await load();
+    });
     await load();
   </script>
 </body>
