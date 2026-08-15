@@ -59,6 +59,7 @@ tests=(
   supabase/tests/storage_matrix.sql
   supabase/tests/006_document_access_audit.sql
   supabase/tests/016_delegate_auth.sql
+  supabase/tests/017_security_definer_privileges.sql
 )
 
 echo "Loading synthetic six-role fixtures. No production workbook is permitted."
@@ -86,7 +87,7 @@ path.write_text(json.dumps({
     "mode": sys.argv[2],
     "repository_commit": sys.argv[3],
     "synthetic_fixtures_only": True,
-    "suite_count": 8,
+    "suite_count": 9,
     "result": "pass",
     "production_import_authorized": False,
 }, indent=2) + "\n", encoding="utf-8")

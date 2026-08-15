@@ -137,6 +137,7 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
 
       - name: Reject committed sensitive exports
         run: |
