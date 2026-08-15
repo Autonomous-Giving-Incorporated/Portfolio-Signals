@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-15T04:07:42Z",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice21-auth-function-hardening",
+  "base_commit": "da66dae31b4c439371561396852822a0257505e8",
+  "status": "local_verified_auth_config_pending",
+  "boundary": {
+    "surface": "execution_and_projection",
+    "production_mutation": false,
+    "production_deployment": false,
+    "production_data_mutation": false,
+    "governance_or_canon_expansion": false
+  },
+  "finding": {
+    "source": "hosted_supabase_security_advisor_and_acl_probe",
+    "path": "authenticated Data API caller -> public helper RPC -> postgres-owned SECURITY DEFINER function",
+    "unnecessary_direct_endpoints": [
+      "require_active_profile()",
+      "require_unexpired_session()"
+    ]
+  },
+  "classification": {
+    "authenticated_application_or_edge_rpcs": 24,
+    "authenticated_rls_or_direct_assurance_helpers": 8,
+    "owner_side_helpers_revoked": 2,
+    "invariant": "Only documented application RPCs, Edge assurance RPCs, and RLS-evaluation helpers remain executable by authenticated."
+  },
+  "auth_configuration": {
+    "leaked_password_protection": "pending_dashboard_operator_session",
+    "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+  },
+  "validation": {
+    "pre_fix_hosted_acl": "observed_both_owner_side_helpers_authenticated_executable",
+    "post_fix_local_regression": "pass",
+    "full_local_policy_suite": "pass_20_files",
+    "local_migration_reset": "pass",
+    "local_supabase_db_lint": "pass_no_schema_errors",
+    "security_contract": "pass",
+    "import_api": "pass_5",
+    "auth_shared": "pass_7",
+    "pull_request": "pending",
+    "production_migration": "pending",
+    "hosted_advisors": "pending"
+  },
+  "residual_risks": [
+    "Leaked-password protection remains disabled until the production Supabase dashboard session is available.",
+    "Authenticated SECURITY DEFINER warnings will remain for intentional application RPC and RLS helper surfaces."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8"
+}

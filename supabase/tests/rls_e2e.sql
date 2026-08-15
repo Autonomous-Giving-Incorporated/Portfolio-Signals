@@ -200,7 +200,8 @@ begin
   end;
 end $$;
 
--- Inactive profile fails closed for role resolution and privileged MFA helper.
+-- Inactive profile fails closed for role resolution and the supported
+-- privileged-assurance RPC. require_active_profile() is owner-side only.
 reset role;
 update public.profiles
    set active = false,
@@ -216,8 +217,8 @@ begin
     raise exception 'inactive profile still resolves application role';
   end if;
   begin
-    perform public.require_active_profile();
-    raise exception 'inactive profile unexpectedly passed require_active_profile';
+    perform public.require_privileged_mfa();
+    raise exception 'inactive profile unexpectedly passed require_privileged_mfa';
   exception
     when others then
       if sqlerrm not like '%inactive_or_missing_profile%' then
@@ -350,3 +351,5 @@ begin
 end $$;
 
 rollback;
+
+-- Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

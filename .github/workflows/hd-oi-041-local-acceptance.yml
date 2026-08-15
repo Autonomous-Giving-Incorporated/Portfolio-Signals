@@ -138,6 +138,7 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/018_authenticated_security_definer_privileges.sql
 
       - name: Reject committed sensitive exports
         run: |
@@ -180,4 +181,4 @@ jobs:
         if: failure()
         run: supabase stop --no-backup || true
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 622346cc565b1d6c7ebfc75eb7590b8dd03af601
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8
