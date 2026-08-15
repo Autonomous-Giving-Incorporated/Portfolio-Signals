@@ -9,13 +9,13 @@ See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for boundar
 
 ## Platform specification status
 
-Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
 ## Platform specification
 
-Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
+Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
 
 Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
 
@@ -66,7 +66,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 | Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
 | Private data placement | Local workbook + platform Supabase (not GitHub, not Notion SoR) |
 | Impact Relay host screens / runbooks | Implemented / documented; live cohort operator-owned |
-| Client Onboarding Pack (org docs) | **Code on main** (#104); platform migrate + Edge deploy **PENDING** — [docs/CLIENT-ONBOARDING-PACK.md](docs/CLIENT-ONBOARDING-PACK.md) |
+| Client Onboarding Pack (org docs) | **Platform schema + Edge OBSERVED**; MFA workspace dry-run pending ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) — [docs/CLIENT-ONBOARDING-PACK.md](docs/CLIENT-ONBOARDING-PACK.md) |
 | Production data import | **Blocked** |
 | Outreach authority | **Not granted** |
 
@@ -270,3 +270,5 @@ Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIM
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

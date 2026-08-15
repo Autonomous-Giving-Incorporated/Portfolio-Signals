@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-15T05:53:48Z",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice22-post-migration-docs",
+  "base_commit": "645560ecfc722b6d040d9c21562681bbf579ba23",
+  "status": "documentation_reconciliation_ready",
+  "boundary": {
+    "surface": "projection_only",
+    "workflow_mutation": false,
+    "repository_settings_mutation": false,
+    "production_runtime_mutation": false,
+    "production_data_mutation": false,
+    "governance_or_canon_expansion": false
+  },
+  "documentation": {
+    "canonical_repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+    "canonical_suite_links_reconciled": true,
+    "onboarding_pack_mfa_dry_run_issue": 18,
+    "allocation_live_acceptance_issue": 20,
+    "supabase_entitlement_issue": 22
+  },
+  "validation": {
+    "receipt_json": "pass",
+    "canonical_stale_reference_scan": "pass",
+    "static_routes": "pass_5_routes",
+    "auth_template_and_assurance_tests": "pass_7_tests",
+    "git_diff_check": "pass",
+    "pull_request": "pending",
+    "pull_request_checks": "pending",
+    "merge_commit": "pending"
+  },
+  "residual_risks": [
+    "Repository rulesets and security settings remain unchanged by operator request.",
+    "Supabase leaked-password protection remains budget-gated in issue 22.",
+    "Production import, outreach, money movement, and live notifications remain separately authority-gated."
+  ],
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23"
+}

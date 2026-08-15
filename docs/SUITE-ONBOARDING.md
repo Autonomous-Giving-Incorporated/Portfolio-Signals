@@ -45,7 +45,7 @@ These are already runnable and recorded as **OBSERVED** when CURRENT-STATE says 
 | Durable host **recipe** + preflight | `cd services/allocation-middleware && npm run preflight:durable` |
 | IR console host path (#48) | Bridge Bearer only; docs default-deny without `--trusted-proxy` |
 | Secret hygiene / SMTP runbooks | Docs ready; dashboard actions still operator |
-| **Doc pack code + platform schema/Edge** (#104 / #113) | Tables REST 200 + Edge unauth 401 OBSERVED; MFA dry-run still operator |
+| **Doc pack code + platform schema/Edge** | Tables REST 200 + Edge unauth 401 OBSERVED; MFA dry-run tracked in [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18) |
 
 Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Connected**.
 
@@ -53,9 +53,8 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 
 | Work | Login / access |
 | --- | --- |
-| Live every.org webhook ([#73](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/73)) | every.org **Hacker Dojo nonprofit admin** |
-| Full director acceptance ([#74](https://github.com/scrimshawlife-ctrl/Fund-Intel/issues/74)) | Live gift + director browser session + sign-off |
-| **Doc pack MFA dry-run → full OBSERVED** | MFA director/master → Workspace Onboarding pack (5 required + park xlsx) — [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) |
+| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | every.org **Hacker Dojo nonprofit admin** + director browser session |
+| **Doc pack MFA dry-run → full OBSERVED** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) | MFA director/master → Workspace Onboarding pack (5 required + park xlsx) — [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) |
 | **Qi / Ed first login + TOTP** | Operator-local links `scripts/platform/.onboarding-invite-links.md` (gitignored); then `set-mfa-enforced` — [PEOPLE-AND-PACK-HANDOFF.md](PEOPLE-AND-PACK-HANDOFF.md) |
 | **Pack dry-run (primary now)** | Primary already `mfa_enforced`; can complete Onboarding pack without waiting on Qi/Ed — handoff above |
 | Durable **named public** host (optional) | Render / Railway / Fly (or VPS) **dashboard** — recipe READY |
@@ -70,7 +69,7 @@ Fixture gifts (`chargeId` matching `fixture-*`) **never** mark every.org **Conne
 3. every.org admin → Settings → Advanced → paste.  
 4. $1 test gift.  
 5. Setup shows **Connected** only for a **live** (non-fixture) chargeId.  
-6. Allocate via director login; complete #74.
+6. Allocate via director login; complete issue #20.
 
 ## Quick commands
 
@@ -97,5 +96,7 @@ npm run accept:seed-loop
 | Impact Relay public | https://autogive.app/impact-relay/ |
 | Platform Supabase | ref `utdioxwiskzatwoejgiu` |
 
-Suite GitHub Project notes: AGI [docs/GITHUB-PROJECT.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/GITHUB-PROJECT.md).  
-Specs progress map: [IMPLEMENTATION-PROGRESS](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/IMPLEMENTATION-PROGRESS.md).
+Suite GitHub Project notes: AGI [docs/GITHUB-PROJECT.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/GITHUB-PROJECT.md).
+Specs progress map: [IMPLEMENTATION-PROGRESS](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/IMPLEMENTATION-PROGRESS.md).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

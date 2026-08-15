@@ -1,7 +1,7 @@
 # Portfolio Signals — current state
 
-**Recorded:** 2026-08-08  
-**Canonical repository:** `scrimshawlife-ctrl/Fund-Intel`  
+**Recorded:** 2026-08-15
+**Canonical repository:** `Autonomous-Giving-Incorporated/Portfolio-Signals`
 **Suite:** Autonomously Giving Incorporated (AGI)
 
 This document separates **live production evidence** from older Hacker Dojo campaign receipts. It does not authorize production CRM import, outreach, or money movement.
@@ -51,12 +51,12 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
 | Vercel path suite under autogive.app | OBSERVED |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
-| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host recipe READY (Compose/Render/Railway/Fly) — public dashboard deploy PENDING operator |
-| every.org live webhook | PENDING (operator) |
+| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host recipe READY; durable host + live acceptance tracked in [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) |
+| every.org live webhook | PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
-| Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)) |
+| Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
 | Secret service_role on Vercel | PROHIBITED (anon only) |
@@ -72,7 +72,7 @@ local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_pilot_env
 public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Durable Render/Railway/Fly still optional operator dashboard step.
-every_org_live_webhook: PENDING  # Phase 3c / #73
+every_org_live_webhook: PENDING  # post-migration issue #20
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
@@ -87,7 +87,7 @@ path: local_node_no_docker
 org_id: org_hacker_dojo
 verify_director: PASS  # config only; optional --login needs director password in operator hands
 membership: director on platform (prior OBSERVED)
-next: every.org webhook #73; human acceptance #74; durable named host optional
+next: every.org webhook + director acceptance issue #20; durable named host optional
 ```
 
 ## Phase 3b — Public HTTPS host (#71)
@@ -111,10 +111,10 @@ status: OBSERVED
 command: cd services/allocation-middleware && npm run accept:seed-loop
 result: SEED_LOOP_ACCEPTANCE_PASS  # 2026-08-07 — allocate $100 Community Hardware Fund → proof URI → packet proofCount≥1
 scope: seed pots only; does not require every.org webhook or director browser session
-remaining_for_full_74: live gift via #73 + director JWT allocate in browser + sign-off comment
+remaining_for_live_acceptance: live gift + director JWT allocate in browser + sign-off comment (#20)
 ```
 
-## Setup wizard — seed vs live (#73 prep)
+## Setup wizard — seed vs live (issue #20 prep)
 
 ```yaml
 status: OBSERVED  # 2026-08-08
@@ -176,7 +176,7 @@ dry_run: OBSERVED  # 2026-08-07 Option B — (1) FI platform: org_hacker_dojo re
 ```yaml
 client_onboarding_pack:
   status: PLATFORM_SCHEMA_AND_EDGE_OBSERVED  # 2026-08-08 — migrations + Edge on utdioxwiskzatwoejgiu; MFA dry-run still PENDING before full pack OBSERVED
-  code_merged: true  # Portofolio-Signals / Fund-Intel PR #104 → main (+ #112 activate script)
+  code_merged: true  # historical pre-migration PR #104 (+ #112 activate script)
   template: onboarding_pack_v1
   production_import: BLOCKED
   path: docs/CLIENT-ONBOARDING-PACK.md
@@ -192,7 +192,7 @@ client_onboarding_pack:
   verified_locally:  # not production evidence
     classifier_unit_tests: PASS  # node --test services/onboarding-pack — 8/8
     sql_test_015_local: PASS  # supabase/tests/015_client_onboarding_pack.sql (ROLLBACK)
-    local_acceptance_ci: PASS  # HD-OI-041 on #104 after GITHUB_REPOSITORY receipt fix
+    local_acceptance_ci: PASS  # historical HD-OI-041 acceptance after GITHUB_REPOSITORY receipt fix
     code_complete: true
   platform_probe_utdioxwiskzatwoejgiu:  # 2026-08-08 operator activate
     client_onboarding_packs: OBSERVED  # REST 200 empty array (service role)
@@ -214,6 +214,8 @@ Pack `ready` ≠ import authorized ≠ outreach ≠ client activated. See [CLIEN
 
 ## Related
 
-- Suite phase map: [AGI docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)
+- Suite phase map: [AGI docs/PLATFORM.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md)
 - Workspace behavior: [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md)
 - Bootstrap: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md)
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

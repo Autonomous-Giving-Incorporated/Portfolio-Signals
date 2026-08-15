@@ -63,7 +63,7 @@ Files: `docker-compose.yml`, `scripts/gen-pilot-env.sh`.
 ## 2) Render
 
 1. [render.com](https://render.com) → New → Blueprint  
-2. Connect `scrimshawlife-ctrl/Fund-Intel`, select `services/allocation-middleware/render.yaml`  
+2. Connect `Autonomous-Giving-Incorporated/Portfolio-Signals`, select `services/allocation-middleware/render.yaml`
    **or** New Web Service → Docker → root directory `services/allocation-middleware`  
 3. Persistent disk at `/data` (1 GB) if not using blueprint  
 4. Set `PUBLIC_BASE_URL=https://<service>.onrender.com` (+ optional `SUPABASE_*`)  
@@ -148,3 +148,5 @@ Files: `fly.toml`, `scripts/bootstrap-fly-pilot.sh`, `scripts/deploy-fly.sh`.
 - Kubernetes / service mesh  
 - Multi-tenant process  
 - Replacing Supabase or Impact Relay  
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

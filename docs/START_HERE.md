@@ -50,9 +50,9 @@ service_role_on_vercel: PROHIBITED
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
 | Role-aware Auth email | **Production active**; Slices 19-21 deployed; authenticated-function ACLs hosted-verified; leaked-password protection blocked by Supabase Pro-plan entitlement |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
-| **Client Onboarding Pack** (docs) | **Code on main** (#104); platform migrate + Edge deploy + MFA dry-run **PENDING** |
+| **Client Onboarding Pack** (docs) | **Platform schema + Edge OBSERVED**; MFA dry-run **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
-| Phase 3c every.org webhook | **PENDING** operator (#73) |
+| Phase 3c every.org webhook | **PENDING** operator ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Production CRM import | Blocked |
 
 ## Quick operator commands
@@ -83,7 +83,7 @@ platform_supabase: utdioxwiskzatwoejgiu
 legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
-client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
+client_onboarding_pack: PENDING_MFA_DRY_RUN  # platform schema + Edge observed; issue #18
 ```
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: b281bc5c53b6666d841d5adeff9afdbf6b8436e8
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23
