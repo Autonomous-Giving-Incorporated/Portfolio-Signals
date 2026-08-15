@@ -285,7 +285,7 @@ Not a substitute for HD-OI-019–021 leadership gates; a **transaction-light** c
 
 Docs: [ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md), [HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md), [ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md), [ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md).
 
-Design/plan (Specs): [design](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md), [MVP plan](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md), [pilot hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md).
+Design/plan (Specs): [design](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md), [MVP plan](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-allocation-middleware.md), [pilot hosting](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md).
 
 ## Release sequence
 
@@ -301,10 +301,11 @@ HD_OI_019:
   state: ACTIVE
   completion: identity_mfa_controls_client_schema_alignment_operator_checklist
   progress:
-    staging_project: PROVISIONED
+    platform_project: ACTIVE_HEALTHY
     data_placement_docs: COMPLETE
-    hosted_migrations: PENDING_OPERATOR
-    mfa_provider: PENDING_OPERATOR
+    hosted_migrations: OBSERVED_APPLIED
+    mfa_profiles: OBSERVED_PARTIAL
+    onboarding_pack_mfa_dry_run: PENDING_ISSUE_18
 
 HD_OI_020:
   name: governed_pilot_import
@@ -332,7 +333,7 @@ ALLOC_MW_PILOT_HOST:
     docker_compose_default: SHIPPED
     optional_fly_render_railway: SHIPPED
     named_public_host: OPTIONAL_OPERATOR
-    live_every_org: PENDING_OPERATOR
+    live_every_org: PENDING_ISSUE_20
 ```
 
 ## Non-negotiable boundary
@@ -340,3 +341,5 @@ ALLOC_MW_PILOT_HOST:
 GitHub and GitHub Pages may contain only public or safely aggregated information. Raw member records, personal contact information, donation histories, attendance records, private notes, relationship assessments, consent state, suppression state, and private documents belong only in **local custody and/or Supabase** (authenticated data service + private storage). Notion is not a substitute SoR for those records.
 
 Production import and outreach remain blocked until both technical and leadership gates are satisfied.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23
