@@ -34,6 +34,7 @@ run_worker_first = [
   "/setup",
   "/seed",
   "/trail",
+  "/waivers",
 ]
 
 [vars]

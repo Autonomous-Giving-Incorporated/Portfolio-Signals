@@ -230,6 +230,232 @@ test('seed allocate proof packet on org_hacker_dojo fixture', async () => {
   assert.equal(body.totals.credited, '19000.00');
 });
 
+test('allocate-only does not issue ImpactNotice', async () => {
+  const store = createMemoryStore();
+  const service = createService({
+    orgId: 'org_hacker_dojo',
+    store,
+    idgen: () => 'alloc-only-1',
+    now: () => '2026-08-15T12:00:00Z',
+  });
+  await service.ingestEveryOrg({
+    chargeId: 'chg-alloc-only',
+    amount: '25.00',
+    netAmount: '25.00',
+    currency: 'USD',
+    donationDate: '2026-08-15T00:00:00Z',
+    fromFundraiser: { title: 'hacker-dojo-420k' },
+    designation: 'community-hardware-fund',
+    email: 'donor@example.org',
+    donorId: 'donor_1',
+  });
+  await service.setDonationLink('https://www.every.org/hacker-dojo');
+  const allocated = await withRuntime(
+    {
+      path: '/allocations',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${jwt('aal2')}`,
+      },
+      body: {
+        campaignKey: 'hacker-dojo-420k',
+        programKey: 'community-hardware-fund',
+        amount: '5.00',
+        purpose: 'Kits',
+      },
+    },
+    { service, store },
+  );
+  assert.equal(allocated.status, 201);
+  assert.equal((await service.listImpactNotices()).length, 0);
+});
+
+test('proof without contact does not issue ImpactNotice', async () => {
+  const service = createService({
+    orgId: 'org_hacker_dojo',
+    store: createMemoryStore(),
+    idgen: (() => { let n = 0; return () => `id-${++n}`; })(),
+    now: () => '2026-08-15T12:00:00Z',
+  });
+  await service.ingestEveryOrg({
+    chargeId: 'chg-no-contact',
+    amount: '25.00',
+    netAmount: '25.00',
+    currency: 'USD',
+    donationDate: '2026-08-15T00:00:00Z',
+    fromFundraiser: { title: 'hacker-dojo-420k' },
+    designation: 'community-hardware-fund',
+  });
+  await service.setDonationLink('https://www.every.org/hacker-dojo');
+  const alloc = await service.allocate({
+    campaignKey: 'hacker-dojo-420k',
+    programKey: 'community-hardware-fund',
+    amount: '5.00',
+    purpose: 'Kits',
+    approvedBy: 'director@hackerdojo.org',
+  });
+  const proof = await withRuntime(
+    {
+      path: '/proofs',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${jwt('aal2')}`,
+      },
+      body: { allocationId: alloc.id, uri: 'https://example.com/evidence.pdf' },
+    },
+    { service },
+  );
+  assert.equal(proof.status, 201);
+  const body = await proof.json();
+  assert.equal(body.impactNotice.issued, false);
+  assert.equal(body.impactNotice.reason, 'no_contact');
+});
+
+test('proof without donation_link does not issue ImpactNotice', async () => {
+  const service = createService({
+    orgId: 'org_hacker_dojo',
+    store: createMemoryStore(),
+    idgen: (() => { let n = 0; return () => `id-${++n}`; })(),
+    now: () => '2026-08-15T12:00:00Z',
+  });
+  await service.ingestEveryOrg({
+    chargeId: 'chg-no-link',
+    amount: '25.00',
+    netAmount: '25.00',
+    currency: 'USD',
+    donationDate: '2026-08-15T00:00:00Z',
+    fromFundraiser: { title: 'hacker-dojo-420k' },
+    designation: 'community-hardware-fund',
+    email: 'donor@example.org',
+    donorId: 'donor_1',
+  });
+  const alloc = await service.allocate({
+    campaignKey: 'hacker-dojo-420k',
+    programKey: 'community-hardware-fund',
+    amount: '5.00',
+    purpose: 'Kits',
+    approvedBy: 'director@hackerdojo.org',
+  });
+  const proof = await withRuntime(
+    {
+      path: '/proofs',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${jwt('aal2')}`,
+      },
+      body: { allocationId: alloc.id, uri: 'https://example.com/evidence.pdf' },
+    },
+    { service },
+  );
+  assert.equal((await proof.json()).impactNotice.reason, 'no_donation_link');
+  assert.equal((await service.listImpactNotices()).length, 0);
+});
+
+test('duplicate proof does not double-send ImpactNotice', async () => {
+  const sent = [];
+  const service = createService({
+    orgId: 'org_hacker_dojo',
+    store: createMemoryStore(),
+    idgen: (() => { let n = 0; return () => `id-${++n}`; })(),
+    noticeIdgen: (() => { let n = 0; return () => `notice-${++n}`; })(),
+    now: () => '2026-08-15T12:00:00Z',
+    notifier: {
+      emailConfigured: true,
+      async sendEmail(msg) {
+        sent.push(msg);
+        return { ok: true };
+      },
+    },
+  });
+  await service.ingestEveryOrg({
+    chargeId: 'chg-dup',
+    amount: '25.00',
+    netAmount: '25.00',
+    currency: 'USD',
+    donationDate: '2026-08-15T00:00:00Z',
+    fromFundraiser: { title: 'hacker-dojo-420k' },
+    designation: 'community-hardware-fund',
+    email: 'donor@example.org',
+    donorId: 'donor_1',
+  });
+  await service.setDonationLink('https://www.every.org/hacker-dojo');
+  const alloc = await service.allocate({
+    campaignKey: 'hacker-dojo-420k',
+    programKey: 'community-hardware-fund',
+    amount: '5.00',
+    purpose: 'Kits',
+    approvedBy: 'director@hackerdojo.org',
+  });
+  const headers = {
+    'content-type': 'application/json',
+    authorization: `Bearer ${jwt('aal2')}`,
+  };
+  const first = await withRuntime(
+    { path: '/proofs', method: 'POST', headers, body: { allocationId: alloc.id, uri: 'https://example.com/a.pdf' } },
+    { service },
+  );
+  const second = await withRuntime(
+    { path: '/proofs', method: 'POST', headers, body: { allocationId: alloc.id, uri: 'https://example.com/b.pdf' } },
+    { service },
+  );
+  assert.equal((await first.json()).impactNotice.issued, true);
+  assert.equal((await second.json()).impactNotice.reason, 'already_issued');
+  assert.equal(sent.length, 1);
+  assert.equal((await service.listImpactNotices()).length, 1);
+});
+
+test('setup stores HTTPS donation_link and rejects non-HTTPS', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo', store: createMemoryStore() });
+  const headers = {
+    'content-type': 'application/json',
+    authorization: `Bearer ${jwt('aal2')}`,
+  };
+  const saved = await withRuntime(
+    { path: '/setup', method: 'POST', headers, body: { donationLink: 'https://www.every.org/hacker-dojo' } },
+    { service },
+  );
+  assert.equal(saved.status, 200);
+  assert.equal((await saved.json()).donationLink, 'https://www.every.org/hacker-dojo');
+  const bad = await withRuntime(
+    { path: '/setup', method: 'POST', headers, body: { donationLink: 'http://example.com/give' } },
+    { service },
+  );
+  assert.equal(bad.status, 400);
+  assert.equal((await bad.json()).error, 'DONATION_LINK_INVALID');
+  const packet = await withRuntime(
+    { path: '/packet', headers: { authorization: `Bearer ${jwt('aal2')}` } },
+    { service },
+  );
+  assert.equal((await packet.json()).donationLink, 'https://www.every.org/hacker-dojo');
+});
+
+test('Stripe webhook path does not write gifts', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo', store: createMemoryStore() });
+  const res = await handleWorkerRequest(
+    request('/webhooks/stripe', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: {
+        type: 'checkout.session.completed',
+        data: { object: { id: 'cs_test_123', url: 'https://checkout.stripe.com/c/pay/cs_test_123' } },
+      },
+    }),
+    { WEBHOOK_TOKEN: 'test-webhook-token-16' },
+    {
+      service,
+      ingest: async () => {
+        throw new Error('stripe must not ingest');
+      },
+    },
+  );
+  assert.equal(res.status, 404);
+  assert.equal((await service.getTrail()).gifts.length, 0);
+  assert.equal((await service.listImpactNotices()).length, 0);
+});
+
 test('seedFromObject is idempotent on fixture chargeIds', async () => {
   const service = createService({ orgId: 'org_hacker_dojo', store: createMemoryStore() });
   const first = await seedFromObject(service, fixture, { applySuggestedAllocation: false });

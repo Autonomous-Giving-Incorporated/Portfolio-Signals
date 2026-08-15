@@ -53,6 +53,7 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Public HTTPS (ephemeral tunnel) | OBSERVED (Phase 3b local smoke) |
 | Named durable public host | **Cloudflare Workers** — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Seed allocate→proof→packet | OBSERVED — `npm run accept:seed-loop` |
+| Tenant `donation_link` + ImpactNotice after proof/waive | In-repo (SPEC-027). Not a live send receipt. Resend + named host remain operator-owned. |
 
 ### Local (Hacker Dojo default)
 

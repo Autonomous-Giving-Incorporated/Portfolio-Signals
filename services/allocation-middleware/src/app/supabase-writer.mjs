@@ -4,6 +4,7 @@
  * Does not use D1, Render, or Fly disk.
  */
 import { normalizeEveryOrgDonation } from '../connectors/everyorg.mjs';
+import { extractOptInContact } from '../connectors/contact.mjs';
 
 const MAX_KEY = 128;
 
@@ -148,6 +149,22 @@ export function createSupabaseAllocationWriter({
       if (insert.status === 409) return { created: false };
       if (!insert.ok) throw new Error('allocation_store_unavailable');
       await creditPot(gift);
+      const contact = extractOptInContact(payload);
+      if (contact) {
+        const contactInsert = await rest('am_gift_contacts?on_conflict=charge_id', {
+          method: 'POST',
+          headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+          body: JSON.stringify({
+            charge_id: gift.chargeId,
+            client_id: orgId,
+            email: contact.email || null,
+            donor_principal: contact.donorPrincipal || null,
+          }),
+        });
+        if (!contactInsert.ok && contactInsert.status !== 409) {
+          throw new Error('allocation_store_unavailable');
+        }
+      }
       return { created: true };
     },
   };

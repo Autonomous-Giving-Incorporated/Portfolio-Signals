@@ -19,7 +19,7 @@ Vercel (`vercel.json`, project `fund-intel`) stays in-repo as the **fallback unt
 | `/allocation` | `allocation.html` | Director allocate → proof → packet for `org_hacker_dojo` (JWT only) |
 | `/allocation-login` | `allocation-login.html` | Supabase password login; existing platform JWT |
 | `/allocation-setup` | `allocation-setup.html` | every.org webhook wizard (URL hidden until AAL2 writer) |
-| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/packet` `/seed` `/setup` | Worker script | Allocation API; operator-token fallback **off** |
+| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/waivers` `/packet` `/seed` `/setup` | Worker script | Allocation API; operator-token fallback **off**. `/setup` also stores tenant `donation_link`. |
 
 This is a **multi-page static site**, not a client-side SPA. `not_found_handling` is left at the default (`none`): unknown paths **404**. `/workspace` works because Wrangler `html_handling = "auto-trailing-slash"` maps `/workspace` → `workspace.html` while `/workspace/session.js` still comes from the `workspace/` directory.
 
@@ -100,6 +100,7 @@ Director path after a live Worker URL exists (not claimed here):
 | `wrangler secret put SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — never commit |
 | `PLATFORM_SUPABASE_ANON_KEY` Worker var/secret | PENDING operator (public anon only; required for `/allocation-login`) |
 | `PUBLIC_BASE_URL` | PENDING until the live origin is known |
+| `RESEND_API_KEY` / `RESEND_FROM` | Optional Worker secrets for ImpactNotice email. Unset → email channel skipped. Do not invent values here. |
 | every.org Advanced webhook URL | **Do not point yet** — no live webhook point is invented here |
 | Controlled live gift + director browser sign-off | PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | `durable_named_host: OBSERVED` | **Not recorded** |
@@ -113,6 +114,9 @@ npx wrangler@4 secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler@4 secret put PLATFORM_SUPABASE_ANON_KEY
 # optional once the workers.dev origin is known:
 # npx wrangler@4 secret put PUBLIC_BASE_URL
+# optional ImpactNotice email (skip send if unset):
+# npx wrangler@4 secret put RESEND_API_KEY
+# npx wrangler@4 secret put RESEND_FROM
 ```
 
 ## Vercel until cutover

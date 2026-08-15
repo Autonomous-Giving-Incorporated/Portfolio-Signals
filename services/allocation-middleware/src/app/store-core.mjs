@@ -8,6 +8,11 @@ export function ensureExtras(state) {
   if (!state.proofs) state.proofs = new Map();
   if (!state.labels) state.labels = new Map();
   if (!state.aliases) state.aliases = new Map();
+  if (!state.giftContacts) state.giftContacts = new Map();
+  if (!state.impactNotices) state.impactNotices = new Map();
+  if (!state.impactDeliveries) state.impactDeliveries = [];
+  if (!state.proofWaivers) state.proofWaivers = new Map();
+  if (state.donationLink === undefined) state.donationLink = null;
   return state;
 }
 
@@ -37,6 +42,11 @@ export function serializeState(state) {
     proofs: state.proofs ? [...state.proofs.entries()] : [],
     labels: state.labels ? [...state.labels.entries()] : [],
     aliases: state.aliases ? [...state.aliases.entries()] : [],
+    giftContacts: state.giftContacts ? [...state.giftContacts.entries()] : [],
+    impactNotices: state.impactNotices ? [...state.impactNotices.entries()] : [],
+    impactDeliveries: state.impactDeliveries || [],
+    proofWaivers: state.proofWaivers ? [...state.proofWaivers.entries()] : [],
+    donationLink: state.donationLink || null,
   };
 }
 
@@ -67,6 +77,11 @@ export function deserializeState(raw) {
   for (const [k, v] of raw.proofs || []) state.proofs.set(k, v);
   for (const [k, v] of raw.labels || []) state.labels.set(k, v);
   for (const [k, v] of raw.aliases || []) state.aliases.set(k, v);
+  for (const [k, v] of raw.giftContacts || []) state.giftContacts.set(k, v);
+  for (const [k, v] of raw.impactNotices || []) state.impactNotices.set(k, v);
+  state.impactDeliveries = raw.impactDeliveries || [];
+  for (const [k, v] of raw.proofWaivers || []) state.proofWaivers.set(k, v);
+  state.donationLink = raw.donationLink || null;
   return state;
 }
 

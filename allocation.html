@@ -58,6 +58,11 @@
       <p class="note" id="alloc-msg" role="status"></p>
     </section>
 
+    <section class="panel" id="cta">
+      <div class="panel-heading"><h2>Donor CTA</h2></div>
+      <p class="note" id="cta-line">CTA omitted until an HTTPS donation_link is saved on the tenant.</p>
+    </section>
+
     <section class="panel" id="proof">
       <div class="panel-heading"><h2>Attach proof</h2></div>
       <form id="proof-form" class="stack-form">
@@ -67,6 +72,17 @@
         <button type="submit" class="button">Attach proof</button>
       </form>
       <p class="note" id="proof-msg" role="status"></p>
+    </section>
+
+    <section class="panel" id="waive">
+      <div class="panel-heading"><h2>Waive evidence</h2></div>
+      <p class="note">Explicit human waive only. Allocation or MISSING_PROOF is not a waive.</p>
+      <form id="waive-form" class="stack-form">
+        <label>Allocation id <input name="allocationId" required /></label>
+        <label>Note <input name="note" /></label>
+        <button type="submit" class="button secondary">Record waive</button>
+      </form>
+      <p class="note" id="waive-msg" role="status"></p>
     </section>
 
     <section class="panel" id="packet">
@@ -106,6 +122,19 @@
       }
       el.textContent = `Director: ${body.email || body.displayName} (${body.role})`;
       pill.textContent = body.role || 'Director';
+    }
+    function renderCta(link) {
+      const el = document.getElementById('cta-line');
+      el.replaceChildren();
+      if (!link) {
+        el.textContent = 'CTA omitted — no donation_link on the tenant record.';
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = link;
+      a.rel = 'noopener noreferrer';
+      a.textContent = link;
+      el.append('Give again: ', a);
     }
     async function loadAvailable() {
       const res = await fetch('/available', { headers: headers(false) });
@@ -163,15 +192,41 @@
       const body = Object.fromEntries(new FormData(ev.target).entries());
       const res = await fetch('/proofs', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
       const data = await res.json();
-      setStatus(document.getElementById('proof-msg'), res.ok, res.ok ? 'Proof attached' : `Error: ${data.error}`);
+      const notice = data.impactNotice;
+      const extra = res.ok && notice
+        ? notice.issued
+          ? ' ImpactNotice issued.'
+          : ` ImpactNotice skipped (${notice.reason || 'not_issued'}).`
+        : '';
+      setStatus(document.getElementById('proof-msg'), res.ok, res.ok ? `Proof attached.${extra}` : `Error: ${data.error}`);
+    });
+    document.getElementById('waive-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/waivers', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+      const data = await res.json();
+      const notice = data.impactNotice;
+      const extra = res.ok && notice
+        ? notice.issued
+          ? ' ImpactNotice issued.'
+          : ` ImpactNotice skipped (${notice.reason || 'not_issued'}).`
+        : '';
+      setStatus(document.getElementById('waive-msg'), res.ok, res.ok ? `Waive recorded.${extra}` : `Error: ${data.error}`);
     });
     document.getElementById('btn-packet').addEventListener('click', async () => {
       const res = await fetch('/packet', { headers: headers(false) });
       if (!res.ok) throw new Error('packet_authorization_required');
-      document.getElementById('packet-body').textContent = JSON.stringify(await res.json(), null, 2);
+      const packet = await res.json();
+      renderCta(packet.donationLink || null);
+      document.getElementById('packet-body').textContent = JSON.stringify(packet, null, 2);
     });
     await refreshAuth();
     await loadAvailable();
+    fetch('/packet', { headers: headers(false) }).then(async (res) => {
+      if (!res.ok) return;
+      const packet = await res.json();
+      renderCta(packet.donationLink || null);
+    }).catch(() => {});
   </script>
 </body>
 </html>

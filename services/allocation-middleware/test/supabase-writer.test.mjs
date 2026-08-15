@@ -33,6 +33,7 @@ test('ingestEveryOrg inserts gift then credits pot', async () => {
     if (url.endsWith('/am_gifts') && init.method === 'POST') return jsonResponse(201, null);
     if (url.includes('am_pots?select=')) return jsonResponse(200, []);
     if (url.endsWith('/am_pots') && init.method === 'POST') return jsonResponse(201, null);
+    if (url.includes('am_gift_contacts')) return jsonResponse(201, null);
     throw new Error(`unexpected ${init.method} ${url}`);
   };
   const writer = createSupabaseAllocationWriter({
@@ -50,6 +51,33 @@ test('ingestEveryOrg inserts gift then credits pot', async () => {
   assert.equal(giftBody.client_id, 'org_hacker_dojo');
   assert.equal(giftBody.net_cents, 1000);
   assert.equal('email' in giftBody, false);
+  assert.equal(calls.some((c) => String(c.url).includes('am_gift_contacts')), false);
+});
+
+test('ingestEveryOrg persists connector contact off the gift row', async () => {
+  const calls = [];
+  const fetchImpl = async (url, init = {}) => {
+    calls.push({ url, method: init.method || 'GET', body: init.body || null });
+    if (url.includes('am_gifts?select=charge_id')) return jsonResponse(200, []);
+    if (url.endsWith('/am_gifts') && init.method === 'POST') return jsonResponse(201, null);
+    if (url.includes('am_pots?select=')) return jsonResponse(200, []);
+    if (url.endsWith('/am_pots') && init.method === 'POST') return jsonResponse(201, null);
+    if (url.includes('am_gift_contacts')) return jsonResponse(201, null);
+    throw new Error(`unexpected ${init.method} ${url}`);
+  };
+  const writer = createSupabaseAllocationWriter({
+    supabaseUrl: 'https://example.supabase.co',
+    serviceRoleKey: 'test-service-role',
+    orgId: 'org_hacker_dojo',
+    fetchImpl,
+  });
+  await writer.ingestEveryOrg({ ...FIXTURE, email: 'donor@example.org', donorId: 'donor_1' });
+  const giftBody = JSON.parse(calls.find((c) => c.url.endsWith('/am_gifts')).body);
+  assert.equal('email' in giftBody, false);
+  const contactBody = JSON.parse(calls.find((c) => String(c.url).includes('am_gift_contacts')).body);
+  assert.equal(contactBody.email, 'donor@example.org');
+  assert.equal(contactBody.donor_principal, 'donor_1');
+  assert.equal(contactBody.charge_id, 'fixture-supabase-gift-001');
 });
 
 test('ingestEveryOrg is idempotent when charge_id already exists', async () => {

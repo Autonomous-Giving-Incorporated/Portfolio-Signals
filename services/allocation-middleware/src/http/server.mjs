@@ -297,6 +297,12 @@ export function createAllocationServer({
           directorLoginEnabled: Boolean(authVerifier),
         });
       }
+      if (req.method === 'POST' && url.pathname === '/setup') {
+        const authz = await authorizeWrite(req, res);
+        if (!authz.ok) return;
+        const body = await readJson(req, maxJsonBodyBytes);
+        return send(res, 200, await service.setDonationLink(body.donationLink));
+      }
       if (req.method === 'GET' && (url.pathname === '/setup.html' || url.pathname === '/connect')) {
         return serveHtml(res, 'setup.html');
       }
@@ -352,8 +358,19 @@ export function createAllocationServer({
         if (!body.attachedBy && authz.actor?.email) {
           body.attachedBy = authz.actor.email;
         }
+        if (body.waive === true || body.proofWaived === true) {
+          if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+          return send(res, 201, await service.waiveProof(body));
+        }
         const result = await service.attachProof(body);
         return send(res, 201, result);
+      }
+      if (req.method === 'POST' && url.pathname === '/waivers') {
+        const authz = await authorizeWrite(req, res);
+        if (!authz.ok) return;
+        const body = await readJson(req, maxJsonBodyBytes);
+        if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+        return send(res, 201, await service.waiveProof(body));
       }
       if (req.method === 'GET' && url.pathname === '/labels') {
         const authz = await authorizeRead(req, res);

@@ -53,13 +53,18 @@ export function createSupabaseStore({
     orgId,
     async load() {
       const state = ensureExtras(emptyState());
-      const [gifts, pots, allocations, proofs, exceptions, metaRows] = await Promise.all([
+      const [gifts, pots, allocations, proofs, exceptions, metaRows, contacts, notices, deliveries, waivers, clientRows] = await Promise.all([
         rest(scoped('am_gifts', '*')).then(readJson),
         rest(scoped('am_pots', '*')).then(readJson),
         rest(scoped('am_allocations', '*')).then(readJson),
         rest(scoped('am_proofs', '*')).then(readJson),
         rest(scoped('am_exceptions', '*')).then(readJson),
-        rest(scoped('am_org_meta', 'labels,aliases')).then(readJson),
+        rest(scoped('am_org_meta', 'labels,aliases,donation_link')).then(readJson),
+        rest(scoped('am_gift_contacts', '*')).then(readJson),
+        rest(scoped('am_impact_notices', '*')).then(readJson),
+        rest(scoped('am_impact_notice_deliveries', '*')).then(readJson),
+        rest(scoped('am_proof_waivers', '*')).then(readJson),
+        rest(`clients?select=donation_link&id=eq.${encodeURIComponent(orgId)}`).then(readJson),
       ]);
       for (const row of gifts || []) {
         state.gifts.set(row.charge_id, {
@@ -123,6 +128,45 @@ export function createSupabaseStore({
       }
       for (const [key, value] of Object.entries(meta?.aliases || {})) {
         if (String(key).startsWith(`${orgId}|`)) state.aliases.set(key, value);
+      }
+      const clientRow = Array.isArray(clientRows) ? clientRows[0] : null;
+      state.donationLink = meta?.donation_link || clientRow?.donation_link || null;
+      for (const row of contacts || []) {
+        const contact = { chargeId: row.charge_id };
+        if (row.email) contact.email = row.email;
+        if (row.donor_principal) contact.donorPrincipal = row.donor_principal;
+        state.giftContacts.set(row.charge_id, contact);
+      }
+      for (const row of notices || []) {
+        state.impactNotices.set(row.allocation_id, {
+          impactNoticeId: row.id,
+          orgId: row.client_id,
+          allocationId: row.allocation_id,
+          evidenceId: row.evidence_id,
+          proofWaived: row.proof_waived === true,
+          channel: row.channel,
+          donationLink: row.donation_link,
+          useSummary: row.use_summary,
+          chargeId: row.charge_id || undefined,
+          createdAt: row.created_at,
+        });
+      }
+      state.impactDeliveries = (deliveries || []).map((row) => ({
+        id: row.id,
+        noticeId: row.notice_id,
+        orgId: row.client_id,
+        channel: row.channel,
+        status: row.status,
+        attemptedAt: row.attempted_at,
+        detail: row.detail || '',
+      }));
+      for (const row of waivers || []) {
+        state.proofWaivers.set(row.allocation_id, {
+          allocationId: row.allocation_id,
+          waivedBy: row.waived_by,
+          waivedAt: row.waived_at,
+          note: row.note || '',
+        });
       }
       return state;
     },
@@ -197,7 +241,54 @@ export function createSupabaseStore({
       for (const [key, value] of state.aliases || []) {
         if (String(key).startsWith(`${orgId}|`)) aliases[key] = value;
       }
-      const metaRows = [{ client_id: orgId, labels, aliases }];
+      const contactRows = [...(state.giftContacts || new Map()).values()]
+        .filter((contact) => state.gifts.get(contact.chargeId)?.orgId === orgId)
+        .map((contact) => ({
+          charge_id: contact.chargeId,
+          client_id: orgId,
+          email: contact.email || null,
+          donor_principal: contact.donorPrincipal || null,
+        }));
+      const noticeRows = [...(state.impactNotices || new Map()).values()]
+        .filter((notice) => notice.orgId === orgId)
+        .map((notice) => ({
+          id: notice.impactNoticeId,
+          client_id: orgId,
+          allocation_id: notice.allocationId,
+          evidence_id: notice.evidenceId || null,
+          proof_waived: notice.proofWaived === true,
+          channel: notice.channel,
+          donation_link: notice.donationLink,
+          use_summary: notice.useSummary,
+          charge_id: notice.chargeId || null,
+          created_at: notice.createdAt,
+        }));
+      const deliveryRows = (state.impactDeliveries || [])
+        .filter((item) => item.orgId === orgId)
+        .map((item) => ({
+          id: item.id,
+          notice_id: item.noticeId,
+          client_id: orgId,
+          channel: item.channel,
+          status: item.status,
+          attempted_at: item.attemptedAt,
+          detail: item.detail || '',
+        }));
+      const waiverRows = [...(state.proofWaivers || new Map()).values()]
+        .filter((item) => state.allocations.get(item.allocationId)?.orgId === orgId)
+        .map((item) => ({
+          allocation_id: item.allocationId,
+          client_id: orgId,
+          waived_by: item.waivedBy,
+          waived_at: item.waivedAt,
+          note: item.note || '',
+        }));
+      const metaRows = [{
+        client_id: orgId,
+        labels,
+        aliases,
+        donation_link: state.donationLink || null,
+      }];
 
       const upserts = [
         ['am_gifts?on_conflict=charge_id', giftRows],
@@ -206,6 +297,10 @@ export function createSupabaseStore({
         ['am_proofs?on_conflict=id', proofRows],
         ['am_exceptions?on_conflict=id', exceptionRows],
         ['am_org_meta?on_conflict=client_id', metaRows],
+        ['am_gift_contacts?on_conflict=charge_id', contactRows],
+        ['am_proof_waivers?on_conflict=allocation_id', waiverRows],
+        ['am_impact_notices?on_conflict=id', noticeRows],
+        ['am_impact_notice_deliveries?on_conflict=id', deliveryRows],
       ];
       for (const [path, rows] of upserts) {
         if (!rows.length) continue;
@@ -216,6 +311,12 @@ export function createSupabaseStore({
         });
         if (!response.ok) throw new Error('allocation_store_unavailable');
       }
+      const clientPatch = await rest(`clients?id=eq.${encodeURIComponent(orgId)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ donation_link: state.donationLink || null }),
+      });
+      if (!clientPatch.ok) throw new Error('allocation_store_unavailable');
     },
   };
 }

@@ -25,6 +25,8 @@ export function parseGiftCsv(text) {
       programKey: get('programKey') || '',
       currency: get('currency') || 'USD',
       donatedAt: get('donatedAt') || '',
+      email: get('email') || '',
+      donorPrincipal: get('donorPrincipal') || get('donorId') || '',
     });
   }
   return rows;

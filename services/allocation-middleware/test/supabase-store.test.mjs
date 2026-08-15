@@ -54,14 +54,16 @@ test('supabase store load keeps only the bound org and drops foreign labels', as
   assert.equal(state.gifts.get('fixture-hd-gift-001').orgId, 'org_hacker_dojo');
   assert.equal(state.labels.get('org_hacker_dojo|campaign|hacker-dojo-420k'), 'Hacker Dojo $420K Campaign');
   assert.equal(state.labels.has('org_other|campaign|x'), false);
-  assert.ok(calls.every((url) => url.includes('client_id=eq.org_hacker_dojo')));
+  assert.ok(calls.every((url) => (
+    url.includes('client_id=eq.org_hacker_dojo') || url.includes('id=eq.org_hacker_dojo')
+  )));
 });
 
 test('supabase store save refuses to persist another org\'s rows', async () => {
   const bodies = [];
   const fetchImpl = async (url, init = {}) => {
-    if (init.method === 'POST') {
-      bodies.push({ url: String(url), rows: JSON.parse(init.body) });
+    if (init.method === 'POST' || init.method === 'PATCH') {
+      bodies.push({ url: String(url), method: init.method, rows: JSON.parse(init.body) });
       return jsonResponse(201, []);
     }
     return jsonResponse(200, []);
@@ -100,4 +102,7 @@ test('supabase store save refuses to persist another org\'s rows', async () => {
   assert.ok(giftUpsert);
   assert.deepEqual(giftUpsert.rows.map((row) => row.charge_id), ['hd']);
   assert.ok(giftUpsert.rows.every((row) => row.client_id === 'org_hacker_dojo'));
+  const clientPatch = bodies.find((item) => item.url.includes('/clients?'));
+  assert.ok(clientPatch);
+  assert.equal(clientPatch.method, 'PATCH');
 });

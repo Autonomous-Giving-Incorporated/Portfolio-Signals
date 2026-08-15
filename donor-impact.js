@@ -94,7 +94,42 @@ async function openReceipt(donorId, rid) {
   }
 }
 
+function renderDonationCta(link) {
+  const el = $("donationCta");
+  if (!el) return;
+  el.replaceChildren();
+  if (!link) {
+    el.textContent = "CTA omitted — no donation_link on the tenant record.";
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = link;
+  a.rel = "noopener noreferrer";
+  a.textContent = link;
+  el.append("Give again: ", a);
+}
+
+async function loadTenantDonationLink() {
+  const jwt = sessionStorage.getItem("am_access_token");
+  if (!jwt) {
+    renderDonationCta(null);
+    return;
+  }
+  try {
+    const res = await fetch("/packet", { headers: { Authorization: `Bearer ${jwt}` } });
+    if (!res.ok) {
+      renderDonationCta(null);
+      return;
+    }
+    const packet = await res.json();
+    renderDonationCta(packet.donationLink || null);
+  } catch {
+    renderDonationCta(null);
+  }
+}
+
 $("btnLoad").addEventListener("click", load);
+loadTenantDonationLink();
 $("apiBase")?.addEventListener("change", () => {
   localStorage.setItem("IMPACT_RELAY_API", impactRelayApiBase());
 });
