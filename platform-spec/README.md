@@ -22,7 +22,7 @@ https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/v
 
 ## Boundary (from platform canon)
 
-Portfolio Signals observes, normalizes, recommends, and credits gift summaries only. It **must not** allocate funds, grant Approval, or process donations. every.org is the P0 connector. Stripe is tenant/SaaS billing only. In-process Signal / Opportunity / Recommendation records are CODE_SHIPPED against SPEC-003 v2.1.0; they are not live and not READY. SPEC-029 remains Proposed; a read-only in-process Mission Graph projection is CODE_SHIPPED and is not an Accept. SPEC-030 remains Proposed; versioned fail-closed metric policies are CODE_SHIPPED and are not an Accept (no formula, no scores).
+Portfolio Signals observes, normalizes, recommends, and credits gift summaries only. It **must not** allocate funds, grant Approval, or process donations. every.org is the P0 connector. Stripe is tenant/SaaS billing only. In-process Signal / Opportunity / Recommendation records are CODE_SHIPPED against SPEC-003 v2.1.0; they are not live and not READY. SPEC-029 remains Proposed; a read-only in-process Mission Graph projection is CODE_SHIPPED and is not an Accept. SPEC-030 remains Proposed; versioned fail-closed metric policies are CODE_SHIPPED and are not an Accept (no formula, no scores). A read-only AGI console projection composes those readers; it is CODE_SHIPPED, not a live product console, and not READY.
 
 ## Updating the pin
 

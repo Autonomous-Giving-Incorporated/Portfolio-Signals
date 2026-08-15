@@ -65,6 +65,7 @@ Code: `services/allocation-middleware/src/intel/staleness.mjs` (`STALENESS_POLIC
 
 - SPEC-029 Mission Graph / learning feedback — **Proposed only**. Not Accepted. A read-only in-process projection exists ([MISSION-GRAPH.md](MISSION-GRAPH.md)); it is not an Accept, not a SoR, and does not mint feedback Signals. No Impact → Recommendation path.
 - SPEC-030 mission-intelligence metrics — **Proposed only**. Not Accepted. Versioned fail-closed policies exist ([MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md)); they return NOT_COMPUTABLE and do not invent scores.
+- AGI console projection — read-only in-process view ([AGI-CONSOLE.md](AGI-CONSOLE.md)). Not a live product console. Not READY. Does not mint Signals or Accept SPEC-029/030.
 - Graph database, forecasting, scoring-model training, or a new capability.
 - Live Worker URL, live every.org pointing, or READY conformance.
 

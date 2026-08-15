@@ -39,6 +39,7 @@ evidence:
   fund_intel_records: docs/FUND-INTEL-SIGNALS.md
   mission_graph_projection: docs/MISSION-GRAPH.md
   mission_intelligence_metrics: docs/MISSION-INTELLIGENCE-METRICS.md
+  agi_console_projection: docs/AGI-CONSOLE.md
   notes: >
     Experimental pin to Autonomous Giving Specs v2.0.0 (tag v2.0.0, commit
     c089739). Not a Required/Recommended runtime claim and not READY.
@@ -52,7 +53,9 @@ evidence:
     READY, not a SoR, no learning-feedback minting). SPEC-030 remains
     Proposed 0.1.0 — not Accepted. Versioned fail-closed metric
     policies are CODE_SHIPPED (not live, not READY, no formula, no
-    scores). Intelligence / observe-credit
+    scores). A read-only AGI console projection is CODE_SHIPPED
+    (not live, not READY, not a product console) and does not Accept
+    SPEC-029 or SPEC-030. Intelligence / observe-credit
     boundary: gift summaries and pot credits; AGI never processes donations.
     every.org is the P0 connector. CONTRACT-013 ImpactNotice records are
     in-repo after proof/waive when contact + donation_link exist; not a live

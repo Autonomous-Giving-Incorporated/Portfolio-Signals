@@ -56,6 +56,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Fund Intel Signal / Opportunity / Recommendation | CODE_SHIPPED in-process (`services/allocation-middleware/src/intel/`); not live; not READY — [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) |
 | Mission Graph projection (SPEC-029 Proposed) | CODE_SHIPPED read-only (`src/intel/mission-graph.mjs`); not live; not READY; SPEC-029 not Accepted — [MISSION-GRAPH.md](MISSION-GRAPH.md) |
 | Mission Intelligence metrics (SPEC-030 Proposed) | CODE_SHIPPED fail-closed policies (`src/intel/metrics.mjs`); not live; not READY; SPEC-030 not Accepted; no formula — [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md) |
+| AGI console projection (read-only view) | CODE_SHIPPED in-process (`src/intel/console-projection.mjs`); not live; not READY; not a product console; SPEC-029/030 stay Proposed — [AGI-CONSOLE.md](AGI-CONSOLE.md) |
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |

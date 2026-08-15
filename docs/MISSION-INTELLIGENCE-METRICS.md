@@ -47,7 +47,7 @@ The evaluator does not write Fund Intel records, mint Signals, credit/debit/lock
 ## Out of scope (do not read this PR as)
 
 - Accept of SPEC-030, or a consumer-pin bump off v2.0.0.
-- Numeric scores, baselines, live dashboards, or forecasting.
+- Numeric scores, baselines, live dashboards, or forecasting. A read-only console *view* that repeats these fail-closed results lives in [AGI-CONSOLE.md](AGI-CONSOLE.md); it is not a dashboard and is not READY.
 - A metrics warehouse, microservice, or new system of record.
 - Learning-feedback Signal minting.
 

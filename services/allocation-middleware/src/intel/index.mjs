@@ -21,3 +21,7 @@ export {
   METRIC_POLICIES,
   MISSION_METRICS_SPEC,
 } from './metrics.mjs';
+export {
+  projectAgiConsole,
+  projectAgiConsoleFromRecords,
+} from './console-projection.mjs';
