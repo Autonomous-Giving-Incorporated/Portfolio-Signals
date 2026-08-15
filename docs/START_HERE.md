@@ -48,7 +48,7 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
-| Role-aware Auth email | **Production active**; Slices 19-21 deployed; authenticated-function ACLs hosted-verified; leaked-password protection pending correct Supabase dashboard session |
+| Role-aware Auth email | **Production active**; Slices 19-21 deployed; authenticated-function ACLs hosted-verified; leaked-password protection blocked by Supabase Pro-plan entitlement |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
 | **Client Onboarding Pack** (docs) | **Code on main** (#104); platform migrate + Edge deploy + MFA dry-run **PENDING** |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
@@ -86,4 +86,4 @@ primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: fe5da4a4ac45159bf3638e952a2bb0fd8aaa73c9
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: b281bc5c53b6666d841d5adeff9afdbf6b8436e8
