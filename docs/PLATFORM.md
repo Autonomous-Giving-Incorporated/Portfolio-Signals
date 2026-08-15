@@ -68,7 +68,7 @@ Build generates gitignored `runtime-config.js`. Do **not** set service-role keys
 | Public HTTPS ephemeral (#71) | OBSERVED — Cloudflare quick tunnel |
 | Seed allocate→proof→packet (#74 partial) | OBSERVED — `npm run accept:seed-loop` |
 | Durable named host | **Cloudflare Workers** (designed); local Node for pilot only |
-| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | PENDING Worker port; needs live gift + browser sign-off |
+| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | Worker route shipped; live URL, every.org pointing, gift, and browser sign-off remain operator-owned |
 
 See [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) (hub) · [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
 

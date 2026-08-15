@@ -7,6 +7,7 @@ on:
 
 jobs:
   contract:
+    name: Local security contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -35,6 +36,10 @@ jobs:
         run: npm test
       - name: Test role-aware Auth email templates
         run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts
+      - name: Test every.org webhook Worker port
+        run: |
+          node --test services/allocation-middleware/test/webhook-auth.test.mjs services/allocation-middleware/test/supabase-writer.test.mjs
+          npm --prefix workers/portfolio-signals test
       - name: Type-check Edge Functions
         run: |
           set -euo pipefail

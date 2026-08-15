@@ -6,13 +6,13 @@
 | Repository role | Portfolio Signals — intelligence implementation |
 | Current conformance level | Experimental |
 | Declaration | [`platform-conformance.yml`](../platform-conformance.yml) |
-| Governing canon | [Autonomous-Giving-Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0) |
+| Governing canon | [Autonomous-Giving-Specs v1.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/tree/v1.0.0) |
 
 ## Current assessment
 
 This repository currently implements an authenticated campaign and decision workspace, import review, and public campaign presentation. It does not yet publish or consume the canonical `SignalDetected`, `OpportunityCreated`, or `RecommendationGenerated` events, and it does not yet validate the shared Opportunity or Recommendation contracts. It therefore MUST NOT claim Required or Recommended platform conformance.
 
-The existing decision and approval screens are local campaign controls. They are not the Autonomous Giving allocation authority defined by [SPEC-006](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/v1.0.0/specs/SPEC-006-service-boundaries.md), and they must not be represented as such without an approved migration.
+The existing decision and approval screens are local campaign controls. They are not the Autonomous Giving allocation authority defined by [SPEC-006](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/v1.0.0/specs/SPEC-006-service-boundaries.md), and they must not be represented as such without an approved migration.
 
 ## Intended boundary
 

@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   contract:
+    name: Current-main acceptance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -19,6 +19,8 @@ function mockFetchFactory({
   role = 'director',
   profileActive = true,
   mfaEnforced = true,
+  profileRole = 'director',
+  memberships,
 } = {}) {
   return async (url, opts = {}) => {
     const u = String(url);
@@ -33,15 +35,20 @@ function mockFetchFactory({
       };
     }
     if (u.includes('client_memberships')) {
-      return {
-        ok: true,
-        json: async () => [{ role, active: true, client_id: 'org_hacker_dojo' }],
-      };
+      const rows = memberships === undefined
+        ? [{ role, active: true, client_id: 'org_hacker_dojo' }]
+        : memberships;
+      return { ok: true, json: async () => rows };
     }
     if (u.includes('profiles')) {
       return {
         ok: true,
-        json: async () => [{ active: profileActive, mfa_enforced: mfaEnforced, display_name: 'Director' }],
+        json: async () => [{
+          role: profileRole,
+          active: profileActive,
+          mfa_enforced: mfaEnforced,
+          display_name: 'Director',
+        }],
       };
     }
     return { ok: false, status: 404, json: async () => ({}) };
@@ -156,6 +163,52 @@ test('AAL1 session may read but cannot mutate', async () => {
   });
   assert.equal(write.status, 403);
   assert.equal((await write.json()).error, 'aal2_session_required');
+});
+
+test('profiles.role without tenant membership is denied', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo' });
+  const authVerifier = createAuthVerifier({
+    supabaseUrl: 'https://example.supabase.co',
+    serviceRoleKey: 'service-role',
+    clientId: 'org_hacker_dojo',
+    fetchImpl: mockFetchFactory({ memberships: [], profileRole: 'director' }),
+  });
+  const server = createAllocationServer({ service, authVerifier, allowOperatorFallback: false });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  servers.push(server);
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/available`, {
+    headers: { authorization: `Bearer ${jwt('aal2')}` },
+  });
+  assert.equal(res.status, 401);
+});
+
+test('membership on a different org does not authorize the bound tenant', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo' });
+  const authVerifier = createAuthVerifier({
+    supabaseUrl: 'https://example.supabase.co',
+    serviceRoleKey: 'service-role',
+    clientId: 'org_hacker_dojo',
+    fetchImpl: mockFetchFactory({
+      memberships: [{ role: 'director', active: true, client_id: 'org_other_makerspace' }],
+    }),
+  });
+  const server = createAllocationServer({ service, authVerifier, allowOperatorFallback: false });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  servers.push(server);
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/allocations`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${jwt('aal2')}`,
+    },
+    body: JSON.stringify({
+      campaignKey: 'general',
+      programKey: 'undesignated',
+      amount: '1.00',
+      purpose: 'cross-tenant',
+    }),
+  });
+  assert.equal(res.status, 401);
 });
 
 test('inactive profile cannot read or mutate despite active membership', async () => {

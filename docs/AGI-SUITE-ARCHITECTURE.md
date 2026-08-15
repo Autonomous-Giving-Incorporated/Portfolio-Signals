@@ -46,8 +46,8 @@ Suite product for **transaction-light allocation middleware** (canonical connect
 
 - [docs/ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) — Portfolio Signals’s observe/credit role + status  
 - [docs/HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) — pilot runbook  
-- [Specs design](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
-- [AGI product brief](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PRODUCT-ALLOCATION-MIDDLEWARE.md)  
+- [Specs design](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/specs/2026-08-03-allocation-middleware-design.md)  
+- [AGI product brief](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PRODUCT-ALLOCATION-MIDDLEWARE.md)  
 
 This track is distinct from Hacker Dojo campaign workspace milestones above; it must not pull Portfolio Signals into full financial transaction processing.
 

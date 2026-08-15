@@ -14,7 +14,7 @@
 | Hosted deploy recipe | Local Node (pilot); production webhook/public host is Cloudflare Workers |
 | Hacker Dojo seed + `SEED_ON_BOOT` | Ready (`fixtures/hacker-dojo-pilot.json`) |
 | Director SSO / Supabase session | OBSERVED (`/login.html` + membership JWT; #72 closed) |
-| every.org live webhook | **PENDING** Worker port (#73) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| every.org live webhook | Worker route shipped; live pointing / gift **PENDING** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Public HTTPS (ephemeral) | OBSERVED (cloudflared; #71 closed) |
 | Named durable public host | **Cloudflare Workers** (designed); not Render/Fly/Railway |
 | Seed-loop accept (no live gift) | OBSERVED (`npm run accept:seed-loop`) |
@@ -38,8 +38,8 @@ Process **exits on boot** if guards fail.
 
 ## every.org pilot wiring
 
-1. Deploy with HTTPS (Fly/Railway/VPS).
-2. Webhook URL: `https://<host>/webhooks/every-org`
+1. Deploy the **Cloudflare Worker** (`portfolio-signals`). Do not prefer Fly/Railway/Render.
+2. Webhook URL: `https://<workers-origin>/webhooks/every-org`
 3. Webhook URL (every.org):  
    `https://<host>/webhooks/every-org?token=<WEBHOOK_TOKEN>`  
    Also accepts header `x-webhook-token` (preferred when a proxy can inject it).

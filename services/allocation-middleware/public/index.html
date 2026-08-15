@@ -70,15 +70,15 @@
       <article class="metric-card"><span class="metric-label">Open exceptions</span><strong id="m-exceptions">—</strong><small>Inbox</small></article>
     </section>
 
-    <section class="panel" id="auth-bar" aria-label="Operator credentials">
+    <section class="panel" id="auth-bar" aria-label="Session">
       <div class="panel-heading">
         <h2>Session</h2>
         <span class="tag warning">HUMAN GATE</span>
       </div>
-      <p class="note" id="auth-state">Not signed in — use Director login or pilot operator token.</p>
-      <div class="control-grid">
-        <label>Operator token (pilot fallback)
-          <input id="token" type="password" placeholder="x-operator-token when Supabase is off" autocomplete="off" />
+      <p class="note" id="auth-state">Not signed in — use Director login.</p>
+      <div class="control-grid" id="operator-fallback" hidden>
+        <label>Operator token (local Node fallback only)
+          <input id="token" type="password" placeholder="disabled on Workers / pilot" autocomplete="off" />
         </label>
         <div class="row-actions">
           <button type="button" class="button" id="btn-save-token">Save token</button>
@@ -183,7 +183,21 @@
 
   <script type="module">
     const tokenEl = document.getElementById('token');
-    tokenEl.value = localStorage.getItem('operatorToken') || '';
+    const fallbackPanel = document.getElementById('operator-fallback');
+    let operatorFallbackEnabled = false;
+    try {
+      const cfg = await fetch('/auth/config').then((r) => r.json());
+      operatorFallbackEnabled = Boolean(cfg.operatorTokenFallback);
+    } catch {
+      operatorFallbackEnabled = false;
+    }
+    if (operatorFallbackEnabled) {
+      fallbackPanel.hidden = false;
+      tokenEl.value = localStorage.getItem('operatorToken') || '';
+    } else {
+      localStorage.removeItem('operatorToken');
+      tokenEl.value = '';
+    }
 
     function opHeaders(json = true) {
       const h = {};
@@ -208,7 +222,9 @@
       const pill = document.getElementById('auth-pill');
       const headers = opHeaders(false);
       if (!headers.Authorization && !headers['x-operator-token']) {
-        el.textContent = 'Not signed in — use Director login or operator token';
+        el.textContent = operatorFallbackEnabled
+          ? 'Not signed in — use Director login or operator token'
+          : 'Not signed in — use Director login. Operator-token fallback is off.';
         pill.textContent = 'Not signed in';
         pill.className = 'status-pill pending';
         return;

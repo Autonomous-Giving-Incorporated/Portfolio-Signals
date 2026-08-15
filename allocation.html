@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>AGI Portfolio Signals · Allocation</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="brand.css" />
+  <link rel="stylesheet" href="allocation-shell.css" />
+</head>
+<body class="allocation-host">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="brand-identity">
+      <span class="brand-product">Portfolio Signals<br />Allocation</span>
+      <span class="tenant-chip">
+        <img src="assets/tenants/hacker-dojo/icon.svg" alt="" width="24" height="24" />
+        org_hacker_dojo
+      </span>
+      <nav class="brand-suite-links" aria-label="Allocation">
+        <a href="allocation.html" aria-current="page">Allocate</a>
+        <a href="allocation-login.html">Director login</a>
+        <a href="allocation-setup.html">every.org setup</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="eyebrow">Cloudflare Workers · seed fixtures OK</p>
+    <h1>Campaign pots</h1>
+    <p class="lede">
+      Director JWT only. Operator-token fallback is off on this host.
+      Seed fixtures can fill Available. They are not a live every.org gift.
+    </p>
+    <p>
+      <span class="status-pill" id="auth-pill">Checking session…</span>
+      <a class="button secondary" href="allocation-login.html">Director login</a>
+      <button type="button" class="button secondary" id="btn-logout">Sign out</button>
+      <button type="button" class="button secondary" id="btn-seed">Seed org_hacker_dojo fixtures</button>
+    </p>
+    <p class="note" id="auth-state">Not signed in.</p>
+    <p class="note" id="seed-msg" role="status"></p>
+
+    <section class="panel" id="available">
+      <div class="panel-heading"><h2>Available</h2></div>
+      <div id="available-body"><p class="note">Sign in to view pots.</p></div>
+    </section>
+
+    <section class="panel" id="allocate">
+      <div class="panel-heading"><h2>Allocate</h2></div>
+      <form id="alloc-form" class="stack-form">
+        <label>Campaign key <input name="campaignKey" required value="hacker-dojo-420k" /></label>
+        <label>Program key <input name="programKey" required value="community-hardware-fund" /></label>
+        <label>Amount <input name="amount" required value="100.00" inputmode="decimal" /></label>
+        <label>Purpose <input name="purpose" required value="Community hardware kits" /></label>
+        <button type="submit" class="button">Approve allocation</button>
+      </form>
+      <p class="note" id="alloc-msg" role="status"></p>
+    </section>
+
+    <section class="panel" id="proof">
+      <div class="panel-heading"><h2>Attach proof</h2></div>
+      <form id="proof-form" class="stack-form">
+        <label>Allocation id <input name="allocationId" required /></label>
+        <label>URI <input name="uri" required placeholder="https://…" /></label>
+        <label>Note <input name="note" /></label>
+        <button type="submit" class="button">Attach proof</button>
+      </form>
+      <p class="note" id="proof-msg" role="status"></p>
+    </section>
+
+    <section class="panel" id="packet">
+      <div class="panel-heading">
+        <h2>Board packet</h2>
+        <button type="button" class="button secondary" id="btn-packet">Refresh packet</button>
+      </div>
+      <pre class="packet-pre" id="packet-body">{}</pre>
+    </section>
+  </main>
+  <script type="module">
+    function headers(json = true) {
+      const h = {};
+      if (json) h['content-type'] = 'application/json';
+      const jwt = sessionStorage.getItem('am_access_token');
+      if (jwt) h.Authorization = 'Bearer ' + jwt;
+      return h;
+    }
+    function setStatus(el, ok, text) {
+      el.className = 'note ' + (ok ? 'ok' : 'err');
+      el.textContent = text;
+    }
+    async function refreshAuth() {
+      const el = document.getElementById('auth-state');
+      const pill = document.getElementById('auth-pill');
+      if (!headers(false).Authorization) {
+        el.textContent = 'Not signed in — use Director login. Operator tokens are not accepted here.';
+        pill.textContent = 'Not signed in';
+        return;
+      }
+      const res = await fetch('/auth/me', { headers: headers(false) });
+      const body = await res.json();
+      if (!res.ok) {
+        el.textContent = 'Auth failed: ' + (body.error || res.status);
+        pill.textContent = 'Auth failed';
+        return;
+      }
+      el.textContent = `Director: ${body.email || body.displayName} (${body.role})`;
+      pill.textContent = body.role || 'Director';
+    }
+    async function loadAvailable() {
+      const res = await fetch('/available', { headers: headers(false) });
+      const host = document.getElementById('available-body');
+      if (!res.ok) {
+        host.textContent = 'Sign in to view operational balances.';
+        return;
+      }
+      const rows = await res.json();
+      if (!rows.length) {
+        host.textContent = 'No pots yet. Seed fixtures or wait for a live gift.';
+        return;
+      }
+      const table = document.createElement('table');
+      table.className = 'data';
+      table.innerHTML = '<thead><tr><th>Campaign</th><th>Program</th><th>Available</th></tr></thead>';
+      const tb = document.createElement('tbody');
+      for (const row of rows) {
+        const tr = document.createElement('tr');
+        for (const value of [row.campaignLabel || row.campaignKey, row.programLabel || row.programKey, row.available]) {
+          const td = document.createElement('td');
+          td.textContent = String(value ?? '');
+          tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+      }
+      table.appendChild(tb);
+      host.replaceChildren(table);
+    }
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      sessionStorage.removeItem('am_access_token');
+      location.href = 'allocation-login.html';
+    });
+    document.getElementById('btn-seed').addEventListener('click', async () => {
+      const res = await fetch('/seed', { method: 'POST', headers: headers() });
+      const body = await res.json();
+      setStatus(
+        document.getElementById('seed-msg'),
+        res.ok,
+        res.ok ? `Seeded ${body.giftsCreated} fixture gift(s). Not a live gift.` : `Error: ${body.error}`,
+      );
+      await loadAvailable();
+    });
+    document.getElementById('alloc-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/allocations', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+      const data = await res.json();
+      setStatus(document.getElementById('alloc-msg'), res.ok, res.ok ? `Approved ${data.id}` : `Error: ${data.error}`);
+      if (res.ok) document.querySelector('#proof-form [name=allocationId]').value = data.id;
+      await loadAvailable();
+    });
+    document.getElementById('proof-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const body = Object.fromEntries(new FormData(ev.target).entries());
+      const res = await fetch('/proofs', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+      const data = await res.json();
+      setStatus(document.getElementById('proof-msg'), res.ok, res.ok ? 'Proof attached' : `Error: ${data.error}`);
+    });
+    document.getElementById('btn-packet').addEventListener('click', async () => {
+      const res = await fetch('/packet', { headers: headers(false) });
+      if (!res.ok) throw new Error('packet_authorization_required');
+      document.getElementById('packet-body').textContent = JSON.stringify(await res.json(), null, 2);
+    });
+    await refreshAuth();
+    await loadAvailable();
+  </script>
+</body>
+</html>

@@ -9,7 +9,7 @@ Use **Hacker Dojo** (`org_hacker_dojo`) until live every.org gift data is integr
 | every.org page | https://www.every.org/hacker-dojo |
 | Suite allocation story | `alloc_community_hardware` / Community Hardware Fund |
 | Hosting choices | [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) |
-| Specs plan | [hacker-dojo-pilot-hosting](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md) |
+| Specs plan | [hacker-dojo-pilot-hosting](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/main/docs/superpowers/plans/2026-08-03-hacker-dojo-pilot-hosting.md) |
 
 ## A — Local Node (**no Docker** — Phase 3a default)
 
@@ -76,14 +76,24 @@ BASE_URL=https://YOUR-SUBDOMAIN.trycloudflare.com npm run verify:director
 
 URL changes each session — fine for local smoke. Production every.org webhooks belong on **Cloudflare Workers**, not Render/Fly/Railway — [CLOUDFLARE.md](CLOUDFLARE.md).
 
-Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable` for local). Webhook remaining work: Worker port of `POST /webhooks/every-org`.
+Operator durable checklist: [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) (`npm run preflight:durable` for local). Webhook remaining work: live Worker URL + every.org pointing (route is in-repo).
 
 ### C2 — Cloudflare Workers (designed durable host)
 
-Public portal: Worker `portfolio-signals` in this repo.  
-every.org webhook: remaining Worker port (same account; not a Render/Fly/Railway service).
+Public portal + allocation console + every.org webhook all live on Worker `portfolio-signals` **in repo**. Live `workers.dev` deploy is **PENDING** until the operator sets GitHub `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Do not invent a live URL. Do not point every.org yet.
 
-Details: [CLOUDFLARE.md](CLOUDFLARE.md). Historical Compose/Render recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) (not production).
+After those secrets exist and `wrangler deploy` succeeds:
+
+| Path | Use |
+| --- | --- |
+| `/allocation-login` | Existing platform JWT (director / campaign_lead on `org_hacker_dojo`) |
+| `/allocation` | Seed fixtures (optional) → allocate → proof → packet |
+| `/allocation-setup` | Webhook URL (AAL2 writer only). Seed ≠ Connected |
+| `POST /webhooks/every-org` | every.org (after operator pointing) |
+
+Operator-token fallback is **off**. Seed fixtures are fine and are not a live gift.
+
+Details: [CLOUDFLARE.md](CLOUDFLARE.md) · [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md). Historical Compose/Render/Fly recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) (not production).
 
 ## D — Seed-loop acceptance (no live every.org) — #74 partial
 
@@ -110,7 +120,7 @@ What it checks:
 
 **Designed production host:** a **Cloudflare Worker** (`POST /webhooks/every-org`) on the same account as `portfolio-signals`, with platform Supabase as the data plane. See [CLOUDFLARE.md](CLOUDFLARE.md). Do **not** deploy this webhook to Render, Fly, or Railway.
 
-Until that Worker port ships, local Node + an ephemeral tunnel is valid **smoke only** (URL is not durable).
+The Worker route is in-repo. Until a live Worker URL exists and every.org is pointed at it, local Node + an ephemeral tunnel is valid **smoke only** (URL is not durable).
 
 ### Prerequisites (local smoke)
 
@@ -144,23 +154,9 @@ npm run start:hacker-dojo
 
 Keep the tunnel (or durable host) **up** while every.org delivers the webhook.
 
-## F — Fly.io (optional)
+## F — Fly.io / Render / Railway (historical only)
 
-Optional public host when flyctl works. Default remains Docker Compose (section B). Full notes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) §4.
-
-```bash
-# once: install flyctl, then if Gatekeeper blocks:
-#   xattr -d com.apple.quarantine ~/.fly/bin/flyctl
-export PATH="$HOME/.fly/bin:$PATH"
-fly auth login
-
-cd services/allocation-middleware
-# optional: export SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY
-npm run bootstrap:fly
-BASE_URL=https://agi-allocation.fly.dev npm run pilot:smoke
-```
-
-After stable seed: `fly secrets set SEED_ON_BOOT=0 -a agi-allocation`.
+Not the designed host. Do not add or prefer these for `org_hacker_dojo`. Leftover `fly.toml` / `render.yaml` stay in-tree as history. Operators should use **C2 Workers**. See [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
 
 ## Scripts
 

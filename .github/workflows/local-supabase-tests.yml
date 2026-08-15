@@ -27,7 +27,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: supabase/setup-cli@v1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.18.0'
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.31.8
       - name: Start disposable Supabase project
@@ -81,6 +84,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
       - name: Execute authenticated SECURITY DEFINER architecture checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/018_authenticated_security_definer_privileges.sql
+      - name: Execute allocation tenant isolation checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/019_am_tenant_isolation.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then

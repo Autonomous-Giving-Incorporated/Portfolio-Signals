@@ -78,6 +78,40 @@ test('configured operational reads fail closed without authentication', async ()
   assert.equal(allowed.status, 200);
 });
 
+test('webhook token reject when configured', async () => {
+  const base = await start({ webhookToken: 'expected-webhook-token' });
+  const denied = await fetch(`${base}/webhooks/every-org`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ chargeId: 'x', amount: '1.00', netAmount: '1.00' }),
+  });
+  assert.equal(denied.status, 401);
+  const allowed = await fetch(`${base}/webhooks/every-org`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-webhook-token': 'expected-webhook-token' },
+    body: JSON.stringify({
+      chargeId: 'wh-token-1',
+      amount: '5.00',
+      netAmount: '5.00',
+      currency: 'USD',
+      donationDate: '2026-08-15T00:00:00Z',
+    }),
+  });
+  assert.equal(allowed.status, 200);
+  assert.equal((await allowed.json()).created, true);
+});
+
+test('webhook fail-closed on malformed JSON when token configured', async () => {
+  const base = await start({ webhookToken: 'expected-webhook-token' });
+  const res = await fetch(`${base}/webhooks/every-org`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-webhook-token': 'expected-webhook-token' },
+    body: '{not-json',
+  });
+  assert.equal(res.status, 400);
+  assert.deepEqual(await res.json(), { error: 'malformed_payload' });
+});
+
 test('request bodies over the configured limit are rejected with 413', async () => {
   const base = await start({ maxJsonBodyBytes: 64 });
   const res = await fetch(`${base}/webhooks/every-org`, {

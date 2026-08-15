@@ -5,18 +5,27 @@
 
 const WRITE_ROLES = new Set(['director', 'campaign_lead']);
 
-function decodeJwtPayload(token) {
+export function decodeJwtPayload(token) {
   try {
     const encoded = String(token).split('.')[1];
     if (!encoded) return {};
-    return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+    const padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = padded.length % 4 === 0 ? '' : '='.repeat(4 - (padded.length % 4));
+    return JSON.parse(atob(padded + pad));
   } catch {
     return {};
   }
 }
 
+export function headerValue(req, name) {
+  const headers = req?.headers;
+  if (!headers) return '';
+  if (typeof headers.get === 'function') return headers.get(name) || '';
+  return headers[name.toLowerCase()] || headers[name] || '';
+}
+
 export function bearerToken(req) {
-  const authorization = req.headers.authorization;
+  const authorization = headerValue(req, 'authorization');
   const match = typeof authorization === 'string' ? authorization.match(/^Bearer\s+(\S+)$/i) : null;
   return match?.[1] || null;
 }
@@ -53,10 +62,10 @@ export function createAuthVerifier({
   }
 
   /**
-   * Resolve membership role for clientId.
-   * Prefer client_memberships; fall back to profiles.role for single-tenant legacy.
-   * Membership rows are read with the service role so RLS cannot hide an existing
-   * grant from the server-side verifier (user JWT is only used to identify the actor).
+   * Resolve membership role for the bound clientId.
+   * Tenant membership is required. A leftover profiles.role must not authorize
+   * another org. Membership rows are read with the service role so RLS cannot
+   * hide an existing grant (user JWT identifies the actor only).
    */
   async function getAuthorization(_accessToken, userId) {
     const headers = {
@@ -88,9 +97,10 @@ export function createAuthVerifier({
     const memRes = await fetchImpl(memUrl, { headers });
     if (memRes.ok) {
       const rows = await memRes.json();
-      if (Array.isArray(rows) && rows[0]?.role) {
+      const membership = Array.isArray(rows) ? rows[0] : null;
+      if (membership?.role && membership.client_id === clientId) {
         return {
-          role: rows[0].role,
+          role: membership.role,
           source: 'client_memberships',
           displayName: profile.display_name,
           mfaEnforced: profile.mfa_enforced === true,
@@ -98,15 +108,8 @@ export function createAuthVerifier({
       }
     }
 
-    // Legacy profile role on same project
-    if (profile.role) {
-      return {
-        role: profile.role,
-        displayName: profile.display_name,
-        mfaEnforced: profile.mfa_enforced === true,
-        source: 'profiles',
-      };
-    }
+    // Tenant membership is required. A leftover profiles.role must not
+    // authorize writes against a different bound ORG_ID.
     return null;
   }
 

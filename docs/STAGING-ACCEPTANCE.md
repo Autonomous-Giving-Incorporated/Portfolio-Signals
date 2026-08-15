@@ -1,8 +1,11 @@
 # HD-OI-041 Staging Acceptance
 
+**Canonical repository now:** `Autonomous-Giving-Incorporated/Portfolio-Signals`.  
+This page is a **historical** HD-OI-041 lane definition. Pre-migration names (`scrimshawlife-ctrl/Hacker-Dojo`, GitHub Pages origin below, legacy staging `ecxkhihlbrcwpavfoaoq`) are provenance only. Current production intent is Workers + platform Supabase `utdioxwiskzatwoejgiu` with Vercel fallback until DNS cutover — [CURRENT-STATE.md](CURRENT-STATE.md), [PLATFORM.md](PLATFORM.md).
+
 ## Purpose
 
-Verify one exact Hacker Dojo commit against local and hosted staging before any production or real-data decision is considered.
+Verify one exact commit against local and hosted staging before any production or real-data decision is considered.
 
 Historical successful runs are evidence for their recorded commits only. They do not prove a later `main` commit.
 
@@ -11,10 +14,13 @@ Historical successful runs are evidence for their recorded commits only. They do
 Record before execution:
 
 ```yaml
-repository: scrimshawlife-ctrl/Hacker-Dojo
+repository: Autonomous-Giving-Incorporated/Portfolio-Signals  # canonical
+historical_repository: scrimshawlife-ctrl/Hacker-Dojo         # pre-migration only
 commit: <40-character SHA>
-staging_project: ecxkhihlbrcwpavfoaoq
-pages_origin: https://scrimshawlife-ctrl.github.io/Hacker-Dojo/
+platform_supabase: utdioxwiskzatwoejgiu
+legacy_staging_project: ecxkhihlbrcwpavfoaoq  # frozen; not new tenancy
+pages_origin_historical: https://scrimshawlife-ctrl.github.io/Hacker-Dojo/
+public_origin_current: https://autogive.app/portfolio-signals/
 operator: <name or GitHub login>
 started_at: <UTC timestamp>
 ```

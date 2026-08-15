@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>AGI Portfolio Signals · Connect every.org</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="brand.css" />
+  <link rel="stylesheet" href="allocation-shell.css" />
+</head>
+<body class="allocation-host">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="brand-identity">
+      <span class="brand-product">Portfolio Signals<br />Allocation</span>
+      <nav class="brand-suite-links" aria-label="Allocation">
+        <a href="allocation.html">Allocate</a>
+        <a href="allocation-setup.html" aria-current="page">every.org setup</a>
+        <a href="allocation-login.html">Director login</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="eyebrow">Cloudflare Workers · webhook</p>
+    <h1>Connect every.org</h1>
+    <p class="lede">
+      Paste one webhook URL into every.org once. Do not point every.org here until an operator
+      verifies a live Worker URL. Seed/fixture gifts never mark this page Connected.
+    </p>
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Connection status</h2>
+        <span class="status-pill" id="status-pill">Checking…</span>
+      </div>
+      <p class="note" id="status-line"></p>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Webhook URL</h2></div>
+      <div class="url-box" id="webhook-url">Loading…</div>
+      <p class="note" id="copy-msg" role="status"></p>
+      <button type="button" class="button" id="btn-copy">Copy URL</button>
+      <button type="button" class="button secondary" id="btn-refresh">Refresh</button>
+    </section>
+  </main>
+  <script type="module">
+    const urlEl = document.getElementById('webhook-url');
+    const pill = document.getElementById('status-pill');
+    const statusLine = document.getElementById('status-line');
+    function authHeaders() {
+      const headers = {};
+      const jwt = sessionStorage.getItem('am_access_token');
+      if (jwt) headers.Authorization = `Bearer ${jwt}`;
+      return headers;
+    }
+    async function load() {
+      const res = await fetch('/setup', { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) {
+        urlEl.textContent = '(AAL2 director session required to view the webhook URL)';
+        statusLine.textContent = data.error || 'Authorization required';
+        pill.textContent = 'Authorization required';
+        return;
+      }
+      urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the Worker)';
+      const live = Boolean(data.steps.receivedLiveGift);
+      const fixtures = Number(data.counts?.fixtureGifts || 0);
+      if (live) {
+        pill.textContent = 'Connected';
+        statusLine.textContent = `Org ${data.orgId} · live gift observed`;
+      } else if (fixtures > 0) {
+        pill.textContent = 'Seed only — waiting for live gift';
+        statusLine.textContent = `Org ${data.orgId} · ${fixtures} fixture gift(s) · not Connected`;
+      } else {
+        pill.textContent = 'Waiting for first live gift';
+        statusLine.textContent = `Org ${data.orgId} · no live gifts yet`;
+      }
+    }
+    document.getElementById('btn-copy').onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(urlEl.textContent.trim());
+        document.getElementById('copy-msg').textContent = 'Copied.';
+      } catch {
+        document.getElementById('copy-msg').textContent = 'Select the URL and copy manually.';
+      }
+    };
+    document.getElementById('btn-refresh').onclick = () => load();
+    await load();
+  </script>
+</body>
+</html>

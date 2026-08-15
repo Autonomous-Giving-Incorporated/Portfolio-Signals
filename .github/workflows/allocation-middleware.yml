@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'services/allocation-middleware/**'
+      - 'workers/portfolio-signals/**'
       - '.github/workflows/allocation-middleware.yml'
   push:
     branches: [main]
     paths:
       - 'services/allocation-middleware/**'
+      - 'workers/portfolio-signals/**'
 
 jobs:
   test:
