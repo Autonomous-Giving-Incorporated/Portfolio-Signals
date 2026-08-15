@@ -53,6 +53,7 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Cloudflare Workers static host | In-repo (`wrangler.toml` + Worker `main`); live `workers.dev` PENDING operator `CLOUDFLARE_*` secrets — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
 | Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** — not Render/Fly/Railway; live named-host OBSERVED is **not** recorded |
+| Fund Intel Signal / Opportunity / Recommendation | CODE_SHIPPED in-process (`services/allocation-middleware/src/intel/`); not live; not READY — [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md) |
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |

@@ -7,7 +7,7 @@
 
 ## Positioning
 
-Portfolio Signals remains the **intelligence / observe** boundary: signals, opportunities, recommendations, and—in the middleware product—**gift summary ingestion and pot credits** from donation platforms.
+Portfolio Signals remains the **intelligence / observe** boundary: signals, opportunities, recommendations, and—in the middleware product—**gift summary ingestion and pot credits** from donation platforms. Fund Intel records live in-process at `services/allocation-middleware/src/intel/` (**CODE_SHIPPED**, not live, not READY). A Recommendation MUST NOT mutate a pot. See [FUND-INTEL-SIGNALS.md](FUND-INTEL-SIGNALS.md).
 
 It does **not** own human approval of allocations (Autonomous Giving capability) or deep evidence verification (Impact Relay capability). The MVP co-locates allocate/proof/packet UI with credit ingestion in a modular monolith package (Specs SPEC-002A / SPEC-020 Profile B).
 
@@ -39,6 +39,7 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Area | State |
 | --- | --- |
 | Domain (pots, gifts, allocate, exceptions, packet) | Shipped |
+| Fund Intel Signal / Opportunity / Recommendation | CODE_SHIPPED in-process (`src/intel/`); not live; not READY |
 | every.org webhook (`POST /webhooks/every-org`) | Shipped |
 | CSV import | Shipped on Node (`POST /import/csv`) and Worker (same path; director write; SPEC-026 twin) |
 | Operator UI (Available · Allocate · Inbox · Packet) | Shipped |

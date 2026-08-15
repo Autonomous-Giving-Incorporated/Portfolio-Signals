@@ -22,7 +22,7 @@ https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/blob/v
 
 ## Boundary (from platform canon)
 
-Portfolio Signals observes, normalizes, recommends, and credits gift summaries only. It **must not** allocate funds, grant Approval, or process donations. every.org is the P0 connector. Stripe is tenant/SaaS billing only.
+Portfolio Signals observes, normalizes, recommends, and credits gift summaries only. It **must not** allocate funds, grant Approval, or process donations. every.org is the P0 connector. Stripe is tenant/SaaS billing only. In-process Signal / Opportunity / Recommendation records are CODE_SHIPPED against SPEC-003 v2.1.0; they are not live and not READY. SPEC-029/030 remain Proposed only.
 
 ## Updating the pin
 
