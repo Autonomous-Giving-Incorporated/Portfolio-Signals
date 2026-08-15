@@ -48,7 +48,7 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
-| Role-aware Auth email | **Production active**; Slice 19 deployed; Slice 20 function least-privilege hardening locally verified, publication pending |
+| Role-aware Auth email | **Production active**; Slices 19-20 deployed; function least-privilege ACLs hosted-verified |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
 | **Client Onboarding Pack** (docs) | **Code on main** (#104); platform migrate + Edge deploy + MFA dry-run **PENDING** |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
@@ -86,4 +86,4 @@ primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
 client_onboarding_pack: PENDING_PLATFORM  # code MERGED #104; see CURRENT-STATE
 ```
 
-Provenance: Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: 36ade3ded86a48abc3b6ba52b25fc34c867caf0a
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: f717507889f35c95ed7f64f986d90c4cebc51725

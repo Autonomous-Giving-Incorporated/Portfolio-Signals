@@ -1,16 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-15T03:23:58.0000000Z",
+  "generated_at": "2026-08-15T03:47:30.1703897Z",
   "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
-  "branch": "loop-805-slice20-security-definer-hardening",
+  "branch": "main",
   "base_commit": "36ade3ded86a48abc3b6ba52b25fc34c867caf0a",
-  "status": "locally_verified_publication_pending",
+  "status": "production_verified",
   "boundary": {
     "surface": "execution_and_projection",
-    "production_mutation": false,
-    "production_deployment": false,
+    "production_mutation": true,
+    "production_deployment": true,
+    "production_data_mutation": false,
     "governance_or_canon_expansion": false,
-    "synthetic_data_only": true
+    "synthetic_data_only": false
   },
   "finding": {
     "source": "hosted_supabase_security_advisor_and_acl_probe",
@@ -39,19 +40,36 @@
     "local_migration_reset": "pass",
     "synthetic_policy_tests": { "passed_files": 18, "failed_files": 0 },
     "supabase_db_lint": "pass_no_schema_errors",
-    "supabase_security_advisors": "pass_no_warn_or_error_findings",
+    "local_supabase_security_advisors": "pass_no_warn_or_error_findings",
     "allocation_middleware": { "passed": 44, "failed": 0 },
     "import_api": { "passed": 5, "failed": 0 },
     "onboarding_pack": { "passed": 8, "failed": 0 },
     "workbook_parser": { "passed": 4, "failed": 0 },
     "auth_shared": { "passed": 7, "failed": 0 },
     "browser_and_accessibility": { "passed": 18, "failed": 0 },
-    "static_routes": "pass"
+    "static_routes": "pass",
+    "pull_request": "https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/10",
+    "merge_commit": "f717507889f35c95ed7f64f986d90c4cebc51725",
+    "production_migration": "20260815023952_security_definer_least_privilege",
+    "hosted_anonymous_security_definer_allowlist": "pass_exact_four",
+    "hosted_internal_function_external_execute": "pass_all_false",
+    "hosted_postgres_function_defaults": "pass_owner_only_global_and_public_schema",
+    "hosted_supported_rpc_contracts": "pass_all_true",
+    "main_policy_tests": "pass",
+    "main_full_acceptance": "pass",
+    "vercel_production": {
+      "deployment_id": "dpl_3WGLoBS6XRLxNAm6QRgBPcfxkDGm",
+      "state": "READY",
+      "commit": "f717507889f35c95ed7f64f986d90c4cebc51725"
+    },
+    "production_http": "pass_200_workspace_and_runtime_config"
   },
   "residual_risks": [
     "Four anonymous SECURITY DEFINER functions remain intentionally callable: one bounded public configuration endpoint and three fail-closed RLS helpers.",
     "Authenticated SECURITY DEFINER RPCs remain externally callable by design and enforce tenant, role, active-profile, session-expiry, and AAL2 checks internally.",
-    "Local advisor retains one INFO-only RLS-without-policy notice for the service-role-only auth_email_dispatches table."
+    "Hosted advisor retains one INFO-only RLS-without-policy notice for the service-role-only auth_email_dispatches table.",
+    "Hosted advisors report the four intentional anonymous RPCs and authenticated application RPCs because SECURITY DEFINER execution remains explicit by design.",
+    "Supabase leaked-password protection remains disabled and requires a separate Auth configuration gate."
   ],
-  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: 36ade3ded86a48abc3b6ba52b25fc34c867caf0a"
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 20 + Hash: f717507889f35c95ed7f64f986d90c4cebc51725"
 }
