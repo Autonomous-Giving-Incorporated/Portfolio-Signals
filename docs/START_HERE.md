@@ -92,7 +92,7 @@ legacy_staging_frozen: ecxkhihlbrcwpavfoaoq
 reference_tenant: org_hacker_dojo
 primary_master_admin: RESTRICTED_OPERATOR_REGISTRY
 client_onboarding_pack: PENDING_MFA_DRY_RUN  # platform schema + Edge observed; operator script scripts/platform/dry-run-onboarding-pack.sh; issue #18
-restore_drill: PENDING_OPERATOR  # scripts/staging/restore-drill.sh; no invented RTO/RPO; issue #19
+restore_drill: LOCAL_SYNTHETIC_OBSERVED  # 2026-08-15 host-postgres dump/restore; 21/21 SQL suites; not accepted RTO/RPO; hosted isolated project still PENDING; issue #19
 ```
 
 Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

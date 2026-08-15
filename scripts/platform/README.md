@@ -102,4 +102,4 @@ Every mutating script must hard-fail if the sentinel UUID `00000000-0000-0000-00
 - `docs/AUTHENTICATED-WORKSPACE.md` — roles and workspace
 - `docs/PLATFORM.md` — suite platform alignment
 - `docs/CURRENT-STATE.md` — live evidence labels
-- `scripts/staging/restore-drill.sh` — #19 local-synthetic or isolated-project restore helper (no invented RTO/RPO)
+- `scripts/staging/restore-drill.sh` — #19 local-synthetic or isolated-project restore helper; writes a privacy-safe engineering receipt; no invented leadership RTO/RPO
