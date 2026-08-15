@@ -47,11 +47,11 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Setup wizard (`/setup.html`, webhook — not OAuth) | Shipped |
 | Supabase director JWT + membership | Shipped (`/login.html`) |
 | Hacker Dojo pilot seed + `SEED_ON_BOOT` | Shipped |
-| Docker Compose pilot host | Shipped (default) |
-| Optional Fly / Render / Railway recipes | Shipped |
-| Live every.org gifts for Hacker Dojo | **Operator step** (#73 — not yet wired) |
-| Public HTTPS (ephemeral tunnel) | OBSERVED (Phase 3b) |
-| Named durable public host | **Optional** (Render / Railway / Fly / VPS) |
+| Docker Compose pilot host | Shipped (local) |
+| Optional Fly / Render / Railway recipes | Historical only — not the designed host |
+| Live every.org gifts for Hacker Dojo | **Operator step** (#73 — webhook Worker port) |
+| Public HTTPS (ephemeral tunnel) | OBSERVED (Phase 3b local smoke) |
+| Named durable public host | **Cloudflare Workers** — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Seed allocate→proof→packet | OBSERVED — `npm run accept:seed-loop` |
 
 ### Local (Hacker Dojo default)

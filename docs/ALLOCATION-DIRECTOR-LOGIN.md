@@ -34,8 +34,8 @@ PUBLIC_BASE_URL=http://127.0.0.1:8787
 | Path | Use |
 | --- | --- |
 | **Local Node (no Docker)** | Default for Phase 3a director-auth evidence |
-| **Docker Compose** | Durable volume / VPS-shaped pilot |
-| **Render / Railway / Fly** | Public HTTPS — Phase 3b ([ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md)) |
+| **Docker Compose** | Local durable volume / VPS-shaped pilot |
+| **Cloudflare Workers** | Designed production public site + webhook host — [CLOUDFLARE.md](CLOUDFLARE.md) |
 
 ### A — Local Node (no Docker)
 

@@ -49,17 +49,18 @@ legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 | Public director portal (static) | OBSERVED live |
 | Authenticated workspace login | OBSERVED operator login pass |
 | Platform multi-tenant schema + RLS | OBSERVED applied on platform |
-| Vercel path suite under autogive.app | OBSERVED |
+| Vercel path suite under autogive.app | OBSERVED (fallback until DNS cutover) |
+| Cloudflare Workers static host | In-repo (`wrangler.toml`); live `workers.dev` PENDING operator `CLOUDFLARE_*` secrets — [CLOUDFLARE.md](CLOUDFLARE.md) |
 | Allocation middleware MVP package | OBSERVED in repo; local pilot smoke PASS |
-| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); durable named host recipe READY; durable host + live acceptance tracked in [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) |
-| every.org live webhook | PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| Allocation middleware public HTTPS | OBSERVED ephemeral (cloudflared); designed durable host is **Workers** (webhook port PENDING) — not Render/Fly/Railway; live acceptance tracked in [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) |
+| every.org live webhook | PENDING Worker port ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Production CRM / workbook import | BLOCKED |
 | Outreach authority | NOT_GRANTED |
-| Secret service_role on Vercel | PROHIBITED (anon only) |
+| Secret service_role on Workers/Vercel | PROHIBITED (anon only) |
 
 ## Allocation middleware pilot (local)
 
@@ -71,8 +72,8 @@ local_host_process: node src/http/server.mjs   # Node path; Docker not required
 local_smoke: PASS
 director_auth_config: OBSERVED  # 2026-08-07 Phase 3a — GET /auth/config directorLoginEnabled=true; platform Supabase utdioxwiskzatwoejgiu; verify:director PASS; ALLOW_OPERATOR_TOKEN_FALLBACK=0
 operator_token_fallback: disabled_on_pilot_env
-public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Durable Render/Railway/Fly still optional operator dashboard step.
-every_org_live_webhook: PENDING  # post-migration issue #20
+public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; pilot:smoke PASS + verify:director PASS over https://*.trycloudflare.com (ephemeral). Designed durable host: Workers (not Render/Fly/Railway).
+every_org_live_webhook: PENDING  # post-migration issue #20 — port POST /webhooks/every-org to a Worker
 ```
 
 Runbook: [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md)  
@@ -87,7 +88,7 @@ path: local_node_no_docker
 org_id: org_hacker_dojo
 verify_director: PASS  # config only; optional --login needs director password in operator hands
 membership: director on platform (prior OBSERVED)
-next: every.org webhook + director acceptance issue #20; durable named host optional
+next: every.org webhook on Workers + director acceptance issue #20
 ```
 
 ## Phase 3b — Public HTTPS host (#71)
@@ -96,10 +97,10 @@ next: every.org webhook + director acceptance issue #20; durable named host opti
 status: OBSERVED_EPHEMERAL
 path: cloudflared_quick_tunnel_to_local_node
 smoke: PASS  # pilot:smoke + verify:director over HTTPS
-durable_render_recipe: READY  # services/allocation-middleware/render.yaml (ALLOW_OPERATOR_TOKEN_FALLBACK=0)
+durable_render_recipe: HISTORICAL  # render.yaml remains in-tree; not the designed host
 durable_host_runbook: docs/ALLOCATION-DURABLE-HOST.md
-durable_preflight: npm run preflight:durable  # services/allocation-middleware
-durable_named_host: PENDING_OPERATOR  # Render/Railway/Fly (or VPS+TLS) dashboard when every.org needs stable URL
+durable_preflight: npm run preflight:durable  # local only
+durable_named_host: CLOUDFLARE_WORKERS  # designed; webhook Worker port PENDING
 durable_preflight_local: OBSERVED  # 2026-08-08 npm run preflight:durable PASS (.env.pilot + recipe files)
 compose_build_this_host: BLOCKED  # docker credential helper exec format error (desktop.exe under WSL); recipe still READY
 ```

@@ -3,6 +3,7 @@
 Portfolio Signals is the multi-tenant **decision workspace** of **Autonomously Giving Incorporated (AGI)**. AGI is the customer-facing corporate brand; Zero State is credited only as the software builder. Impact Relay is the tenant-isolated financial and impact backend.
 
 **Live:** [autogive.app/portfolio-signals](https://autogive.app/portfolio-signals/) · **Workspace:** [autogive.app/portfolio-signals/workspace](https://autogive.app/portfolio-signals/workspace)  
+**Hosting:** **Cloudflare Workers** is the intended production host for the public/static site (Worker `portfolio-signals`, `*.workers.dev` until DNS cutover). **Vercel** (`fund-intel` / [fund-intel-ten.vercel.app](https://fund-intel-ten.vercel.app)) is the **fallback until DNS cutover** — `vercel.json` stays until that cutover is documented as done. Designed stack is **Workers + platform Supabase** (`utdioxwiskzatwoejgiu`); Auth and private data are not moving off Supabase. See [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).  
 **Platform Supabase:** `utdioxwiskzatwoejgiu` · **Reference tenant:** Hacker Dojo (`org_hacker_dojo`) — pilot/regression fixture, **not** product identity (tenant assets under `assets/tenants/hacker-dojo/`).
 
 See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for boundaries, and [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) / [docs/START_HERE.md](docs/START_HERE.md) for live ops status.
@@ -23,7 +24,7 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-**Status (2026-08-07):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host and live every.org webhook still open. **Default host:** Docker Compose / local Node. **Optional hosts:** Fly.io, Render, Railway.
+**Status (2026-08-07):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host is **Cloudflare Workers** (this repo’s static Worker). Live every.org webhook is remaining work **on Workers** (not Render/Fly/Railway) — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md). **Local pilot:** Node on `:8787`.
 
 ```bash
 cd services/allocation-middleware
@@ -38,7 +39,7 @@ BASE_URL=http://127.0.0.1:8787 npm run verify:director
 | --- | --- |
 | [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
 | [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
-| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose (default) · Render · Railway · optional Fly |
+| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Local Node/Compose for pilot; designed durable host is Workers |
 | [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
 | [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
@@ -51,7 +52,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 
 | Capability | State |
 |---|---|
-| Public director portal | **Live** on https://autogive.app/portfolio-signals/ |
+| Public director portal | **Live** on https://autogive.app/portfolio-signals/ (Vercel today; **Workers** intended production — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)) |
 | Authenticated workspace login | **Live** — operator magic-link login verified |
 | Allocation middleware MVP | Implemented; **local pilot smoke PASS** |
 | every.org live webhook (hosted) | Operator-owned (setup wizard ready; production host pending) |
@@ -95,7 +96,8 @@ services/allocation-middleware/         every.org pots → allocate → proof �
 
 docs/ALLOCATION-MIDDLEWARE.md           Middleware role + status
 docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Docker default
-docs/ALLOCATION-HOSTING-OPTIONS.md      Compose / Render / Railway / optional Fly
+docs/CLOUDFLARE.md                      Workers static host + webhook remaining work
+docs/ALLOCATION-HOSTING-OPTIONS.md      Local pilot vs designed Workers host
 docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
 docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
@@ -110,7 +112,8 @@ docs/HD-OI-019.md                       Current hardening phase notes
 scripts/staging/                        Local/staging bootstrap helpers (no secrets)
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
-.github/workflows/                      Validation, security, Pages, and Supabase CI
+.github/workflows/                      Validation, security, Pages, Workers, and Supabase CI
+wrangler.toml                           Cloudflare Workers static assets (`portfolio-signals`)
 ```
 
 ## Campaign architecture

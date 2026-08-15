@@ -7,16 +7,17 @@ Checklist for rotating and containing secrets used by the AGI suite (Portfolio S
 | Secret | Where it lives | Who may hold it |
 | --- | --- | --- |
 | Platform Supabase **service_role** | Secret manager / local gitignored only | Platform operators |
-| Platform Supabase **anon** | Vercel env + gitignored `runtime-config.js` | Public-capable (RLS-bound) |
+| Platform Supabase **anon** | Workers / Vercel env + gitignored `runtime-config.js` | Public-capable (RLS-bound) |
+| `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets | Workers deploy only |
 | Allocation `WEBHOOK_TOKEN` | Host dashboard / `.env.pilot` | Pilot host ops |
 | Allocation `OPERATOR_TOKEN` | Host dashboard / `.env.pilot` | Emergency only; prefer director JWT |
-| `gh` / `vercel` / cloud tokens | Local credential store | Individual operator |
+| `gh` / `vercel` / Cloudflare tokens | Local credential store / GitHub secrets | Individual operator |
 | every.org nonprofit admin | every.org account | Nonprofit admin (external) |
 
 ## Never
 
 - Commit service_role, `sb_secret_…`, webhook/operator tokens, or PATs.
-- Put service_role on Vercel (anon only for Pages/runtime).
+- Put service_role on Workers or Vercel (anon only for runtime-config).
 - Paste secrets into GitHub issues, Project comments, or chat logs.
 - Share a single long-lived operator token across multiple people without rotation plan.
 
@@ -41,13 +42,13 @@ Rotate when any of the following is true:
 ### Platform Supabase anon
 
 1. Rotate only if the key was treated as confidential or embedded in a non-RLS client incorrectly.
-2. Update Vercel `PLATFORM_SUPABASE_ANON_KEY` (or project env) → redeploy Fund-Intel / AGI as needed.
+2. Update Workers/Vercel `PLATFORM_SUPABASE_ANON_KEY` (or project env) → redeploy Portfolio Signals as needed.
 3. Regenerate gitignored `runtime-config.js` via staging scripts if used locally.
 
 ### Allocation middleware (`WEBHOOK_TOKEN` / `OPERATOR_TOKEN`)
 
 1. Generate new values (`openssl rand -hex 24` minimum 16 chars; prefer 32+).
-2. Set on host (Render/Railway/Fly secrets, Compose `.env.pilot`, VPS env).
+2. Set on the **Worker** (`wrangler secret put`) or local `.env.pilot`. Do not use Render/Fly/Railway as the production webhook host.
 3. Restart process; `SEED_ON_BOOT` should stay `0` on a stable pilot volume.
 4. If every.org webhook URL embeds `?token=`, update every.org Advanced settings with the new URL from `/setup.html`.
 5. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0` and director JWT after rotation.
