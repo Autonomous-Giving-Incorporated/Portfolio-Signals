@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-08-14",
+  "repository": "Autonomous-Giving-Incorporated/Portfolio-Signals",
+  "branch": "loop-805-slice19-security-remediation",
+  "base_commit": "e7d251cc1b4bbe26270060bae03a662e95363794",
+  "boundary": {
+    "surface": "execution_and_projection",
+    "production_mutation": false,
+    "production_secret_rotation": false,
+    "production_deployment": false,
+    "governance_or_canon_expansion": false
+  },
+  "control_outcomes": {
+    "allocation_operational_reads_require_authentication": "fixed",
+    "allocation_setup_credentials_require_privileged_authorization": "fixed",
+    "privileged_database_and_middleware_actions_require_current_aal2": "fixed",
+    "privileged_edge_uploads_require_current_aal2": "fixed",
+    "tenant_director_global_profile_deactivation": "fixed",
+    "anonymous_auth_email_recipient_rotation": "fixed_with_global_hourly_budget",
+    "allocation_request_body_exhaustion": "fixed",
+    "allocation_state_cardinality_exhaustion": "fixed",
+    "allocation_concurrent_lost_updates": "fixed_for_single_process_service",
+    "allocation_state_partial_write_and_corrupt_read": "fixed",
+    "operator_ui_dynamic_html_injection": "fixed",
+    "restricted_operator_email_metadata_in_current_tree": "fixed"
+  },
+  "validation": {
+    "allocation_middleware": { "passed": 44, "failed": 0 },
+    "import_api": { "passed": 5, "failed": 0 },
+    "onboarding_pack": { "passed": 8, "failed": 0 },
+    "workbook_parser": { "passed": 4, "failed": 0 },
+    "auth_email_templates": { "passed": 4, "failed": 0 },
+    "auth_assurance_claim_reader": { "passed": 3, "failed": 0 },
+    "edge_function_typecheck_deno_2_2_7": "pass",
+    "browser_and_accessibility": { "passed": 18, "failed": 0 },
+    "local_migration_reset": "pass",
+    "synthetic_sql_policy_suite": "pass",
+    "supabase_db_lint": "pass_no_schema_errors",
+    "supabase_security_advisors": "pass_no_issues",
+    "schema_diff": "test_helper_functions_only",
+    "git_diff_check": "pass"
+  },
+  "residual_risks": [
+    "The allocation mutation queue coordinates one Node process; horizontal replicas still require a shared transactional store.",
+    "Production publication, migration application, Edge deployment, hosted smoke tests, and webhook-token rotation remain unperformed in this local evidence packet.",
+    "Webhook-token rotation requires coordinated replacement in both the deployment secret and the every.org webhook configuration to avoid delivery interruption."
+  ],
+  "governance_loop": {
+    "status": "not_computable",
+    "reason": "scripts/abraxas_v2.0_codex_governance_loop.py and Scripts/abx_loop.py are absent from this repository"
+  },
+  "provenance": "Notion Sprint 001 Hub + Loop 805 Slice 19 + Hash: e7d251cc1b4bbe26270060bae03a662e95363794"
+}

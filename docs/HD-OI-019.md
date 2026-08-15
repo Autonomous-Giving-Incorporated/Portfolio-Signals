@@ -13,7 +13,7 @@ Harden identity, client/schema contracts, and operator runbooks after HD-OI-018 
   - deactivation metadata
   - `require_active_profile()`
   - `require_privileged_mfa()`
-  - director-only `deactivate_profile()`
+  - master-admin-only global `deactivate_profile()` plus tenant-scoped director membership deactivation
 
 ### Executable tests
 

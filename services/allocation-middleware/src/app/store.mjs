@@ -1,5 +1,5 @@
 import { emptyState } from '../domain/pots.mjs';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rename, unlink } from 'node:fs/promises';
 import path from 'node:path';
 
 export function ensureExtras(state) {
@@ -88,15 +88,23 @@ export function createFileStore(filePath) {
       try {
         const raw = JSON.parse(await readFile(filePath, 'utf8'));
         cache = deserializeState(raw);
-      } catch {
-        cache = ensureExtras(emptyState());
+      } catch (error) {
+        if (error?.code === 'ENOENT') cache = ensureExtras(emptyState());
+        else throw new Error('STATE_LOAD_FAILED', { cause: error });
       }
       return cache;
     },
     async save(next) {
-      cache = ensureExtras(next);
+      const prepared = ensureExtras(next);
       await mkdir(path.dirname(filePath), { recursive: true });
-      await writeFile(filePath, JSON.stringify(serializeState(next), null, 2));
+      const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+      try {
+        await writeFile(temporaryPath, JSON.stringify(serializeState(prepared), null, 2), { flag: 'wx' });
+        await rename(temporaryPath, filePath);
+        cache = prepared;
+      } finally {
+        await unlink(temporaryPath).catch(() => {});
+      }
     },
   };
 }

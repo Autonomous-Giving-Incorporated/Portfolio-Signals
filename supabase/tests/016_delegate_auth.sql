@@ -44,6 +44,7 @@ insert into auth.users (
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claim.aal', 'aal2', true);
 select set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 
 create temporary table delegate_test_state(invitation_id uuid) on commit drop;
@@ -185,6 +186,21 @@ begin
   perform public.complete_auth_email_dispatch(v_id, 'sent', 'synthetic-provider-id');
   if public.begin_auth_email_dispatch(v_hash, 'tenant_member_magic_link') is not null then
     raise exception 'sent dispatch did not retain the recipient cooldown';
+  end if;
+
+  -- One recipient cooldown is insufficient: rotating recipients must still hit
+  -- the service-wide anonymous provider budget.
+  for i in 1..49 loop
+    if public.begin_auth_email_dispatch(
+      lpad(to_hex(i), 64, '0'), 'tenant_member_magic_link'
+    ) is null then
+      raise exception 'anonymous dispatch budget rejected before its documented ceiling';
+    end if;
+  end loop;
+  if public.begin_auth_email_dispatch(
+    lpad(to_hex(500), 64, '0'), 'tenant_member_magic_link'
+  ) is not null then
+    raise exception 'anonymous recipient rotation bypassed the global dispatch budget';
   end if;
 end $$;
 reset role;

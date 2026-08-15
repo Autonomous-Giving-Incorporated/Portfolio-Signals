@@ -18,7 +18,7 @@ Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Le
 | --- | --- |
 | Migrations on platform | Applied |
 | Vercel `PLATFORM_SUPABASE_URL` + `ANON_KEY` | Set; `runtime-config.js` generated with platform host |
-| Primary master_admin | `scrimshawlife@gmail.com` bootstrapped |
+| Primary master_admin | identity held in restricted operator registry |
 | Reference tenant HD director membership | Active |
 | Magic-link login (implicit hash + session persist) | **Verified** on production |
 | Built-in Auth email rate limit | Still low without custom SMTP — use admin `generate_link` or configure SMTP |
@@ -90,7 +90,7 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - Client directors invite, resend sign-ins for, and revoke scoped infrastructure delegates through the dedicated audited workflow. Unscoped delegates cannot be created through `set_client_membership()`.
 - Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
 - Master-admin and privileged client mutations require an active MFA-enforced profile.
-- **Primary `master_admin`:** `scrimshawlife@gmail.com` (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
+- **Primary `master_admin`:** resolve from the restricted operator registry (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
 - **Second admin (deferred):** Add Qi Diaz via `platform_administrators` insert with rationale ≥ 12 chars.
 
 ## Director workflow

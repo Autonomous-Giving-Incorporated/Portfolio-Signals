@@ -12,8 +12,8 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | GitHub Pages fallback | `https://scrimshawlife-ctrl.github.io/Fund-Intel/` |
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
-| Primary `master_admin` | `scrimshawlife@gmail.com` |
-| Second `master_admin` | `qi@enkeyai.com` (Qi Diaz) — granted 2026-08-08; MFA enroll still required before privileged ops |
+| Primary `master_admin` | Restricted operator registry |
+| Second `master_admin` | Restricted operator registry; AAL2 required before privileged operations |
 
 Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 

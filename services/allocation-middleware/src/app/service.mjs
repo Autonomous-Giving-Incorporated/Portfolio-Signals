@@ -6,6 +6,15 @@ import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
 import { createMemoryStore, ensureExtras } from './store.mjs';
 
+const DEFAULT_LIMITS = Object.freeze({
+  maxGifts: 100_000,
+  maxPots: 10_000,
+  maxAllocations: 100_000,
+  maxExceptions: 10_000,
+  maxProofs: 100_000,
+  maxKeyLength: 128,
+});
+
 /** Seed/fixture chargeIds must not count as live every.org connect. */
 export function isFixtureChargeId(id) {
   return /^fixture[-_]/i.test(String(id || ''));
@@ -30,15 +39,26 @@ export function createService({
   idgen = () => crypto.randomUUID(),
   store = createMemoryStore(),
   proofSlaHours = 72,
+  limits: configuredLimits = {},
 }) {
+  const limits = { ...DEFAULT_LIMITS, ...configuredLimits };
+  let mutationQueue = Promise.resolve();
+
   async function withState(fn) {
-    let state = ensureExtras(await store.load());
-    const result = fn(state);
-    if (result && result.state) {
-      await store.save(ensureExtras(result.state));
+    const run = mutationQueue.then(async () => {
+      const state = ensureExtras(await store.load());
+      const result = fn(state);
+      if (result && result.state) {
+        await store.save(ensureExtras(result.state));
+      }
       return result;
-    }
-    return result;
+    });
+    mutationQueue = run.catch(() => {});
+    return run;
+  }
+
+  function requireBounded(value, maximum, code) {
+    if (String(value ?? '').length > maximum) throw new Error(code);
   }
 
   function mapKeys(state, campaignKey, programKey) {
@@ -51,7 +71,11 @@ export function createService({
         let gift = normalizeEveryOrgDonation(payload, { orgId });
         const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
         gift = { ...gift, ...mapped };
-        return creditGift(state, gift);
+        requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
+        requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
+        requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
+        requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
+        return creditGift(state, gift, limits);
       });
     },
     async importCsv(text) {
@@ -78,7 +102,10 @@ export function createService({
             donatedAt: row.donatedAt || now(),
             source: 'csv',
           };
-          const r = creditGift(s, gift);
+          requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
+          requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
+          requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
+          const r = creditGift(s, gift, limits);
           s = r.state;
           if (r.created) created += 1;
         }
@@ -110,6 +137,9 @@ export function createService({
       const id = idgen();
       const approvedAt = now();
       await withState((state) => {
+        if (!state.allocations.has(id) && state.allocations.size >= limits.maxAllocations) {
+          throw new Error('STATE_ALLOCATION_LIMIT');
+        }
         const mapped = mapKeys(state, campaignKey, programKey);
         return approveAllocation(state, {
           id,
@@ -126,6 +156,8 @@ export function createService({
       return state.allocations.get(id);
     },
     async setLabel(input) {
+      requireBounded(input.key, limits.maxKeyLength, 'LABEL_KEY_TOO_LONG');
+      requireBounded(input.label, 256, 'LABEL_TOO_LONG');
       await withState((state) => setLabel(state, { orgId, ...input }));
       return { ok: true };
     },
@@ -142,6 +174,8 @@ export function createService({
       await withState((state) => {
         if (!state.allocations.has(allocationId)) throw new Error('ALLOCATION_NOT_FOUND');
         const proofs = new Map(state.proofs || []);
+        const proofCount = [...proofs.values()].reduce((count, rows) => count + rows.length, 0);
+        if (proofCount >= limits.maxProofs) throw new Error('STATE_PROOF_LIMIT');
         const list = proofs.get(allocationId) || [];
         list.push({
           id: idgen(),

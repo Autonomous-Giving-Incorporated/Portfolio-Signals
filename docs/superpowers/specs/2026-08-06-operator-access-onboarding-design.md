@@ -8,7 +8,7 @@
 
 ## 1. Context
 
-The AGI suite delivers multi-tenant Portfolio Signals + Impact Relay under Autonomously Giving Incorporated. Platform Supabase (`utdioxwiskzatwoejgiu`) and workspace magic-link login are operator-verified. Primary `master_admin` (`scrimshawlife@gmail.com`) is bootstrapped via ad-hoc SQL.
+The AGI suite delivers multi-tenant Portfolio Signals + Impact Relay under Autonomously Giving Incorporated. Platform Supabase and workspace magic-link login are operator-verified. The primary `master_admin` identity is held in the restricted operator registry and bootstrapped via controlled SQL.
 
 Commercial onboarding decomposes as:
 

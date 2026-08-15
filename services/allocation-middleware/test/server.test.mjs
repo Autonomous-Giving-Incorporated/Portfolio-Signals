@@ -65,3 +65,26 @@ test('healthz is ok', async () => {
   const body = await res.json();
   assert.equal(body.status, 'ok');
 });
+
+test('configured operational reads fail closed without authentication', async () => {
+  const base = await start({ operatorToken: 'read-secret' });
+  for (const route of ['/available', '/labels', '/exceptions', '/trail', '/packet', '/setup']) {
+    const res = await fetch(`${base}${route}`);
+    assert.equal(res.status, 401, route);
+  }
+  const allowed = await fetch(`${base}/available`, {
+    headers: { 'x-operator-token': 'read-secret' },
+  });
+  assert.equal(allowed.status, 200);
+});
+
+test('request bodies over the configured limit are rejected with 413', async () => {
+  const base = await start({ maxJsonBodyBytes: 64 });
+  const res = await fetch(`${base}/webhooks/every-org`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ chargeId: 'x', padding: 'a'.repeat(256) }),
+  });
+  assert.equal(res.status, 413);
+  assert.deepEqual(await res.json(), { error: 'PAYLOAD_TOO_LARGE' });
+});

@@ -94,19 +94,24 @@ test('live gift after fixtures marks Connected', async () => {
   assert.equal(status.lastLiveGift.chargeId, 'eo-live-abc123');
 });
 
-test('GET /setup returns wizard JSON', async () => {
+test('GET /setup requires operator authorization and never discloses to anonymous callers', async () => {
   const service = createService({ orgId: 'org_1' });
   const server = createAllocationServer({
     service,
     webhookToken: 'whsec',
+    operatorToken: 'operator-secret',
     publicBaseUrl: 'https://alloc.example.com',
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   servers.push(server);
   const port = server.address().port;
   const res = await fetch(`http://127.0.0.1:${port}/setup`);
-  assert.equal(res.status, 200);
-  const body = await res.json();
+  assert.equal(res.status, 401);
+  const authorized = await fetch(`http://127.0.0.1:${port}/setup`, {
+    headers: { 'x-operator-token': 'operator-secret' },
+  });
+  assert.equal(authorized.status, 200);
+  const body = await authorized.json();
   assert.equal(
     body.webhookUrl,
     'https://alloc.example.com/webhooks/every-org?token=whsec',

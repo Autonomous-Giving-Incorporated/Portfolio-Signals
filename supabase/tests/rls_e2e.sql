@@ -8,6 +8,7 @@ as $$
 begin
   perform set_config('request.jwt.claim.sub', test_user::text, true);
   perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.aal', 'aal2', true);
   perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end $$;
 
@@ -106,6 +107,24 @@ begin
   exception when insufficient_privilege then null;
   end;
 end $$;
+
+-- A stored MFA enrollment flag never substitutes for current-session AAL2.
+select public.test_set_user('00000000-0000-0000-0000-000000000102');
+select set_config('request.jwt.claim.aal', 'aal1', true);
+do $$
+begin
+  if public.current_client_role('org_hacker_dojo') is not null then
+    raise exception 'AAL1 privileged membership unexpectedly resolved';
+  end if;
+  begin
+    perform public.require_privileged_mfa();
+    raise exception 'AAL1 privileged session unexpectedly accepted';
+  exception when others then
+    if sqlerrm = 'AAL1 privileged session unexpectedly accepted' then raise; end if;
+    if sqlerrm not like '%aal2_session_required%' then raise; end if;
+  end;
+end $$;
+select set_config('request.jwt.claim.aal', 'aal2', true);
 
 -- Development: may read constituents, may not insert constituents.
 select public.test_set_user('00000000-0000-0000-0000-000000000103');
@@ -231,7 +250,8 @@ begin
   end;
 end $$;
 
--- Director may deactivate another profile; non-directors may not.
+-- Global profile deactivation is platform-admin only; tenant directors use
+-- set_client_membership(..., p_active => false) for tenant-local revocation.
 reset role;
 update public.profiles
    set mfa_enforced = true
@@ -246,7 +266,7 @@ begin
     raise exception 'non-director deactivation unexpectedly succeeded';
   exception
     when others then
-      if sqlerrm not like '%insufficient_role%' then
+      if sqlerrm not like '%master_admin_required%' then
         raise;
       end if;
   end;
@@ -254,12 +274,14 @@ end $$;
 
 select public.test_set_user('00000000-0000-0000-0000-000000000101');
 do $$
-declare v public.profiles;
 begin
-  v := public.deactivate_profile('00000000-0000-0000-0000-000000000103', 'synthetic_revocation');
-  if v.active then
-    raise exception 'director deactivation did not clear active flag';
-  end if;
+  begin
+    perform public.deactivate_profile('00000000-0000-0000-0000-000000000103', 'cross_tenant_denied');
+    raise exception 'tenant director global deactivation unexpectedly succeeded';
+  exception when others then
+    if sqlerrm = 'tenant director global deactivation unexpectedly succeeded' then raise; end if;
+    if sqlerrm not like '%master_admin_required%' then raise; end if;
+  end;
 end $$;
 
 -- An expired JWT loses role resolution and cannot pass privileged checks.
