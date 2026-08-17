@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test:browser": "playwright test",
-    "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs"
+    "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs tests/impact-relay-auth.test.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
