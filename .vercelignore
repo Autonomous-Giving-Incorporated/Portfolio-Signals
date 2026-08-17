@@ -16,5 +16,6 @@ workers
 *.xlsx
 *.csv
 docs
+fixtures
 .idea
 .vscode

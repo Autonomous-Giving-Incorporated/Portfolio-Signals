@@ -78,6 +78,22 @@ impact_notice: CODE_SHIPPED  # not live
 
 `agi-public.zer0state-noema.workers.dev` is the **suite gateway** origin, not an allocation / webhook / CSV host. Do not invent a `portfolio-signals.*.workers.dev` allocation URL.
 
+## Phase C C4 public-safe fixtures (OBSERVED in-repo 2026-08-17)
+
+In-repo copies only. Not a live campaign, not a live gift, not READY, not a Worker host.
+
+```yaml
+c4_public_safe_fixtures: OBSERVED_IN_REPO
+path: fixtures/agi_phase_c/
+canonical: Community AI Lab / 25 laptops / 2500 USD
+canonical_join_key: alloc_community_ai_lab
+noncanonical: Hacker Dojo / Community Hardware  # labeled; 18-attendee IR copy
+spec011_uuid_allocationId: NOT_COMPUTABLE_ON_PUBLIC_CAMPAIGN  # UUID fails ^alloc_[a-z0-9_]+$
+live_public_campaign: data/public-campaign.json  # unchanged fail-closed shell
+published_on_worker_or_cdn: false  # fixtures/ is assets-ignored
+c3_public_data_policy: PROPOSED
+```
+
 ## Capability matrix (repository + production)
 
 | Capability | State |

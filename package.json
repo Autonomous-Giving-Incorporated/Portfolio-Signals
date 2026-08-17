@@ -2,7 +2,8 @@
   "name": "agi-fund-intel-acceptance",
   "private": true,
   "scripts": {
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

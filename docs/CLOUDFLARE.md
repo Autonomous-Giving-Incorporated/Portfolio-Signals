@@ -102,6 +102,8 @@ The Worker may only serve:
 
 It must **not** serve donor records, member registries, workbooks, service-role keys, or Supabase migrations. `.assetsignore` is fail-closed on those trees. Authz for private data remains **Supabase RLS + Edge Functions**, not this CDN.
 
+Phase C C4 public-safe fixtures are **OBSERVED in-repo** under `fixtures/agi_phase_c/` (2026-08-17). Canonical copy is Community AI Lab; Hacker Dojo / Community Hardware is labeled non-canonical. Those files are **not** the live public aggregate and are assets-ignored. They do not invent a live allocation host, a `workers.dev` URL, or READY.
+
 ## every.org webhook on this Worker
 
 `POST /webhooks/every-org` and the director allocation API are **CODE_SHIPPED** on in-repo Worker `portfolio-signals` via `main` + `assets.run_worker_first`. They are **not live** on a named Worker. Product semantics stay the allocation middleware contract. Operator-token fallback is **off**. Durable state is platform Supabase `am_*` (not D1, not Render/Fly disk).
