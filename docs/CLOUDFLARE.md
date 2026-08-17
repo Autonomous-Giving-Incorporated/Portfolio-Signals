@@ -1,11 +1,34 @@
 # Cloudflare Workers — Portfolio Signals public host
 
 **Designed production stack:** Cloudflare Workers + platform Supabase (`utdioxwiskzatwoejgiu`).  
-Workers serve the public/static site and the every.org webhook route. Supabase remains Auth, RLS, and private data. This is **not** a database migration and **not** a replacement for Supabase Auth.
+The in-repo Worker name is `portfolio-signals` (`wrangler.toml` + `workers/portfolio-signals`). That script is **CODE_SHIPPED**, not live on the connected account. Supabase remains Auth, RLS, and private data. This is **not** a database migration and **not** a replacement for Supabase Auth.
 
-Vercel (`vercel.json`, project `fund-intel`) stays in-repo as the **fallback until DNS cutover**. Do not treat Render, Fly, or Railway as the durable public or webhook host.
+Vercel (`vercel.json`, project `fund-intel`) stays in-repo as the **fallback until DNS cutover**. Live public HTML for `/portfolio-signals` is currently reached through the suite gateway (below), which GET/HEAD-proxies to Vercel. Do not treat Render, Fly, or Railway as the durable public or webhook host.
 
-## What this Worker serves
+## Account OBSERVED (2026-08-15 PT)
+
+Recorded via Cloudflare Bindings + Observability on the connected Zero State / Noema account. **Listing Workers now works** (`workers_list`, `workers_get_worker`). Bindings can also list/get D1, KV, and R2. There is still **no secret-set tool**. Do not claim secrets were set.
+
+| Item | OBSERVED |
+| --- | --- |
+| Workers on this account | `agi-public` (id `2d4fca83de814951afc30791e5b4f27b`, created 2026-08-14, modified 2026-08-15) and `noema-gateway` |
+| Worker `portfolio-signals` | **ABSENT** — `workers_get_worker portfolio-signals` failed |
+| Workers Builds for `agi-public` | 0 builds |
+| `agi-public` role | Suite gateway (`workers/suite-gateway.ts` + `workers/suite-routes.ts`). **Not** the allocation / webhook / CSV Worker |
+| `GET`/`HEAD` `/portfolio-signals` | Proxies to `https://fund-intel-ten.vercel.app` |
+| `GET`/`HEAD` `/impact-relay` | Proxies to `https://impact-relay.vercel.app` |
+| `/fund-intel` | 301 → `/portfolio-signals` |
+| Non-`GET`/`HEAD` on proxied routes | 405 |
+| Observability hosts hitting `agi-public` | `autogive.app` and `agi-public.zer0state-noema.workers.dev` |
+| Observability `scriptName` | `agi-public` only |
+
+`agi-public.zer0state-noema.workers.dev` is the suite-gateway origin. It is **not** a live allocation host. Do not invent `https://portfolio-signals.<account>.workers.dev`.
+
+Allocation APIs (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`), `POST /webhooks/every-org`, and ImpactNotice remain **CODE_SHIPPED** in this repo, not live on a named Worker. Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md).
+
+## What the in-repo Worker is designed to serve
+
+The table below is the **CODE_SHIPPED** `portfolio-signals` script in this repo. It is **not** deployed on the connected account. Live `/portfolio-signals` HTML is the `agi-public` suite-gateway proxy to Vercel.
 
 | Path | Asset | Notes |
 | --- | --- | --- |
@@ -34,7 +57,7 @@ Publish directory is the **repo root** (same as `vercel.json` `outputDirectory: 
 | Name | Where | Purpose |
 | --- | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | repository **secret** | Wrangler deploy. Use the **Edit Cloudflare Workers** token template (write, not read-only). |
-| `CLOUDFLARE_ACCOUNT_ID` | repository **secret** | Account that owns Worker `portfolio-signals`. |
+| `CLOUDFLARE_ACCOUNT_ID` | repository **secret** | Account that would own a deployed Worker `portfolio-signals`. That name is **ABSENT** on the connected account (OBSERVED 2026-08-15). |
 
 Until both are set, `.github/workflows/cloudflare-workers.yml` **validates** on every PR/`main` push and **skips** the live deploy rather than failing the branch.
 
@@ -66,11 +89,9 @@ npx wrangler@4 deploy --dry-run --outdir=/tmp/wrangler-dry-run
 npx wrangler@4 deploy
 ```
 
-On `main`, GitHub Actions runs the same generate + `wrangler deploy` path. First successful deploy publishes:
+On `main`, GitHub Actions runs the same generate + `wrangler deploy` path when `CLOUDFLARE_*` secrets exist. A first successful deploy of **this** in-repo Worker would publish a `portfolio-signals` `workers.dev` origin. **That origin is not OBSERVED.** The connected account has `agi-public` and `noema-gateway` only.
 
-`https://portfolio-signals.<your-subdomain>.workers.dev`
-
-DNS cutover (`autogive.app/portfolio-signals` → this Worker) is an operator step. Keep Vercel live until that cutover is verified (workspace login, public pages, Auth redirects).
+DNS cutover (`autogive.app/portfolio-signals` → an allocation/static Worker) is an operator step. Today `autogive.app/portfolio-signals` is OBSERVED as an `agi-public` GET/HEAD proxy to Vercel. Keep Vercel live until a real cutover is verified (workspace login, public pages, Auth redirects). Do not treat the suite-gateway `workers.dev` host as that cutover.
 
 ## Public data boundary
 
@@ -83,11 +104,11 @@ It must **not** serve donor records, member registries, workbooks, service-role 
 
 ## every.org webhook on this Worker
 
-`POST /webhooks/every-org` and the director allocation API run on Worker `portfolio-signals` via `main` + `assets.run_worker_first`. Product semantics stay the allocation middleware contract. Operator-token fallback is **off**. Durable state is platform Supabase `am_*` (not D1, not Render/Fly disk).
+`POST /webhooks/every-org` and the director allocation API are **CODE_SHIPPED** on in-repo Worker `portfolio-signals` via `main` + `assets.run_worker_first`. They are **not live** on a named Worker. Product semantics stay the allocation middleware contract. Operator-token fallback is **off**. Durable state is platform Supabase `am_*` (not D1, not Render/Fly disk).
 
-Director path after a live Worker URL exists (not claimed here):
+Director path after a live **allocation** Worker URL exists (not claimed here; do not use the suite-gateway origin):
 
-1. Open `https://portfolio-signals.<account>.workers.dev/allocation-login`
+1. Open `/allocation-login` on that operator-verified origin (do not invent a `workers.dev` URL)
 2. Sign in with an existing platform JWT (membership on `org_hacker_dojo`)
 3. `/allocation` → **Seed fixtures** (optional) → allocate → attach proof → refresh packet
 
@@ -95,7 +116,7 @@ Director path after a live Worker URL exists (not claimed here):
 | --- | --- |
 | Worker route + deterministic tests | SHIPPED in this repo (webhook + seed allocate → proof → packet + fail-closed auth) |
 | Durable store | platform Supabase `am_*` via service-role **secret**. Not D1, not Render/Fly disk |
-| Live `workers.dev` deploy | **PENDING** — this environment does not have `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` |
+| Live allocation `workers.dev` deploy | **ABSENT** — no Worker named `portfolio-signals`; `agi-public` is the suite gateway only |
 | `wrangler secret put WEBHOOK_TOKEN` | PENDING operator |
 | `wrangler secret put SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — never commit |
 | `PLATFORM_SUPABASE_ANON_KEY` Worker var/secret | PENDING operator (public anon only; required for `/allocation-login`) |

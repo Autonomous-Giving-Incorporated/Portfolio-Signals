@@ -11,9 +11,9 @@ This page is the **local** operator preflight. Production webhook remaining work
 | State | Meaning |
 | --- | --- |
 | Designed host | Cloudflare Workers + Supabase — [CLOUDFLARE.md](CLOUDFLARE.md) |
-| Public static site | Worker `portfolio-signals` (CI deploy once CF secrets are set) |
-| Webhook on Workers | CODE_SHIPPED (`POST /webhooks/every-org` on `portfolio-signals`); live URL + every.org pointing PENDING |
-| Allocation API on Workers | CODE_SHIPPED (`/seed` `/allocations` `/proofs` `/packet` `/import/csv`); operator-token fallback off; live host PENDING |
+| Public static site | In-repo Worker name `portfolio-signals` (CI deploy once CF secrets are set). **ABSENT** on the connected account (OBSERVED 2026-08-15). Live HTML is `agi-public` GET/HEAD-proxy to Vercel. |
+| Webhook on Workers | CODE_SHIPPED (`POST /webhooks/every-org` in-repo); not live on a named Worker; every.org pointing PENDING |
+| Allocation API on Workers | CODE_SHIPPED (`/seed` `/allocations` `/proofs` `/packet` `/import/csv`); operator-token fallback off; **no live allocation Worker** |
 | Local durable OBSERVED | Docker Compose volume / local Node smoke |
 | Render / Railway / Fly | Not the designed durable host |
 
