@@ -1,4 +1,4 @@
-# A.G.I. Fund-Intel TODO
+# Portfolio Signals TODO
 
 - [x] AGI-001: define A.G.I. component boundaries and shared `client_id` contract.
 - [x] AGI-002: complete tenant scoping across every operational table, RPC, and storage policy.

@@ -25,6 +25,7 @@
   <link rel="icon" type="image/png" href="assets/brand/agi-mark.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="brand.css">
+  <script src="runtime-config.js"></script>
 </head>
 <body class="impact-host-shell">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -46,15 +47,29 @@
   </header>
 
   <main id="main" class="section impact-host-main">
+    <section class="panel impact-host-auth" id="authGate" hidden>
+      <p class="eyebrow">RESTRICTED · IMPACT RELAY</p>
+      <h1>Donor receipts</h1>
+      <p class="lede">Sign in with a staff campaign profile. Load <code>runtime-config.js</code> for Supabase. Local fixture mode stays available without config.</p>
+      <form id="loginForm" class="auth-form">
+        <label>Email <input id="email" type="email" autocomplete="email" required></label>
+        <button class="button" type="submit">Send secure sign-in link</button>
+        <p id="authMessage" class="note"></p>
+      </form>
+    </section>
+
+    <div id="mainApp">
     <div class="section-heading">
       <div>
         <p class="eyebrow">IMPACT RELAY · DONOR</p>
         <h1>Fund timeline &amp; use-of-funds</h1>
         <p class="lede" id="identityLine">Donor-scoped receipts from Impact Relay (staff view). Supabase auth when configured.</p>
       </div>
-      <span class="status-pill status-blocked" id="apiStatus">API offline</span>
+      <div class="control-grid">
+        <span class="status-pill status-blocked" id="apiStatus">API offline</span>
+        <button type="button" class="button secondary" id="signOut">Sign out</button>
+      </div>
     </div>
-    <script src="runtime-config.js"></script>
 
     <section class="panel">
       <div class="control-grid">
@@ -90,6 +105,7 @@
       <div class="panel-heading"><h2>Receipt detail</h2></div>
       <pre id="receiptDetail" class="note" style="white-space:pre-wrap;overflow:auto;max-height:28rem"></pre>
     </section>
+    </div>
   </main>
 
   <footer>
