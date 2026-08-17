@@ -18,6 +18,7 @@ workers
 scripts
 docs
 tests
+fixtures
 templates
 platform-spec
 .cursor

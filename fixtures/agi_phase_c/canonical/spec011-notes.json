@@ -1,0 +1,61 @@
+{
+  "role": "documentation",
+  "canonical": true,
+  "liveClaim": false,
+  "demoId": "community-ai-lab",
+  "organization": "Community AI Lab",
+  "need": {
+    "summary": "25 laptops for a neighborhood AI learning lab",
+    "quantity": 25,
+    "item": "laptops",
+    "amount": 2500,
+    "currency": "USD"
+  },
+  "spec011AllocationId": "c6c2e191-3000-4000-8000-000000000001",
+  "publicJoinAllocationId": "alloc_community_ai_lab",
+  "lifecycleOrder": [
+    "Need",
+    "Fund Intel Recommendation",
+    "Human Approval",
+    "Allocation",
+    "Purchase",
+    "Evidence",
+    "Receipt",
+    "Verification",
+    "Impact",
+    "Notification"
+  ],
+  "narrativeEventSubsequence": [
+    "purchase_approved",
+    "receipt_attached",
+    "equipment_delivered",
+    "program_held",
+    "notification_delivered"
+  ],
+  "money": {
+    "giftTracked": true,
+    "agiProcessedDonation": false,
+    "stripeDonation": false,
+    "contactableDonor": false,
+    "impactNoticeIssued": false
+  },
+  "notComputable": [
+    {
+      "field": "public-campaign.allocations[].allocationId",
+      "spec011Value": "c6c2e191-3000-4000-8000-000000000001",
+      "status": "NOT_COMPUTABLE",
+      "reason": "SPEC-011 allocationId is a UUID. public-campaign / AGI validatePublicCampaign require ^alloc_[a-z0-9_]+$. The UUID is not used as a campaign allocationId. Fixture join key is alloc_community_ai_lab."
+    },
+    {
+      "field": "public-campaign.allocations[].amount",
+      "spec011Value": 2500,
+      "status": "NOT_COMPUTABLE",
+      "reason": "The published public-campaign allocation item has no amount field. 2500 USD is recorded on the narrative rationale and this note only. Campaign targets stay 0 so this file is not a live fundraising claim."
+    },
+    {
+      "field": "ImpactEvent.type for Need and Fund Intel Recommendation",
+      "status": "NOT_COMPUTABLE",
+      "reason": "AGI ImpactEventType has no Need or Recommendation values. Those SPEC-011 stages are recorded in lifecycleOrder here and are not invented as event types."
+    }
+  ]
+}

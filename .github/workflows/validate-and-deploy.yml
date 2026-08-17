@@ -33,6 +33,10 @@ jobs:
           -c ajv-formats
           -s schemas/public-campaign.schema.json
           -d data/public-campaign.json
+          -d fixtures/agi_phase_c/canonical/public_campaign.json
+          -d fixtures/agi_phase_c/noncanonical/hacker-dojo-public-campaign.json
+      - name: Validate Phase C public-safe fixtures
+        run: node --test tests/agi-phase-c-fixtures.test.mjs
       - name: Prohibit obvious sensitive-data files
         shell: bash
         run: |
