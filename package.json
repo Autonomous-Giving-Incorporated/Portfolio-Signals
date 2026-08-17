@@ -6,7 +6,7 @@
     "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.54.2"
   }
 }
