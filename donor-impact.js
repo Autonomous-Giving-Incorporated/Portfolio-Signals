@@ -1,7 +1,13 @@
 /**
  * Donor receipt UI with optional Supabase staff auth.
  */
-import { impactRelayApiBase, impactRelayFetch, loadImpactRelaySession } from './workspace/impact-relay-bridge.js';
+import {
+  impactRelayApiBase,
+  impactRelayFetch,
+  loadImpactRelaySession,
+  clearWorkspaceSessionCache,
+  createWorkspaceClient
+} from './workspace/impact-relay-bridge.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -75,6 +81,24 @@ async function load() {
     }
     setMsg(`Loaded dashboard for ${donorId} via ${impactRelayApiBase()}`);
   } catch (err) {
+    if (err.code === "UNAUTHENTICATED") {
+      $("apiStatus").textContent = "Sign in required";
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+      return;
+    }
+    if (err.code === "MFA_REQUIRED") {
+      $("apiStatus").textContent = "MFA required";
+      $("apiStatus").className = "status-pill status-blocked";
+      setMsg(String(err.message || err), true);
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+      if ($("authMessage")) {
+        $("authMessage").textContent =
+          "Privileged campaign roles need MFA enforced on the profile before donor staff views.";
+      }
+      return;
+    }
     $("apiStatus").textContent = "API offline / auth";
     $("apiStatus").className = "status-pill status-blocked";
     setMsg(String(err.message || err), true);
@@ -128,8 +152,62 @@ async function loadTenantDonationLink() {
   }
 }
 
+function wireAuthGate() {
+  const form = $("loginForm");
+  if (!form) return;
+  let client;
+  try {
+    client = createWorkspaceClient();
+  } catch {
+    $("authGate").hidden = true;
+    $("mainApp").hidden = false;
+    return;
+  }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("email").value.trim();
+    const { error } = await client.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${location.origin}${location.pathname}` }
+    });
+    $("authMessage").textContent = error
+      ? error.message
+      : "Check your email for the secure sign-in link.";
+  });
+  $("signOut")?.addEventListener("click", async () => {
+    clearWorkspaceSessionCache();
+    await client.auth.signOut();
+    location.reload();
+  });
+  client.auth.onAuthStateChange(async (_e, session) => {
+    if (session) {
+      $("authGate").hidden = true;
+      $("mainApp").hidden = false;
+    } else {
+      $("authGate").hidden = false;
+      $("mainApp").hidden = true;
+    }
+  });
+  client.auth.getSession().then(async ({ data }) => {
+    if (data.session) {
+      $("authGate").hidden = true;
+      $("mainApp").hidden = false;
+    } else {
+      try {
+        createWorkspaceClient();
+        $("authGate").hidden = false;
+        $("mainApp").hidden = true;
+      } catch {
+        $("authGate").hidden = true;
+        $("mainApp").hidden = false;
+      }
+    }
+  });
+}
+
 $("btnLoad").addEventListener("click", load);
 loadTenantDonationLink();
+wireAuthGate();
 $("apiBase")?.addEventListener("change", () => {
   localStorage.setItem("IMPACT_RELAY_API", impactRelayApiBase());
 });
