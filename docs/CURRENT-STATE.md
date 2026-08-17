@@ -111,6 +111,7 @@ c3_public_data_policy: PROPOSED
 | AGI console projection (read-only view) | CODE_SHIPPED in-process (`src/intel/console-projection.mjs`); not live; not READY; not a product console; SPEC-029/030 stay Proposed — [AGI-CONSOLE.md](AGI-CONSOLE.md) |
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
+| Suite stack audit (2026-08-17) | INFORMATIVE — [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md); not READY, not a freeze SHA |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
