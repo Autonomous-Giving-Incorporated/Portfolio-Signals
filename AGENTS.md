@@ -14,6 +14,7 @@ This is the AGI suite **decision workspace and host** (historically Fund-Intel).
 - Do not commit service-role keys, donor PII, member registries, or `.csv` / `.xlsx` workbooks.
 - Do not mark fixture or synthetic data `OBSERVED` or claim READY.
 - Do not un-PARK AGI SPEC-028 login. Auth for this host is Supabase workspace magic-link, not an AGI-issued capability JWT.
+- Missing `runtime-config.js` must not send a fixture Impact Relay Bearer. Local fixture mode is explicit `allowFixtureBearer: true` only.
 - Operator-owned: Worker `portfolio-signals` secrets, live every.org pointing, MFA dry-run, director acceptance.
 
 ## Verification
