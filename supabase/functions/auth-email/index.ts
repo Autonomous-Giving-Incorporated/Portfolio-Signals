@@ -137,6 +137,11 @@ Deno.serve(async (request) => {
       : audience === 'delegate'
         ? 'delegate_magic_link'
         : 'tenant_member_magic_link';
+    // Tenant directors get a distinct tenant-administration template. The
+    // dispatch record kind stays tenant_member_magic_link (enum unchanged).
+    if (audience === 'tenant_member' && String(context.role || '') === 'director') {
+      audience = 'tenant_admin';
+    }
   } else {
     const user = await userClient.auth.getUser();
     if (user.error || !user.data.user) return json(request, { error: 'invalid_user_token' }, 401);
