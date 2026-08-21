@@ -35,7 +35,7 @@ jobs:
         working-directory: services/import-api
         run: npm test
       - name: Test role-aware Auth email templates
-        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts supabase/functions/auth-email/lib.test.ts
       - name: Test every.org webhook Worker port
         run: |
           node --test services/allocation-middleware/test/webhook-auth.test.mjs services/allocation-middleware/test/supabase-writer.test.mjs

@@ -4,22 +4,33 @@ import {
   type AuthEmailAudience,
   type AuthEmailTemplateInput
 } from '../_shared/auth-email-templates.ts';
+import {
+  clientIp,
+  createRateLimiter,
+  normalizeEmail,
+  parseAllowedOrigins,
+  pickAllowedOrigin,
+  safeRedirect
+} from './lib.ts';
 
 type JsonRecord = Record<string, unknown>;
 
 const DEFAULT_REDIRECT = 'https://autogive.app/portfolio-signals/workspace';
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_ORIGINS = new Set(
-  (Deno.env.get('AUTH_ALLOWED_ORIGINS') || 'https://autogive.app,http://127.0.0.1:8080')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-);
+
+// Production-safe by default: when AUTH_ALLOWED_ORIGINS is unset, only
+// https://autogive.app is accepted (no localhost). Local development sets
+// AUTH_ALLOWED_ORIGINS='https://autogive.app,http://127.0.0.1:8080'.
+const ALLOWED_ORIGINS = parseAllowedOrigins(Deno.env.get('AUTH_ALLOWED_ORIGINS'));
+
+// Best-effort coarse throttle for the unauthenticated self_sign_in path
+// (requested_by is null there, so the per-requester DB cap does not apply).
+// Durable per-identity limiting is a documented follow-up.
+const SELF_SIGN_IN_PER_IP = createRateLimiter({ windowMs: 600_000, max: 5 });
+const SELF_SIGN_IN_GLOBAL = createRateLimiter({ windowMs: 600_000, max: 300 });
 
 function corsHeaders(request: Request) {
-  const origin = request.headers.get('origin') || '';
   return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://autogive.app',
+    'Access-Control-Allow-Origin': pickAllowedOrigin(request.headers.get('origin'), ALLOWED_ORIGINS),
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin'
@@ -31,24 +42,6 @@ function json(request: Request, body: JsonRecord, status = 200) {
     status,
     headers: { ...corsHeaders(request), 'content-type': 'application/json' }
   });
-}
-
-function normalizeEmail(value: unknown) {
-  const email = String(value || '').trim().toLowerCase();
-  return EMAIL_PATTERN.test(email) && email.length <= 254 ? email : null;
-}
-
-function safeRedirect(value: unknown) {
-  try {
-    const url = new URL(String(value || DEFAULT_REDIRECT));
-    if (url.origin !== 'https://autogive.app' && url.origin !== 'http://127.0.0.1:8080') {
-      return DEFAULT_REDIRECT;
-    }
-    if (!url.pathname.includes('workspace')) return DEFAULT_REDIRECT;
-    return url.toString();
-  } catch {
-    return DEFAULT_REDIRECT;
-  }
 }
 
 async function sha256(value: string) {
@@ -105,7 +98,7 @@ Deno.serve(async (request) => {
   }
 
   const action = String(body.action || '');
-  const redirectTo = safeRedirect(body.redirect_to);
+  const redirectTo = safeRedirect(body.redirect_to, ALLOWED_ORIGINS, DEFAULT_REDIRECT);
   const serviceClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
   const authorization = request.headers.get('authorization') || '';
   const userClient = createClient(supabaseUrl, anonKey, {
@@ -121,6 +114,11 @@ Deno.serve(async (request) => {
   let invitationId: string | null = null;
 
   if (action === 'self_sign_in') {
+    const ip = clientIp(request.headers);
+    if (!SELF_SIGN_IN_PER_IP.check(ip) || !SELF_SIGN_IN_GLOBAL.check('global')) {
+      // Generic response: never reveal throttling or account existence.
+      return json(request, { accepted: true }, 202);
+    }
     email = normalizeEmail(body.email);
     if (!email) return json(request, { accepted: true }, 202);
     const resolved = await serviceClient.rpc('resolve_auth_email_context', { p_email: email });
