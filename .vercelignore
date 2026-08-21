@@ -1,6 +1,7 @@
 node_modules
 .git
 .github
+.cursor
 out
 test-results
 playwright-report
