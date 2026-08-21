@@ -40,15 +40,15 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0d1522;
-  --surface: #131e2e;
-  --surface-alt: #172538;
-  --text: #edf4ff;
-  --muted: #a9b7c9;
-  --line: #2a3a50;
-  --brand: #86b7dd;
+  --bg: #0e1116;
+  --surface: #1f232b;
+  --surface-alt: #1f232b;
+  --text: #f7f8fa;
+  --muted: #c8ced3;
+  --line: #46505a;
+  --brand: #2e7d6b;
   --brand-2: #a5cbb8;
-  --accent: #f08a68;
+  --accent: #e6b23c;
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.28);
 }
 

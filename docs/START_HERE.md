@@ -28,6 +28,7 @@ service_role_on_vercel: PROHIBITED
 ## Read in this order
 
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — live production vs historical evidence  
+1a. [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md) — informative suite-wide audit (not READY)  
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
 3a. [CLOUDFLARE.md](CLOUDFLARE.md) — Workers public host + webhook route (live pointing remaining)  

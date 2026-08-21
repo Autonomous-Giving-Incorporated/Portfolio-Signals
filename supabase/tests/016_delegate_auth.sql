@@ -21,11 +21,11 @@ begin
   ) then raise exception 'service role cannot resolve auth email context'; end if;
   if has_function_privilege(
     'anon',
-    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid)',
+    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid,text)',
     'execute'
   ) or has_function_privilege(
     'authenticated',
-    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid)',
+    'public.begin_auth_email_dispatch(text,public.auth_email_kind,text,uuid,uuid,text)',
     'execute'
   ) then raise exception 'non-service role can open auth email dispatch'; end if;
 end $$;

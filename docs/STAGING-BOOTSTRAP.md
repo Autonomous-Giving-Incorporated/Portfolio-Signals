@@ -20,7 +20,7 @@ Live donation progress, use-of-funds receipts, and event digests:
 
 https://autogive.app/impact-relay/
 
-Repo: https://github.com/scrimshawlife-ctrl/Impact-Relay
+Repo: https://github.com/Autonomous-Giving-Incorporated/Impact-Relay
 
 Platform and any remaining HD-staging environments must not publish personal CRM data. Aggregate campaign totals belong on Impact Relay after authorized reduction (for example Every.org aggregate summary → `impact-relay --every-org-aggregate`).
 

@@ -1,16 +1,25 @@
-# AGENTS.md
+# Portfolio Signals — agent guidance
 
-Portfolio Signals is the AGI multi-tenant decision workspace: a privacy-safe
-public director portal (static HTML/CSS/JS at the repo root), Node microservices
-under `services/` (allocation-middleware, workbook-parser, import-api,
-onboarding-pack), a Cloudflare Worker under `workers/portfolio-signals/`, a Deno
-edge-function set and governed database schema under `supabase/`, and Playwright
-browser acceptance tests under `tests/`.
+This is the AGI suite **decision workspace and host** (historically Fund-Intel). It is not the public AGI marketing site and it does not process donations.
 
-Preserve the privacy/authority boundary in `README.md` and `SECURITY.md`: never
-add member/donor/attendee source data, credentials, or `.xlsx`/`.csv` exports to
-the repo. Toolchain pins live in `docs/RUNTIME-VERSIONS.md` (Node 22.18.0, Deno
-2.2.7, Supabase CLI 2.31.8, Postgres 15.8); do not upgrade them casually.
+## Start here
+
+- [docs/START_HERE.md](docs/START_HERE.md)
+- [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md)
+- [SECURITY.md](SECURITY.md)
+
+## Hard stops
+
+- Do not enable production CRM / workbook import or outreach.
+- Do not commit service-role keys, donor PII, member registries, or `.csv` / `.xlsx` workbooks.
+- Do not mark fixture or synthetic data `OBSERVED` or claim READY.
+- Do not un-PARK AGI SPEC-028 login. Auth for this host is Supabase workspace magic-link, not an AGI-issued capability JWT.
+- Missing `runtime-config.js` must not send a fixture Impact Relay Bearer. Local fixture mode is explicit `allowFixtureBearer: true` only.
+- Operator-owned: Worker `portfolio-signals` secrets, live every.org pointing, MFA dry-run, director acceptance.
+
+## Verification
+
+Follow the repo’s existing CI contracts (`validate-and-deploy.yml`, `local-security-contract.yml`, Playwright, disposable Supabase). Do not add a network or live-service requirement to the default suite. Toolchain pins live in `docs/RUNTIME-VERSIONS.md` (Node 22.18.0, Deno 2.2.7, Supabase CLI 2.31.8, Postgres 15.8); do not upgrade them casually.
 
 ## Cursor Cloud specific instructions
 

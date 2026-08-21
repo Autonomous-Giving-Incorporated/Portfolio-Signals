@@ -88,6 +88,12 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/019_am_tenant_isolation.sql
       - name: Execute ImpactNotice and donation_link checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/020_am_impact_notice.sql
+      - name: Execute auth-email per-source dispatch budget checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/021_auth_email_ip_budget.sql
+      - name: Execute auth-email delivery-status checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/022_auth_email_delivery_status.sql
+      - name: Execute auth-email hard-failure alert checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/023_auth_email_alerts.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
