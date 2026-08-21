@@ -16,7 +16,8 @@ Status legend: DONE · IN PR · PENDING (eng) · PENDING (operator)
 | P7 | Extract pure helpers to `lib.ts` + unit tests; wire into `local-security-contract.yml` | eng | IN PR |
 | P4b | Durable per-source (hashed IP) send budget migration + SQL dispatch drill (`021`) | eng | IN PR |
 | P3 | Signed Resend delivery webhook (`auth-email-webhook`) → dispatch delivery states (`022`) | eng | IN PR |
-| P3b | Alerting on failed/bounced `platform_admin` sends | eng | PENDING (eng) |
+| P3b | Hard-failure alerts (`auth_email_alerts`) on bounced/complained magic links (`023`) | eng | IN PR |
+| P3c | Push/notification channel for those alerts | eng | PENDING (eng) |
 | P1 | Deploy `auth-email` + set `RESEND_API_KEY` / `AUTH_EMAIL_FROM` / `AUTH_EMAIL_REPLY_TO` / `AUTH_ALLOWED_ORIGINS`; reconcile `CURRENT-STATE` | operator | PENDING (operator) |
 | P2 | Verify `auth.autogive.app` in Resend (DKIM/SPF/return-path); DMARC p=none→reject | operator | PENDING (operator) |
 | P8 | Synthetic acceptance drill; record OBSERVED (provider + date only) | operator + eng | PENDING |
