@@ -29,6 +29,9 @@ enable_signup = false
 [functions.auth-email]
 verify_jwt = false
 
+[functions.auth-email-webhook]
+verify_jwt = false
+
 [storage]
 enabled = true
 file_size_limit = "25MiB"
