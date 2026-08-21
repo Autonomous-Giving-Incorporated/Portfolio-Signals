@@ -187,12 +187,14 @@ Deno.serve(async (request) => {
 
   if (!email) return json(request, { accepted: true }, 202);
   const recipientHash = await sha256(email);
+  const requestIpHash = await sha256(clientIp(request.headers));
   const dispatch = await serviceClient.rpc('begin_auth_email_dispatch', {
     p_recipient_hash: recipientHash,
     p_kind: kind,
     p_client_id: context.client_id || null,
     p_target_user_id: context.target_user_id || context.user_id || null,
-    p_requested_by: requestedBy
+    p_requested_by: requestedBy,
+    p_request_ip_hash: requestIpHash
   });
   if (dispatch.error) return json(request, { error: 'email_dispatch_unavailable' }, 503);
   if (!dispatch.data) {
