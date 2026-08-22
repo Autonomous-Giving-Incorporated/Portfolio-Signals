@@ -93,7 +93,7 @@ The 17 August audit is still the first stack-wide record. Several of its **agent
 | Signals fallback taught Hacker Dojo / 18 attendees | Fail-closed fallback is Community AI Lab / 25 / $2500 | OBSERVED in AGI docs |
 | `autogive.app` still described as Vercel-live | DNS cutover to Worker `agi-public` recorded 2026-08-22 | OBSERVED in AGI `docs/DNS-CUTOVER-CHECKLIST.md` |
 | No Civic Forge / suite join-key corpus | AutoGive Synthetic Dataset v1 landed in Portfolio Signals ([PR #47](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/47)); IR [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) and AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) are draft, CI green | SYNTHETIC_ONLY |
-| Auth-email brand / throttle / Resend path thin | PS PRs #41–#45 merged (brand kit, origin allowlist, budget, Resend webhook, bounce alerts) | CODE_SHIPPED; live MFA still PENDING |
+| Auth-email brand / throttle / Resend path thin | PS PRs #41–#46 merged; 2026-08-22 platform apply+deploy OBSERVED (`auth-email` v3, `auth-email-webhook` v1, IP-budget/delivery/alerts migrations). Send secrets NOT_COMPUTABLE; webhook secret OBSERVED unset | PARTIAL; P8 PENDING |
 | Suite-stack-audit / brand-auth-gate / agent-token scope | Merged on Portfolio Signals (#36, #37, #38) | OBSERVED in-repo |
 | Worker `portfolio-signals` ABSENT | Unchanged | OBSERVED 2026-08-15; not re-listed this session |
 | Live every.org / MFA / hosted restore / C3 / SPEC-028 | Unchanged | PENDING / PARKED / PROPOSED |
@@ -336,6 +336,7 @@ Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
 | 2 Allocation pilot (#20) | `CLOUDFLARE_*` ABSENT; no every.org admin; no live gift | NOT_COMPUTABLE |
 | 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
 | 4 SPEC-028 | Left PARKED | — |
+| Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v1 deployed on `utdioxwiskzatwoejgiu`. Localhost origin 403. Webhook secret unset (503). Send secrets / P8 not executed | PARTIAL |
 
 Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 

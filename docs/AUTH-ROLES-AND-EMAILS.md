@@ -12,7 +12,10 @@ This specification defines authentication and tenant-scoped infrastructure acces
 | OBSERVED | Platform administrators are held separately in `platform_administrators`; that status does not imply tenant-private membership. |
 | OBSERVED | Delegate migrations add invitation, scoped delegation, and email-dispatch records with RLS and audited security-definer functions. |
 | OBSERVED | `auth-email` generates one-time Supabase Auth links server-side and sends role-aware content through Resend. |
-| INFERRED | Production readiness requires migration application, Edge deployment, sender-domain secrets, and a synthetic delivery drill on platform project `utdioxwiskzatwoejgiu`. |
+| OBSERVED | 2026-08-22 — `auth-email` v3 and `auth-email-webhook` v1 ACTIVE on `utdioxwiskzatwoejgiu` (`verify_jwt=false`). Live templates include `tenant_admin` and AGI gold/carbon chrome. Migrations `auth_email_ip_budget`, `auth_email_delivery_status`, `auth_email_alerts` applied. |
+| OBSERVED | 2026-08-22 — live `auth-email` rejects `http://127.0.0.1:8080` and unlisted origins (`origin_not_allowed`). Unsigned webhook POST returns `function_not_configured` (secret unset). |
+| PENDING | `RESEND_API_KEY` / `AUTH_EMAIL_FROM` confirmation, `RESEND_WEBHOOK_SECRET`, Resend domain `auth.autogive.app`, and P8 synthetic send+click. |
+| INFERRED | Production readiness still requires sender-domain secrets and a synthetic delivery drill on platform project `utdioxwiskzatwoejgiu`. |
 
 ## Role contract
 
