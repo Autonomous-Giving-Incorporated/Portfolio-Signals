@@ -12,6 +12,8 @@ This specification defines authentication and tenant-scoped infrastructure acces
 | OBSERVED | Platform administrators are held separately in `platform_administrators`; that status does not imply tenant-private membership. |
 | OBSERVED | Delegate migrations add invitation, scoped delegation, and email-dispatch records with RLS and audited security-definer functions. |
 | OBSERVED | `auth-email` generates one-time Supabase Auth links server-side and sends role-aware content through Resend. |
+| OBSERVED | 2026-08-22 — Mailosaur inbox `Autogive Tests` (`qpbqeifu`) accepts injected messages (inject → wait → delete). Unassigned `auth-email` self_sign_in returns HTTP 202 and delivers nothing. |
+| PENDING | Assigned Mailosaur Auth user (isolation-tenant `board_viewer` only), Resend send secrets, webhook secret, and P8 synthetic send+click. |
 | INFERRED | Production readiness requires migration application, Edge deployment, sender-domain secrets, and a synthetic delivery drill on platform project `utdioxwiskzatwoejgiu`. |
 
 ## Role contract
@@ -155,6 +157,8 @@ node --experimental-strip-types --test supabase/functions/_shared/mailosaur-clie
 # Inbox Autogive Tests: qpbqeifu.mailosaur.net
 export MAILOSAUR_SERVER_ID=qpbqeifu
 export SUPABASE_ANON_KEY=   # platform anon only; not service_role
+# After inviting p8-isolation@qpbqeifu.mailosaur.net as isolation board_viewer:
+# export MAILOSAUR_ASSIGNED_EMAIL=p8-isolation@qpbqeifu.mailosaur.net
 node --experimental-strip-types scripts/platform/probe-auth-email-mailosaur.ts
 ```
 

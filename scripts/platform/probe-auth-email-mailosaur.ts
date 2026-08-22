@@ -67,7 +67,11 @@ async function main() {
   let magicLink: Record<string, unknown> = { status: 'skipped', reason: 'SUPABASE_ANON_KEY unset' };
   const anonKey = process.env.SUPABASE_ANON_KEY?.trim() || process.env.PLATFORM_SUPABASE_ANON_KEY?.trim();
   if (anonKey) {
-    const recipient = inboxAddress(serverId, `p8-unassigned-${Date.now()}`);
+    const assigned = process.env.MAILOSAUR_ASSIGNED_EMAIL?.trim().toLowerCase();
+    const recipient = assigned || inboxAddress(serverId, `p8-unassigned-${Date.now()}`);
+    if (assigned && !assigned.endsWith(`@${serverId}.mailosaur.net`)) {
+      throw new Error('assigned_email_must_use_mailosaur_inbox');
+    }
     const requested = await requestMagicLink(recipient, anonKey);
     let delivery: Record<string, unknown> = { status: 'pending' };
     try {
