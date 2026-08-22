@@ -1,0 +1,14 @@
+{
+  "chargeId": "fixture-eo-gift-001",
+  "amount": "25.00",
+  "netAmount": "24.25",
+  "currency": "USD",
+  "donationDate": "2026-08-22T00:00:00Z",
+  "toNonprofit": { "slug": "example-nonprofit", "name": "Example Nonprofit" },
+  "fromFundraiser": {
+    "id": "fr_fixture_1",
+    "title": "Community Hardware Fund",
+    "slug": "community-hardware-fund"
+  },
+  "designation": "Laptops"
+}
