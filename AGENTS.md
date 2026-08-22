@@ -17,6 +17,10 @@ This is the AGI suite **decision workspace and host** (historically Fund-Intel).
 - Missing `runtime-config.js` must not send a fixture Impact Relay Bearer. Local fixture mode is explicit `allowFixtureBearer: true` only.
 - Operator-owned: Worker `portfolio-signals` secrets, live every.org pointing, MFA dry-run, director acceptance.
 
+## Cloud Agent token scope
+
+`.cursor/environment.json` keeps the Portfolio Signals `install` / `start` scripts and lists sibling suite repos in `repositoryDependencies` so **newly minted** Cloud Agent GitHub tokens include write access beyond this repo. The Cursor GitHub App must also have Contents + Pull requests **read and write** on those repos (org installation → All repositories, or the four named siblings plus this one). Completing environment-setup checkboxes or attaching extra checkouts does **not** rotate a running agent's token. Start a new Cloud Agent after the environment and App install change.
+
 ## Verification
 
 Follow the repo’s existing CI contracts (`validate-and-deploy.yml`, `local-security-contract.yml`, Playwright, disposable Supabase). Do not add a network or live-service requirement to the default suite. Toolchain pins live in `docs/RUNTIME-VERSIONS.md` (Node 22.18.0, Deno 2.2.7, Supabase CLI 2.31.8, Postgres 15.8); do not upgrade them casually.

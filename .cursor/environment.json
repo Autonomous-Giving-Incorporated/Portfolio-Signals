@@ -1,5 +1,11 @@
 {
   "name": "Portfolio Signals",
   "install": "bash .cursor/install.sh",
-  "start": "bash .cursor/start.sh"
+  "start": "bash .cursor/start.sh",
+  "repositoryDependencies": [
+    "github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated",
+    "github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs",
+    "github.com/Autonomous-Giving-Incorporated/Impact-Relay",
+    "github.com/Autonomous-Giving-Incorporated/agi-cross-repo-harness"
+  ]
 }
