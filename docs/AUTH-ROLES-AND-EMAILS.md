@@ -145,6 +145,21 @@ psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
 ```
 
+Optional Mailosaur inbox (synthetic only). Default CI stays offline.
+
+```bash
+# Unit tests (mocked; no network)
+node --experimental-strip-types --test supabase/functions/_shared/mailosaur-client.test.ts
+
+# Live probe — requires MAILOSAUR_API_KEY. Never commit the key.
+# Inbox Autogive Tests: qpbqeifu.mailosaur.net
+export MAILOSAUR_SERVER_ID=qpbqeifu
+export SUPABASE_ANON_KEY=   # platform anon only; not service_role
+node --experimental-strip-types scripts/platform/probe-auth-email-mailosaur.ts
+```
+
+A real magic-link receive still needs an assigned Auth user whose email is `@qpbqeifu.mailosaur.net` (isolation-tenant `board_viewer`, not a platform admin) plus working `RESEND_API_KEY` / `AUTH_EMAIL_FROM`. Unassigned addresses return HTTP 202 and send nothing. The probe redacts action URLs and tokens.
+
 Production acceptance requires synthetic addresses only:
 
 1. Platform administrator receives the administrator template and signs in.

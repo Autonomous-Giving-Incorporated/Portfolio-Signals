@@ -30,6 +30,7 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | `dry-run-onboarding-pack.sh` | #18 local-synthetic classifier/contract check, or fail-closed MFA probe. Does not write an OBSERVED receipt |
 | `verify-platform-isolation.sql` | Reference + isolation fixture clients |
 | `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
+| `probe-auth-email-mailosaur.ts` | Optional Mailosaur + `auth-email` live probe. Skips without `MAILOSAUR_API_KEY`. Never prints tokens. |
 
 ## Order of operations
 
