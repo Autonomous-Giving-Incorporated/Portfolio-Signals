@@ -1,0 +1,26 @@
+[
+  {
+    "program_id": "prog_syn_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "name": "Intro Robotics Workshop",
+    "status": "active",
+    "start_date": "2026-08-17",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "program_id": "prog_syn_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "name": "Access Scholarship Cohort",
+    "status": "active",
+    "start_date": "2026-08-18",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "program_id": "prog_syn_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "name": "Facility Continuity Program",
+    "status": "active",
+    "start_date": "2026-08-19",
+    "provenance": "SYNTHETIC"
+  }
+]

@@ -44,6 +44,7 @@ service_role_on_vercel: PROHIBITED
 10b. [MISSION-GRAPH.md](MISSION-GRAPH.md) — SPEC-029 Proposed read-only projection (CODE_SHIPPED; not live; not READY; not Accepted)  
 10c. [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md) — SPEC-030 Proposed fail-closed policies (CODE_SHIPPED; not live; not READY; not Accepted; no formula)  
 10d. [AGI-CONSOLE.md](AGI-CONSOLE.md) — read-only operator/console projection over existing records + graph + metrics (CODE_SHIPPED; not live; not READY; not a product console)  
+10e. [SYNTHETIC-DATASET.md](SYNTHETIC-DATASET.md) — AutoGive v1 Civic Forge disposable universe (not HD, not OBSERVED)  
 11. [DATA-PLACEMENT.md](DATA-PLACEMENT.md) — where private data may live  
 12. [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md) — migrations / operator SQL  
 13. [IMPACT-RELAY.md](IMPACT-RELAY.md) / live-cohort docs — IR integration  
@@ -83,6 +84,13 @@ npm test
 BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 BASE_URL=http://127.0.0.1:8787 npm run verify:director
 npm run accept:seed-loop   # allocate→proof→packet on seed (no every.org)
+
+# AutoGive synthetic v1 (Civic Forge — disposable only)
+npm run synthetic:validate
+npm run public:fixture:synthetic
+npm run synthetic:test
+# supabase start && supabase db reset && six_roles.sql
+# SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
 ```
 
 ## Current baseline (suite)

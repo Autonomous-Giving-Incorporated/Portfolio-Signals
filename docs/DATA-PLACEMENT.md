@@ -11,7 +11,7 @@ Private campaign CRM and development-list data use **local operator storage + Su
 | Operator machine (local) | Canonical source workbook until quarantine upload | Allowed while import is blocked; never commit |
 | Supabase Postgres + RLS | System of record for quarantine, constituents, consent, pipelines | Allowed only after governed import |
 | Supabase Storage `campaign-private` | Encrypted source objects and private documents | Allowed with private bucket policies |
-| GitHub / this repository | Code, schemas, synthetic fixtures, aggregate public JSON | **Prohibited** |
+| GitHub / this repository | Code, schemas, synthetic fixtures, aggregate public JSON | **Prohibited** for person-level **live** data. AutoGive v1 private fixtures are SYNTHETIC_ONLY JSON under `fixtures/autogive-v1/private/` (reserved `example.test` domains; never CSV/XLSX). |
 | GitHub Pages (director portal) | Public campaign aggregates | **Prohibited** for person-level data |
 | Impact Relay Pages | Aggregate raised / UOF / digests / public evidence | **Prohibited** for person-level data |
 | Notion | Strategy kits, public evidence aggregates, org research notes | **Not** the CRM system of record; no bulk donor roster |

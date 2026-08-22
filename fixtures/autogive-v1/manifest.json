@@ -1,0 +1,41 @@
+{
+  "dataset": "autogive-synthetic-dataset",
+  "version": "1.0.0",
+  "generatedAt": "2026-08-21T19:08:00-07:00",
+  "seed": 20260821,
+  "classification": "SYNTHETIC_ONLY",
+  "tenantId": "org_synthetic_civic_forge",
+  "campaignId": "cmp_synthetic_builder_fund_2026",
+  "intended_surfaces": [
+    "AGI public workbench",
+    "Portfolio Signals workspace and RLS tests",
+    "allocation middleware",
+    "Impact Relay ledger/workflow/receipt tests",
+    "cross-suite integration and analytics"
+  ],
+  "counts": {
+    "synthetic_donors": 100,
+    "synthetic_gifts": 438,
+    "funds": 4,
+    "allocations": 4,
+    "expenses": 8,
+    "evidence_records": 7,
+    "programs": 3,
+    "outcomes": 5,
+    "roles": 6,
+    "edge_cases": 10
+  },
+  "financial_summary": {
+    "gift_records_total": 286450,
+    "public_raised": 286450,
+    "public_committed": 174200,
+    "note": "Gift rows include pending/refunded fixture cases; public aggregate is independently controlled synthetic campaign state."
+  },
+  "safety_rules": [
+    "Never relabel SYNTHETIC or PILOT data as OBSERVED.",
+    "Never publish private_synthetic donor-level rows.",
+    "Use public/ files only for public aggregate surfaces.",
+    "All contact addresses use example.test or example.org reserved synthetic domains.",
+    "No record grants real outreach authority."
+  ]
+}

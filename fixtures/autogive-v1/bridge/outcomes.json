@@ -1,0 +1,62 @@
+[
+  {
+    "outcome_id": "out_syn_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "program_id": "prog_syn_001",
+    "metric": "participants_verified",
+    "value": 32,
+    "unit": "people",
+    "verification_status": "verified",
+    "evidence_id": "ev_out_syn_001",
+    "claim_label": "PILOT",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "outcome_id": "out_syn_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "program_id": "prog_syn_001",
+    "metric": "kits_deployed",
+    "value": 18,
+    "unit": "kits",
+    "verification_status": "verified",
+    "evidence_id": "ev_out_syn_002",
+    "claim_label": "PILOT",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "outcome_id": "out_syn_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "program_id": "prog_syn_002",
+    "metric": "scholarships_awarded",
+    "value": 14,
+    "unit": "awards",
+    "verification_status": "verified",
+    "evidence_id": "ev_out_syn_003",
+    "claim_label": "PILOT",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "outcome_id": "out_syn_004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "program_id": "prog_syn_003",
+    "metric": "critical_repairs_completed",
+    "value": 2,
+    "unit": "repairs",
+    "verification_status": "verified",
+    "evidence_id": "ev_out_syn_004",
+    "claim_label": "PILOT",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "outcome_id": "out_syn_005",
+    "tenant_id": "org_synthetic_civic_forge",
+    "program_id": "prog_syn_003",
+    "metric": "downtime_avoided_hours",
+    "value": 16,
+    "unit": "hours",
+    "verification_status": "proposed",
+    "evidence_id": "",
+    "claim_label": "NOT_COMPUTABLE",
+    "provenance": "SYNTHETIC"
+  }
+]

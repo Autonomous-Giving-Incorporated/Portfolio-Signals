@@ -176,8 +176,8 @@ export function createService({
         capturedAt: now(),
       });
     },
-    async ingestEveryOrg(payload) {
-      const credited = await withState((state) => persistNormalizedGift(state, payload));
+    async ingestEveryOrg(payload, options = {}) {
+      const credited = await withState((state) => persistNormalizedGift(state, payload, options));
       if (credited.created && credited.gift) {
         await this.maybeRecordGiftSignal(credited.gift, { source: credited.gift.source, verified: true });
       }
@@ -224,9 +224,10 @@ export function createService({
           ),
         }));
     },
-    async allocate({ campaignKey, programKey, amount, purpose, approvedBy }) {
+    async allocate({ campaignKey, programKey, amount, purpose, approvedBy, id: requestedId }) {
       const amountCents = parseAmount(amount).cents;
-      const id = idgen();
+      const id =
+        requestedId && /^alloc_[a-z0-9_]+$/.test(requestedId) ? requestedId : idgen();
       const approvedAt = now();
       await withState((state) => {
         if (!state.allocations.has(id) && state.allocations.size >= limits.maxAllocations) {

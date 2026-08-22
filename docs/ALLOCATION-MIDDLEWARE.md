@@ -51,6 +51,7 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Setup wizard (`/setup.html`, webhook — not OAuth) | Shipped |
 | Supabase director JWT + membership | Shipped (`/login.html`) |
 | Hacker Dojo pilot seed + `SEED_ON_BOOT` | Shipped |
+| AutoGive synthetic v1 Civic Forge seed | Shipped (`fixtures/autogive-v1/middleware/pilot.json`; `npm run seed:synthetic`) — not HD, not OBSERVED |
 | Docker Compose pilot host | Shipped (local) |
 | Optional Fly / Render / Railway recipes | Historical only — not the designed host |
 | Live every.org gifts for Hacker Dojo | **Operator step** ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) — live URL + gift; Worker route already in-repo) |
