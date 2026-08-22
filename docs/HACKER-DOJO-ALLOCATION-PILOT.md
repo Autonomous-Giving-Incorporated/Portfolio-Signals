@@ -102,7 +102,7 @@ Operator-token fallback is **off**. Seed fixtures are fine and are not a live gi
 
 Details: [CLOUDFLARE.md](CLOUDFLARE.md) · [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md). Historical Compose/Render/Fly recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md) (not production).
 
-## D — Seed-loop acceptance (no live every.org) — #74 partial
+## D — Seed-loop acceptance (no live every.org) — historical #74 partial
 
 Proves **allocate → proof → packet** on seeded Community Hardware Fund without a live gift. Uses a disposable data file and ephemeral port so day-to-day pilot env (token fallback off) is unchanged.
 
@@ -119,9 +119,9 @@ What it checks:
 3. `POST /proofs` evidence URI → 201.  
 4. `GET /packet` shows allocation with `proofCount ≥ 1` and totals.  
 
-**Not covered here:** live every.org gift (Phase 3c / #73) or director browser JWT allocate (use `/login.html` + 3a path). After webhook works, re-run a director session allocate for full #74 sign-off.
+**Not covered here:** live every.org gift (Phase 3c / [issue #20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20); historical #73) or director browser JWT allocate (use `/login.html` + 3a path). After webhook works, re-run a director session allocate for full [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) sign-off (historical #74).
 
-## E — every.org live webhook (Phase 3c / #73)
+## E — every.org live webhook (Phase 3c / [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20))
 
 **Not OAuth.** every.org POSTs each completed donation to your public HTTPS webhook.
 
