@@ -1,0 +1,62 @@
+# Resend magic-link production readiness — design
+
+**Date:** 2026-08-21
+**Status:** Implementation (template + edge hardening landing; transport/domain operator-gated)
+**Scope:** Official master-admin and tenant-admin (director) magic links via the `auth-email` Edge Function + Resend
+**Components:** `supabase/functions/auth-email/`, `supabase/functions/_shared/auth-email-templates.ts`
+
+## Goal
+
+Make master-admin and tenant-admin sign-in mail production-grade: on-brand, role-distinct, deliverable, observable, and abuse-resistant — without weakening the existing authority boundaries or leaking secrets/PII.
+
+## How the flows resolve
+
+`resolve_auth_email_context` (service-role only) maps a recipient to an audience:
+
+| Recipient | Audience | Template | Subject |
+| --- | --- | --- | --- |
+| Active `platform_administrators` row | `platform_admin` | Master-admin | "Your A.G.I. platform administrator sign-in link" |
+| Tenant `director` membership | `tenant_admin` (new) | Tenant director | "Your <client> tenant administrator sign-in link" |
+| Other tenant roles | `tenant_member` | Generic tenant | "Your <client> Portfolio Signals sign-in link" |
+| `infrastructure_delegate` | `delegate` / `delegate_invite` | Delegate | — |
+
+The dispatch record `kind` stays `tenant_member_magic_link` for directors (enum unchanged; no migration). Template selection is an edge-function concern.
+
+## Workstreams
+
+- **P1 Deploy + secret reconciliation (operator).** Confirm/deploy `auth-email` on `utdioxwiskzatwoejgiu`; set `RESEND_API_KEY`, `AUTH_EMAIL_FROM`, `AUTH_EMAIL_REPLY_TO`, `AUTH_ALLOWED_ORIGINS='https://autogive.app'`; confirm Auth redirect allowlist; update `docs/CURRENT-STATE.md` `edge_functions_deployed`.
+- **P2 Sender domain (operator).** Dedicated subdomain `auth.autogive.app` verified in Resend (DKIM + SPF + custom return-path); `AUTH_EMAIL_FROM='A.G.I. Portfolio Signals <no-reply@auth.autogive.app>'`; DMARC `p=none` + `rua` ≥14 days → `quarantine` → `reject`.
+- **P3 Delivery feedback loop (eng).** Delivered: `auth-email-webhook` verifies the Resend (Svix) signature and calls `record_auth_email_delivery` to set `delivered/bounced/complained/delayed` on `auth_email_dispatches` (migration `20260821223000`, test `022`). Operator deploys with `--no-verify-jwt`, sets `RESEND_WEBHOOK_SECRET`, and points the Resend webhook at `https://utdioxwiskzatwoejgiu.supabase.co/functions/v1/auth-email-webhook` for `email.delivered/bounced/complained/delivery_delayed`. Bounced/complained outcomes also open an operator-readable alert (`auth_email_alerts`, migration `20260821224500`, test `023`), carrying the dispatch kind for triage. `auth-email-webhook` additionally posts a redacted alert (kind/reason/ref only — no recipient address) to a channel-agnostic incoming webhook (`ALERT_WEBHOOK_URL`, Slack/Buzz/Discord/Teams-compatible) on bounced/complained; set that secret to enable push (P3c).
+- **P4 Abuse throttle (eng).** The DB `begin_auth_email_dispatch` already enforces a 10-minute per-recipient cooldown, a 20/hour per-requester cap, and a 50/hour global anonymous budget. Added: a best-effort in-memory per-IP + global edge limiter, plus (P4b) a durable per-source (hashed IP) cap so one source cannot exhaust the shared anonymous budget and deny legitimate admin/director sign-ins.
+- **P5 Prod-safe origins/redirect (eng).** Env-driven allow-list; default production-only (no localhost).
+- **P6 Distinct tenant-admin template (eng).** Delivered.
+- **P7 Tests (eng).** Unit tests for pure helpers + templates; wire into `local-security-contract.yml`; follow-up SQL dispatch drill on the local Supabase stack.
+- **P8 Synthetic acceptance (operator + eng).** Run `docs/AUTH-ROLES-AND-EMAILS.md` §VALIDATION with synthetic addresses; record OBSERVED (provider name + date only).
+
+## Edge hardening detail (P4/P5)
+
+Pure helpers live in `supabase/functions/auth-email/lib.ts` (unit-tested):
+
+- `parseAllowedOrigins` defaults to `https://autogive.app` only; localhost is opt-in via `AUTH_ALLOWED_ORIGINS`.
+- `safeRedirect` validates against the allow-list + requires a `workspace` path.
+- `createRateLimiter` is an in-memory sliding window; `self_sign_in` is limited to 5/IP and 300 global per 10 minutes and returns the generic 202 when throttled (no enumeration signal). This is best-effort per isolate; the durable per-source cap (below) is the cross-isolate backstop.
+- Migration `20260821221500` adds `auth_email_dispatches.request_ip_hash` and a per-source cap in `begin_auth_email_dispatch` (max 10 per hashed IP per 10 minutes); the Edge Function passes `sha256(clientIp)`. Verified by `supabase/tests/021_auth_email_ip_budget.sql`.
+
+## Acceptance
+
+1. Master admin receives the administrator template and signs in.
+2. Tenant director receives the tenant-administrator template (distinct) and signs in with MFA.
+3. Delegate invite/accept/resend/revoke behave per `AUTH-ROLES-AND-EMAILS.md`.
+4. Audit events + redacted dispatch rows present; no email address, token, or secret logged.
+5. DMARC aligned for the sending domain across the reporting window before tightening policy.
+
+## Out of scope
+
+- Custom Supabase SMTP for built-in Auth security emails (`PLATFORM-AUTH-SMTP.md`) — separate track.
+- Durable DB/KV rate limiting and the Resend delivery webhook (P3/P4 follow-ups; own migrations).
+
+## Decisions
+
+- Distinct tenant-admin template: **yes** (delivered).
+- Sending domain: **`auth.autogive.app`** (recommended).
+- Deploy/DNS/Resend ownership: single accountable platform operator; code via eng PRs under change control.

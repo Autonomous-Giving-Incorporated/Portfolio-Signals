@@ -82,6 +82,8 @@ Optional secrets:
 ```text
 AUTH_EMAIL_REPLY_TO
 AUTH_ALLOWED_ORIGINS=https://autogive.app,http://127.0.0.1:8080
+RESEND_WEBHOOK_SECRET   # required only for the auth-email-webhook delivery feedback function
+ALERT_WEBHOOK_URL       # optional; incoming-webhook URL (Slack/Buzz/Discord/Teams) for hard-failure alerts
 ```
 
 Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to the deployed function. Never place any provider or service-role secret in browser runtime config, Vercel public environment variables, logs, email HTML, or git.
@@ -112,6 +114,19 @@ Abort if a future dry run proposes an unexpected migration. Database publication
 supabase secrets set RESEND_API_KEY=... AUTH_EMAIL_FROM='A.G.I. <auth@autogive.app>'
 supabase secrets set AUTH_EMAIL_REPLY_TO=... AUTH_ALLOWED_ORIGINS='https://autogive.app'
 supabase functions deploy auth-email --project-ref utdioxwiskzatwoejgiu --no-verify-jwt
+```
+
+Optional delivery feedback loop — deploy the webhook and point Resend at it:
+
+```bash
+supabase secrets set RESEND_WEBHOOK_SECRET=whsec_...
+supabase functions deploy auth-email-webhook --project-ref utdioxwiskzatwoejgiu --no-verify-jwt
+# Resend → Webhooks → Endpoint URL:
+#   https://utdioxwiskzatwoejgiu.supabase.co/functions/v1/auth-email-webhook
+# Events: email.delivered, email.bounced, email.complained, email.delivery_delayed
+# Keep Resend open/click tracking OFF for auth mail. Rotate the signing secret if it
+# was ever shared outside the secret manager. The webhook records only the provider
+# message id; recipient addresses are never persisted or logged.
 ```
 
 Configure the Auth redirect allowlist for both production workspace routes before delivery testing:

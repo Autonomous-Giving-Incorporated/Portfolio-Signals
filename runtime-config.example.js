@@ -8,6 +8,7 @@ window.AGI_PORTFOLIO_SIGNALS_CONFIG = {
   productName: 'Portfolio Signals',
   platformName: 'Autonomously Giving Incorporated',
   impactRelayApiBase: 'https://impact-relay.example.run.app',
+  // allowFixtureBearer: true  // local IR console only; never on hosted pages
 };
 window.AGI_FUND_INTEL_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
 window.HACKER_DOJO_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
