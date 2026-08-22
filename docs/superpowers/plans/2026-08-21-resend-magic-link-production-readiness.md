@@ -20,7 +20,7 @@ Status legend: DONE · IN PR · PENDING (eng) · PENDING (operator)
 | P3c | Channel-agnostic incoming-webhook notifier (`ALERT_WEBHOOK_URL`; Slack/Buzz/Discord/Teams) | eng | IN PR |
 | P1 | Deploy `auth-email` + set `RESEND_API_KEY` / `AUTH_EMAIL_FROM` / `AUTH_EMAIL_REPLY_TO` / `AUTH_ALLOWED_ORIGINS`; reconcile `CURRENT-STATE` | operator | PENDING (operator) |
 | P2 | Verify `auth.autogive.app` in Resend (DKIM/SPF/return-path); DMARC p=none→reject | operator | PENDING (operator) |
-| P8 | Synthetic acceptance drill; record OBSERVED (provider + date only) | operator + eng | **PARTIAL** 2026-08-22 — tenant-member template delivered to Mailosaur `qpbqeifu`; dispatch `sent`. Click/MFA and other audiences still PENDING |
+| P8 | Synthetic acceptance drill; record OBSERVED (provider + date only) | operator + eng | **PARTIAL** 2026-08-22 — tenant-member + isolation-director templates delivered; director magic-link click reached workspace. MFA, platform-admin template, and webhook secret still PENDING |
 
 ## Sequencing
 
