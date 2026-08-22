@@ -48,7 +48,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 
 ## Current evidence boundary
 
-**As of 2026-08-07** (suite production on `autogive.app` + platform Supabase). See [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) for the full live receipt. Older HD-OI-041 staging receipts are **historical** only.
+**As of 2026-08-07** (suite production on `autogive.app` + platform Supabase). See [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) for the full live receipt. Suite-wide readiness and next waves: [docs/PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](docs/PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md) (**Not READY**; `current_main_verdict` remains **NO_GO**). Older HD-OI-041 staging receipts are **historical** only.
 
 | Capability | State |
 |---|---|
