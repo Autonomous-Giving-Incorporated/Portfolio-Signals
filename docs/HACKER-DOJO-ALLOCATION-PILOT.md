@@ -2,6 +2,13 @@
 
 Use **Hacker Dojo** (`org_hacker_dojo`) until live every.org gift data is integrated.
 
+A second disposable tenant, **Civic Forge** (`org_synthetic_civic_forge`), is the AutoGive Synthetic Dataset v1 universe. It does **not** replace this Hacker Dojo reference tenant. See [SYNTHETIC-DATASET.md](SYNTHETIC-DATASET.md).
+
+```bash
+cd services/allocation-middleware
+npm run seed:synthetic    # Civic Forge fixture; HD seed remains seed:hacker-dojo
+```
+
 | Item | Value |
 | --- | --- |
 | Org id | `org_hacker_dojo` |

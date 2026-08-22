@@ -46,6 +46,11 @@ local flows:
 - Allocation middleware app: `cd services/allocation-middleware && npm run
   start:hacker-dojo:seed` runs an open-dev server on `:8787` (auth disabled,
   in-memory seed) — good for exercising `/available`, `/allocations`, `/trail`.
+- Synthetic Civic Forge corpus: `npm run synthetic:validate`, `npm run
+  public:fixture:synthetic`, `npm run synthetic:test`. Disposable seed:
+  `SYNTHETIC_SEED_CONFIRM=1 DB_URL=... npm run seed:synthetic` then
+  `supabase/tests/024_autogive_synthetic_v1.sql`. Never seed platform refs.
+  See [docs/SYNTHETIC-DATASET.md](docs/SYNTHETIC-DATASET.md).
 
 ### Docker + local Supabase (non-obvious)
 
