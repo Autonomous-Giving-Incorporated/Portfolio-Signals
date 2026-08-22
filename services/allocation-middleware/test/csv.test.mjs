@@ -61,6 +61,16 @@ test('importCsv is the offline twin of ingestEveryOrg (same pot credit)', async 
   assert.ok((await csvSvc.listAvailable()).every((p) => p.available === '10.00'));
 });
 
+test('importCsv currency mismatch does not credit', async () => {
+  const svc = createService({ orgId: 'org_1' });
+  const result = await svc.importCsv(
+    'chargeId,netAmount,currency\nc-csv-eur,10.00,EUR\n',
+  );
+  assert.equal(result.created, 0);
+  assert.equal((await svc.getTrail()).gifts.length, 0);
+  assert.equal((await svc.listExceptions()).some((item) => item.code === 'CURRENCY_MISMATCH'), true);
+});
+
 test('csvRowToEveryOrgPayload does not invent contact fields', () => {
   const mapped = csvRowToEveryOrgPayload({
     chargeId: 'c1',

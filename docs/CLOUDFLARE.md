@@ -24,7 +24,7 @@ Recorded via Cloudflare Bindings + Observability on the connected Zero State / N
 
 `agi-public.zer0state-noema.workers.dev` is the suite-gateway origin. It is **not** a live allocation host. Do not invent `https://portfolio-signals.<account>.workers.dev`.
 
-Allocation APIs (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`), `POST /webhooks/every-org`, and ImpactNotice remain **CODE_SHIPPED** in this repo, not live on a named Worker. Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md).
+Allocation APIs (`/allocations` `/proofs` `/packet` `/seed` `/import/csv`), `POST /webhooks/every-org`, proposed `POST /webhooks/givebutter` and `POST /webhooks/donorbox`, and ImpactNotice remain **CODE_SHIPPED** in this repo, not live on a named Worker. Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md).
 
 ## What the in-repo Worker is designed to serve
 
@@ -42,7 +42,7 @@ The table below is the **CODE_SHIPPED** `portfolio-signals` script in this repo.
 | `/allocation` | `allocation.html` | Director allocate → proof → packet for `org_hacker_dojo` (JWT only) |
 | `/allocation-login` | `allocation-login.html` | Supabase password login; existing platform JWT |
 | `/allocation-setup` | `allocation-setup.html` | every.org webhook wizard (URL hidden until AAL2 writer) |
-| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/waivers` `/packet` `/seed` `/setup` `/import/csv` | Worker script | Allocation API; operator-token fallback **off**. `/setup` also stores tenant `donation_link`. `POST /import/csv` is the SPEC-026 offline twin of the every.org webhook (director write; observe/credit only). |
+| `/healthz` `/readyz` `/auth/*` `/available` `/allocations` `/proofs` `/waivers` `/packet` `/seed` `/setup` `/import/csv` | Worker script | Allocation API; operator-token fallback **off**. `/setup` stores tenant `source` and optional HTTPS `donation_link`. `POST /import/csv` is the SPEC-026 offline twin (director write; observe/credit only). |
 
 This is a **multi-page static site**, not a client-side SPA. `not_found_handling` is left at the default (`none`): unknown paths **404**. `/workspace` works because Wrangler `html_handling = "auto-trailing-slash"` maps `/workspace` → `workspace.html` while `/workspace/session.js` still comes from the `workspace/` directory.
 
@@ -104,9 +104,9 @@ It must **not** serve donor records, member registries, workbooks, service-role 
 
 Phase C C4 public-safe fixtures are **OBSERVED in-repo** under `fixtures/agi_phase_c/` (2026-08-17). Canonical copy is Community AI Lab; Hacker Dojo / Community Hardware is labeled non-canonical. Those files are **not** the live public aggregate and are assets-ignored. They do not invent a live allocation host, a `workers.dev` URL, or READY.
 
-## every.org webhook on this Worker
+## Gift webhooks on this Worker
 
-`POST /webhooks/every-org` and the director allocation API are **CODE_SHIPPED** on in-repo Worker `portfolio-signals` via `main` + `assets.run_worker_first`. They are **not live** on a named Worker. Product semantics stay the allocation middleware contract. Operator-token fallback is **off**. Durable state is platform Supabase `am_*` (not D1, not Render/Fly disk).
+`POST /webhooks/every-org`, `POST /webhooks/givebutter`, `POST /webhooks/donorbox`, and the director allocation API are **CODE_SHIPPED** on in-repo Worker `portfolio-signals` via `main` + `assets.run_worker_first`. They are **not live** on a named Worker. Product semantics stay the allocation middleware contract. Operator-token fallback is **off**. Durable state is platform Supabase `am_*` (not D1, not Render/Fly disk). See [GIFT-CONNECTORS.md](GIFT-CONNECTORS.md).
 
 Director path after a live **allocation** Worker URL exists (not claimed here; do not use the suite-gateway origin):
 
@@ -120,6 +120,8 @@ Director path after a live **allocation** Worker URL exists (not claimed here; d
 | Durable store | platform Supabase `am_*` via service-role **secret**. Not D1, not Render/Fly disk |
 | Live allocation `workers.dev` deploy | **ABSENT** — no Worker named `portfolio-signals`; `agi-public` is the suite gateway only |
 | `wrangler secret put WEBHOOK_TOKEN` | PENDING operator |
+| `wrangler secret put GIVEBUTTER_WEBHOOK_SECRET` | PENDING operator — Givebutter `Signature` |
+| `wrangler secret put DONORBOX_WEBHOOK_SECRET` | PENDING operator — Donorbox `Donorbox-Signature` |
 | `wrangler secret put SUPABASE_SERVICE_ROLE_KEY` | PENDING operator — never commit |
 | `PLATFORM_SUPABASE_ANON_KEY` Worker var/secret | PENDING operator (public anon only; required for `/allocation-login`) |
 | `PUBLIC_BASE_URL` | PENDING until the live origin is known |
@@ -133,6 +135,9 @@ Local Node (`npm run start:hacker-dojo:seed` / `npm run accept:seed-loop`) remai
 ```bash
 # after GitHub CF secrets exist (do not invent a live URL before deploy)
 npx wrangler@4 secret put WEBHOOK_TOKEN
+# optional P1 sources (do not commit values):
+# npx wrangler@4 secret put GIVEBUTTER_WEBHOOK_SECRET
+# npx wrangler@4 secret put DONORBOX_WEBHOOK_SECRET
 npx wrangler@4 secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler@4 secret put PLATFORM_SUPABASE_ANON_KEY
 # optional once the workers.dev origin is known:
