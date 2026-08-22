@@ -1,0 +1,38 @@
+[
+  {
+    "fund_id": "fund_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "public_allocation_id": "alloc_community_hardware",
+    "name": "Community Hardware Fund",
+    "restriction": "restricted",
+    "status": "active",
+    "currency": "USD"
+  },
+  {
+    "fund_id": "fund_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "public_allocation_id": "alloc_access_scholarships",
+    "name": "Access Scholarship Fund",
+    "restriction": "restricted",
+    "status": "active",
+    "currency": "USD"
+  },
+  {
+    "fund_id": "fund_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "public_allocation_id": "alloc_facility_resilience",
+    "name": "Facility Resilience Fund",
+    "restriction": "unrestricted",
+    "status": "active",
+    "currency": "USD"
+  },
+  {
+    "fund_id": "fund_004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "public_allocation_id": "alloc_community_programs",
+    "name": "Community Programs Fund",
+    "restriction": "unrestricted",
+    "status": "proposed",
+    "currency": "USD"
+  }
+]

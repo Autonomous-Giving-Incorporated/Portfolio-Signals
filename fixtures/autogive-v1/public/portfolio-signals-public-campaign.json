@@ -1,0 +1,85 @@
+{
+  "$schema": "../../../schemas/public-campaign.schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-08-21",
+  "authority": "advisory_only",
+  "campaign": {
+    "minimumTarget": 420000,
+    "stretchTarget": 2000000,
+    "currency": "USD",
+    "minimumCaseState": "Synthetic stabilization scenario",
+    "stretchCaseState": "Synthetic transformation scenario"
+  },
+  "registry": {
+    "normalizedMemberIds": 1250,
+    "bayAreaRecords": 812,
+    "organizerLabels": 44,
+    "privateRelayOccurrences": 0,
+    "highEngagementRecords": 196,
+    "outreachReadyRecords": 0,
+    "qualification": "SYNTHETIC_ONLY — no outreach authority"
+  },
+  "execution": {
+    "state": "review",
+    "reason": "Synthetic dataset for development, QA, analytics, and contract testing."
+  },
+  "gates": [
+    {
+      "id": "synthetic_data_only",
+      "label": "Synthetic data only",
+      "state": "approved"
+    },
+    {
+      "id": "real_outreach_authority",
+      "label": "Real outreach authority",
+      "state": "blocked"
+    },
+    {
+      "id": "production_import",
+      "label": "Production import",
+      "state": "blocked"
+    },
+    {
+      "id": "public_aggregate_validation",
+      "label": "Public aggregate validation",
+      "state": "approved"
+    }
+  ],
+  "allocations": [
+    {
+      "allocationId": "alloc_community_hardware",
+      "fundName": "Community Hardware Fund",
+      "status": "active",
+      "rationale": "Synthetic equipment and workshop scenario.",
+      "publishedAt": "2026-08-10T16:00:00Z"
+    },
+    {
+      "allocationId": "alloc_access_scholarships",
+      "fundName": "Access Scholarship Fund",
+      "status": "approved",
+      "rationale": "Synthetic fee-waiver and training-access scenario.",
+      "publishedAt": "2026-08-11T16:00:00Z"
+    },
+    {
+      "allocationId": "alloc_facility_resilience",
+      "fundName": "Facility Resilience Fund",
+      "status": "active",
+      "rationale": "Synthetic facility maintenance and continuity scenario.",
+      "publishedAt": "2026-08-12T16:00:00Z"
+    },
+    {
+      "allocationId": "alloc_community_programs",
+      "fundName": "Community Programs Fund",
+      "status": "proposed",
+      "rationale": "Synthetic events and program delivery scenario.",
+      "publishedAt": "2026-08-13T16:00:00Z"
+    }
+  ],
+  "privacy": {
+    "classification": "public_aggregate_only",
+    "piiAllowed": false,
+    "rawRegistryAllowed": false,
+    "donorHistoryAllowed": false,
+    "privateNotesAllowed": false
+  }
+}
