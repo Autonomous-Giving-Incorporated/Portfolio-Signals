@@ -132,6 +132,7 @@ c3_public_data_policy: PROPOSED
 | Production readiness + continuation (2026-08-22) | INFORMATIVE — [PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md); verdict still **NO_GO**; not READY |
 | C3 public-data policy | PROPOSED; **written deferral** 2026-08-22 — [C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md](C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md); not sign-off; Phase D gated |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
+| Role-aware Resend magic links (`auth-email`) | CODE_SHIPPED (templates + Edge + webhook + alerts). Latest function deploy / secrets on `utdioxwiskzatwoejgiu` **NOT_COMPUTABLE** 2026-08-22 (no `SUPABASE_ACCESS_TOKEN`, no `RESEND_API_KEY`). Not in `edge_functions_deployed` below. [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
