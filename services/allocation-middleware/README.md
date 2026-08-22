@@ -48,6 +48,7 @@ npm run accept:seed-loop
 
 npm run start:hacker-dojo        # durable file, no re-seed
 npm run seed:hacker-dojo         # seed only
+npm run seed:synthetic           # Civic Forge AutoGive v1 (does not replace HD)
 npm run pilot:smoke              # health checks (BASE_URL=...)
 npm run pilot:env                # env checklist
 ```
