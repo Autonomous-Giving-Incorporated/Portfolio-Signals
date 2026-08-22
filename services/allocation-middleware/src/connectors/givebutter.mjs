@@ -45,13 +45,13 @@ export function normalizeGivebutterGift(payload, { orgId, now } = {}) {
     };
   }
 
-  if (eventName && eventName !== 'transaction.succeeded') {
+  if (eventName !== 'transaction.succeeded') {
     return {
       kind: 'hold',
       source: CONNECTOR_GIVEBUTTER,
       eventName,
       chargeId,
-      reason: 'event_not_credited',
+      reason: eventName ? 'event_not_credited' : 'missing_event',
     };
   }
 

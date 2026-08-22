@@ -55,8 +55,8 @@ These paths are in-repo on Worker `portfolio-signals`. They are **not** live URL
 ## Field mapping (product)
 
 - every.org: `fromFundraiser` → campaign, `designation` → slice, `chargeId`, `netAmount`.
-- Givebutter: `data.id` → `chargeId`, `data.donated` → `netAmount` (`payout` if `donated` is absent). Email only when `communication_opt_in` is true.
-- Donorbox: donation `id` → `chargeId`. Never use `stripe_charge_id`. INFERRED net = `amount` − `processing_fee` when fee is present; otherwise `amount`. Email only when `join_mailing_list` is true.
+- Givebutter: credit only when `event` or `type` is exactly `transaction.succeeded`. Missing event is a hold. `data.id` → `chargeId`, `data.donated` → `netAmount` (`payout` if `donated` is absent). Email only when `communication_opt_in` is true.
+- Donorbox: credit only `donation.created`. v1 arrays credit only when `action` is `new` or `donation.created`; chargebacks and missing `action` hold. Never infer `donation.created`. donation `id` → `chargeId`. Never use `stripe_charge_id`. INFERRED net = `amount` − `processing_fee` when fee is present; otherwise `amount`. Email only when `join_mailing_list` is true.
 - CSV required columns: `chargeId`, `netAmount`.
 
 Refunds and chargebacks persist after verify and open `SYNC_FAILURE`. v1 does not debit pots.

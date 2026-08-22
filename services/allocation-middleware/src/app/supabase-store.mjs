@@ -67,7 +67,7 @@ export function createSupabaseStore({
         rest(scoped('am_impact_notice_deliveries', '*')).then(readJson),
         rest(scoped('am_proof_waivers', '*')).then(readJson),
         rest(`clients?select=donation_link&id=eq.${encodeURIComponent(orgId)}`).then(readJson),
-        rest(scoped('am_webhook_events', '*')).then(readJson),
+        rest(scoped('am_webhook_events', 'id,client_id,source,event_name,charge_id,created_at')).then(readJson),
       ]);
       for (const row of gifts || []) {
         state.gifts.set(row.charge_id, {
@@ -297,7 +297,7 @@ export function createSupabaseStore({
           note: item.note || '',
         }));
       const eventRows = (state.webhookEvents || [])
-        .filter((item) => item.orgId === orgId)
+        .filter((item) => item.orgId === orgId && item.payload != null)
         .map((item) => ({
           id: item.id,
           client_id: orgId,

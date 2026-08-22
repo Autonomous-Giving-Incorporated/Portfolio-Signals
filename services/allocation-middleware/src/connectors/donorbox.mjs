@@ -38,18 +38,40 @@ export async function verifyDonorboxSignature(headerValue, secret, rawBody, { no
   return { ok: false, status: 401, error: 'UNAUTHORIZED' };
 }
 
+/** Map Donorbox v1 `action` / v2 `event_name`. Never infer donation.created. */
+export function donorboxEventNameFromAction(action) {
+  const raw = String(action || '').trim();
+  if (!raw) return '';
+  if (raw === 'new') return 'donation.created';
+  if (raw === 'update' || raw === 'updated') return 'donation.updated';
+  if (raw.includes('chargeback')) {
+    return raw.startsWith('donation.') ? raw : 'donation.chargeback_created';
+  }
+  return raw;
+}
+
 export function donorboxDonation(payload) {
   if (Array.isArray(payload)) {
-    return { eventName: 'donation.created', donation: payload[0] || null };
+    if (payload.length !== 1 || !payload[0] || typeof payload[0] !== 'object') {
+      const donation = payload[0] && typeof payload[0] === 'object' ? payload[0] : null;
+      return { eventName: '', donation };
+    }
+    return { eventName: donorboxEventNameFromAction(payload[0].action), donation: payload[0] };
   }
   if (!payload || typeof payload !== 'object') {
     return { eventName: '', donation: null };
   }
   if (payload.donation && typeof payload.donation === 'object') {
-    return { eventName: String(payload.event_name || ''), donation: payload.donation };
+    return {
+      eventName: String(payload.event_name || donorboxEventNameFromAction(payload.donation.action) || ''),
+      donation: payload.donation,
+    };
   }
   if (payload.id != null && (payload.amount != null || payload.campaign)) {
-    return { eventName: String(payload.event_name || 'donation.created'), donation: payload };
+    return {
+      eventName: String(payload.event_name || donorboxEventNameFromAction(payload.action) || ''),
+      donation: payload,
+    };
   }
   return { eventName: String(payload.event_name || ''), donation: null };
 }
@@ -66,23 +88,18 @@ export function normalizeDonorboxGift(payload, { orgId, now } = {}) {
   const { eventName, donation } = donorboxDonation(payload);
   const chargeId = donation?.id != null && String(donation.id).trim() ? String(donation.id) : '';
 
-  if (eventName.startsWith('donation.chargeback')) {
+  if (eventName !== 'donation.created') {
+    const reason = eventName.startsWith('donation.chargeback')
+      ? 'chargeback_not_v1'
+      : eventName
+        ? 'event_not_credited'
+        : 'missing_event';
     return {
       kind: 'hold',
       source: CONNECTOR_DONORBOX,
       eventName,
       chargeId,
-      reason: 'chargeback_not_v1',
-    };
-  }
-
-  if (eventName && eventName !== 'donation.created') {
-    return {
-      kind: 'hold',
-      source: CONNECTOR_DONORBOX,
-      eventName,
-      chargeId,
-      reason: 'event_not_credited',
+      reason,
     };
   }
 

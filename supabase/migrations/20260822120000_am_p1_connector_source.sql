@@ -33,10 +33,10 @@ create index if not exists am_webhook_events_client_idx
   on public.am_webhook_events (client_id, created_at desc);
 
 comment on table public.am_webhook_events is
-  'Raw vendor webhook or CSV twin payload persisted before or with pot credit. Not a donation processor ledger.';
+  'Raw vendor webhook or CSV twin payload persisted before or with pot credit. Not a donation processor ledger. Member SELECT is denied; service-role writes and master-admin SELECT only.';
 
 alter table public.am_webhook_events enable row level security;
 
 drop policy if exists am_webhook_events_select on public.am_webhook_events;
 create policy am_webhook_events_select on public.am_webhook_events for select
-  using (public.is_client_member(client_id) or public.is_master_admin());
+  using (public.is_master_admin());
