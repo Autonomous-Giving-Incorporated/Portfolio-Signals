@@ -1,6 +1,6 @@
 # People MFA + Onboarding Pack handoff
 
-**Updated:** 2026-08-08  
+**Updated:** 2026-08-22  
 **Workspace:** https://autogive.app/portfolio-signals/workspace  
 **Platform:** Supabase `utdioxwiskzatwoejgiu`
 
@@ -66,8 +66,9 @@ After login, workspace context must show:
 
 | Next | Owner |
 | --- | --- |
-| every.org live webhook [#73](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/73) | HD nonprofit admin |
-| Director browser allocate + #74 | Director + durable/ephemeral host |
+| MFA onboarding-pack dry-run [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18) | Operator |
+| Hosted isolated restore [#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19) | Operator |
+| Durable host + live every.org webhook + director allocate [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) | HD nonprofit admin + director. Historical #73/#74 do not exist. Do not invent a `workers.dev` URL. |
 | Optional SMTP | Platform Supabase Dashboard |
 
 ## Non-goals
