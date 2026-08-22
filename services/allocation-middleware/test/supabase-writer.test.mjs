@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { createSupabaseAllocationWriter } from '../src/app/supabase-writer.mjs';
+
+const fixtureRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../fixtures/spec-026');
 
 const FIXTURE = {
   chargeId: 'fixture-supabase-gift-001',
@@ -127,4 +132,25 @@ test('non-USD gift writes an exception and does not create a gift', async () => 
   assert.equal(result.created, false);
   assert.equal(result.exception.code, 'CURRENCY_MISMATCH');
   assert.equal(calls.some((c) => c.url.includes('am_gifts')), false);
+});
+
+test('Donorbox v1 chargeback array writes SYNC_FAILURE and never credits a pot', async () => {
+  const payload = JSON.parse(await readFile(join(fixtureRoot, 'donorbox/chargeback-v1-array.json'), 'utf8'));
+  const calls = [];
+  const fetchImpl = async (url, init = {}) => {
+    calls.push({ url, method: init.method || 'GET' });
+    if (url.endsWith('/am_webhook_events') && init.method === 'POST') return jsonResponse(201, null);
+    if (url.startsWith('https://example.supabase.co/rest/v1/am_exceptions')) return jsonResponse(201, null);
+    throw new Error(`unexpected ${init.method} ${url}`);
+  };
+  const writer = createSupabaseAllocationWriter({
+    supabaseUrl: 'https://example.supabase.co',
+    serviceRoleKey: 'test-service-role',
+    orgId: 'org_hacker_dojo',
+    fetchImpl,
+  });
+  const result = await writer.ingestGift(payload, { source: 'donorbox' });
+  assert.equal(result.created, false);
+  assert.equal(result.exception.code, 'SYNC_FAILURE');
+  assert.equal(calls.some((c) => c.url.includes('am_gifts') || c.url.includes('am_pots')), false);
 });

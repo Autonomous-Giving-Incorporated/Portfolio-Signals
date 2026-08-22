@@ -76,6 +76,46 @@ test('Donorbox fee-absent net equals amount and ignores stripe_charge_id', async
   assert.equal(result.gift.contact, null);
 });
 
+test('Donorbox v1 chargeback array is hold without pot debit', async () => {
+  const created = await loadJson('donorbox/donation-created-v1-array.json');
+  const chargeback = await loadJson('donorbox/chargeback-v1-array.json');
+  const createdNorm = normalize_gift(created, { source: 'donorbox', orgId: 'org_1' });
+  assert.equal(createdNorm.kind, 'credit');
+  assert.equal(createdNorm.gift.chargeId, '9010');
+  assert.notEqual(createdNorm.gift.chargeId, 'ch_fixture_v1_created_ignored');
+  const heldNorm = normalize_gift(chargeback, { source: 'donorbox', orgId: 'org_1' });
+  assert.equal(heldNorm.kind, 'hold');
+  assert.equal(heldNorm.reason, 'chargeback_not_v1');
+  const svc = createService({ orgId: 'org_1' });
+  await svc.ingestGift(created, { source: 'donorbox' });
+  const credited = (await svc.listAvailable()).find((row) => row.campaignKey === 'v1 created campaign');
+  assert.equal(credited.credited, '25.00');
+  const held = await svc.ingestGift(chargeback, { source: 'donorbox' });
+  assert.equal(held.created, false);
+  assert.equal((await svc.listAvailable()).find((row) => row.campaignKey === 'v1 created campaign').credited, '25.00');
+  assert.equal((await svc.listExceptions()).some((item) => item.code === 'SYNC_FAILURE'), true);
+});
+
+test('Donorbox missing action does not infer donation.created', async () => {
+  const result = normalize_gift(
+    [{ id: 9111, amount: '50.0', currency: 'USD', campaign: { name: 'bare v1' } }],
+    { source: 'donorbox', orgId: 'org_1' },
+  );
+  assert.equal(result.kind, 'hold');
+  assert.equal(result.reason, 'missing_event');
+});
+
+test('Givebutter missing event does not infer transaction.succeeded', async () => {
+  const payload = await loadJson('givebutter/missing-event.json');
+  const result = normalize_gift(payload, { source: 'givebutter', orgId: 'org_1' });
+  assert.equal(result.kind, 'hold');
+  assert.equal(result.reason, 'missing_event');
+  const svc = createService({ orgId: 'org_1' });
+  const ingested = await svc.ingestGift(payload, { source: 'givebutter' });
+  assert.equal(ingested.created, false);
+  assert.equal((await svc.getTrail()).gifts.length, 0);
+});
+
 test('Donorbox chargeback is hold without pot debit', async () => {
   const created = await loadJson('donorbox/donation-created-v2.json');
   const chargeback = await loadJson('donorbox/chargeback-created.json');
@@ -131,6 +171,15 @@ test('unmapped fundraiser auto-creates a review-tagged pot', async () => {
   assert.equal((await svc.listExceptions()).some((item) => item.code === 'UNMAPPED_FUNDRAISER'), true);
 });
 
+test('verify_webhook fail-closed on empty Givebutter secret', async () => {
+  const denied = await verify_webhook(
+    { headers: { Signature: 'gb-secret' } },
+    { source: 'givebutter', secrets: { givebutterSecret: '' } },
+  );
+  assert.equal(denied.ok, false);
+  assert.equal(denied.status, 503);
+});
+
 test('verify_webhook fail-closed on Givebutter Signature miss', async () => {
   const denied = await verify_webhook(
     { headers: { Signature: 'nope' } },
@@ -143,6 +192,15 @@ test('verify_webhook fail-closed on Givebutter Signature miss', async () => {
     { source: 'givebutter', secrets: { givebutterSecret: 'gb-secret' } },
   );
   assert.equal(allowed.ok, true);
+});
+
+test('verify_webhook fail-closed on empty Donorbox secret', async () => {
+  const denied = await verify_webhook(
+    { headers: { 'Donorbox-Signature': '1,deadbeef' } },
+    { source: 'donorbox', secrets: { donorboxSecret: '' }, rawBody: '{}' },
+  );
+  assert.equal(denied.ok, false);
+  assert.equal(denied.status, 503);
 });
 
 test('verify_webhook fail-closed on Donorbox-Signature miss', async () => {

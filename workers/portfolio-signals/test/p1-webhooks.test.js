@@ -80,10 +80,41 @@ test('Givebutter happy path credits net and is idempotent on chargeId', async ()
 
 test('Givebutter bad Signature is fail-closed', async () => {
   const payload = await loadJson('givebutter/transaction-succeeded.json');
-  const ingest = createMemoryIngest('org_hacker_dojo');
+  const store = createMemoryStore();
+  const service = createService({ orgId: 'org_hacker_dojo', store });
+  let ingestCalls = 0;
+  const ingest = (body) => {
+    ingestCalls += 1;
+    return service.ingestGift(body, { source: 'givebutter' });
+  };
   const res = await postGivebutter({}, payload, { Signature: 'wrong' }, { ingest });
   assert.equal(res.status, 401);
   assert.deepEqual(await res.json(), { error: 'UNAUTHORIZED' });
+  assert.equal(ingestCalls, 0);
+  assert.equal((await store.load()).gifts.size, 0);
+});
+
+test('Givebutter empty secret is 503 and does not ingest', async () => {
+  const payload = await loadJson('givebutter/transaction-succeeded.json');
+  const store = createMemoryStore();
+  const service = createService({ orgId: 'org_hacker_dojo', store });
+  let ingestCalls = 0;
+  const res = await handleWorkerRequest(
+    request('/webhooks/givebutter', {
+      headers: { 'content-type': 'application/json', Signature: GB_SECRET },
+      body: payload,
+    }),
+    { GIVEBUTTER_WEBHOOK_SECRET: '' },
+    {
+      ingest: (body) => {
+        ingestCalls += 1;
+        return service.ingestGift(body, { source: 'givebutter' });
+      },
+    },
+  );
+  assert.equal(res.status, 503);
+  assert.equal(ingestCalls, 0);
+  assert.equal((await store.load()).gifts.size, 0);
 });
 
 test('Givebutter missing opt-in does not store email', async () => {
@@ -141,9 +172,117 @@ test('Donorbox happy path uses donation id not stripe_charge_id', async () => {
 
 test('Donorbox bad signature is fail-closed', async () => {
   const payload = await loadJson('donorbox/donation-created-v2.json');
-  const res = await signedDonorbox(payload, { bad: true });
+  const store = createMemoryStore();
+  const service = createService({ orgId: 'org_hacker_dojo', store });
+  let ingestCalls = 0;
+  const raw = JSON.stringify(payload);
+  const now = 1_700_000_000_000;
+  const ts = String(Math.floor(now / 1000));
+  const res = await handleWorkerRequest(
+    request('/webhooks/donorbox', {
+      headers: {
+        'content-type': 'application/json',
+        'Donorbox-Signature': `${ts},deadbeef`,
+      },
+      body: raw,
+    }),
+    { DONORBOX_WEBHOOK_SECRET: DB_SECRET },
+    {
+      ingest: (body) => {
+        ingestCalls += 1;
+        return service.ingestGift(body, { source: 'donorbox' });
+      },
+      now,
+    },
+  );
   assert.equal(res.status, 401);
   assert.deepEqual(await res.json(), { error: 'UNAUTHORIZED' });
+  assert.equal(ingestCalls, 0);
+  assert.equal((await store.load()).gifts.size, 0);
+});
+
+test('Donorbox empty secret is 503 and does not ingest', async () => {
+  const payload = await loadJson('donorbox/donation-created-v2.json');
+  let ingestCalls = 0;
+  const raw = JSON.stringify(payload);
+  const now = 1_700_000_000_000;
+  const ts = String(Math.floor(now / 1000));
+  const sig = await hmacSha256Hex('unused', `${ts}.${raw}`);
+  const empty = await handleWorkerRequest(
+    request('/webhooks/donorbox', {
+      headers: {
+        'content-type': 'application/json',
+        'Donorbox-Signature': `${ts},${sig}`,
+      },
+      body: raw,
+    }),
+    { DONORBOX_WEBHOOK_SECRET: '' },
+    {
+      ingest: (body) => {
+        ingestCalls += 1;
+        return service.ingestGift(body, { source: 'donorbox' });
+      },
+      now,
+    },
+  );
+  assert.equal(empty.status, 503);
+  assert.equal(ingestCalls, 0);
+});
+
+test('Donorbox stale timestamp is fail-closed', async () => {
+  const payload = await loadJson('donorbox/donation-created-v2.json');
+  const store = createMemoryStore();
+  const service = createService({ orgId: 'org_hacker_dojo', store });
+  let ingestCalls = 0;
+  const raw = JSON.stringify(payload);
+  const now = 1_700_000_000_000;
+  const ts = String(Math.floor(now / 1000) - 120);
+  const sig = await hmacSha256Hex(DB_SECRET, `${ts}.${raw}`);
+  const res = await handleWorkerRequest(
+    request('/webhooks/donorbox', {
+      headers: {
+        'content-type': 'application/json',
+        'Donorbox-Signature': `${ts},${sig}`,
+      },
+      body: raw,
+    }),
+    { DONORBOX_WEBHOOK_SECRET: DB_SECRET },
+    {
+      ingest: (body) => {
+        ingestCalls += 1;
+        return service.ingestGift(body, { source: 'donorbox' });
+      },
+      now,
+    },
+  );
+  assert.equal(res.status, 401);
+  assert.equal(ingestCalls, 0);
+  assert.equal((await store.load()).gifts.size, 0);
+});
+
+test('Donorbox v1 chargeback array does not credit', async () => {
+  const payload = await loadJson('donorbox/chargeback-v1-array.json');
+  const store = createMemoryStore();
+  const service = createService({ orgId: 'org_hacker_dojo', store });
+  const raw = JSON.stringify(payload);
+  const now = 1_700_000_000_000;
+  const ts = String(Math.floor(now / 1000));
+  const sig = await hmacSha256Hex(DB_SECRET, `${ts}.${raw}`);
+  const res = await handleWorkerRequest(
+    request('/webhooks/donorbox', {
+      headers: {
+        'content-type': 'application/json',
+        'Donorbox-Signature': `${ts},${sig}`,
+      },
+      body: raw,
+    }),
+    { DONORBOX_WEBHOOK_SECRET: DB_SECRET },
+    { ingest: (body) => service.ingestGift(body, { source: 'donorbox' }), now },
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { created: false });
+  assert.equal((await store.load()).gifts.size, 0);
+  assert.equal((await service.listExceptions()).some((item) => item.code === 'SYNC_FAILURE'), true);
 });
 
 test('Donorbox fee-absent net equals amount', async () => {
