@@ -40,11 +40,13 @@ edge_functions_deployed:
   - upload-client-asset
   - upload-onboarding-document  # 2026-08-08 platform deploy OBSERVED
   - onboarding-document-url     # 2026-08-08 platform deploy OBSERVED
+  - auth-email                  # 2026-08-22 v3 SHA 3a9bd980… ACTIVE verify_jwt=false
+  - auth-email-webhook          # 2026-08-22 v1 SHA 6f3883ff… ACTIVE verify_jwt=false; secret PENDING
 tenant_assets_layout: assets/tenants/<slug>/  # HD under assets/tenants/hacker-dojo/
 legacy_hd_staging_ref: ecxkhihlbrcwpavfoaoq  # FROZEN for new tenancy
 ```
 
-Connected Supabase MCP lists only project `dezykkherxlaysxyvgbs` (Noema). `get_project utdioxwiskzatwoejgiu` returned permission denied. The platform ref above remains previously OBSERVED; this connector cannot reach it.
+Supabase MCP `list_projects` still enumerates only Noema `dezykkherxlaysxyvgbs`. Targeted `get_project` / `apply_migration` / `deploy_edge_function` on `utdioxwiskzatwoejgiu` now succeed. Do not deploy AGI auth-email to Noema. MCP still cannot list or set Edge secrets.
 
 ## Cloudflare account (OBSERVED 2026-08-15 PT)
 
@@ -129,8 +131,10 @@ c3_public_data_policy: PROPOSED
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Suite stack audit (2026-08-17) | INFORMATIVE — [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md); not READY, not a freeze SHA |
+| Production readiness + continuation (2026-08-22) | INFORMATIVE — [PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md); verdict still **NO_GO**; not READY |
+| C3 public-data policy | PROPOSED; **written deferral** 2026-08-22 — [C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md](C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md); not sign-off; Phase D gated |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
-| Role-aware Resend magic links (`auth-email`) | **P8 tenant-member send + isolation-director send/click OBSERVED** 2026-08-22 via Mailosaur `qpbqeifu`. Click reached `autogive.app/portfolio-signals/workspace`. MFA, platform-admin template, and webhook `delivery_status` still PENDING (`503 function_not_configured`). [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) |
+| Role-aware Resend magic links (`auth-email`) | **Function deploy + P8 tenant-member send + isolation-director send/click OBSERVED** 2026-08-22 on `utdioxwiskzatwoejgiu` / Mailosaur `qpbqeifu`. Click reached `autogive.app/portfolio-signals/workspace`. `RESEND_WEBHOOK_SECRET` **OBSERVED unset** (`503 function_not_configured`). MFA and platform-admin template still PENDING. [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
