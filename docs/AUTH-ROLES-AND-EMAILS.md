@@ -83,6 +83,7 @@ Optional secrets:
 AUTH_EMAIL_REPLY_TO
 AUTH_ALLOWED_ORIGINS=https://autogive.app,http://127.0.0.1:8080
 RESEND_WEBHOOK_SECRET   # required only for the auth-email-webhook delivery feedback function
+ALERT_WEBHOOK_URL       # optional; incoming-webhook URL (Slack/Buzz/Discord/Teams) for hard-failure alerts
 ```
 
 Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to the deployed function. Never place any provider or service-role secret in browser runtime config, Vercel public environment variables, logs, email HTML, or git.

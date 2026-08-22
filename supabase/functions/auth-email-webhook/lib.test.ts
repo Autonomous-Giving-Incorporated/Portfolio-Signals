@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  buildAlertPayload,
   computeSvixSignature,
   eventToDeliveryStatus,
   providerMessageId,
+  shouldAlert,
   verifyResendWebhook
 } from './lib.ts';
 
@@ -62,6 +64,31 @@ test('verifyResendWebhook rejects out-of-tolerance timestamps (replay)', async (
   const headers = await signedHeaders(body);
   // 10 minutes of skew exceeds the 5-minute window.
   assert.equal(await verifyResendWebhook(SECRET, headers, body, NOW_MS + 600_000), false);
+});
+
+test('shouldAlert fires only on hard failures', () => {
+  assert.equal(shouldAlert('bounced'), true);
+  assert.equal(shouldAlert('complained'), true);
+  assert.equal(shouldAlert('delivered'), false);
+  assert.equal(shouldAlert('delayed'), false);
+});
+
+test('buildAlertPayload is redacted and flags platform-admin priority', () => {
+  const admin = buildAlertPayload({
+    kind: 'platform_admin_magic_link',
+    reason: 'bounced',
+    dispatchRef: 'msg_123',
+    occurredAt: '2026-08-22T00:00:00Z'
+  });
+  assert.match(admin.text, /bounced \(platform admin\)/);
+  assert.match(admin.text, /kind=platform_admin_magic_link/);
+  assert.match(admin.text, /ref=msg_123/);
+
+  const tenant = buildAlertPayload({ kind: 'tenant_member_magic_link', reason: 'complained' });
+  assert.match(tenant.text, /complained:/);
+  assert.doesNotMatch(tenant.text, /platform admin/);
+  // Never leak a recipient address: payload is derived only from provided fields.
+  assert.doesNotMatch(JSON.stringify(buildAlertPayload({ reason: 'bounced' })), /@/);
 });
 
 // Provenance: auth-email hardening — Resend delivery feedback loop

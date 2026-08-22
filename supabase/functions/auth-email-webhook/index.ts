@@ -1,5 +1,11 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
-import { eventToDeliveryStatus, providerMessageId, verifyResendWebhook } from './lib.ts';
+import {
+  buildAlertPayload,
+  eventToDeliveryStatus,
+  providerMessageId,
+  shouldAlert,
+  verifyResendWebhook
+} from './lib.ts';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -47,6 +53,33 @@ Deno.serve(async (request) => {
     p_occurred_at: occurredAt
   });
   if (result.error) return json({ error: 'delivery_record_failed' }, 500);
+
+  // Best-effort operator alert on hard failures via a channel-agnostic incoming
+  // webhook (Slack / Buzz / Discord / Teams). Redacted: kind/reason/ref only, no
+  // recipient address. Never fails the webhook response if the notify call errors.
+  if (shouldAlert(status)) {
+    const alertUrl = Deno.env.get('ALERT_WEBHOOK_URL');
+    if (alertUrl) {
+      let kind: string | null = null;
+      const row = await service
+        .from('auth_email_dispatches')
+        .select('kind')
+        .eq('provider_message_id', messageId.slice(0, 160))
+        .limit(1);
+      if (!row.error && Array.isArray(row.data) && row.data[0]) {
+        kind = (row.data[0] as { kind?: string }).kind ?? null;
+      }
+      try {
+        await fetch(alertUrl, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(buildAlertPayload({ kind, reason: status, dispatchRef: messageId, occurredAt }))
+        });
+      } catch {
+        // Alerting is best-effort; delivery was already recorded.
+      }
+    }
+  }
 
   return json({ received: true, updated: result.data ?? 0 }, 200);
 });

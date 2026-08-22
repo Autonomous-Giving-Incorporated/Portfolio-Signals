@@ -89,3 +89,31 @@ export function providerMessageId(event: unknown): string {
   const id = data.email_id ?? data.id ?? '';
   return typeof id === 'string' ? id : '';
 }
+
+// Hard delivery failures worth alerting operators about (delivered/delayed are not).
+const ALERT_STATUSES = new Set(['bounced', 'complained']);
+
+/** Whether a delivery outcome should raise an operator alert. */
+export function shouldAlert(deliveryStatus: string): boolean {
+  return ALERT_STATUSES.has(deliveryStatus);
+}
+
+/**
+ * Build a redacted alert message for a channel-agnostic incoming webhook
+ * (Slack / Buzz / Discord / Teams all accept a `text` field). Never includes a
+ * recipient address — only the dispatch kind, reason, id, and time.
+ */
+export function buildAlertPayload(input: {
+  kind?: string | null;
+  reason: string;
+  dispatchRef?: string | null;
+  occurredAt?: string | null;
+}): { text: string } {
+  const kind = input.kind || 'unknown';
+  const when = input.occurredAt || new Date().toISOString();
+  const ref = input.dispatchRef || 'unknown';
+  const priority = kind === 'platform_admin_magic_link' ? ' (platform admin)' : '';
+  return {
+    text: `AGI auth email ${input.reason}${priority}: kind=${kind}, ref=${ref}, at=${when}. See auth_email_alerts for details.`
+  };
+}
