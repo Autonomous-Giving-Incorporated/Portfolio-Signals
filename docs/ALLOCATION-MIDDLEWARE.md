@@ -44,6 +44,7 @@ Public `data/public-campaign.json` contracts for the GitHub Pages suite remain s
 | Mission Intelligence metrics (SPEC-030 Proposed) | CODE_SHIPPED fail-closed policies (`src/intel/metrics.mjs`); not live; not READY; not Accepted; no formula |
 | AGI console projection (read-only view) | CODE_SHIPPED (`src/intel/console-projection.mjs`); not live; not READY; not a product console; SPEC-029/030 stay Proposed |
 | every.org webhook (`POST /webhooks/every-org`) | Shipped |
+| Givebutter / Donorbox webhooks | CODE_SHIPPED in-repo (`POST /webhooks/givebutter`, `POST /webhooks/donorbox`); not live; not READY |
 | CSV import | Shipped on Node (`POST /import/csv`) and Worker (same path; director write; SPEC-026 twin) |
 | Operator UI (Available · Allocate · Inbox · Packet) | Shipped |
 | File-backed durable store (`DATA_FILE`) | Shipped |

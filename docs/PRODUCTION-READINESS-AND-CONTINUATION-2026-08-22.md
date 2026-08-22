@@ -315,7 +315,7 @@ Agents should **not** unpark login, invent a live Worker URL, or publish Civic F
 
 | Repo | Current useful HEAD / PR | Agent work remaining | Human work remaining |
 |---|---|---|---|
-| Portfolio-Signals | `main` includes synthetic v1 + auth-email hardening | Doc pointers (this file) | #18, #19, #20, C3 sign-off, leadership queue |
+| Portfolio-Signals | `main` includes synthetic v1 + auth-email hardening; draft [#52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) is SPEC-026 P1 CODE_SHIPPED | #52 review findings fail-closed on draft; live pointing still operator-owned | #18, #19, #20, C3 sign-off, #52 live pointing, leadership queue |
 | Impact-Relay | [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) **merged** 2026-08-22 | Optional README/CLAUDE hygiene | Live cohort / FINDINGS |
 | Autonomous-Giving-Incorporated | [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) **merged** 2026-08-22 | None on public-site v0.1 | Keep SPEC-028 PARKED |
 | Autonomous-Giving-Specs | v2.0.0 released | Optional: refresh `IMPLEMENTATION-PROGRESS.md` (dated 2026-08-08) | Do not accept 029/030 from this plan |
@@ -337,6 +337,7 @@ Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
 | 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
 | 4 SPEC-028 | Left PARKED | — |
 | Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v1 deployed on `utdioxwiskzatwoejgiu`. Localhost origin 403. Webhook secret unset (503). Send secrets / P8 not executed | PARTIAL |
+| SPEC-026 P1 connectors | Draft [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings fail-closed. Not live. Not READY. Unlocked pot RMW left as pre-existing pilot-scale | CODE_SHIPPED |
 
 Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 

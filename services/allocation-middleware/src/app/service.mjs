@@ -1,6 +1,7 @@
-import { normalizeEveryOrgDonation } from '../connectors/everyorg.mjs';
-import { csvRowToEveryOrgPayload, parseGiftCsv } from '../connectors/csv.mjs';
+import { parseGiftCsv } from '../connectors/csv.mjs';
 import { extractOptInContact } from '../connectors/contact.mjs';
+import { normalize_gift } from '../connectors/adapter.mjs';
+import { CONNECTOR_EVERY_ORG, requireConnectorSource } from '../connectors/sources.mjs';
 import { creditGift, availableCents } from '../domain/pots.mjs';
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
@@ -28,6 +29,42 @@ const DEFAULT_LIMITS = Object.freeze({
 /** Seed/fixture chargeIds must not count as live every.org connect. */
 export function isFixtureChargeId(id) {
   return /^fixture[-_]/i.test(String(id || ''));
+}
+
+function setupInstructions(source) {
+  if (source === 'csv') {
+    return [
+      { id: 1, title: 'Choose CSV as the tenant source', detail: 'CSV is the offline twin. It is not a public webhook.' },
+      { id: 2, title: 'Prepare chargeId and netAmount columns', detail: 'Optional columns: amount, campaignKey, programKey, currency, donatedAt.' },
+      { id: 3, title: 'POST /import/csv with a director session', detail: 'Anonymous CSV POST is rejected. This path is not a vendor webhook.' },
+      { id: 4, title: 'Confirm each new chargeId credited once', detail: 'A second row with the same chargeId is a no-op.' },
+    ];
+  }
+  if (source === 'givebutter') {
+    return [
+      { id: 1, title: 'Copy the operator-owned Givebutter path', detail: 'Use the URL the operator pastes. Specs do not invent a workers.dev host.' },
+      { id: 2, title: 'Open Givebutter webhook settings', detail: 'Create a webhook for transaction.succeeded. Store the signing secret as a Worker binding.' },
+      { id: 3, title: 'Paste the operator-owned URL', detail: 'Givebutter sends header Signature. AGI compares it to the stored secret.' },
+      { id: 4, title: 'Send a small live test gift', detail: 'Seed/fixture gifts do not count as Connected. Givebutter does not fire this event on its CSV imports.' },
+      { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+    ];
+  }
+  if (source === 'donorbox') {
+    return [
+      { id: 1, title: 'Confirm Donorbox webhook access', detail: 'Custom webhooks need the Donorbox API/Zapier add-on or Premium. Other tenants use CSV.' },
+      { id: 2, title: 'Copy the operator-owned Donorbox path', detail: 'Use the URL the operator pastes. Specs do not invent a workers.dev host.' },
+      { id: 3, title: 'Paste the URL and store the Signature Secret', detail: 'Donorbox sends header Donorbox-Signature. Prefer payload version v2.' },
+      { id: 4, title: 'Send a small live test gift', detail: 'chargeId is the donation id. Never treat stripe_charge_id as chargeId.' },
+      { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+    ];
+  }
+  return [
+    { id: 1, title: 'Copy your webhook URL', detail: 'Use the URL shown in this wizard (includes a secret token).' },
+    { id: 2, title: 'Open every.org nonprofit settings', detail: 'Go to every.org/<your-slug>/admin/settings → Advanced settings.' },
+    { id: 3, title: 'Paste the webhook URL', detail: 'Save. every.org will POST each completed donation to AGI.' },
+    { id: 4, title: 'Send a small live test gift', detail: 'Donate $1 on your nonprofit page. Seed/fixture gifts do not count as Connected.' },
+    { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+  ];
 }
 
 function giftSummary(gift) {
@@ -147,21 +184,93 @@ export function createService({
     }
   }
 
+  function persistWebhookEvent(state, payload, { source, eventName, chargeId }) {
+    const webhookEvents = [...(state.webhookEvents || [])];
+    webhookEvents.push({
+      id: `wh_${source}_${chargeId || 'none'}_${webhookEvents.length + 1}`,
+      orgId,
+      source,
+      eventName: eventName || '',
+      chargeId: chargeId || null,
+      payload,
+      createdAt: now(),
+    });
+    return { ...state, webhookEvents };
+  }
+
+  function openException(state, { id, code, message, ref }) {
+    const existing = (state.exceptions || []).find((item) => item.id === id);
+    if (existing) return { state, exception: existing };
+    if (state.exceptions.length >= limits.maxExceptions) throw new Error('STATE_EXCEPTION_LIMIT');
+    const exception = {
+      id,
+      orgId,
+      code,
+      message,
+      open: true,
+      createdAt: now(),
+      ref: ref || {},
+    };
+    return { state: { ...state, exceptions: [...state.exceptions, exception] }, exception };
+  }
+
+  function persistHold(state, payload, result, source) {
+    const withEvent = persistWebhookEvent(state, payload, {
+      source,
+      eventName: result.eventName,
+      chargeId: result.chargeId,
+    });
+    const opened = openException(withEvent, {
+      id: `ex_${result.chargeId || result.eventName || 'hold'}_sync`,
+      code: 'SYNC_FAILURE',
+      message: result.reason || 'held without pot debit',
+      ref: { chargeId: result.chargeId, eventName: result.eventName, source },
+    });
+    return { ...opened, created: false, held: true, gift: null };
+  }
+
   function persistNormalizedGift(state, payload, { source } = {}) {
-    let gift = normalizeEveryOrgDonation(payload, { orgId });
+    const src = source || CONNECTOR_EVERY_ORG;
+    const result = normalize_gift(payload, { source: src, orgId, now });
+    if (result.kind === 'hold' || result.kind === 'uncomputable') {
+      return persistHold(state, payload, result, src);
+    }
+    let gift = result.gift;
     const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
     gift = { ...gift, ...mapped };
     if (source) gift = { ...gift, source };
-    requireBounded(gift.chargeId, 256, 'CHARGE_ID_TOO_LONG');
-    requireBounded(gift.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
-    requireBounded(gift.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
-    requireBounded(gift.currency, 16, 'CURRENCY_TOO_LONG');
-    const credited = creditGift(state, gift, limits);
-    const contact = extractOptInContact(payload);
-    if (!contact || !credited.created) return { ...credited, gift };
-    const giftContacts = new Map(credited.state.giftContacts || []);
-    giftContacts.set(gift.chargeId, { chargeId: gift.chargeId, ...contact });
-    return { ...credited, gift, state: { ...credited.state, giftContacts } };
+    const contact = gift.contact !== undefined ? gift.contact : extractOptInContact(payload, { source: src });
+    const { contact: _ignoredContact, ...giftRow } = gift;
+    requireBounded(giftRow.chargeId, 256, 'CHARGE_ID_TOO_LONG');
+    requireBounded(giftRow.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
+    requireBounded(giftRow.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
+    requireBounded(giftRow.currency, 16, 'CURRENCY_TOO_LONG');
+    const potId = `${orgId}|${giftRow.campaignKey}|${giftRow.programKey}`;
+    const potExisted = state.pots.has(potId);
+    const hints = giftRow.campaignKey !== 'general';
+    let working = persistWebhookEvent(state, payload, {
+      source: giftRow.source,
+      eventName: result.eventName,
+      chargeId: giftRow.chargeId,
+    });
+    const credited = creditGift(working, giftRow, limits);
+    let next = credited.state;
+    if (credited.created && !potExisted && hints) {
+      const labeled = openException(next, {
+        id: `ex_${giftRow.chargeId}_unmapped`,
+        code: 'UNMAPPED_FUNDRAISER',
+        message: `New — review campaign ${giftRow.campaignKey}`,
+        ref: { chargeId: giftRow.chargeId, campaignKey: giftRow.campaignKey, programKey: giftRow.programKey },
+      });
+      next = labeled.state;
+      const labels = new Map(next.labels || []);
+      labels.set(`${orgId}|campaign|${giftRow.campaignKey}`, 'New — review');
+      next = { ...next, labels };
+    }
+    if (!contact || !credited.created) return { ...credited, gift: giftRow, state: next };
+    const giftContacts = new Map(next.giftContacts || []);
+    giftContacts.set(giftRow.chargeId, { chargeId: giftRow.chargeId, ...contact });
+    return { ...credited, gift: giftRow, state: { ...next, giftContacts } };
   }
 
   return {
@@ -176,12 +285,16 @@ export function createService({
         capturedAt: now(),
       });
     },
-    async ingestEveryOrg(payload, options = {}) {
-      const credited = await withState((state) => persistNormalizedGift(state, payload, options));
+    async ingestGift(payload, options = {}) {
+      const source = options.source || CONNECTOR_EVERY_ORG;
+      const credited = await withState((state) => persistNormalizedGift(state, payload, { ...options, source }));
       if (credited.created && credited.gift) {
         await this.maybeRecordGiftSignal(credited.gift, { source: credited.gift.source, verified: true });
       }
       return credited;
+    },
+    async ingestEveryOrg(payload, options = {}) {
+      return this.ingestGift(payload, { ...options, source: options.source || CONNECTOR_EVERY_ORG });
     },
     async importCsv(text) {
       const rows = parseGiftCsv(text);
@@ -190,8 +303,7 @@ export function createService({
       await withState((state) => {
         let s = state;
         for (const row of rows) {
-          const payload = csvRowToEveryOrgPayload(row, { donatedAtFallback: now() });
-          const r = persistNormalizedGift(s, payload, { source: 'csv' });
+          const r = persistNormalizedGift(s, row, { source: 'csv' });
           s = r.state;
           if (r.created) {
             created += 1;
@@ -263,13 +375,35 @@ export function createService({
       return { ok: true };
     },
     async setDonationLink(value) {
-      const donationLink = normalizeDonationLink(value);
-      await withState((state) => ({ state: { ...state, donationLink } }));
-      return { donationLink };
+      const result = await this.setOnboarding({ donationLink: value });
+      return { donationLink: result.donationLink };
+    },
+    async setOnboarding({ donationLink, source } = {}) {
+      let nextSource;
+      if (source !== undefined && source !== null && String(source).trim() !== '') {
+        nextSource = requireConnectorSource(source);
+      }
+      const nextLink = donationLink !== undefined ? normalizeDonationLink(donationLink) : undefined;
+      await withState((state) => ({
+        state: {
+          ...state,
+          donationLink: nextLink !== undefined ? nextLink : state.donationLink,
+          tenantSource: nextSource || state.tenantSource || CONNECTOR_EVERY_ORG,
+        },
+      }));
+      const state = ensureExtras(await store.load());
+      return {
+        donationLink: publicDonationLink(state.donationLink),
+        source: state.tenantSource || CONNECTOR_EVERY_ORG,
+      };
     },
     async getDonationLink() {
       const state = ensureExtras(await store.load());
       return publicDonationLink(state.donationLink);
+    },
+    async getTenantSource() {
+      const state = ensureExtras(await store.load());
+      return state.tenantSource || CONNECTOR_EVERY_ORG;
     },
     async attachProof({ allocationId, uri, note, attachedBy }) {
       if (!uri || !String(uri).trim()) throw new Error('PROOF_URI_REQUIRED');
@@ -395,6 +529,7 @@ export function createService({
           }),
         ),
         donationLink: publicDonationLink(state.donationLink),
+        source: state.tenantSource || CONNECTOR_EVERY_ORG,
         impactNotices: [...(state.impactNotices || new Map()).values()].filter((n) => n.orgId === orgId),
         impactDeliveries: (state.impactDeliveries || []).filter((d) => d.orgId === orgId),
         proofWaivers: [...(state.proofWaivers || new Map()).values()],
@@ -458,9 +593,10 @@ export function createService({
       const lastGift = gifts.slice().sort(byDonatedDesc)[0];
       const lastLiveGift = liveGifts.slice().sort(byDonatedDesc)[0];
       const receivedLive = liveGifts.length > 0;
+      const tenantSource = state.tenantSource || CONNECTOR_EVERY_ORG;
       const steps = {
         copyWebhookUrl: Boolean(meta.webhookUrl),
-        pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see every.org admin
+        pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see vendor admin
         receivedFixtureGifts: fixtureGifts.length > 0,
         // API name kept for clients; meaning is live (non-fixture) gift only
         receivedTestGift: receivedLive,
@@ -470,11 +606,15 @@ export function createService({
       };
       return {
         orgId,
-        connector: 'every.org',
-        authModel: 'webhook_url', // not OAuth
+        connector: tenantSource,
+        source: tenantSource,
+        authModel: tenantSource === 'csv' ? 'csv_import' : 'webhook_url', // not OAuth
         donationLink: publicDonationLink(state.donationLink),
         webhookUrl: meta.webhookUrl || null,
+        webhookPath: meta.webhookPath || null,
         hasWebhookToken: Boolean(meta.hasWebhookToken),
+        hasGivebutterSecret: Boolean(meta.hasGivebutterSecret),
+        hasDonorboxSecret: Boolean(meta.hasDonorboxSecret),
         hasOperatorToken: Boolean(meta.hasOperatorToken),
         steps,
         counts: {
@@ -486,35 +626,7 @@ export function createService({
         },
         lastGift: giftSummary(lastGift),
         lastLiveGift: giftSummary(lastLiveGift),
-        instructions: [
-          {
-            id: 1,
-            title: 'Copy your webhook URL',
-            detail: 'Use the URL shown in this wizard (includes a secret token).',
-          },
-          {
-            id: 2,
-            title: 'Open every.org nonprofit settings',
-            detail: 'Go to every.org/<your-slug>/admin/settings → Advanced settings.',
-          },
-          {
-            id: 3,
-            title: 'Paste the webhook URL',
-            detail: 'Save. every.org will POST each completed donation to AGI.',
-          },
-          {
-            id: 4,
-            title: 'Send a small live test gift',
-            detail:
-              'Donate $1 on your nonprofit page. Seed/fixture gifts do not count as Connected.',
-          },
-          {
-            id: 5,
-            title: 'Confirm live gift landed',
-            detail:
-              'Status becomes Connected when a non-fixture chargeId is received. Then allocate.',
-          },
-        ],
+        instructions: setupInstructions(tenantSource),
       };
     },
   };

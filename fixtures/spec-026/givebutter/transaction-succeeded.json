@@ -1,0 +1,19 @@
+{
+  "event": "transaction.succeeded",
+  "data": {
+    "id": "fixture-gb-txn-001",
+    "campaign_id": 39,
+    "campaign_code": "ABCDEF",
+    "fund_id": null,
+    "fund_code": null,
+    "first_name": "Alex",
+    "last_name": "Example",
+    "email": "alex@example.org",
+    "communication_opt_in": true,
+    "amount": 250,
+    "donated": 250,
+    "payout": 250,
+    "currency": "USD",
+    "transacted_at": "2026-08-22T12:15:22+00:00"
+  }
+}

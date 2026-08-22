@@ -407,6 +407,33 @@ test('duplicate proof does not double-send ImpactNotice', async () => {
   assert.equal((await service.listImpactNotices()).length, 1);
 });
 
+test('setup stores tenant source and optional HTTPS donation_link', async () => {
+  const service = createService({ orgId: 'org_hacker_dojo', store: createMemoryStore() });
+  const headers = {
+    'content-type': 'application/json',
+    authorization: `Bearer ${jwt('aal2')}`,
+  };
+  const saved = await withRuntime(
+    { path: '/setup', method: 'POST', headers, body: { source: 'donorbox' } },
+    { service },
+  );
+  assert.equal(saved.status, 200);
+  const body = await saved.json();
+  assert.equal(body.source, 'donorbox');
+  assert.equal(body.donationLink, null);
+  const status = await withRuntime(
+    { path: '/setup', headers: { authorization: `Bearer ${jwt('aal2')}` } },
+    { service },
+  );
+  assert.equal((await status.json()).source, 'donorbox');
+  const stripe = await withRuntime(
+    { path: '/setup', method: 'POST', headers, body: { source: 'stripe' } },
+    { service },
+  );
+  assert.equal(stripe.status, 400);
+  assert.equal((await stripe.json()).error, 'INVALID_CONNECTOR_SOURCE');
+});
+
 test('setup stores HTTPS donation_link and rejects non-HTTPS', async () => {
   const service = createService({ orgId: 'org_hacker_dojo', store: createMemoryStore() });
   const headers = {

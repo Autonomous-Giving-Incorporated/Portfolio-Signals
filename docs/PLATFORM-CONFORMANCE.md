@@ -32,7 +32,7 @@ Honest status only. In-repo is not live pointing, not a live gift, and not leade
 | EVENT-001 / EVENT-002 / EVENT-003 | Retained in-process. Not published as named live events. |
 | SPEC-023 | Tracked. Gift summaries + pot credits; no donation capture; Stripe `/webhooks/stripe` returns 404. |
 | SPEC-024 | Tracked. every.org inbound webhook; Stripe is not a donation connector; optional Resend for ImpactNotice email. |
-| SPEC-026 | Partial. Worker `POST /webhooks/every-org` and Worker `POST /import/csv` are in-repo. Live every.org pointing remains operator-owned. Gift write and Signal write stay separate. |
+| SPEC-026 | v1.1.0 P1 CODE_SHIPPED in-repo: same adapter (`verify_webhook`, `normalize_gift`, `list_campaign_hints`); `POST /webhooks/every-org` kept; proposed `POST /webhooks/givebutter` and `POST /webhooks/donorbox`; authenticated `POST /import/csv`; tenant `source` + optional HTTPS `donation_link`. Live pointing remains operator-owned. Not READY. Gift write and Signal write stay separate. |
 | SPEC-027 | In-repo after proof/waive when opt-in contact and tenant `donation_link` exist. Not a live send receipt. |
 | SPEC-028 | Tracked as suite topology and money pointer (Cloudflare + Supabase; no fifth capability). This repo is not the AGI control plane. |
 | SPEC-029 | Proposed 0.1.0. Not Accepted. Read-only in-process projection CODE_SHIPPED (`src/intel/mission-graph.mjs`). Not live. Not READY. No SoR, no graph DB, no learning-feedback minting. Evidence: [MISSION-GRAPH.md](MISSION-GRAPH.md). Consumer pin remains Specs v2.0.0. |

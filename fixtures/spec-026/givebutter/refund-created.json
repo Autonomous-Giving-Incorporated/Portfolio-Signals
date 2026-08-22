@@ -1,0 +1,8 @@
+{
+  "event": "refund.created",
+  "data": {
+    "id": "fixture-gb-refund-001",
+    "transaction_id": "fixture-gb-txn-001",
+    "amount": 250
+  }
+}

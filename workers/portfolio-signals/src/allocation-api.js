@@ -2,7 +2,8 @@ import { createService } from '../../../services/allocation-middleware/src/app/s
 import { createAuthVerifier } from '../../../services/allocation-middleware/src/app/auth.mjs';
 import { createSupabaseStore } from '../../../services/allocation-middleware/src/app/supabase-store.mjs';
 import { seedFromObject } from '../../../services/allocation-middleware/src/app/seed.mjs';
-import { buildEveryOrgWebhookUrl } from '../../../services/allocation-middleware/src/app/config.mjs';
+import { buildConnectorWebhookUrl } from '../../../services/allocation-middleware/src/app/config.mjs';
+import { webhookPathForSource } from '../../../services/allocation-middleware/src/connectors/sources.mjs';
 import { createResendNotifier } from '../../../services/allocation-middleware/src/app/impact-notice.mjs';
 import {
   DEFAULT_MAX_JSON_BODY_BYTES,
@@ -47,6 +48,8 @@ export function resolveAllocationBindings(env = {}) {
     anonKey: env.PLATFORM_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || '',
     serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY || '',
     webhookToken: env.WEBHOOK_TOKEN || '',
+    givebutterSecret: env.GIVEBUTTER_WEBHOOK_SECRET || '',
+    donorboxSecret: env.DONORBOX_WEBHOOK_SECRET || '',
     publicBaseUrl: (env.PUBLIC_BASE_URL || '').replace(/\/$/, ''),
   };
 }
@@ -265,10 +268,16 @@ export async function handleAllocationApi(request, env, options = {}) {
       const authz = await authorize(request, 'write', runtime);
       if (!authz.ok) return authz.response;
       const origin = runtime.bindings.publicBaseUrl || url.origin;
-      const webhookUrl = buildEveryOrgWebhookUrl(origin, runtime.bindings.webhookToken);
+      const tenantSource = await runtime.service.getTenantSource();
+      const webhookUrl = buildConnectorWebhookUrl(origin, tenantSource, {
+        webhookToken: runtime.bindings.webhookToken,
+      });
       const status = await runtime.service.getSetupStatus({
         webhookUrl,
+        webhookPath: webhookPathForSource(tenantSource),
         hasWebhookToken: Boolean(runtime.bindings.webhookToken),
+        hasGivebutterSecret: Boolean(runtime.bindings.givebutterSecret),
+        hasDonorboxSecret: Boolean(runtime.bindings.donorboxSecret),
         hasOperatorToken: false,
       });
       return jsonResponse(200, { ...status, directorLoginEnabled: true, operatorTokenFallback: false });
@@ -277,7 +286,10 @@ export async function handleAllocationApi(request, env, options = {}) {
       const authz = await authorize(request, 'write', runtime);
       if (!authz.ok) return authz.response;
       const body = await readJson(request, maxBytes);
-      const result = await runtime.service.setDonationLink(body.donationLink);
+      const result = await runtime.service.setOnboarding({
+        donationLink: body.donationLink,
+        source: body.source,
+      });
       return jsonResponse(200, result);
     }
     if (request.method === 'POST' && url.pathname === '/seed') {
