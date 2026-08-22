@@ -92,7 +92,7 @@ The 17 August audit is still the first stack-wide record. Several of its **agent
 | AGI public-source URLs pointed at historical `scrimshawlife-ctrl` 404s | Retargeted to org `data/public-*.json` (AGI PR #13) | OBSERVED in AGI docs |
 | Signals fallback taught Hacker Dojo / 18 attendees | Fail-closed fallback is Community AI Lab / 25 / $2500 | OBSERVED in AGI docs |
 | `autogive.app` still described as Vercel-live | DNS cutover to Worker `agi-public` recorded 2026-08-22 | OBSERVED in AGI `docs/DNS-CUTOVER-CHECKLIST.md` |
-| No Civic Forge / suite join-key corpus | AutoGive Synthetic Dataset v1 landed in Portfolio Signals ([PR #47](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/47)); IR [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) and AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) are draft, CI green | SYNTHETIC_ONLY |
+| No Civic Forge / suite join-key corpus | AutoGive Synthetic Dataset v1 landed in Portfolio Signals ([PR #47](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/47)); IR [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) and AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) merged. Live `data/` untouched | SYNTHETIC_ONLY |
 | Auth-email brand / throttle / Resend path thin | PS PRs #41–#46 merged; 2026-08-22 platform apply+deploy OBSERVED (`auth-email` v3, `auth-email-webhook` v1, IP-budget/delivery/alerts migrations). Send secrets NOT_COMPUTABLE; webhook secret OBSERVED unset | PARTIAL; P8 PENDING |
 | Suite-stack-audit / brand-auth-gate / agent-token scope | Merged on Portfolio Signals (#36, #37, #38) | OBSERVED in-repo |
 | Worker `portfolio-signals` ABSENT | Unchanged | OBSERVED 2026-08-15; not re-listed this session |
@@ -122,7 +122,7 @@ The 17 August audit is still the first stack-wide record. Several of its **agent
 | Specs v2.0.0 pin | Docs pin, not READY | — |
 | AGI static export + fail-closed signals | Shipped; live projection rejected | Authorized IR `VERIFIED` outcome (human) |
 | Community AI Lab SPEC-011 demo | Canonical | Do not replace with Civic Forge |
-| Civic Forge synthetic v1 | SYNTHETIC_ONLY join-key corpus | Reviewer merge of IR #12 / AGI #18 |
+| Civic Forge synthetic v1 | SYNTHETIC_ONLY join-key corpus | Landed. Do not promote to live `data/` |
 | Workspace magic-link login | OBSERVED operator pass | MFA dry-run still operator (#18) |
 | MFA enforced on privileged roles | `NOT_RUN_FOR_CURRENT_MAIN` | Operator + people (#18) |
 | Onboarding pack schema + Edge | OBSERVED 2026-08-08 | MFA dry-run (#18) |
@@ -201,7 +201,7 @@ Work is ordered by **gate**, not calendar. Later waves assume earlier exits. Ite
 
 **Do not:** publish Civic Forge as live `data/`; point `FUND_INTEL_PUBLIC_URL` / `IMPACT_RELAY_PUBLIC_URL` at fixture files; label the pack `OBSERVED`.
 
-**Agent-safe follow-ups after merge:** none required for production. Optional doc-only: IR README host-UI pointer if still on `scrimshawlife-ctrl/Hacker-Dojo`; IR `CLAUDE.md` test-count (~397, not ~260).
+**Agent-safe follow-ups after merge:** none required for production. Optional IR hygiene landed in [IR #17](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/17) `59e3e8f` (413 collected tests; Pages 404 recorded).
 
 ### Wave 1 — Operator gates that unlock later work *(ops / human)*
 
@@ -315,11 +315,11 @@ Agents should **not** unpark login, invent a live Worker URL, or publish Civic F
 
 | Repo | Current useful HEAD / PR | Agent work remaining | Human work remaining |
 |---|---|---|---|
-| Portfolio-Signals | `main` includes synthetic v1 + auth-email hardening; draft [#52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) is SPEC-026 P1 CODE_SHIPPED | #52 review findings fail-closed on draft; live pointing still operator-owned | #18, #19, #20, C3 sign-off, #52 live pointing, leadership queue |
-| Impact-Relay | [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) **merged** 2026-08-22 | Optional README/CLAUDE hygiene | Live cohort / FINDINGS |
+| Portfolio-Signals | `main` `4c38323` includes synthetic v1 + auth-email hardening + merged [#52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) SPEC-026 P1 CODE_SHIPPED | none required on current main; live pointing still operator-owned | #18, #19, #20, C3 sign-off, #52 live pointing, leadership queue |
+| Impact-Relay | [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) and [PR #17](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/17) **merged** 2026-08-22 | none required | Live cohort / FINDINGS |
 | Autonomous-Giving-Incorporated | [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) **merged** 2026-08-22 | None on public-site v0.1 | Keep SPEC-028 PARKED |
-| Autonomous-Giving-Specs | v2.0.0 released | Optional: refresh `IMPLEMENTATION-PROGRESS.md` (dated 2026-08-08) | Do not accept 029/030 from this plan |
-| agi-cross-repo-harness | Scaffold + local contract-schema work | Grow only after W4.1 | Private repo; not a production runtime |
+| Autonomous-Giving-Specs | v2.0.0 released; `IMPLEMENTATION-PROGRESS` refreshed 2026-08-22 | none required for this plan | Do not accept 029/030 from this plan |
+| agi-cross-repo-harness | Pins + C3 PROPOSED guard + PLAN-03 skip/fail-closed ([#20](https://github.com/Autonomous-Giving-Incorporated/agi-cross-repo-harness/pull/20)) | Grow only after W4.1 | Private repo; not a production runtime |
 
 ---
 
@@ -337,7 +337,7 @@ Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
 | 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
 | 4 SPEC-028 | Left PARKED | — |
 | Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v1 deployed on `utdioxwiskzatwoejgiu`. Localhost origin 403. Webhook secret unset (503). Send secrets / P8 not executed | PARTIAL |
-| SPEC-026 P1 connectors | Draft [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings fail-closed. Not live. Not READY. Unlocked pot RMW left as pre-existing pilot-scale | CODE_SHIPPED |
+| SPEC-026 P1 connectors | Merged [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings fail-closed. Not live. Not READY. Unlocked pot RMW left as pre-existing pilot-scale | CODE_SHIPPED |
 
 Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 
@@ -349,7 +349,7 @@ Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 - DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…2026-08-22). This session did not re-probe live HTTP.
 - Civic Forge money totals: from the merged Portfolio Signals fixture pack and prior disposable seed (`024_autogive_synthetic_v1.sql`). SYNTHETIC_ONLY.
 - PS issues #18 / #19 / #20: open via GitHub API on 2026-08-22. #19 reopened after local-synthetic PR #32.
-- IR #12 and AGI #18: draft, mergeable, CI success on 2026-08-22.
+- IR #12 and AGI #18 squash-merged 2026-08-22. PS #52 merged `4c38323`. Specs #18 `dcf7f6b` and harness #20 `5712add` record those SHAs.
 - Cloudflare Worker inventory and `NO_GO`: inherited from CURRENT-STATE (recorded 2026-08-15). This session did not re-list the live Cloudflare account.
 - AGI `next build` on the Civic Forge branch still logged `source=policy_rejected reason=impact.missing_verified_outcome`. Fail-closed is correct.
 
