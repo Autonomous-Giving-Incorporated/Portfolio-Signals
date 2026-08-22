@@ -30,6 +30,7 @@ service_role_on_vercel: PROHIBITED
 1. [CURRENT-STATE.md](CURRENT-STATE.md) — live production vs historical evidence  
 1a. [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md) — informative suite-wide audit (not READY)  
 1b. [PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md) — 2026-08-22 readiness successor + continuation waves (not READY)  
+1c. [C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md](C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md) — C3 still PROPOSED; Phase D gated (not sign-off)  
 2. [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) — **onboarding hub** (done without login vs needs login)  
 3. [PLATFORM.md](PLATFORM.md) — hosts, Supabase ref, env rules  
 3a. [CLOUDFLARE.md](CLOUDFLARE.md) — Workers public host + webhook route (live pointing remaining)  

@@ -194,9 +194,9 @@ Work is ordered by **gate**, not calendar. Later waves assume earlier exits. Ite
 
 | ID | Task | Owner | Exit |
 |---|---|---|---|
-| W0.1 | Human review + merge Impact Relay [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) | Reviewer *(human)* | Merged; `data/*.json` unchanged |
-| W0.2 | Human review + merge AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) | Reviewer *(human)* | Merged; Community AI Lab remains canonical demo |
-| W0.3 | Close conflicting IR [PR #9](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/9) (superseded by merged host-pointer work) | Reviewer *(human)* | Closed, not merged |
+| W0.1 | Human review + merge Impact Relay [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) | Reviewer *(human)* | **Merged** 2026-08-22 (`3ec3b95`). Live `data/public-impact.json` still `gated:public_shell` / `outcomes: []` |
+| W0.2 | Human review + merge AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) | Reviewer *(human)* | **Merged** 2026-08-22 (`0925eb7`). Community AI Lab remains canonical demo |
+| W0.3 | Close conflicting IR [PR #9](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/9) (superseded by merged host-pointer work) | Reviewer *(human)* | **Closed** 2026-08-22, not merged |
 | W0.4 | Land this document on Portfolio Signals `main` | Engineering | START_HERE / CURRENT-STATE point here |
 
 **Do not:** publish Civic Forge as live `data/`; point `FUND_INTEL_PUBLIC_URL` / `IMPACT_RELAY_PUBLIC_URL` at fixture files; label the pack `OBSERVED`.
@@ -209,10 +209,10 @@ Work is ordered by **gate**, not calendar. Later waves assume earlier exits. Ite
 
 | ID | Task | Issue / doc | Exit |
 |---|---|---|---|
-| W1.1 | MFA-enforced Client Onboarding Pack dry-run on `org_hacker_dojo` with five synthetic documents + one parked workbook | [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18), [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) | Commit-scoped receipt; `production_import` still BLOCKED |
-| W1.2 | Hosted isolated restore drill (empty project, not `utdioxwiskzatwoejgiu` / `ecxkhihlbrcwpavfoaoq`) | [#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19), [templates/RESTORE-DRILL-EVIDENCE.md](templates/RESTORE-DRILL-EVIDENCE.md) | Privacy-safe receipt; RTO/RPO still unaccepted |
-| W1.3 | Sign or explicitly defer C3 `PUBLIC_DATA_POLICY` | AGI `PUBLIC_DATA_POLICY.md`; IR `docs/CONTRACT-GOVERNANCE.md` | Approved **or** written deferral; Phase D stays gated |
-| W1.4 | Confirm `agi_custom_access_token_hook` is registered in Supabase Dashboard | [IMPACT-RELAY.md](IMPACT-RELAY.md) | Hook OBSERVED; fixture Bearer remains last-resort only |
+| W1.1 | MFA-enforced Client Onboarding Pack dry-run on `org_hacker_dojo` with five synthetic documents + one parked workbook | [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18), [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) | **NOT_COMPUTABLE** this session — no MFA session, no `SUPABASE_ACCESS_TOKEN` |
+| W1.2 | Hosted isolated restore drill (empty project, not `utdioxwiskzatwoejgiu` / `ecxkhihlbrcwpavfoaoq`) | [#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19), [templates/RESTORE-DRILL-EVIDENCE.md](templates/RESTORE-DRILL-EVIDENCE.md) | **NOT_COMPUTABLE** this session — no isolated hosted project credentials |
+| W1.3 | Sign or explicitly defer C3 `PUBLIC_DATA_POLICY` | AGI `PUBLIC_DATA_POLICY.md`; IR `docs/CONTRACT-GOVERNANCE.md` | **Written deferral** 2026-08-22 — [C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md](C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md). Still PROPOSED. Phase D stays gated |
+| W1.4 | Confirm `agi_custom_access_token_hook` is registered in Supabase Dashboard | [IMPACT-RELAY.md](IMPACT-RELAY.md) | **NOT_COMPUTABLE** — Dashboard-owned; this connector cannot reach `utdioxwiskzatwoejgiu` |
 | W1.5 | Enable GitHub secret scanning / branch protection where API 403 today | CURRENT-STATE | Operator-owned |
 
 **HD-OI-019 exit still open on current main:**
@@ -234,7 +234,7 @@ Wave 1 closes the first four lines. It does **not** split production or authoriz
 
 | ID | Task | Issue / doc | Exit |
 |---|---|---|---|
-| W2.1 | Deploy one durable named host (designed: Workers `portfolio-signals`, not Render / Fly / Railway) | [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20), [CLOUDFLARE.md](CLOUDFLARE.md), [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Health/readiness OBSERVED on a stable URL |
+| W2.1 | Deploy one durable named host (designed: Workers `portfolio-signals`, not Render / Fly / Railway) | [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20), [CLOUDFLARE.md](CLOUDFLARE.md), [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md) | **NOT_COMPUTABLE** — `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` ABSENT; do not invent a Worker URL |
 | W2.2 | Set Worker secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SUPABASE_SERVICE_ROLE_KEY` server-side only) | Operator; Bindings has **no secret-set tool** | Secrets not in git / HTML |
 | W2.3 | Register every.org Advanced webhook; receive one controlled **non-fixture** gift | [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) | `liveGifts >= 1`; chargeId idempotent |
 | W2.4 | Director JWT allocate → proof → packet; unauthenticated mutation rejected | [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) | Director sign-off recorded |
@@ -292,7 +292,7 @@ If only one thing happens after this document lands:
 
 **Operators run Wave 1.1 ([issue #18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) — MFA onboarding-pack dry-run on Hacker Dojo with synthetic documents.**
 
-That is the highest-leverage closed loop that does not require every.org admin access, does not move money, and does not weaken fail-closed public claims. Reviewers can merge Wave 0 drafts in parallel.
+That is the highest-leverage closed loop that does not require every.org admin access, does not move money, and does not weaken fail-closed public claims. Wave 0 drafts are merged. This loop is now the blocking operator step.
 
 Agents should **not** unpark login, invent a live Worker URL, or publish Civic Forge.
 
@@ -315,15 +315,34 @@ Agents should **not** unpark login, invent a live Worker URL, or publish Civic F
 
 | Repo | Current useful HEAD / PR | Agent work remaining | Human work remaining |
 |---|---|---|---|
-| Portfolio-Signals | `main` includes synthetic v1 + auth-email hardening | Doc pointers (this file) | #18, #19, #20, C3, leadership queue |
-| Impact-Relay | Draft [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) CI green | Optional README/CLAUDE hygiene after merge | Merge #12; close #9; live cohort / FINDINGS |
-| Autonomous-Giving-Incorporated | Draft [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) CI green | None on public-site v0.1 | Merge #18; keep SPEC-028 PARKED |
+| Portfolio-Signals | `main` includes synthetic v1 + auth-email hardening | Doc pointers (this file) | #18, #19, #20, C3 sign-off, leadership queue |
+| Impact-Relay | [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) **merged** 2026-08-22 | Optional README/CLAUDE hygiene | Live cohort / FINDINGS |
+| Autonomous-Giving-Incorporated | [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) **merged** 2026-08-22 | None on public-site v0.1 | Keep SPEC-028 PARKED |
 | Autonomous-Giving-Specs | v2.0.0 released | Optional: refresh `IMPLEMENTATION-PROGRESS.md` (dated 2026-08-08) | Do not accept 029/030 from this plan |
 | agi-cross-repo-harness | Scaffold + local contract-schema work | Grow only after W4.1 | Private repo; not a production runtime |
 
 ---
 
-## 10. Evidence notes for this revision
+## 10. Execution log — 2026-08-22 (this session)
+
+Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
+
+| Wave | Result | Label |
+|---|---|---|
+| 0 Close drafts | IR #12 and AGI #18 squash-merged. IR #9 closed. Civic Forge not copied into `data/` | OBSERVED |
+| 1.1 MFA pack dry-run (#18) | No workspace MFA session; `SUPABASE_ACCESS_TOKEN` ABSENT | NOT_COMPUTABLE |
+| 1.2 Hosted restore (#19) | No isolated hosted project credentials | NOT_COMPUTABLE |
+| 1.3 C3 | Written deferral recorded; still PROPOSED | DEFERRED |
+| 2 Allocation pilot (#20) | `CLOUDFLARE_*` ABSENT; no every.org admin; no live gift | NOT_COMPUTABLE |
+| 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
+| 4 SPEC-028 | Left PARKED | — |
+
+Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
+
+- Impact Relay `data/public-impact.json` SHA `5a0325739976727f1d7717bcd1e63a093b413a88` — empty gated shell
+- Portfolio Signals `data/public-campaign.json` SHA `09ab23777be93f7e53d9015fb3578d25c9bd938d` — blocked authenticated-only shell
+
+## 11. Evidence notes for this revision
 
 - DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…2026-08-22). This session did not re-probe live HTTP.
 - Civic Forge money totals: from the merged Portfolio Signals fixture pack and prior disposable seed (`024_autogive_synthetic_v1.sql`). SYNTHETIC_ONLY.
@@ -332,6 +351,6 @@ Agents should **not** unpark login, invent a live Worker URL, or publish Civic F
 - Cloudflare Worker inventory and `NO_GO`: inherited from CURRENT-STATE (recorded 2026-08-15). This session did not re-list the live Cloudflare account.
 - AGI `next build` on the Civic Forge branch still logged `source=policy_rejected reason=impact.missing_verified_outcome`. Fail-closed is correct.
 
-## 11. Change control
+## 12. Change control
 
 This file is informative. It does not amend SPECs, ADRs, contracts, or schemas. It does not authorize import, outreach, money movement, or SPEC-028. Corrections land as a dated successor or a follow-up commit on this file.

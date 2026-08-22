@@ -130,6 +130,7 @@ c3_public_data_policy: PROPOSED
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Suite stack audit (2026-08-17) | INFORMATIVE — [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md); not READY, not a freeze SHA |
 | Production readiness + continuation (2026-08-22) | INFORMATIVE — [PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md); verdict still **NO_GO**; not READY |
+| C3 public-data policy | PROPOSED; **written deferral** 2026-08-22 — [C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md](C3-PUBLIC-DATA-POLICY-DEFERRAL-2026-08-22.md); not sign-off; Phase D gated |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
