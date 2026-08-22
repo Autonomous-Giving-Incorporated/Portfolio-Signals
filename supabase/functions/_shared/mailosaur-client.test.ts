@@ -4,6 +4,7 @@ import {
   assertBrandedAuthEmail,
   basicAuthHeader,
   createMailosaurClient,
+  extractActionUrl,
   inboxAddress,
   isMailosaurConfigured,
   redactAuthEmailMessage,
@@ -40,6 +41,20 @@ test('redactAuthEmailMessage strips tokens and action URLs from stored copies', 
   assert.doesNotMatch(redacted.html, /token_hash=secret|token=abc|access_token/);
   assert.doesNotMatch(redacted.text, /token=abc|access_token=leak/);
   assert.match(redacted.text, /\[redacted-action-url\]/);
+});
+
+test('extractActionUrl returns the first verify URL and nowhere else', () => {
+  const url = 'https://xxx.supabase.co/auth/v1/verify?token=abc&type=magiclink';
+  assert.equal(extractActionUrl({
+    subject: 'Your Example tenant administrator sign-in link',
+    html: `<a href="${url}">Sign in</a>`,
+    text: `Sign in: ${url}`
+  }), url);
+  assert.equal(extractActionUrl({
+    subject: 'none',
+    html: '<p>no link</p>',
+    text: 'no link'
+  }), null);
 });
 
 test('summarizeAuthEmail keeps audience cues and never returns the raw action URL', () => {

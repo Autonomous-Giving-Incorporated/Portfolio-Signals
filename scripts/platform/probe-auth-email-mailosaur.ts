@@ -4,6 +4,7 @@
 import {
   DEFAULT_MAILOSAUR_SERVER_ID,
   createMailosaurClient,
+  extractActionUrl,
   inboxAddress,
   summarizeAuthEmail
 } from '../../supabase/functions/_shared/mailosaur-client.ts';
@@ -28,6 +29,50 @@ async function connectivity(client: ReturnType<typeof createMailosaurClient>, se
   if (message.subject !== subject) throw new Error('connectivity_subject_mismatch');
   if (message.id) await client.deleteMessage(message.id);
   return { ok: true, subjectMatched: true };
+}
+
+async function consumeMagicLink(url: string) {
+  const hops: Array<{ status: number; host: string | null; path: string | null }> = [];
+  let current = url;
+  for (let i = 0; i < 5; i += 1) {
+    const response = await fetch(current, {
+      redirect: 'manual',
+      headers: { 'user-agent': 'agi-p8-probe/1.0' }
+    });
+    const location = response.headers.get('location') || '';
+    let host: string | null = null;
+    let path: string | null = null;
+    try {
+      const parsed = new URL(location, current);
+      host = parsed.host;
+      path = parsed.pathname;
+      current = parsed.href;
+    } catch {
+      current = '';
+    }
+    hops.push({ status: response.status, host, path });
+    if (!(response.status >= 300 && response.status < 400) || !current) break;
+  }
+  const last = hops[hops.length - 1] || { status: 0, host: null, path: null };
+  return {
+    hops: hops.length,
+    firstStatus: hops[0]?.status ?? null,
+    lastStatus: last.status,
+    lastHost: last.host,
+    lastPath: last.path,
+    reachedWorkspace: hops.some((hop) => hop.host === 'autogive.app'
+      || (hop.path || '').includes('/portfolio-signals/'))
+  };
+}
+
+async function probeUnsignedWebhook() {
+  const response = await fetch(`${PLATFORM_FUNCTIONS}/auth-email-webhook`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'user-agent': 'agi-p8-probe/1.0' },
+    body: JSON.stringify({ type: 'email.delivered' })
+  });
+  const body = await response.json().catch(() => ({}));
+  return { status: response.status, error: body?.error ?? null };
 }
 
 async function requestMagicLink(email: string, anonKey: string) {
@@ -76,21 +121,27 @@ async function main() {
     const requested = await requestMagicLink(recipient, anonKey);
     let delivery: Record<string, unknown> = { status: 'pending' };
     try {
-      const message = await client.waitForMessage(recipient, {
+      const raw = await client.waitForRawMessage(recipient, {
         timeoutMs: 25_000,
         intervalMs: 2_000,
         receivedAfter: requestedAt
       });
-      const summary = summarizeAuthEmail(message);
+      const summary = summarizeAuthEmail(raw);
+      const actionUrl = extractActionUrl(raw);
+      let click: Record<string, unknown> = { status: 'skipped', reason: 'no_action_url' };
+      if (actionUrl) {
+        click = { status: 'consumed', ...await consumeMagicLink(actionUrl) };
+      }
       delivery = {
         status: 'delivered',
         audienceHint: summary.audienceHint,
         hasGoldAccent: summary.hasGoldAccent,
         hasCarbonAction: summary.hasCarbonAction,
         hasLegacyPalette: summary.hasLegacyPalette,
-        actionUrlPresent: summary.actionUrlPresent
+        actionUrlPresent: summary.actionUrlPresent,
+        click
       };
-      if (message.id) await client.deleteMessage(message.id);
+      if (raw.id) await client.deleteMessage(raw.id);
     } catch (error) {
       delivery = {
         status: 'no_delivery',
@@ -109,7 +160,8 @@ async function main() {
     status: 'ok',
     server: { id: serverId, name: named?.name || null, knownServers: servers.length },
     connectivity: connect,
-    magicLink
+    magicLink,
+    webhook: await probeUnsignedWebhook()
   });
 }
 

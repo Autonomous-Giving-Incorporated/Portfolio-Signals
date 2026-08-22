@@ -65,6 +65,12 @@ export function isMailosaurConfigured(env: MailosaurEnv = process.env): boolean 
   return Boolean(env.MAILOSAUR_API_KEY?.trim() && env.MAILOSAUR_SERVER_ID?.trim());
 }
 
+export function extractActionUrl(input: AuthEmailCopy): string | null {
+  const fromHtml = input.html.match(ACTION_URL)?.[0];
+  const fromText = input.text.match(ACTION_URL)?.[0];
+  return fromHtml || fromText || null;
+}
+
 export function redactAuthEmailMessage(input: AuthEmailCopy & { id?: string }): RedactedAuthEmail {
   const redact = (value: string) => value
     .replace(ACTION_URL, '[redacted-action-url]')
@@ -167,31 +173,39 @@ export function createMailosaurClient(opts: MailosaurClientOptions) {
       });
     },
 
-    async getMessage(id: string): Promise<RedactedAuthEmail> {
+    async getRawMessage(id: string): Promise<AuthEmailCopy & { id?: string }> {
       const payload = await request(`/messages/${encodeURIComponent(id)}`);
-      return redactAuthEmailMessage({
+      return {
         id: String(payload?.id || id),
         subject: String(payload?.subject || ''),
         html: String(payload?.html?.body ?? payload?.html ?? ''),
         text: String(payload?.text?.body ?? payload?.text ?? '')
-      });
+      };
+    },
+
+    async getMessage(id: string): Promise<RedactedAuthEmail> {
+      return redactAuthEmailMessage(await this.getRawMessage(id));
     },
 
     async deleteMessage(id: string) {
       await request(`/messages/${encodeURIComponent(id)}`, { method: 'DELETE' });
     },
 
-    async waitForMessage(sentTo: string, wait: WaitOptions = {}): Promise<RedactedAuthEmail> {
+    async waitForRawMessage(sentTo: string, wait: WaitOptions = {}): Promise<AuthEmailCopy & { id?: string }> {
       const timeoutMs = wait.timeoutMs ?? 20_000;
       const intervalMs = wait.intervalMs ?? 1_000;
       const start = Date.now();
       while (Date.now() - start <= timeoutMs) {
         const found = await this.searchMessages(sentTo, wait.receivedAfter);
         const first = Array.isArray(found?.items) ? found.items[0] : null;
-        if (first?.id) return this.getMessage(String(first.id));
+        if (first?.id) return this.getRawMessage(String(first.id));
         await sleep(intervalMs);
       }
       throw new Error('mailosaur_timeout');
+    },
+
+    async waitForMessage(sentTo: string, wait: WaitOptions = {}): Promise<RedactedAuthEmail> {
+      return redactAuthEmailMessage(await this.waitForRawMessage(sentTo, wait));
     }
   };
 }
