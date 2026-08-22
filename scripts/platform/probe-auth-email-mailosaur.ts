@@ -72,10 +72,15 @@ async function main() {
     if (assigned && !assigned.endsWith(`@${serverId}.mailosaur.net`)) {
       throw new Error('assigned_email_must_use_mailosaur_inbox');
     }
+    const requestedAt = new Date();
     const requested = await requestMagicLink(recipient, anonKey);
     let delivery: Record<string, unknown> = { status: 'pending' };
     try {
-      const message = await client.waitForMessage(recipient, { timeoutMs: 20_000, intervalMs: 2_000 });
+      const message = await client.waitForMessage(recipient, {
+        timeoutMs: 25_000,
+        intervalMs: 2_000,
+        receivedAfter: requestedAt
+      });
       const summary = summarizeAuthEmail(message);
       delivery = {
         status: 'delivered',

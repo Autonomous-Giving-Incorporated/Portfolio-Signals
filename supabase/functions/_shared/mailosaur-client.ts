@@ -42,6 +42,7 @@ export type MailosaurClientOptions = {
 export type WaitOptions = {
   timeoutMs?: number;
   intervalMs?: number;
+  receivedAfter?: Date | string;
 };
 
 function requirePart(value: string, code: string) {
@@ -154,8 +155,13 @@ export function createMailosaurClient(opts: MailosaurClientOptions) {
       });
     },
 
-    async searchMessages(sentTo: string) {
-      return request(`/messages/search?server=${encodeURIComponent(opts.serverId)}`, {
+    async searchMessages(sentTo: string, receivedAfter?: Date | string) {
+      const params = new URLSearchParams({ server: opts.serverId });
+      if (receivedAfter) {
+        const iso = receivedAfter instanceof Date ? receivedAfter.toISOString() : receivedAfter;
+        params.set('receivedAfter', iso);
+      }
+      return request(`/messages/search?${params}`, {
         method: 'POST',
         body: JSON.stringify({ sentTo })
       });
@@ -180,7 +186,7 @@ export function createMailosaurClient(opts: MailosaurClientOptions) {
       const intervalMs = wait.intervalMs ?? 1_000;
       const start = Date.now();
       while (Date.now() - start <= timeoutMs) {
-        const found = await this.searchMessages(sentTo);
+        const found = await this.searchMessages(sentTo, wait.receivedAfter);
         const first = Array.isArray(found?.items) ? found.items[0] : null;
         if (first?.id) return this.getMessage(String(first.id));
         await sleep(intervalMs);

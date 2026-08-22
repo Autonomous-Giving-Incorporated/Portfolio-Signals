@@ -117,3 +117,36 @@ test('createMailosaurClient listServers and waitForMessage use the documented RE
   assert.ok(calls.some((call) => call.url.endsWith('/api/servers')));
   assert.ok(calls.some((call) => call.url.includes('/api/messages/search?server=qpbqeifu')));
 });
+
+test('waitForMessage forwards receivedAfter as a search query parameter', async () => {
+  const calls: string[] = [];
+  const fetchImpl = async (url: string) => {
+    calls.push(String(url));
+    if (String(url).includes('/api/messages/search')) {
+      return new Response(JSON.stringify({
+        items: [{ id: 'm2', subject: 'Your Example Portfolio Signals sign-in link' }]
+      }), { status: 200 });
+    }
+    if (String(url).endsWith('/api/messages/m2')) {
+      return new Response(JSON.stringify({
+        id: 'm2',
+        subject: 'Your Example Portfolio Signals sign-in link',
+        html: { body: '<p>#e6b23c #0e1116</p>' },
+        text: { body: 'ok' }
+      }), { status: 200 });
+    }
+    return new Response('missing', { status: 404 });
+  };
+  const client = createMailosaurClient({
+    apiKey: 'test-key',
+    serverId: 'qpbqeifu',
+    fetchImpl,
+    sleep: async () => undefined
+  });
+  await client.waitForMessage('p8@qpbqeifu.mailosaur.net', {
+    timeoutMs: 10,
+    intervalMs: 1,
+    receivedAfter: '2026-08-22T04:00:00.000Z'
+  });
+  assert.ok(calls.some((url) => url.includes('receivedAfter=2026-08-22T04%3A00%3A00.000Z')));
+});
