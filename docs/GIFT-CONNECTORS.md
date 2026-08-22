@@ -61,6 +61,8 @@ These paths are in-repo on Worker `portfolio-signals`. They are **not** live URL
 
 Refunds and chargebacks persist after verify and open `SYNC_FAILURE`. v1 does not debit pots.
 
+Durable pot credit on the Supabase writer is still unlocked read-modify-write at pilot scale. Concurrent credits to the same pot can lose an update. Gift insert stays idempotent on `chargeId`. Do not treat this as a live concurrency guarantee.
+
 ## Exception catalog
 
 Unchanged: `UNMAPPED_FUNDRAISER`, `UNMAPPED_DESIGNATION`, `DUPLICATE_GIFT`, `CURRENCY_MISMATCH`, `OVER_ALLOCATION`, `SYNC_FAILURE`, `MISSING_PROOF`, `STALE_POT`.
