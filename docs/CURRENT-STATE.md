@@ -75,6 +75,8 @@ observability_script_name: agi-public  # only scriptName seen
 allocation_worker: ABSENT
 allocation_apis: CODE_SHIPPED  # /allocations /proofs /packet /seed /import/csv; not live on a named Worker
 every_org_webhook: CODE_SHIPPED  # not live
+givebutter_webhook: CODE_SHIPPED  # in-repo POST /webhooks/givebutter; not live; not READY
+donorbox_webhook: CODE_SHIPPED  # in-repo POST /webhooks/donorbox; not live; not READY
 impact_notice: CODE_SHIPPED  # not live
 ```
 
@@ -129,6 +131,7 @@ c3_public_data_policy: PROPOSED
 | Mission Intelligence metrics (SPEC-030 Proposed) | CODE_SHIPPED fail-closed policies (`src/intel/metrics.mjs`); not live; not READY; SPEC-030 not Accepted; no formula — [MISSION-INTELLIGENCE-METRICS.md](MISSION-INTELLIGENCE-METRICS.md) |
 | AGI console projection (read-only view) | CODE_SHIPPED in-process (`src/intel/console-projection.mjs`); not live; not READY; not a product console; SPEC-029/030 stay Proposed — [AGI-CONSOLE.md](AGI-CONSOLE.md) |
 | every.org webhook Worker port | CODE_SHIPPED (`POST /webhooks/every-org` + tests); live URL / every.org pointing / live gift PENDING ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
+| Givebutter / Donorbox P1 webhooks (SPEC-026 v1.1.0) | CODE_SHIPPED in-repo (`POST /webhooks/givebutter`, `POST /webhooks/donorbox`); draft [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52); not live; not READY; operator-owned pointing — [GIFT-CONNECTORS.md](GIFT-CONNECTORS.md) |
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Suite stack audit (2026-08-17) | INFORMATIVE — [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md); not READY, not a freeze SHA |
 | Production readiness + continuation (2026-08-22) | INFORMATIVE — [PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md); verdict still **NO_GO**; not READY |
@@ -158,6 +161,8 @@ operator_token_fallback: disabled_on_worker_and_pilot_env
 public_https_host: OBSERVED  # 2026-08-07 Phase 3b — Cloudflare quick tunnel → local Node; designed durable host: Workers (not Render/Fly/Railway).
 workers_allocation_api: CODE_SHIPPED  # seed → allocate → proof → packet + POST /import/csv tests; no live director session
 every_org_webhook_worker: CODE_SHIPPED  # POST /webhooks/every-org in-repo; not live on a named Worker; not a live gift
+givebutter_webhook_worker: CODE_SHIPPED  # POST /webhooks/givebutter; not live; not READY
+donorbox_webhook_worker: CODE_SHIPPED  # POST /webhooks/donorbox; not live; not READY
 csv_import_worker: CODE_SHIPPED  # POST /import/csv director-write; same chargeId credit as webhook; not a checkout; not live
 every_org_live_webhook: PENDING  # operator: CF secrets, wrangler secret, every.org Advanced URL, controlled gift (#20)
 durable_named_host: NOT_OBSERVED
