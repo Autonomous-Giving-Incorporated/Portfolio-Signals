@@ -115,6 +115,10 @@ jobs:
 
       - name: Load six synthetic roles
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+      - name: Load AutoGive synthetic dataset v1
+        run: SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
+      - name: Execute AutoGive synthetic v1 acceptance
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/024_autogive_synthetic_v1.sql
 
       - name: Execute import gate suite
         run: |

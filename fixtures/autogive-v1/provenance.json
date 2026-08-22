@@ -1,0 +1,30 @@
+{
+  "dataset": "autogive-synthetic-dataset",
+  "version": "1.0.0",
+  "seed": 20260821,
+  "classification": "SYNTHETIC_ONLY",
+  "source_pack": "autogive-synthetic-dataset-v1.zip",
+  "source_generated_at": "2026-08-21T19:08:00-07:00",
+  "ingested_at": "2026-08-22T02:16:09Z",
+  "storage_note": "Source pack used CSV. This repository stores JSON only because CI rejects .csv/.xlsx workbooks (AGENTS.md / SECURITY.md).",
+  "original_pack_sha256": {
+    "README.md": "2672fc9b66b22d986334684af5f94b0c4e792d0e4f64dc72baaa69eb8534b269",
+    "edge_cases/acceptance-corpus.json": "061c650ca37cf273cb595b4f0263dbf9cd4fd53f939ac979238d189f13d5fa75",
+    "manifest.json": "bb41772aad5ff6ddf84b5b2bfaff26477cc5cc66a795f7deee739dd3474c6757",
+    "private_synthetic/allocations.csv": "4d0e636a94ffdfebbe37266bee1104cb2baa1e90cc95bcb0f5fcda7e39d202c4",
+    "private_synthetic/donors.csv": "0cf5e9840cbc1936af27e0323bc2240846e07c404b4ed1b9184dbb7fae7992d4",
+    "private_synthetic/evidence.csv": "b88f3501955924154c90f0b50bb2f8ed9647c48204d5450e32ab5358a14397d8",
+    "private_synthetic/expense_program_links.csv": "0bc375c12ac9ba0ee5669bc03788a4dfffc161509c257d7db4a8b7a5352d5f14",
+    "private_synthetic/expenses.csv": "d2d956b3765ee22e82821bece2690f58b99aaab1447feea00777e11cb2c06e6d",
+    "private_synthetic/funds.csv": "01c010380fe05ec51c9c8f1960a03ab922f7f721d19de7d21a42a495748a9eed",
+    "private_synthetic/gifts.csv": "3226c738067ef95f49e03a19613e5cb704b8b41d615326aeca67df4c0507b0ab",
+    "private_synthetic/outcomes.csv": "28f671709a97486bafb40c6e84116e3d938098262f1dbb4a8488d8c361e3eabf",
+    "private_synthetic/programs.csv": "e274f7afb90974dd9b722b9f6f3932b89922494423671042d192ad5be97999c8",
+    "private_synthetic/roles.csv": "2694534729b191e3d5aa579fa5b48fe83121467f95b7d94113d9f5515bb26ddb",
+    "public/impact-relay-public-impact.json": "d2fd83301ebc2b51b881ee2218c0748a9f9bfced59c0fe460e02ffb68da5b722",
+    "public/portfolio-signals-public-campaign.json": "3253953f88bc672a2ed2b879aa5b62cecaf52a285e0cde553523414a99b21d40"
+  },
+  "never_label": [
+    "OBSERVED"
+  ]
+}

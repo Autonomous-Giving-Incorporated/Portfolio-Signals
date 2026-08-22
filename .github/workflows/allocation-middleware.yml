@@ -5,12 +5,14 @@ on:
     paths:
       - 'services/allocation-middleware/**'
       - 'workers/portfolio-signals/**'
+      - 'fixtures/autogive-v1/**'
       - '.github/workflows/allocation-middleware.yml'
   push:
     branches: [main]
     paths:
       - 'services/allocation-middleware/**'
       - 'workers/portfolio-signals/**'
+      - 'fixtures/autogive-v1/**'
 
 jobs:
   test:

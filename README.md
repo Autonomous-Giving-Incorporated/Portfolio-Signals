@@ -102,7 +102,9 @@ docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
 docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
+docs/SYNTHETIC-DATASET.md               AutoGive v1 disposable fixture universe
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
+fixtures/autogive-v1/                   Canonical SYNTHETIC_ONLY Civic Forge corpus
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
 docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
 docs/IMPACT-RELAY.md                    Impact Relay host bridge runbook
@@ -214,9 +216,22 @@ The executable workflow performs the following sequence against a disposable loc
 1. Start the pinned Supabase stack.
 2. Reset the database and apply the complete migration chain.
 3. Resolve and validate the local database URL.
-4. Load synthetic profiles for all six roles.
-5. Execute RLS and import-policy acceptance tests.
-6. Stop and discard the local stack.
+4. Load Hacker Dojo synthetic profiles for all six roles.
+5. Load AutoGive Synthetic Dataset v1 (`npm run seed:synthetic`) and run `024`.
+6. Execute RLS and import-policy acceptance tests.
+7. Stop and discard the local stack.
+
+Civic Forge fixture commands (never overwrite `data/public-campaign.json`):
+
+```bash
+npm run synthetic:validate
+npm run public:fixture:synthetic
+npm run synthetic:test
+# disposable Supabase only
+SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
+```
+
+See [docs/SYNTHETIC-DATASET.md](docs/SYNTHETIC-DATASET.md).
 
 PR #14 observed a green disposable run for migrations, six-role fixtures, and RLS acceptance checks. This repository now also executes the synthetic import-gate corpus (confirmed, restricted, duplicate, suppressed, unauthorized promotion, and eligible promotion) in that same workflow.
 

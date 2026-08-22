@@ -78,6 +78,23 @@ impact_notice: CODE_SHIPPED  # not live
 
 `agi-public.zer0state-noema.workers.dev` is the **suite gateway** origin, not an allocation / webhook / CSV host. Do not invent a `portfolio-signals.*.workers.dev` allocation URL.
 
+## AutoGive synthetic v1 fixtures (in-repo, not production)
+
+In-repo disposable universe only. Not a live campaign, not Every.org, not READY, not `OBSERVED`.
+
+```yaml
+synthetic_dataset: autogive-synthetic-dataset
+version: 1.0.0
+path: fixtures/autogive-v1/
+tenant_id: org_synthetic_civic_forge
+campaign_id: cmp_synthetic_builder_fund_2026
+classification: SYNTHETIC_ONLY
+live_public_campaign: data/public-campaign.json  # unchanged fail-closed shell
+reference_tenant_unchanged: org_hacker_dojo
+```
+
+See [SYNTHETIC-DATASET.md](SYNTHETIC-DATASET.md).
+
 ## Phase C C4 public-safe fixtures (OBSERVED in-repo 2026-08-17)
 
 In-repo copies only. Not a live campaign, not a live gift, not READY, not a Worker host.

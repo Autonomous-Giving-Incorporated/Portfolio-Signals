@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/impact-state.schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-08-21",
+  "authority": "public_aggregate_only",
+  "organization": {
+    "name": "Civic Forge Foundation — Synthetic Tenant",
+    "tagline": "Synthetic reference tenant for AGI suite testing.",
+    "homepage": "https://synthetic.example.org/",
+    "donationUrl": "https://synthetic.example.org/donate",
+    "processor": "fixture"
+  },
+  "campaign": {
+    "name": "Builder Fund 2026 — Synthetic",
+    "eventDate": "2026-08-21",
+    "currency": "USD",
+    "minimumTarget": 420000,
+    "stretchTarget": 2000000,
+    "raisedPublic": 286450,
+    "committedPublic": 174200,
+    "donorCountPublic": 438,
+    "lastReconciledAt": "2026-08-21T18:00:00Z",
+    "status": "active",
+    "raisedSource": "pilot_synthetic",
+    "raisedClaimLabel": "PILOT",
+    "aggregateSource": "fixture://autogive-synthetic-dataset-v1"
+  },
+  "milestones": [
+    {
+      "id": "stabilization",
+      "label": "Stabilization",
+      "threshold": 420000,
+      "state": "open",
+      "impact": "Synthetic operating-continuity milestone."
+    },
+    {
+      "id": "growth",
+      "label": "Growth",
+      "threshold": 750000,
+      "state": "open",
+      "impact": "Synthetic program-capacity milestone."
+    },
+    {
+      "id": "expansion",
+      "label": "Expansion",
+      "threshold": 1200000,
+      "state": "deferred",
+      "impact": "Synthetic expansion milestone."
+    },
+    {
+      "id": "transformation",
+      "label": "Transformation",
+      "threshold": 2000000,
+      "state": "deferred",
+      "impact": "Synthetic long-range transformation milestone."
+    }
+  ],
+  "notifications": [
+    {
+      "id": "syn_note_001",
+      "severity": "success",
+      "title": "Synthetic allocation approved",
+      "body": "Community Hardware Fund allocation passed the fixture approval workflow.",
+      "publishedAt": "2026-08-15T19:15:00Z"
+    },
+    {
+      "id": "syn_note_002",
+      "severity": "info",
+      "title": "Synthetic evidence verified",
+      "body": "Program evidence was validated in the synthetic impact workflow.",
+      "publishedAt": "2026-08-20T17:30:00Z"
+    }
+  ],
+  "privacy": {
+    "classification": "public_aggregate_only",
+    "piiAllowed": false,
+    "donorNamesAllowed": false,
+    "individualAmountsAllowed": false,
+    "contactDataAllowed": false
+  },
+  "classification": "public_aggregate_only"
+}

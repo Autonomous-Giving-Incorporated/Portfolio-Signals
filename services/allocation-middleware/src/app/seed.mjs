@@ -40,7 +40,9 @@ export async function seedFromObject(service, raw, { applySuggestedAllocation = 
     };
     // Override normalized keys: force fixture keys after normalize by using campaign title
     // every.org normalizer lowercases title → campaign key
-    const r = await service.ingestEveryOrg(payload);
+    const r = await service.ingestEveryOrg(payload, {
+      source: raw.source === 'fixture' || /^fixture[-_]/i.test(g.chargeId) ? 'fixture' : undefined,
+    });
     if (r.created) giftsCreated += 1;
   }
 
@@ -53,6 +55,7 @@ export async function seedFromObject(service, raw, { applySuggestedAllocation = 
     const s = raw.suggestedAllocation;
     try {
       allocation = await service.allocate({
+        id: s.id,
         campaignKey: s.campaignKey,
         programKey: s.programKey,
         amount: s.amount,

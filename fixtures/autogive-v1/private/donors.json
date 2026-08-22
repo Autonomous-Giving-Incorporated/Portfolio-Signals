@@ -1,0 +1,902 @@
+[
+  {
+    "donor_id": "donor_syn_0001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0001",
+    "email": "donor0001@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0002",
+    "email": "donor0002@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0003",
+    "email": "donor0003@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0004",
+    "email": "donor0004@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0005",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0005",
+    "email": "donor0005@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0006",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0006",
+    "email": "donor0006@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0007",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0007",
+    "email": "donor0007@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0008",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0008",
+    "email": "donor0008@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0009",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0009",
+    "email": "donor0009@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0010",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0010",
+    "email": "donor0010@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0011",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0011",
+    "email": "donor0011@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0012",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0012",
+    "email": "donor0012@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0013",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0013",
+    "email": "donor0013@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0014",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0014",
+    "email": "donor0014@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0015",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0015",
+    "email": "donor0015@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0016",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0016",
+    "email": "donor0016@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0017",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0017",
+    "email": "donor0017@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0018",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0018",
+    "email": "donor0018@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0019",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0019",
+    "email": "donor0019@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0020",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0020",
+    "email": "donor0020@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0021",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0021",
+    "email": "donor0021@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0022",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0022",
+    "email": "donor0022@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0023",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0023",
+    "email": "donor0023@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0024",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0024",
+    "email": "donor0024@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0025",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0025",
+    "email": "donor0025@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0026",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0026",
+    "email": "donor0026@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0027",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0027",
+    "email": "donor0027@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0028",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0028",
+    "email": "donor0028@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0029",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0029",
+    "email": "donor0029@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0030",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0030",
+    "email": "donor0030@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0031",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0031",
+    "email": "donor0031@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0032",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0032",
+    "email": "donor0032@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0033",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0033",
+    "email": "donor0033@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0034",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0034",
+    "email": "donor0034@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0035",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0035",
+    "email": "donor0035@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0036",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0036",
+    "email": "donor0036@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0037",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0037",
+    "email": "donor0037@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0038",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0038",
+    "email": "donor0038@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0039",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0039",
+    "email": "donor0039@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0040",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0040",
+    "email": "donor0040@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0041",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0041",
+    "email": "donor0041@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0042",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0042",
+    "email": "donor0042@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0043",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0043",
+    "email": "donor0043@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0044",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0044",
+    "email": "donor0044@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0045",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0045",
+    "email": "donor0045@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0046",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0046",
+    "email": "donor0046@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0047",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0047",
+    "email": "donor0047@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0048",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0048",
+    "email": "donor0048@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0049",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0049",
+    "email": "donor0049@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0050",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0050",
+    "email": "donor0050@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0051",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0051",
+    "email": "donor0051@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0052",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0052",
+    "email": "donor0052@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0053",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0053",
+    "email": "donor0053@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0054",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0054",
+    "email": "donor0054@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0055",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0055",
+    "email": "donor0055@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0056",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0056",
+    "email": "donor0056@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0057",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0057",
+    "email": "donor0057@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0058",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0058",
+    "email": "donor0058@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0059",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0059",
+    "email": "donor0059@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0060",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0060",
+    "email": "donor0060@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0061",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0061",
+    "email": "donor0061@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0062",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0062",
+    "email": "donor0062@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0063",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0063",
+    "email": "donor0063@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0064",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0064",
+    "email": "donor0064@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0065",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0065",
+    "email": "donor0065@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0066",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0066",
+    "email": "donor0066@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0067",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0067",
+    "email": "donor0067@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0068",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0068",
+    "email": "donor0068@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0069",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0069",
+    "email": "donor0069@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0070",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0070",
+    "email": "donor0070@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0071",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0071",
+    "email": "donor0071@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0072",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0072",
+    "email": "donor0072@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0073",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0073",
+    "email": "donor0073@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0074",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0074",
+    "email": "donor0074@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0075",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0075",
+    "email": "donor0075@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0076",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0076",
+    "email": "donor0076@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0077",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0077",
+    "email": "donor0077@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0078",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0078",
+    "email": "donor0078@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0079",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0079",
+    "email": "donor0079@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0080",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0080",
+    "email": "donor0080@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0081",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0081",
+    "email": "donor0081@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0082",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0082",
+    "email": "donor0082@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0083",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0083",
+    "email": "donor0083@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0084",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0084",
+    "email": "donor0084@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0085",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0085",
+    "email": "donor0085@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0086",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0086",
+    "email": "donor0086@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0087",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0087",
+    "email": "donor0087@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0088",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0088",
+    "email": "donor0088@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0089",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0089",
+    "email": "donor0089@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0090",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0090",
+    "email": "donor0090@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0091",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0091",
+    "email": "donor0091@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0092",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0092",
+    "email": "donor0092@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0093",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0093",
+    "email": "donor0093@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0094",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0094",
+    "email": "donor0094@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0095",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0095",
+    "email": "donor0095@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0096",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0096",
+    "email": "donor0096@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0097",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0097",
+    "email": "donor0097@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0098",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0098",
+    "email": "donor0098@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0099",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0099",
+    "email": "donor0099@example.test",
+    "channel": "email",
+    "consent_state": "suppressed",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "donor_id": "donor_syn_0100",
+    "tenant_id": "org_synthetic_civic_forge",
+    "display_name": "Synthetic Donor 0100",
+    "email": "donor0100@example.test",
+    "channel": "email",
+    "consent_state": "granted",
+    "provenance": "SYNTHETIC"
+  }
+]

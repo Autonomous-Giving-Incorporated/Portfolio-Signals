@@ -11,6 +11,8 @@
     "start": "node src/http/server.mjs",
     "start:prod": "NODE_ENV=production node src/http/server.mjs",
     "seed:hacker-dojo": "node scripts/seed-hacker-dojo.mjs",
+    "seed:synthetic": "node scripts/seed-synthetic.mjs",
+    "start:synthetic:seed": "ORG_ID=org_synthetic_civic_forge DATA_FILE=./data/synthetic-civic-forge.json SEED_ON_BOOT=0 node scripts/seed-synthetic.mjs && ORG_ID=org_synthetic_civic_forge DATA_FILE=./data/synthetic-civic-forge.json SEED_ON_BOOT=0 node src/http/server.mjs",
     "start:hacker-dojo": "ORG_ID=org_hacker_dojo DATA_FILE=./data/hacker-dojo.json SEED_ON_BOOT=0 node src/http/server.mjs",
     "pilot:smoke": "bash scripts/pilot-smoke.sh",
     "pilot:env": "bash scripts/print-env-checklist.sh",

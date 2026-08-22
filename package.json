@@ -3,7 +3,11 @@
   "private": true,
   "scripts": {
     "test:browser": "playwright test",
-    "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs tests/impact-relay-auth.test.mjs"
+    "test:fixtures": "node --test tests/agi-phase-c-fixtures.test.mjs tests/impact-relay-auth.test.mjs tests/autogive-synthetic-v1.test.mjs",
+    "synthetic:validate": "node scripts/synthetic/validate.mjs",
+    "synthetic:test": "node --test tests/autogive-synthetic-v1.test.mjs",
+    "public:fixture:synthetic": "node scripts/synthetic/public-fixture.mjs",
+    "seed:synthetic": "node scripts/synthetic/seed.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

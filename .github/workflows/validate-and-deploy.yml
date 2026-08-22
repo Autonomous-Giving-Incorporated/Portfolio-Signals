@@ -35,8 +35,14 @@ jobs:
           -d data/public-campaign.json
           -d fixtures/agi_phase_c/canonical/public_campaign.json
           -d fixtures/agi_phase_c/noncanonical/hacker-dojo-public-campaign.json
+          -d fixtures/autogive-v1/public/portfolio-signals-public-campaign.json
       - name: Validate Phase C public-safe fixtures
         run: node --test tests/agi-phase-c-fixtures.test.mjs tests/impact-relay-auth.test.mjs
+      - name: Validate AutoGive synthetic corpus
+        run: |
+          npm run synthetic:validate
+          npm run public:fixture:synthetic
+          npm run synthetic:test
       - name: Prohibit obvious sensitive-data files
         shell: bash
         run: |
