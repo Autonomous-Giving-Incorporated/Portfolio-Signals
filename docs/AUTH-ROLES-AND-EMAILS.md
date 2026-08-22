@@ -13,7 +13,8 @@ This specification defines authentication and tenant-scoped infrastructure acces
 | OBSERVED | Delegate migrations add invitation, scoped delegation, and email-dispatch records with RLS and audited security-definer functions. |
 | OBSERVED | `auth-email` generates one-time Supabase Auth links server-side and sends role-aware content through Resend. |
 | OBSERVED | 2026-08-22 — Mailosaur inbox `Autogive Tests` (`qpbqeifu`) accepts injected messages (inject → wait → delete). Unassigned `auth-email` self_sign_in returns HTTP 202 and delivers nothing. |
-| PENDING | Assigned Mailosaur Auth user (isolation-tenant `board_viewer` only), Resend send secrets, webhook secret, and P8 synthetic send+click. |
+| OBSERVED | 2026-08-22 — After Dashboard invite + isolation `board_viewer` membership, `auth-email` delivered the tenant-member template to Mailosaur (gold/carbon chrome, no legacy palette). Dispatch `tenant_member_magic_link` status `sent` with a provider id. Built-in Auth invite used `noreply@mail.app.supabase.io` / "You've been invited" (not AGI brand). |
+| PENDING | P8 click/MFA, director and platform-admin template receives, `RESEND_WEBHOOK_SECRET` (dispatch `delivery_status` still null). |
 | INFERRED | Production readiness requires migration application, Edge deployment, sender-domain secrets, and a synthetic delivery drill on platform project `utdioxwiskzatwoejgiu`. |
 
 ## Role contract

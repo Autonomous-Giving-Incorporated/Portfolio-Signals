@@ -130,6 +130,7 @@ c3_public_data_policy: PROPOSED
 | Allocation security audit | REPO_REVIEW — [ALLOCATION-SECURITY-AUDIT.md](ALLOCATION-SECURITY-AUDIT.md); no live director session claimed |
 | Suite stack audit (2026-08-17) | INFORMATIVE — [SUITE_STACK_AUDIT_2026-08-17.md](SUITE_STACK_AUDIT_2026-08-17.md); not READY, not a freeze SHA |
 | Custom SMTP for Auth email volume | PENDING (operator) — runbook [PLATFORM-AUTH-SMTP.md](PLATFORM-AUTH-SMTP.md) |
+| Role-aware Resend magic links (`auth-email`) | **P8 tenant-member send OBSERVED** 2026-08-22 via Mailosaur `qpbqeifu` (isolation `board_viewer`). Dispatch `sent` + provider id. Webhook `delivery_status` still null. Click/MFA and director/admin templates PENDING. [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md) |
 | IR console default-deny + host bridge | OBSERVED — Bearer JWT/fixture only; `--trusted-proxy` gateway-only (#48) |
 | Operator secret hygiene checklist | READY — [OPERATOR-SECRET-HYGIENE.md](OPERATOR-SECRET-HYGIENE.md) |
 | Client Onboarding Pack (document phase) | **Platform schema + Edge OBSERVED** 2026-08-08 — tables REST 200; Edge 401 without JWT; MFA workspace dry-run still **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
