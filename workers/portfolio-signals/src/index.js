@@ -1,4 +1,8 @@
-import { handleEveryOrgWebhook } from './every-org-webhook.js';
+import {
+  handleDonorboxWebhook,
+  handleEveryOrgWebhook,
+  handleGivebutterWebhook,
+} from './gift-webhook.js';
 import { handleAllocationApi, isAllocationApiPath } from './allocation-api.js';
 
 function jsonResponse(status, data) {
@@ -16,6 +20,12 @@ export async function handleWorkerRequest(request, env, options = {}) {
   const url = new URL(request.url);
   if (url.pathname === '/webhooks/every-org') {
     return handleEveryOrgWebhook(request, env, options);
+  }
+  if (url.pathname === '/webhooks/givebutter') {
+    return handleGivebutterWebhook(request, env, options);
+  }
+  if (url.pathname === '/webhooks/donorbox') {
+    return handleDonorboxWebhook(request, env, options);
   }
   if (url.pathname.startsWith('/webhooks/')) {
     return jsonResponse(404, { error: 'not_found' });

@@ -2,9 +2,16 @@ import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildEveryOrgWebhookUrl } from '../app/config.mjs';
+import { buildConnectorWebhookUrl } from '../app/config.mjs';
 import { createAuthVerifier, bearerToken } from '../app/auth.mjs';
 import { authorizeWebhookToken, parseWebhookJson } from './webhook-auth.mjs';
+import { verify_webhook } from '../connectors/adapter.mjs';
+import {
+  CONNECTOR_DONORBOX,
+  CONNECTOR_EVERY_ORG,
+  CONNECTOR_GIVEBUTTER,
+  webhookPathForSource,
+} from '../connectors/sources.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startedAt = Date.now();
@@ -69,6 +76,8 @@ export function createAllocationServer({
   service,
   operatorToken = '',
   webhookToken = '',
+  givebutterWebhookSecret = '',
+  donorboxWebhookSecret = '',
   publicBaseUrl = '',
   authVerifier = null,
   allowOperatorFallback = true,
@@ -286,10 +295,14 @@ export function createAllocationServer({
       if (req.method === 'GET' && url.pathname === '/setup') {
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
-        const webhookUrl = buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken);
+        const tenantSource = await service.getTenantSource();
+        const webhookUrl = buildConnectorWebhookUrl(publicBaseUrl, tenantSource, { webhookToken });
         const status = await service.getSetupStatus({
           webhookUrl,
+          webhookPath: webhookPathForSource(tenantSource),
           hasWebhookToken: Boolean(webhookToken),
+          hasGivebutterSecret: Boolean(givebutterWebhookSecret),
+          hasDonorboxSecret: Boolean(donorboxWebhookSecret),
           hasOperatorToken: Boolean(operatorToken),
         });
         return send(res, 200, {
@@ -301,7 +314,10 @@ export function createAllocationServer({
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
         const body = await readJson(req, maxJsonBodyBytes);
-        return send(res, 200, await service.setDonationLink(body.donationLink));
+        return send(res, 200, await service.setOnboarding({
+          donationLink: body.donationLink,
+          source: body.source,
+        }));
       }
       if (req.method === 'GET' && (url.pathname === '/setup.html' || url.pathname === '/connect')) {
         return serveHtml(res, 'setup.html');
@@ -314,7 +330,29 @@ export function createAllocationServer({
         if (!requireWebhook(req, res, url)) return;
         const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
         const payload = parseWebhookJson(raw, maxJsonBodyBytes);
-        const result = await service.ingestEveryOrg(payload);
+        const result = await service.ingestGift(payload, { source: CONNECTOR_EVERY_ORG });
+        return send(res, 200, { created: result.created });
+      }
+      if (req.method === 'POST' && url.pathname === '/webhooks/givebutter') {
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const auth = await verify_webhook(
+          { headers: req.headers, url: url.toString() },
+          { source: CONNECTOR_GIVEBUTTER, secrets: { givebutterSecret: givebutterWebhookSecret }, rawBody: raw },
+        );
+        if (!auth.ok) return send(res, auth.status, { error: auth.error });
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes);
+        const result = await service.ingestGift(payload, { source: CONNECTOR_GIVEBUTTER });
+        return send(res, 200, { created: result.created });
+      }
+      if (req.method === 'POST' && url.pathname === '/webhooks/donorbox') {
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const auth = await verify_webhook(
+          { headers: req.headers, url: url.toString() },
+          { source: CONNECTOR_DONORBOX, secrets: { donorboxSecret: donorboxWebhookSecret }, rawBody: raw },
+        );
+        if (!auth.ok) return send(res, auth.status, { error: auth.error });
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes, { allowArray: true });
+        const result = await service.ingestGift(payload, { source: CONNECTOR_DONORBOX });
         return send(res, 200, { created: result.created });
       }
       if (req.method === 'POST' && url.pathname === '/import/csv') {
@@ -475,6 +513,8 @@ if (isMain) {
     service,
     operatorToken: cfg.operatorToken,
     webhookToken: cfg.webhookToken,
+    givebutterWebhookSecret: process.env.GIVEBUTTER_WEBHOOK_SECRET || '',
+    donorboxWebhookSecret: process.env.DONORBOX_WEBHOOK_SECRET || '',
     publicBaseUrl: cfg.publicBaseUrl || `http://127.0.0.1:${cfg.port}`,
     authVerifier,
     allowOperatorFallback: cfg.allowOperatorFallback,

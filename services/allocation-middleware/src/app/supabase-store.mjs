@@ -14,6 +14,7 @@ export function createSupabaseStore({
   serviceRoleKey,
   orgId,
   fetchImpl = fetch,
+  timeoutMs = 8000,
 }) {
   const base = String(supabaseUrl || '').replace(/\/$/, '');
   if (!base || !serviceRoleKey || !orgId) {
@@ -23,6 +24,7 @@ export function createSupabaseStore({
   async function rest(path, init = {}) {
     const response = await fetchImpl(`${base}/rest/v1/${path}`, {
       ...init,
+      signal: init.signal || AbortSignal.timeout(timeoutMs),
       headers: {
         apikey: serviceRoleKey,
         authorization: `Bearer ${serviceRoleKey}`,
@@ -53,18 +55,19 @@ export function createSupabaseStore({
     orgId,
     async load() {
       const state = ensureExtras(emptyState());
-      const [gifts, pots, allocations, proofs, exceptions, metaRows, contacts, notices, deliveries, waivers, clientRows] = await Promise.all([
+      const [gifts, pots, allocations, proofs, exceptions, metaRows, contacts, notices, deliveries, waivers, clientRows, events] = await Promise.all([
         rest(scoped('am_gifts', '*')).then(readJson),
         rest(scoped('am_pots', '*')).then(readJson),
         rest(scoped('am_allocations', '*')).then(readJson),
         rest(scoped('am_proofs', '*')).then(readJson),
         rest(scoped('am_exceptions', '*')).then(readJson),
-        rest(scoped('am_org_meta', 'labels,aliases,donation_link')).then(readJson),
+        rest(scoped('am_org_meta', 'labels,aliases,donation_link,source')).then(readJson),
         rest(scoped('am_gift_contacts', '*')).then(readJson),
         rest(scoped('am_impact_notices', '*')).then(readJson),
         rest(scoped('am_impact_notice_deliveries', '*')).then(readJson),
         rest(scoped('am_proof_waivers', '*')).then(readJson),
         rest(`clients?select=donation_link&id=eq.${encodeURIComponent(orgId)}`).then(readJson),
+        rest(scoped('am_webhook_events', 'id,client_id,source,event_name,charge_id,created_at')).then(readJson),
       ]);
       for (const row of gifts || []) {
         state.gifts.set(row.charge_id, {
@@ -131,6 +134,16 @@ export function createSupabaseStore({
       }
       const clientRow = Array.isArray(clientRows) ? clientRows[0] : null;
       state.donationLink = meta?.donation_link || clientRow?.donation_link || null;
+      state.tenantSource = meta?.source || 'every.org';
+      state.webhookEvents = (events || []).map((row) => ({
+        id: row.id,
+        orgId: row.client_id,
+        source: row.source,
+        eventName: row.event_name,
+        chargeId: row.charge_id,
+        payload: row.payload,
+        createdAt: row.created_at,
+      }));
       for (const row of contacts || []) {
         const contact = { chargeId: row.charge_id };
         if (row.email) contact.email = row.email;
@@ -283,11 +296,23 @@ export function createSupabaseStore({
           waived_at: item.waivedAt,
           note: item.note || '',
         }));
+      const eventRows = (state.webhookEvents || [])
+        .filter((item) => item.orgId === orgId && item.payload != null)
+        .map((item) => ({
+          id: item.id,
+          client_id: orgId,
+          source: item.source,
+          event_name: item.eventName || '',
+          charge_id: item.chargeId || null,
+          payload: item.payload,
+          created_at: item.createdAt,
+        }));
       const metaRows = [{
         client_id: orgId,
         labels,
         aliases,
         donation_link: state.donationLink || null,
+        source: state.tenantSource || 'every.org',
       }];
 
       const upserts = [
@@ -297,6 +322,7 @@ export function createSupabaseStore({
         ['am_proofs?on_conflict=id', proofRows],
         ['am_exceptions?on_conflict=id', exceptionRows],
         ['am_org_meta?on_conflict=client_id', metaRows],
+        ['am_webhook_events?on_conflict=id', eventRows],
         ['am_gift_contacts?on_conflict=charge_id', contactRows],
         ['am_proof_waivers?on_conflict=allocation_id', waiverRows],
         ['am_impact_notices?on_conflict=id', noticeRows],

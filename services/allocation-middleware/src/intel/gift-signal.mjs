@@ -4,7 +4,7 @@
  * Gift without a Need credits a pot and MUST NOT invent a Recommendation.
  */
 
-const CONNECTOR_SOURCES = new Set(['every.org', 'csv']);
+const CONNECTOR_SOURCES = new Set(['every.org', 'givebutter', 'donorbox', 'csv']);
 
 function potSubject(gift) {
   const campaign = String(gift?.campaignKey || '').trim();

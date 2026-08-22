@@ -13,6 +13,8 @@ export function ensureExtras(state) {
   if (!state.impactDeliveries) state.impactDeliveries = [];
   if (!state.proofWaivers) state.proofWaivers = new Map();
   if (state.donationLink === undefined) state.donationLink = null;
+  if (state.tenantSource === undefined) state.tenantSource = 'every.org';
+  if (!state.webhookEvents) state.webhookEvents = [];
   return state;
 }
 
@@ -47,6 +49,8 @@ export function serializeState(state) {
     impactDeliveries: state.impactDeliveries || [],
     proofWaivers: state.proofWaivers ? [...state.proofWaivers.entries()] : [],
     donationLink: state.donationLink || null,
+    tenantSource: state.tenantSource || 'every.org',
+    webhookEvents: state.webhookEvents || [],
   };
 }
 
@@ -82,6 +86,8 @@ export function deserializeState(raw) {
   state.impactDeliveries = raw.impactDeliveries || [];
   for (const [k, v] of raw.proofWaivers || []) state.proofWaivers.set(k, v);
   state.donationLink = raw.donationLink || null;
+  state.tenantSource = raw.tenantSource || 'every.org';
+  state.webhookEvents = raw.webhookEvents || [];
   return state;
 }
 

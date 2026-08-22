@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>AGI Portfolio Signals · Connect every.org</title>
+  <title>AGI Portfolio Signals · Connect a donation source</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="brand.css" />
   <link rel="stylesheet" href="allocation-shell.css" />
@@ -16,17 +16,19 @@
       <span class="brand-product">Portfolio Signals<br />Allocation</span>
       <nav class="brand-suite-links" aria-label="Allocation">
         <a href="allocation.html">Allocate</a>
-        <a href="allocation-setup.html" aria-current="page">every.org setup</a>
+        <a href="allocation-setup.html" aria-current="page">Source setup</a>
         <a href="allocation-login.html">Director login</a>
       </nav>
     </div>
   </header>
   <main id="main">
     <p class="eyebrow">Cloudflare Workers · webhook</p>
-    <h1>Connect every.org</h1>
+    <h1>Connect a donation source</h1>
     <p class="lede">
-      Paste one webhook URL into every.org once. Do not point every.org here until an operator
-      verifies a live Worker URL. Seed/fixture gifts never mark this page Connected.
+      Record the tenant source, an optional HTTPS donation link, and paste the
+      operator-owned Worker path into the vendor dashboard. Do not point a vendor
+      here until an operator verifies a live Worker URL. This page does not invent
+      a workers.dev host. Seed/fixture gifts never mark this page Connected.
     </p>
     <section class="panel">
       <div class="panel-heading">
@@ -36,17 +38,27 @@
       <p class="note" id="status-line"></p>
     </section>
     <section class="panel">
-      <div class="panel-heading"><h2>Outbound donation link</h2></div>
+      <div class="panel-heading"><h2>Tenant source and outbound donation link</h2></div>
       <p class="note">
-        Tenant HTTPS CTA to the third-party receiver. Missing link omits the CTA.
-        Do not paste a Stripe Checkout Session or an AGI checkout URL.
+        Source is every.org, Givebutter, Donorbox, or CSV. The donation link is an
+        HTTPS CTA to the tenant receiver. Missing link omits the CTA and blocks
+        ImpactNotice. Do not paste a Stripe Checkout Session or an AGI checkout URL.
       </p>
       <form id="link-form" class="stack-form">
+        <label>Source
+          <select name="source">
+            <option value="every.org">every.org</option>
+            <option value="givebutter">Givebutter</option>
+            <option value="donorbox">Donorbox</option>
+            <option value="csv">CSV</option>
+          </select>
+        </label>
         <label>Donation link <input name="donationLink" type="url" placeholder="https://…" /></label>
-        <button type="submit" class="button">Save donation link</button>
+        <button type="submit" class="button">Save onboarding fields</button>
       </form>
       <p class="note" id="link-msg" role="status"></p>
       <p class="note" id="cta-preview">CTA omitted until an HTTPS donation link is saved.</p>
+      <p class="note" id="source-note"></p>
     </section>
     <section class="panel">
       <div class="panel-heading"><h2>Webhook URL</h2></div>
@@ -66,6 +78,18 @@
       if (jwt) headers.Authorization = `Bearer ${jwt}`;
       return headers;
     }
+    function sourceNote(source) {
+      if (source === 'donorbox') {
+        return 'Donorbox custom webhooks need the API/Zapier add-on or Premium. Other tenants use CSV.';
+      }
+      if (source === 'csv') {
+        return 'CSV uses authenticated POST /import/csv. It is not a public webhook.';
+      }
+      if (source === 'givebutter') {
+        return 'Givebutter verifies header Signature against the Worker secret. Store GIVEBUTTER_WEBHOOK_SECRET as a binding.';
+      }
+      return 'every.org verifies x-webhook-token or ?token=. Store WEBHOOK_TOKEN as a Worker secret.';
+    }
     async function load() {
       const res = await fetch('/setup', { headers: authHeaders() });
       const data = await res.json();
@@ -75,7 +99,17 @@
         pill.textContent = 'Authorization required';
         return;
       }
-      urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the Worker)';
+      const source = data.source || data.connector || 'every.org';
+      document.querySelector('#link-form [name=source]').value = source;
+      document.getElementById('source-note').textContent = sourceNote(source);
+      if (source === 'csv') {
+        urlEl.textContent = data.webhookPath
+          ? `Authenticated ${data.webhookPath || 'POST /import/csv'} — not a vendor webhook`
+          : 'Authenticated POST /import/csv — not a vendor webhook';
+      } else {
+        urlEl.textContent = data.webhookUrl
+          || '(Operator-owned origin required. Do not invent a workers.dev URL. Set PUBLIC_BASE_URL after a live host exists.)';
+      }
       const linkInput = document.querySelector('#link-form [name=donationLink]');
       const cta = document.getElementById('cta-preview');
       if (data.donationLink) {
@@ -93,13 +127,13 @@
       const fixtures = Number(data.counts?.fixtureGifts || 0);
       if (live) {
         pill.textContent = 'Connected';
-        statusLine.textContent = `Org ${data.orgId} · live gift observed`;
+        statusLine.textContent = `Org ${data.orgId} · ${source} · live gift observed`;
       } else if (fixtures > 0) {
         pill.textContent = 'Seed only — waiting for live gift';
-        statusLine.textContent = `Org ${data.orgId} · ${fixtures} fixture gift(s) · not Connected`;
+        statusLine.textContent = `Org ${data.orgId} · ${source} · ${fixtures} fixture gift(s) · not Connected`;
       } else {
         pill.textContent = 'Waiting for first live gift';
-        statusLine.textContent = `Org ${data.orgId} · no live gifts yet`;
+        statusLine.textContent = `Org ${data.orgId} · ${source} · no live gifts yet`;
       }
     }
     document.getElementById('btn-copy').onclick = async () => {
@@ -113,16 +147,19 @@
     document.getElementById('btn-refresh').onclick = () => load();
     document.getElementById('link-form').addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const donationLink = new FormData(ev.target).get('donationLink');
+      const form = new FormData(ev.target);
       const res = await fetch('/setup', {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ donationLink }),
+        body: JSON.stringify({
+          donationLink: form.get('donationLink'),
+          source: form.get('source'),
+        }),
       });
       const data = await res.json();
       const msg = document.getElementById('link-msg');
       msg.textContent = res.ok
-        ? (data.donationLink ? 'Saved outbound donation link.' : 'Cleared donation link. CTA omitted.')
+        ? `Saved ${data.source || 'source'}${data.donationLink ? ' and outbound donation link.' : '. CTA omitted.'}`
         : (data.error || 'Save failed');
       await load();
     });
