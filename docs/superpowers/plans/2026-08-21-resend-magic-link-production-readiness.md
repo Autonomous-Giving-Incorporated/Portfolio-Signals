@@ -18,9 +18,9 @@ Status legend: DONE · IN PR · PENDING (eng) · PENDING (operator)
 | P3 | Signed Resend delivery webhook (`auth-email-webhook`) → dispatch delivery states (`022`) | eng | DONE — merged PS #44 |
 | P3b | Hard-failure alerts (`auth_email_alerts`) on bounced/complained magic links (`023`) | eng | DONE — merged PS #45 |
 | P3c | Channel-agnostic incoming-webhook notifier (`ALERT_WEBHOOK_URL`; Slack/Buzz/Discord/Teams) | eng | DONE — merged PS #46 |
-| P1 | Deploy `auth-email` + set `RESEND_API_KEY` / `AUTH_EMAIL_FROM` / `AUTH_EMAIL_REPLY_TO` / `AUTH_ALLOWED_ORIGINS`; reconcile `CURRENT-STATE` | operator | **PARTIAL** 2026-08-22 — `auth-email` v3 + migrations OBSERVED on `utdioxwiskzatwoejgiu`; live origins reject localhost; send secrets still **NOT_COMPUTABLE** (MCP cannot list/set Edge secrets; no send executed) |
+| P1 | Deploy `auth-email` + set `RESEND_API_KEY` / `AUTH_EMAIL_FROM` / `AUTH_EMAIL_REPLY_TO` / `AUTH_ALLOWED_ORIGINS`; reconcile `CURRENT-STATE` | operator | **PARTIAL** 2026-08-22 — `auth-email` v3 + migrations OBSERVED on `utdioxwiskzatwoejgiu`; live origins reject localhost; branded Mailosaur sends prove Resend send secrets work. Webhook secret still unset. |
 | P2 | Verify `auth.autogive.app` in Resend (DKIM/SPF/return-path); DMARC p=none→reject | operator | PENDING (operator) |
-| P8 | Synthetic acceptance drill; record OBSERVED (provider + date only) | operator + eng | PENDING — needs confirmed send secrets + operator inbox; function deploy is done |
+| P8 | Synthetic acceptance drill; record OBSERVED (provider + date only) | operator + eng | **PARTIAL** 2026-08-22 — tenant-member + isolation-director templates delivered; director magic-link click reached workspace. MFA, platform-admin template, and webhook secret still PENDING |
 
 ## Sequencing
 

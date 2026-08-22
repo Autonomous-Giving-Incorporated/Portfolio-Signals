@@ -14,8 +14,11 @@ This specification defines authentication and tenant-scoped infrastructure acces
 | OBSERVED | `auth-email` generates one-time Supabase Auth links server-side and sends role-aware content through Resend. |
 | OBSERVED | 2026-08-22 — `auth-email` v3 and `auth-email-webhook` v1 ACTIVE on `utdioxwiskzatwoejgiu` (`verify_jwt=false`). Live templates include `tenant_admin` and AGI gold/carbon chrome. Migrations `auth_email_ip_budget`, `auth_email_delivery_status`, `auth_email_alerts` applied. |
 | OBSERVED | 2026-08-22 — live `auth-email` rejects `http://127.0.0.1:8080` and unlisted origins (`origin_not_allowed`). Unsigned webhook POST returns `function_not_configured` (secret unset). |
-| PENDING | `RESEND_API_KEY` / `AUTH_EMAIL_FROM` confirmation, `RESEND_WEBHOOK_SECRET`, Resend domain `auth.autogive.app`, and P8 synthetic send+click. |
-| INFERRED | Production readiness still requires sender-domain secrets and a synthetic delivery drill on platform project `utdioxwiskzatwoejgiu`. |
+| OBSERVED | 2026-08-22 — Mailosaur inbox `Autogive Tests` (`qpbqeifu`) accepts injected messages (inject → wait → delete). Unassigned `auth-email` self_sign_in returns HTTP 202 and delivers nothing. |
+| OBSERVED | 2026-08-22 — After Dashboard invite + isolation `board_viewer` membership, `auth-email` delivered the tenant-member template to Mailosaur (gold/carbon chrome, no legacy palette). Dispatch `tenant_member_magic_link` status `sent` with a provider id. Built-in Auth invite used `noreply@mail.app.supabase.io` / "You've been invited" (not AGI brand). |
+| OBSERVED | 2026-08-22 — Isolation-only promotion to `director` on `org_platform_isolation` (not Hacker Dojo, not platform admin). `auth-email` delivered the tenant-administrator template. Probe consumed the magic link (303 then 200 on `autogive.app/portfolio-signals/workspace`). `mfa_enforced` stayed false, so MFA was not exercised. |
+| PENDING | P8 platform-admin template, MFA-enforced sign-in, `RESEND_WEBHOOK_SECRET` (unsigned webhook still `503 function_not_configured`; dispatch `delivery_status` still null). |
+| INFERRED | Production readiness still requires the webhook secret and an MFA-enforced synthetic drill on platform project `utdioxwiskzatwoejgiu`. |
 
 ## Role contract
 
@@ -147,6 +150,23 @@ supabase db reset
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
 ```
+
+Optional Mailosaur inbox (synthetic only). Default CI stays offline.
+
+```bash
+# Unit tests (mocked; no network)
+node --experimental-strip-types --test supabase/functions/_shared/mailosaur-client.test.ts
+
+# Live probe — requires MAILOSAUR_API_KEY. Never commit the key.
+# Inbox Autogive Tests: qpbqeifu.mailosaur.net
+export MAILOSAUR_SERVER_ID=qpbqeifu
+export SUPABASE_ANON_KEY=   # platform anon only; not service_role
+# Isolation director (not Hacker Dojo, not platform admin):
+# export MAILOSAUR_ASSIGNED_EMAIL=p8-isolation@qpbqeifu.mailosaur.net
+node --experimental-strip-types scripts/platform/probe-auth-email-mailosaur.ts
+```
+
+A real magic-link receive still needs an assigned Auth user whose email is `@qpbqeifu.mailosaur.net` (isolation-tenant membership only, not a platform admin) plus working `RESEND_API_KEY` / `AUTH_EMAIL_FROM`. Unassigned addresses return HTTP 202 and send nothing. The probe consumes the action URL in-process and never prints tokens.
 
 Production acceptance requires synthetic addresses only:
 
