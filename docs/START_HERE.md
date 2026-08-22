@@ -55,7 +55,7 @@ service_role_on_vercel: PROHIBITED
 | --- | --- |
 | Public suite on autogive.app | Live |
 | Phase 2 platform Auth + workspace | **Operator-complete** (login verified) |
-| Role-aware Auth email | **Production active**; Slices 19-21 deployed; authenticated-function ACLs hosted-verified; leaked-password protection blocked by Supabase Pro-plan entitlement |
+| Role-aware Auth email | **P8 tenant-member send OBSERVED** 2026-08-22 (Mailosaur isolation `board_viewer`). Click/MFA, director/admin templates, and webhook delivery status still PENDING. |
 | Commercial onboarding C→B→D | Runbooks + OBSERVED dry-runs (see CURRENT-STATE) |
 | **Client Onboarding Pack** (docs) | **Platform schema + Edge OBSERVED**; MFA dry-run **PENDING** ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) |
 | Phase 3a/3b allocation pilot | Director JWT + ephemeral public HTTPS OBSERVED |
