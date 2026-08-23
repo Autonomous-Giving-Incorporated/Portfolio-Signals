@@ -1,0 +1,3 @@
+# The synthetic v1 corpus is protected by byte-level SHA-256 checksums.
+# Keep its checkout representation stable on Windows and Unix hosts.
+fixtures/autogive-v1/** text eol=lf
