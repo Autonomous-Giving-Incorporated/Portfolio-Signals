@@ -71,7 +71,8 @@ begin
 
   if not has_function_privilege('service_role', 'public.register_client_asset(text,text,text,text,text,bigint,uuid)', 'execute')
     or not has_function_privilege('service_role', 'public.register_onboarding_document(text,text,text,text,bigint,text,text,numeric,text,text,uuid)', 'execute')
-    or not has_function_privilege('service_role', 'public.resolve_auth_email_context(text)', 'execute') then
+    or not has_function_privilege('service_role', 'public.resolve_auth_email_context(text)', 'execute')
+    or not has_function_privilege('service_role', 'public.am_credit_pot(text,text,text,bigint)', 'execute') then
     raise exception 'service-role Edge Function RPC contract was narrowed';
   end if;
 end $$;

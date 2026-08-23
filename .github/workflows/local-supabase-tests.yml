@@ -102,6 +102,8 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/020_am_impact_notice.sql
       - name: P1 connector source
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/025_am_p1_connectors.sql
+      - name: Atomic pot credit
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/026_am_credit_pot.sql
       - name: Execute auth-email per-source dispatch budget checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/021_auth_email_ip_budget.sql
       - name: Execute auth-email delivery-status checks

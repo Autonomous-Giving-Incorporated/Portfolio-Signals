@@ -1,6 +1,7 @@
 /**
  * Service-role writer for allocation webhook ingest → platform Supabase am_* tables.
- * Gift insert is idempotent on charge_id. Pot credit is read-modify-write (pilot scale).
+ * Gift insert is idempotent on charge_id. Pot credit is an atomic increment
+ * via service-role RPC `am_credit_pot` (INSERT … ON CONFLICT DO UPDATE).
  * Does not use D1, Render, or Fly disk.
  */
 import { normalize_gift } from '../connectors/adapter.mjs';
@@ -122,44 +123,21 @@ export function createSupabaseAllocationWriter({
   }
 
   async function creditPot(gift) {
-    const select =
-      `am_pots?select=credited_cents,allocated_cents` +
-      `&client_id=eq.${encodeURIComponent(orgId)}` +
-      `&campaign_key=eq.${encodeURIComponent(gift.campaignKey)}` +
-      `&program_key=eq.${encodeURIComponent(gift.programKey)}` +
-      `&limit=1`;
-    const existingRes = await rest(select);
-    if (!existingRes.ok) throw new Error('allocation_store_unavailable');
-    const existing = await readJson(existingRes);
-    const row = Array.isArray(existing) ? existing[0] : null;
-    if (!row) {
-      const insert = await rest('am_pots', {
-        method: 'POST',
-        headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({
-          client_id: orgId,
-          campaign_key: gift.campaignKey,
-          program_key: gift.programKey,
-          credited_cents: Number(gift.netCents),
-          allocated_cents: 0,
-        }),
-      });
-      if (!insert.ok) throw new Error('allocation_store_unavailable');
-      return { newPot: true };
-    }
-    const nextCredited = Number(row.credited_cents) + Number(gift.netCents);
-    const patch = await rest(
-      `am_pots?client_id=eq.${encodeURIComponent(orgId)}` +
-        `&campaign_key=eq.${encodeURIComponent(gift.campaignKey)}` +
-        `&program_key=eq.${encodeURIComponent(gift.programKey)}`,
-      {
-        method: 'PATCH',
-        headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({ credited_cents: nextCredited }),
-      },
-    );
-    if (!patch.ok) throw new Error('allocation_store_unavailable');
-    return { newPot: false };
+    const response = await rest('rpc/am_credit_pot', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        p_client_id: orgId,
+        p_campaign_key: gift.campaignKey,
+        p_program_key: gift.programKey,
+        p_credited_cents: Number(gift.netCents),
+      }),
+    });
+    if (!response.ok) throw new Error('allocation_store_unavailable');
+    const payload = await readJson(response);
+    const row = Array.isArray(payload) ? payload[0] : payload;
+    if (!row) throw new Error('allocation_store_unavailable');
+    return { newPot: Boolean(row.inserted) };
   }
 
   async function ingestGift(payload, { source = CONNECTOR_EVERY_ORG } = {}) {
