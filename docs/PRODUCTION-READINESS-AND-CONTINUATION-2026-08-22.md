@@ -315,7 +315,7 @@ Agents should **not** unpark login, invent a live Worker URL, or publish Civic F
 
 | Repo | Current useful HEAD / PR | Agent work remaining | Human work remaining |
 |---|---|---|---|
-| Portfolio-Signals | `main` `2d1dce7` includes synthetic v1 + auth-email hardening + merged [#52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` SPEC-026 P1 CODE_SHIPPED + [#54](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/54) docs flip | None required for #52 / #54; live pointing still operator-owned; unlocked pot RMW left as pre-existing pilot-scale | #18, #19, #20, C3 sign-off, #52 live pointing, leadership queue |
+| Portfolio-Signals | `main` `da5ee6b` includes synthetic v1 + auth-email hardening + merged [#52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` SPEC-026 P1 CODE_SHIPPED + [#54](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/54) / [#55](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/55) docs flips; this branch adds atomic `am_credit_pot` | Apply `am_credit_pot` on the operator-owned platform project; live pointing still operator-owned | #18, #19, #20, C3 sign-off, #52 live pointing, leadership queue |
 | Impact-Relay | [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) **merged** 2026-08-22; [PR #17](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/17) `59e3e8f` landed README/CLAUDE hygiene | None required | Live cohort / FINDINGS |
 | Autonomous-Giving-Incorporated | [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) **merged** 2026-08-22 | None on public-site v0.1 | Keep SPEC-028 PARKED |
 | Autonomous-Giving-Specs | v2.0.0 released; `IMPLEMENTATION-PROGRESS.md` refreshed in [#17](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/pull/17) / [#18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/pull/18); [#19](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/pull/19) `385619c` merged (harness #20 observation) | None required | Do not accept 029/030 from this plan |
@@ -337,7 +337,7 @@ Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
 | 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
 | 4 SPEC-028 | Left PARKED | — |
 | Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v1 deployed on `utdioxwiskzatwoejgiu`. Localhost origin 403. Webhook secret unset (503). Send secrets / P8 not executed | PARTIAL |
-| SPEC-026 P1 connectors | Merged [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings remain fail-closed on main. Not live. Not READY. Unlocked pot RMW left as pre-existing pilot-scale | CODE_SHIPPED |
+| SPEC-026 P1 connectors | Merged [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings remain fail-closed on main. Not live. Not READY. Pot credit is now atomic `am_credit_pot` (this branch); apply the migration on the operator-owned project before treating concurrent credits as safe | CODE_SHIPPED |
 
 Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 
