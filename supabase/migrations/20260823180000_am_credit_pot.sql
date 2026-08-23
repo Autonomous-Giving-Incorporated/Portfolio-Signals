@@ -19,6 +19,7 @@ returns table (
 language plpgsql
 set search_path = public
 as $$
+#variable_conflict use_column
 begin
   if p_client_id is null or length(btrim(p_client_id)) = 0 then
     raise exception 'client_id required';
@@ -34,33 +35,23 @@ begin
   end if;
 
   return query
-  with upsert as (
-    insert into public.am_pots (
-      client_id, campaign_key, program_key, credited_cents, allocated_cents
-    )
-    values (
-      p_client_id, p_campaign_key, p_program_key, p_credited_cents, 0
-    )
-    on conflict (client_id, campaign_key, program_key)
-    do update set
-      credited_cents = public.am_pots.credited_cents + excluded.credited_cents,
-      updated_at = now()
-    returning
-      public.am_pots.client_id,
-      public.am_pots.campaign_key,
-      public.am_pots.program_key,
-      public.am_pots.credited_cents,
-      public.am_pots.allocated_cents,
-      (xmax = 0) as inserted
+  insert into public.am_pots (
+    client_id, campaign_key, program_key, credited_cents, allocated_cents
   )
-  select
-    upsert.client_id,
-    upsert.campaign_key,
-    upsert.program_key,
-    upsert.credited_cents,
-    upsert.allocated_cents,
-    upsert.inserted
-  from upsert;
+  values (
+    p_client_id, p_campaign_key, p_program_key, p_credited_cents, 0
+  )
+  on conflict on constraint am_pots_pkey
+  do update set
+    credited_cents = public.am_pots.credited_cents + excluded.credited_cents,
+    updated_at = now()
+  returning
+    public.am_pots.client_id,
+    public.am_pots.campaign_key,
+    public.am_pots.program_key,
+    public.am_pots.credited_cents,
+    public.am_pots.allocated_cents,
+    (xmax = 0);
 end;
 $$;
 
