@@ -31,7 +31,7 @@ ImpactNotice still requires contactable identity, Evidence or an explicit waive,
 These paths are in-repo on Worker `portfolio-signals`. They are **not** live URLs. Do not invent a `workers.dev` or named-host URL. The operator pastes the real origin into the vendor dashboard after a live host exists.
 
 | Path | Role | Verify |
-| --- | --- | --- |
+| --- | --- |
 | `POST /webhooks/every-org` | P0. Keep this path. | `x-webhook-token` or `?token=` |
 | `POST /webhooks/givebutter` | P1 Givebutter `transaction.succeeded` | Header `Signature` equals `GIVEBUTTER_WEBHOOK_SECRET` |
 | `POST /webhooks/donorbox` | P1 Donorbox `donation.created` | Header `Donorbox-Signature` as `timestamp,hmac-sha256` |
@@ -61,7 +61,7 @@ These paths are in-repo on Worker `portfolio-signals`. They are **not** live URL
 
 Refunds and chargebacks persist after verify and open `SYNC_FAILURE`. v1 does not debit pots.
 
-Durable pot credit on the Supabase writer is still unlocked read-modify-write at pilot scale. Concurrent credits to the same pot can lose an update. Gift insert stays idempotent on `chargeId`. Do not treat this as a live concurrency guarantee.
+Durable pot credit on the Supabase writer is an atomic increment via service-role RPC `am_credit_pot` (`INSERT … ON CONFLICT DO UPDATE` on `(client_id, campaign_key, program_key)`). The writer sends the gift increment only; it does not GET a pot and PATCH an absolute `credited_cents`. Gift insert stays idempotent on `chargeId`. This is CODE_SHIPPED, not live, and not READY.
 
 ## Exception catalog
 
