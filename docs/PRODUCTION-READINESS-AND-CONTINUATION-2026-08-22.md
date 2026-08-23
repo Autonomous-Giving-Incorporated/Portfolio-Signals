@@ -93,7 +93,7 @@ The 17 August audit is still the first stack-wide record. Several of its **agent
 | Signals fallback taught Hacker Dojo / 18 attendees | Fail-closed fallback is Community AI Lab / 25 / $2500 | OBSERVED in AGI docs |
 | `autogive.app` still described as Vercel-live | DNS cutover to Worker `agi-public` recorded 2026-08-22 | OBSERVED in AGI `docs/DNS-CUTOVER-CHECKLIST.md` |
 | No Civic Forge / suite join-key corpus | AutoGive Synthetic Dataset v1 landed in Portfolio Signals ([PR #47](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/47)); IR [PR #12](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/pull/12) `3ec3b95` and AGI [PR #18](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/pull/18) `0925eb7` merged. Live `data/` untouched | SYNTHETIC_ONLY |
-| Auth-email brand / throttle / Resend path thin | PS PRs #41–#46 merged; 2026-08-22 platform apply+deploy OBSERVED (`auth-email` v3, `auth-email-webhook` v1, IP-budget/delivery/alerts migrations). **2026-08-23:** webhook secret OBSERVED set (unsigned `401`; signed `200`; one `delivery_status=delivered`). Remaining dispatch rows + MFA still PENDING | PARTIAL; P8 MFA PENDING |
+| Auth-email brand / throttle / Resend path thin | PS PRs #41–#46 merged; 2026-08-22 platform apply+deploy OBSERVED (`auth-email` v3, `auth-email-webhook` v1, IP-budget/delivery/alerts migrations). **2026-08-23:** webhook secret OBSERVED set; all 10 dispatches have Resend-backed `delivery_status` (9 delivered, 1 bounced). MFA still PENDING | PARTIAL; P8 MFA PENDING |
 | Suite-stack-audit / brand-auth-gate / agent-token scope | Merged on Portfolio Signals (#36, #37, #38) | OBSERVED in-repo |
 | Worker `portfolio-signals` ABSENT | Unchanged | OBSERVED 2026-08-15; not re-listed this session |
 | Live every.org / MFA / hosted restore / C3 / SPEC-028 | Unchanged | PENDING / PARKED / PROPOSED |
@@ -336,9 +336,9 @@ Attempted Waves 0–3 as instructed. SPEC-028 was not unparked.
 | 2 Allocation pilot (#20) | `CLOUDFLARE_*` ABSENT; no every.org admin; no live gift | NOT_COMPUTABLE |
 | 3 Public impact loop | Live IR `data/public-impact.json` still `outcomes: []` / `gated:public_shell`. Live PS campaign still `execution.state: blocked`. Fixtures not promoted | OBSERVED empty shell |
 | 4 SPEC-028 | Left PARKED | — |
-| Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v2 on `utdioxwiskzatwoejgiu`. Localhost origin 403. **Webhook secret OBSERVED set** 2026-08-23 (unsigned `401`; signed `200`). P8 tenant-member send/click already OBSERVED; platform-admin **send** OBSERVED (`6` rows); MFA drill still PENDING | PARTIAL |
+| Resend P1 (after org user grant) | Migrations + `auth-email` v3 + `auth-email-webhook` v2 on `utdioxwiskzatwoejgiu`. Localhost origin 403. **Webhook secret OBSERVED set** 2026-08-23. All 10 dispatches have Resend-backed `delivery_status`. P8 tenant-member send/click already OBSERVED; platform-admin **send + delivered** OBSERVED (`6` rows); MFA drill still PENDING | PARTIAL |
 | SPEC-026 P1 connectors | Merged [PR #52](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/52) `4c38323` CODE_SHIPPED (Givebutter + Donorbox + CSV twin). Review findings remain fail-closed on main. Not live. Not READY. Unlocked pot RMW left as pre-existing pilot-scale | CODE_SHIPPED |
-| Resend webhook secret (2026-08-23) | Operator set Edge `RESEND_WEBHOOK_SECRET` on `utdioxwiskzatwoejgiu`. Unsigned POST `401`. Signed Svix POST `200`. One P8 `tenant_member_magic_link` `delivery_status=delivered`. Do not create a second Resend webhook | OBSERVED |
+| Resend webhook secret (2026-08-23) | Operator set Edge `RESEND_WEBHOOK_SECRET` on `utdioxwiskzatwoejgiu`. Unsigned POST `401`. Signed Svix POST `200`. All 10 dispatches now have Resend-confirmed `delivery_status` (9 delivered, 1 bounced + `auth_email_alerts` row). Do not create a second Resend webhook | OBSERVED |
 
 Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 
@@ -347,7 +347,7 @@ Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 
 ## 11. Evidence notes for this revision
 
-- DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…2026-08-22). This session did not re-probe live HTTP.
+- DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…22). This session did not re-probe live HTTP.
 - Civic Forge money totals: from the merged Portfolio Signals fixture pack and prior disposable seed (`024_autogive_synthetic_v1.sql`). SYNTHETIC_ONLY.
 - PS issues #18 / #19 / #20: open via GitHub API on 2026-08-22. #19 reopened after local-synthetic PR #32.
 - IR #12 and AGI #18: merged 2026-08-22 (`3ec3b95`, `0925eb7`). PS #52 merged (`4c38323`).
