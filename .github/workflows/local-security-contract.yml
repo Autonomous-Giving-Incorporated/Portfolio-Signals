@@ -110,6 +110,7 @@ jobs:
           test -f supabase/tests/016_delegate_auth.sql
           test -f supabase/tests/017_security_definer_privileges.sql
           test -f supabase/tests/018_authenticated_security_definer_privileges.sql
+          test -f supabase/tests/026_am_credit_pot.sql
           grep -q "verify_jwt = false" supabase/config.toml
           grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
           test -f scripts/staging/generate-runtime-config.mjs
