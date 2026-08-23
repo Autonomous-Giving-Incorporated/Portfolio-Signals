@@ -347,7 +347,7 @@ Post-merge probe of org `main` (GitHub contents API, 2026-08-22):
 
 ## 11. Evidence notes for this revision
 
-- DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…22). This session did not re-probe live HTTP.
+- DNS cutover, public-source retarget, and Community AI Lab fallback: read from AGI docs on the synthetic-v1 / main line (2026-08-19…2026-08-22). This session did not re-probe live HTTP.
 - Civic Forge money totals: from the merged Portfolio Signals fixture pack and prior disposable seed (`024_autogive_synthetic_v1.sql`). SYNTHETIC_ONLY.
 - PS issues #18 / #19 / #20: open via GitHub API on 2026-08-22. #19 reopened after local-synthetic PR #32.
 - IR #12 and AGI #18: merged 2026-08-22 (`3ec3b95`, `0925eb7`). PS #52 merged (`4c38323`).
