@@ -31,7 +31,7 @@ ImpactNotice still requires contactable identity, Evidence or an explicit waive,
 These paths are in-repo on Worker `portfolio-signals`. They are **not** live URLs. Do not invent a `workers.dev` or named-host URL. The operator pastes the real origin into the vendor dashboard after a live host exists.
 
 | Path | Role | Verify |
-| --- | --- |
+| --- | --- | --- |
 | `POST /webhooks/every-org` | P0. Keep this path. | `x-webhook-token` or `?token=` |
 | `POST /webhooks/givebutter` | P1 Givebutter `transaction.succeeded` | Header `Signature` equals `GIVEBUTTER_WEBHOOK_SECRET` |
 | `POST /webhooks/donorbox` | P1 Donorbox `donation.created` | Header `Donorbox-Signature` as `timestamp,hmac-sha256` |
