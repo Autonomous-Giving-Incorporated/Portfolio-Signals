@@ -143,6 +143,8 @@ Configure the Auth redirect allowlist for both production workspace routes befor
 - `https://autogive.app/portfolio-signals/workspace`
 - `https://autogive.app/portfolio-signals/workspace.html`
 
+`auth-email` does not put the provider `action_link` in the message. It builds a workspace consume URL from `generateLink`'s `hashed_token` (`?token_hash=&type=`) so a director can open a forwarded admin-issued email without the sender's PKCE `localStorage`. Suite aliases such as `https://autogive.app/workspace` are rewritten to the canonical `workspace.html` path before the link is generated. Eligibility checks on `self_sign_in`, `invite_delegate`, and `resend_delegate_sign_in` are unchanged.
+
 ## VALIDATION
 
 ```bash

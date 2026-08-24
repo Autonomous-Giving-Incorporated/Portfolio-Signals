@@ -10,12 +10,14 @@ import {
   normalizeEmail,
   parseAllowedOrigins,
   pickAllowedOrigin,
-  safeRedirect
+  safeRedirect,
+  buildWorkspaceConsumeUrl,
+  CANONICAL_SUITE_WORKSPACE
 } from './lib.ts';
 
 type JsonRecord = Record<string, unknown>;
 
-const DEFAULT_REDIRECT = 'https://autogive.app/portfolio-signals/workspace';
+const DEFAULT_REDIRECT = CANONICAL_SUITE_WORKSPACE;
 
 // Production-safe by default: when AUTH_ALLOWED_ORIGINS is unset, only
 // https://autogive.app is accepted (no localhost). Local development sets
@@ -215,7 +217,16 @@ Deno.serve(async (request) => {
     options: { redirectTo: linkRedirect }
   });
 
-  if (generated.error || !generated.data.properties?.action_link) {
+  // Prefer token_hash on the workspace URL so the recipient can verifyOtp
+  // without a PKCE verifier from the sender's browser. Do not email the
+  // provider action_link (it can bounce through a PKCE code redirect).
+  const consumeUrl = buildWorkspaceConsumeUrl(
+    linkRedirect,
+    generated.data?.properties,
+    linkType
+  );
+
+  if (generated.error || !consumeUrl) {
     await serviceClient.rpc('complete_auth_email_dispatch', {
       p_dispatch_id: dispatch.data,
       p_status: 'failed',
@@ -228,7 +239,7 @@ Deno.serve(async (request) => {
 
   const templateInput: AuthEmailTemplateInput = {
     audience,
-    actionUrl: generated.data.properties.action_link,
+    actionUrl: consumeUrl,
     displayName: String(context.display_name || ''),
     clientName: String(context.client_name || ''),
     role: String(context.role || ''),

@@ -210,6 +210,7 @@
 .auth-form { align-self: center; display: grid; gap: 1rem; border-top: 4px solid var(--accent); }
 .auth-form label { display: grid; gap: .45rem; font-weight: 800; }
 .auth-form input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: .8rem; background: var(--bg); color: var(--text); }
+#mfaEnroll img { width: 180px; height: 180px; border-radius: 8px; background: #fff; }
 .workspace-authority-note { grid-column: 1 / -1; display: flex; gap: .7rem; padding: 1rem 1.1rem; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 10px; color: var(--muted); }
 .workspace-authority-note strong { color: var(--text); white-space: nowrap; }
 .auth-footer { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .6rem 1rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
