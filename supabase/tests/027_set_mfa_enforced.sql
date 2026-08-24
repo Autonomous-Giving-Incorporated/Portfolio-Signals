@@ -58,7 +58,6 @@ do $$
 declare
   v_profile public.profiles;
   v_again public.profiles;
-  v_audit integer;
 begin
   v_profile := public.set_mfa_enforced();
   if v_profile.mfa_enforced is not true then
@@ -72,7 +71,14 @@ begin
   if v_again.mfa_enforced is not true then
     raise exception 'idempotent set_mfa_enforced lost mfa_enforced';
   end if;
+end $$;
 
+-- campaign_lead cannot SELECT audit_log; count the row as the table owner.
+reset role;
+do $$
+declare
+  v_audit integer;
+begin
   select count(*) into v_audit
   from public.audit_log
   where actor_id = '00000000-0000-0000-0000-000000000102'
@@ -82,8 +88,6 @@ begin
     raise exception 'expected one mfa_enforced audit row, found %', v_audit;
   end if;
 end $$;
-
-reset role;
 update public.profiles
    set mfa_enforced = true
  where id = '00000000-0000-0000-0000-000000000102';
