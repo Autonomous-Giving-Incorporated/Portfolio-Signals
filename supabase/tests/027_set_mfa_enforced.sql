@@ -5,12 +5,14 @@ begin;
 create or replace function public.test_set_user(test_user uuid) returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth
 as $$
 begin
   perform set_config('request.jwt.claim.sub', test_user::text, true);
   perform set_config('request.jwt.claim.role', 'authenticated', true);
   perform set_config('request.jwt.claim.aal', 'aal2', true);
+  -- require_active_profile() fail-closes without a future exp claim.
+  perform set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 end
 $$;
 revoke execute on function public.test_set_user(uuid) from public, anon;
@@ -37,6 +39,20 @@ begin
 end $$;
 
 select set_config('request.jwt.claim.aal', 'aal2', true);
+select set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint - 30)::text, true);
+
+do $$
+begin
+  begin
+    perform public.set_mfa_enforced();
+    raise exception 'expired session set_mfa_enforced unexpectedly succeeded';
+  exception when others then
+    if sqlerrm = 'expired session set_mfa_enforced unexpectedly succeeded' then raise; end if;
+    if sqlerrm not like '%session_expired%' then raise; end if;
+  end;
+end $$;
+
+select set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 
 do $$
 declare
