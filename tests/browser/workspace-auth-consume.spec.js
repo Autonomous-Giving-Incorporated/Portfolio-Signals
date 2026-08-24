@@ -94,7 +94,7 @@ test('token_hash consume shows MFA enroll instead of the send-link form', async 
   await page.goto('/workspace.html?token_hash=fresh&type=magiclink');
   await expect(page.locator('#mfaEnroll')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Send secure sign-in link' })).toBeHidden();
-  await expect(page.getByText('Enforced MFA')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Enroll an authenticator' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Verify authenticator' })).toBeVisible();
 });
 
