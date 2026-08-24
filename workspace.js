@@ -7,6 +7,10 @@ import {
   workspaceRedirectUrl,
   getRecoveredSession
 } from './workspace/session.js';
+import {
+  isPrivilegedMfaRequiredError,
+  settleAuthFromUrl as consumeAuthFromUrl
+} from './workspace/auth-consume.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 import { mountBrandConfiguration } from './workspace/configuration.js';
@@ -72,93 +76,80 @@ function withTimeout(promise, ms, label) {
   });
 }
 
-/**
- * Consume auth redirect payloads before session reads.
- * Supabase email/admin magic links redirect as:
- *   /workspace#access_token=…&refresh_token=…&type=magiclink
- */
 async function settleAuthFromUrl(client) {
-  const url = new URL(window.location.href);
-  const hashParams = new URLSearchParams(
-    url.hash.startsWith('#') ? url.hash.slice(1) : url.hash
-  );
+  return consumeAuthFromUrl(client, {
+    href: window.location.href,
+    onMessage: showMessage,
+    onCleanUrl: cleanAuthUrl
+  });
+}
 
-  const hashError = hashParams.get('error') || hashParams.get('error_code');
-  if (hashError) {
-    const detail =
-      hashParams.get('error_description') ||
-      hashParams.get('error_code') ||
-      hashParams.get('error') ||
-      'sign-in link invalid';
-    showMessage(
-      `Sign-in link failed: ${decodeURIComponent(detail.replace(/\+/g, ' '))}. Request a new link.`
-    );
-    cleanAuthUrl();
-    return null;
-  }
+let mfaEnrollStarted = false;
+let mfaFactorId = null;
 
-  const code = url.searchParams.get('code');
-  const tokenHash = url.searchParams.get('token_hash');
-  const otpType = url.searchParams.get('type') || hashParams.get('type');
-  const accessToken = hashParams.get('access_token');
-  const refreshToken = hashParams.get('refresh_token');
+function hideSendLinkForm() {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) loginForm.hidden = true;
+}
 
-  const hasAuthPayload = Boolean(code || tokenHash || accessToken || refreshToken);
-  if (!hasAuthPayload) {
-    return getRecoveredSession(client);
-  }
+async function showMfaEnrollPath() {
+  const enroll = document.getElementById('mfaEnroll');
+  const mfaMessage = document.getElementById('mfaMessage');
+  hideSendLinkForm();
+  if (gate) gate.hidden = false;
+  if (workspace) workspace.hidden = true;
+  if (enroll) enroll.hidden = false;
+  showMessage('Enforced MFA is required for this privileged account.');
 
-  showMessage('Completing secure sign-in…');
+  if (mfaEnrollStarted || !activeClient?.auth?.mfa) return;
+  mfaEnrollStarted = true;
 
   try {
-    if (code) {
-      const { data, error } = await withTimeout(
-        client.auth.exchangeCodeForSession(code),
-        12000,
-        'Code exchange'
-      );
-      if (error) throw error;
-      cleanAuthUrl();
-      showMessage('');
-      return data.session;
+    const { data: listed, error: listError } = await withTimeout(
+      activeClient.auth.mfa.listFactors(),
+      12000,
+      'MFA factor list'
+    );
+    if (listError) throw listError;
+    const totp = listed?.totp || [];
+    const verified = totp.filter((factor) => factor.status === 'verified');
+    if (verified.length) {
+      if (mfaMessage) {
+        mfaMessage.textContent =
+          'Authenticator is enrolled. An operator must confirm enforced MFA before privileged workspace access.';
+      }
+      const form = document.getElementById('mfaVerifyForm');
+      if (form) form.hidden = true;
+      return;
     }
 
-    if (tokenHash && otpType) {
-      const { data, error } = await withTimeout(
-        client.auth.verifyOtp({ token_hash: tokenHash, type: otpType }),
-        12000,
-        'OTP verify'
-      );
-      if (error) throw error;
-      cleanAuthUrl();
-      showMessage('');
-      return data.session;
+    const { data: enrolled, error: enrollError } = await withTimeout(
+      activeClient.auth.mfa.enroll({
+        factorType: 'totp',
+        friendlyName: 'Portfolio Signals'
+      }),
+      12000,
+      'MFA enroll'
+    );
+    if (enrollError) throw enrollError;
+    mfaFactorId = enrolled?.id || null;
+    const qr = document.getElementById('mfaQr');
+    const secret = document.getElementById('mfaSecret');
+    if (qr && enrolled?.totp?.qr_code) {
+      qr.src = enrolled.totp.qr_code;
+      qr.hidden = false;
     }
-
-    if (accessToken && refreshToken) {
-      // Strip hash BEFORE setSession so a re-entry cannot re-process tokens,
-      // and so detect/init never re-reads the same fragment.
-      cleanAuthUrl();
-      const { data, error } = await withTimeout(
-        client.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        }),
-        12000,
-        'Session establish'
-      );
-      if (error) throw error;
-      showMessage('');
-      return data.session;
+    if (secret && enrolled?.totp?.secret) {
+      secret.textContent = `If you cannot scan the code, enter this secret: ${enrolled.totp.secret}`;
     }
-
-    showMessage('Sign-in link incomplete. Request a new link.');
-    cleanAuthUrl();
-    return null;
+    if (mfaMessage) {
+      mfaMessage.textContent =
+        'Scan the code, then enter a 6-digit authenticator code. Enrolling does not remove the MFA requirement.';
+    }
   } catch (error) {
-    showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-    cleanAuthUrl();
-    return null;
+    if (mfaMessage) {
+      mfaMessage.textContent = `Unable to start MFA enrollment: ${error.message}`;
+    }
   }
 }
 
@@ -208,6 +199,38 @@ if (activeClient) {
     await activeClient.auth.signOut();
   });
 
+  document.getElementById('mfaVerifyForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const mfaMessage = document.getElementById('mfaMessage');
+    const code = document.getElementById('mfaCode')?.value.trim();
+    if (!mfaFactorId || !code || !activeClient?.auth?.mfa) return;
+    try {
+      const { data: challenge, error: challengeError } = await withTimeout(
+        activeClient.auth.mfa.challenge({ factorId: mfaFactorId }),
+        12000,
+        'MFA challenge'
+      );
+      if (challengeError) throw challengeError;
+      const { error: verifyError } = await withTimeout(
+        activeClient.auth.mfa.verify({
+          factorId: mfaFactorId,
+          challengeId: challenge.id,
+          code
+        }),
+        12000,
+        'MFA verify'
+      );
+      if (verifyError) throw verifyError;
+      if (mfaMessage) {
+        mfaMessage.textContent =
+          'Authenticator enrolled. An operator must confirm enforced MFA before privileged workspace access.';
+      }
+      showMessage('Enforced MFA is still required until an operator confirms this account.');
+    } catch (error) {
+      if (mfaMessage) mfaMessage.textContent = `Authenticator verification failed: ${error.message}`;
+    }
+  });
+
   // CRITICAL: never await auth APIs inside onAuthStateChange — supabase-js
   // holds a lock during setSession and deadlocks if listeners call getSession.
   // Defer UI work off the auth callback stack.
@@ -243,6 +266,10 @@ async function renderSession(session, { allowNull = false } = {}) {
     lastSessionUserId = null;
     gate.hidden = false;
     workspace.hidden = true;
+    const enroll = document.getElementById('mfaEnroll');
+    if (enroll) enroll.hidden = true;
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) loginForm.hidden = false;
     activeProfile = null;
     clearWorkspaceSessionCache();
     return;
@@ -272,6 +299,10 @@ async function renderSession(session, { allowNull = false } = {}) {
     workspaceSession = await requireWorkspaceSession(session);
   } catch (error) {
     if (generation !== renderGeneration) return;
+    if (isPrivilegedMfaRequiredError(error)) {
+      await showMfaEnrollPath();
+      return;
+    }
     gate.hidden = false;
     workspace.hidden = true;
     showMessage(`Access blocked: ${error.message}`);
@@ -281,7 +312,10 @@ async function renderSession(session, { allowNull = false } = {}) {
 
   const { profile, clients, selectedClient: currentClient, isMasterAdmin: masterAdmin } = workspaceSession;
   const mfaRequired = PRIVILEGED_ROLES.has(profile.role) || masterAdmin;
-  if (mfaRequired && !profile.mfa_enforced) throw new Error('Enforced MFA is required.');
+  if (mfaRequired && !profile.mfa_enforced) {
+    await showMfaEnrollPath();
+    return;
+  }
   activeProfile = profile;
   selectedClient = currentClient;
   isMasterAdmin = masterAdmin;

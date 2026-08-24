@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
   clientIp,
@@ -7,10 +8,12 @@ import {
   parseAllowedOrigins,
   pickAllowedOrigin,
   safeRedirect,
+  buildWorkspaceConsumeUrl,
+  CANONICAL_SUITE_WORKSPACE,
   DEFAULT_ALLOWED_ORIGIN
 } from './lib.ts';
 
-const FALLBACK = 'https://autogive.app/portfolio-signals/workspace';
+const FALLBACK = CANONICAL_SUITE_WORKSPACE;
 
 test('normalizeEmail lowercases, trims, and rejects malformed input', () => {
   assert.equal(normalizeEmail('  Admin@Example.COM '), 'admin@example.com');
@@ -58,6 +61,62 @@ test('safeRedirect allows localhost only when explicitly opted in', () => {
     safeRedirect('http://127.0.0.1:8080/workspace', dev, FALLBACK),
     'http://127.0.0.1:8080/workspace'
   );
+  assert.equal(
+    safeRedirect('http://127.0.0.1:8080/workspace.html', dev, FALLBACK),
+    'http://127.0.0.1:8080/workspace.html'
+  );
+});
+
+test('safeRedirect rewrites suite /workspace aliases to the asset-backed canonical page', () => {
+  const prod = parseAllowedOrigins(undefined);
+  assert.equal(safeRedirect('https://autogive.app/workspace', prod, FALLBACK), CANONICAL_SUITE_WORKSPACE);
+  assert.equal(
+    safeRedirect('https://autogive.app/portfolio-signals/workspace', prod, FALLBACK),
+    CANONICAL_SUITE_WORKSPACE
+  );
+  assert.equal(
+    safeRedirect('https://autogive.app/workspace?delegate_invitation=abc', prod, FALLBACK),
+    `${CANONICAL_SUITE_WORKSPACE}?delegate_invitation=abc`
+  );
+});
+
+test('buildWorkspaceConsumeUrl emits a token_hash link settleAuthFromUrl can verify without PKCE', () => {
+  const url = buildWorkspaceConsumeUrl(
+    'https://autogive.app/portfolio-signals/workspace.html',
+    { hashed_token: 'hashed-otp', verification_type: 'magiclink' },
+    'magiclink'
+  );
+  assert.equal(
+    url,
+    'https://autogive.app/portfolio-signals/workspace.html?token_hash=hashed-otp&type=magiclink'
+  );
+  assert.doesNotMatch(url || '', /code=|access_token=/);
+});
+
+test('buildWorkspaceConsumeUrl preserves invite type and existing query parameters', () => {
+  const url = buildWorkspaceConsumeUrl(
+    'https://autogive.app/portfolio-signals/workspace.html?delegate_invitation=inv-1',
+    { hashed_token: 'invite-hash' },
+    'invite'
+  );
+  const parsed = new URL(url || '');
+  assert.equal(parsed.searchParams.get('token_hash'), 'invite-hash');
+  assert.equal(parsed.searchParams.get('type'), 'invite');
+  assert.equal(parsed.searchParams.get('delegate_invitation'), 'inv-1');
+});
+
+test('buildWorkspaceConsumeUrl fails closed when generateLink omits hashed_token', () => {
+  assert.equal(
+    buildWorkspaceConsumeUrl('https://autogive.app/portfolio-signals/workspace.html', {}, 'magiclink'),
+    null
+  );
+});
+
+test('auth-email emails the consume URL rather than the provider action_link', () => {
+  const source = readFileSync(new URL('./index.ts', import.meta.url), 'utf8');
+  assert.match(source, /buildWorkspaceConsumeUrl/);
+  assert.match(source, /actionUrl: consumeUrl/);
+  assert.doesNotMatch(source, /actionUrl: generated\.data\.properties\.action_link/);
 });
 
 test('clientIp prefers cf-connecting-ip, then first x-forwarded-for, then x-real-ip', () => {

@@ -6,6 +6,12 @@
   "outputDirectory": ".",
   "cleanUrls": false,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/workspace",
+      "destination": "/workspace.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

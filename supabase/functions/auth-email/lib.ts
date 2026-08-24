@@ -6,6 +6,62 @@ export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const DEFAULT_ALLOWED_ORIGIN = 'https://autogive.app';
 
+/** Suite path whose workspace.js and CSS actually load. */
+export const CANONICAL_SUITE_WORKSPACE = 'https://autogive.app/portfolio-signals/workspace.html';
+
+const SUITE_WORKSPACE_ALIASES = new Set([
+  '/workspace',
+  '/workspace/',
+  '/workspace.html',
+  '/portfolio-signals/workspace',
+  '/portfolio-signals/workspace/'
+]);
+
+function isSuiteHost(hostname: string): boolean {
+  return hostname === 'autogive.app' || hostname.endsWith('.autogive.app');
+}
+
+/**
+ * Rewrite suite aliases that serve HTML but 404 relative scripts
+ * (`/workspace.js`) to the Portfolio Signals workspace page.
+ */
+export function canonicalizeWorkspaceRedirect(url: URL): string {
+  if (isSuiteHost(url.hostname) && SUITE_WORKSPACE_ALIASES.has(url.pathname)) {
+    const canonical = new URL(CANONICAL_SUITE_WORKSPACE);
+    for (const [key, value] of url.searchParams) {
+      if (!canonical.searchParams.has(key)) canonical.searchParams.set(key, value);
+    }
+    return canonical.toString();
+  }
+  return url.toString();
+}
+
+/**
+ * Build a workspace URL that settleAuthFromUrl can consume with verifyOtp.
+ * Uses hashed_token from admin generateLink so the recipient does not need
+ * a PKCE verifier from the sender's browser. Returns null when the token
+ * is missing so the send path can fail closed.
+ */
+export function buildWorkspaceConsumeUrl(
+  redirectTo: string,
+  properties: { hashed_token?: string; verification_type?: string } | null | undefined,
+  linkType: 'invite' | 'magiclink'
+): string | null {
+  const tokenHash = properties?.hashed_token;
+  if (!tokenHash) return null;
+  try {
+    const url = new URL(redirectTo);
+    url.searchParams.set('token_hash', tokenHash);
+    url.searchParams.set(
+      'type',
+      properties?.verification_type || (linkType === 'invite' ? 'invite' : 'magiclink')
+    );
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Parse the comma-separated AUTH_ALLOWED_ORIGINS env into a Set. Defaults to
  * production only (no localhost) so a production deploy that forgets to set the
@@ -37,7 +93,7 @@ export function safeRedirect(value: unknown, allowed: Set<string>, fallback: str
     const url = new URL(String(value || fallback));
     if (!allowed.has(url.origin)) return fallback;
     if (!url.pathname.includes('workspace')) return fallback;
-    return url.toString();
+    return canonicalizeWorkspaceRedirect(url);
   } catch {
     return fallback;
   }
