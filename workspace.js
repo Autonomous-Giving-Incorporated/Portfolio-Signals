@@ -11,6 +11,10 @@ import {
   isPrivilegedMfaRequiredError,
   settleAuthFromUrl as consumeAuthFromUrl
 } from './workspace/auth-consume.js';
+import {
+  completePrivilegedMfaVerify,
+  pickTotpChallengeFactor
+} from './workspace/mfa.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 import { mountBrandConfiguration } from './workspace/configuration.js';
@@ -111,15 +115,24 @@ async function showMfaEnrollPath() {
       'MFA factor list'
     );
     if (listError) throw listError;
-    const totp = listed?.totp || [];
-    const verified = totp.filter((factor) => factor.status === 'verified');
-    if (verified.length) {
+    const existing = pickTotpChallengeFactor(listed);
+    if (existing.factorId && existing.alreadyVerified) {
+      mfaFactorId = existing.factorId;
+      const form = document.getElementById('mfaVerifyForm');
+      if (form) form.hidden = false;
       if (mfaMessage) {
         mfaMessage.textContent =
-          'Authenticator is enrolled. An operator must confirm enforced MFA before privileged workspace access.';
+          'Enter a 6-digit authenticator code. A verified factor satisfies enforced MFA and opens the workspace.';
       }
-      const form = document.getElementById('mfaVerifyForm');
-      if (form) form.hidden = true;
+      return;
+    }
+
+    if (existing.factorId && !existing.alreadyVerified) {
+      mfaFactorId = existing.factorId;
+      if (mfaMessage) {
+        mfaMessage.textContent =
+          'Finish verification with a 6-digit authenticator code. Enrolling alone does not open the workspace.';
+      }
       return;
     }
 
@@ -144,7 +157,7 @@ async function showMfaEnrollPath() {
     }
     if (mfaMessage) {
       mfaMessage.textContent =
-        'Scan the code, then enter a 6-digit authenticator code. Enrolling does not remove the MFA requirement.';
+        'Scan the code, then enter a 6-digit authenticator code. Enrolling without verification does not open the workspace.';
     }
   } catch (error) {
     if (mfaMessage) {
@@ -205,27 +218,23 @@ if (activeClient) {
     const code = document.getElementById('mfaCode')?.value.trim();
     if (!mfaFactorId || !code || !activeClient?.auth?.mfa) return;
     try {
-      const { data: challenge, error: challengeError } = await withTimeout(
-        activeClient.auth.mfa.challenge({ factorId: mfaFactorId }),
-        12000,
-        'MFA challenge'
-      );
-      if (challengeError) throw challengeError;
-      const { error: verifyError } = await withTimeout(
-        activeClient.auth.mfa.verify({
-          factorId: mfaFactorId,
-          challengeId: challenge.id,
-          code
-        }),
-        12000,
-        'MFA verify'
-      );
-      if (verifyError) throw verifyError;
-      if (mfaMessage) {
-        mfaMessage.textContent =
-          'Authenticator enrolled. An operator must confirm enforced MFA before privileged workspace access.';
+      const result = await completePrivilegedMfaVerify(activeClient, {
+        factorId: mfaFactorId,
+        code,
+        withTimeout
+      });
+      if (!result.ok) {
+        throw result.error || new Error(result.reason || 'mfa_verify_failed');
       }
-      showMessage('Enforced MFA is still required until an operator confirms this account.');
+      clearWorkspaceSessionCache();
+      lastSessionUserId = null;
+      const nextSession = result.session?.access_token
+        ? result.session
+        : (await getRecoveredSession(activeClient));
+      if (mfaMessage) {
+        mfaMessage.textContent = 'Authenticator verified. Opening the workspace…';
+      }
+      await scheduleRender(nextSession, { allowNull: false });
     } catch (error) {
       if (mfaMessage) mfaMessage.textContent = `Authenticator verification failed: ${error.message}`;
     }

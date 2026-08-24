@@ -32,10 +32,12 @@ legacy_staging_for_new_people: PROHIBITED  # ecxkhihlbrcwpavfoaoq frozen
 
 ## MFA policy
 
-1. User enrolls MFA in Supabase Auth (TOTP).
-2. Operator confirms enrollment in Dashboard → Authentication → Users.
-3. Only then run `set-mfa-enforced.sql` with `desired_mfa_enforced := true`.
-4. Never reverse this order.
+1. User opens a workspace magic-link consume URL and signs in.
+2. Privileged roles without `mfa_enforced` see **Enroll an authenticator**.
+3. User enrolls TOTP and submits a 6-digit code. `mfa.verify` must succeed. Enroll alone does not open the workspace.
+4. The workspace calls `set_mfa_enforced()`. That RPC writes the existing `profiles.mfa_enforced` flag only when `current_session_aal()` is `aal2`.
+5. The workspace then opens. The MFA requirement stays; a verified factor satisfies it.
+6. Keep `scripts/platform/set-mfa-enforced.sql` for emergency clear or accounts that cannot reach the enroll UI. Never set the flag true without a verified factor.
 
 ## Flow A — additional master_admin
 

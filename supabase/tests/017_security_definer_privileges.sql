@@ -65,7 +65,8 @@ begin
   if not has_function_privilege('authenticated', 'public.get_workspace_context()', 'execute')
     or not has_function_privilege('authenticated', 'public.approve_import_row(bigint)', 'execute')
     or not has_function_privilege('authenticated', 'public.set_client_membership(text,uuid,public.app_role,boolean,text)', 'execute')
-    or not has_function_privilege('authenticated', 'public.get_onboarding_pack(text)', 'execute') then
+    or not has_function_privilege('authenticated', 'public.get_onboarding_pack(text)', 'execute')
+    or not has_function_privilege('authenticated', 'public.set_mfa_enforced()', 'execute') then
     raise exception 'authenticated application RPC contract was narrowed';
   end if;
 
