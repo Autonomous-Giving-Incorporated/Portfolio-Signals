@@ -1,15 +1,28 @@
 import { test, expect } from '@playwright/test';
 
+const ADMIN_USER_ID = '11111111-1111-4111-8111-111111111111';
+
 function supabaseMock({
   session = {
     access_token: 'sess',
-    user: { id: 'user-admin', email: 'zer0state@zer0state.com' }
+    user: { id: ADMIN_USER_ID, email: 'zer0state@zer0state.com' }
   }
 } = {}) {
   const sessionJson = JSON.stringify(session);
   return `
     export function createClient() {
       const session = ${sessionJson};
+      if (!globalThis.__provisionCalls) globalThis.__provisionCalls = [];
+      const clients = [
+        {
+          id: 'org_hacker_dojo',
+          slug: 'hacker-dojo',
+          display_name: 'Hacker Dojo',
+          state: 'active',
+          reference_tenant: true,
+          created_at: '2026-01-01T00:00:00Z'
+        }
+      ];
       return {
         auth: {
           getSession: async () => ({ data: { session: null }, error: null }),
@@ -29,23 +42,38 @@ function supabaseMock({
           }
         },
         functions: { invoke: async () => ({ data: { accepted: true }, error: null }) },
-        rpc: async () => ({ data: null, error: { message: 'unused' } }),
+        rpc: async (name, args) => {
+          if (name === 'provision_client') {
+            globalThis.__provisionCalls.push(args);
+            clients.push({
+              id: args.p_client_id,
+              slug: args.p_slug,
+              display_name: args.p_display_name,
+              state: 'provisioning',
+              reference_tenant: false,
+              created_at: '2026-08-25T00:00:00Z'
+            });
+            return { data: { id: args.p_client_id }, error: null };
+          }
+          return { data: null, error: { message: 'unused' } };
+        },
         from: (table) => {
           if (table === 'clients') {
             return {
               select: () => ({
-                order: async () => ({
-                  data: [
-                    {
-                      id: 'org_hacker_dojo',
-                      slug: 'hacker-dojo',
-                      display_name: 'Hacker Dojo',
-                      state: 'active',
-                      reference_tenant: true,
-                      created_at: '2026-01-01T00:00:00Z'
-                    }
-                  ],
-                  error: null
+                order: async () => ({ data: [...clients], error: null })
+              })
+            };
+          }
+          if (table === 'profiles') {
+            return {
+              select: () => ({
+                eq: (_column, value) => ({
+                  maybeSingle: async () => (
+                    value === session.user.id
+                      ? { data: { id: session.user.id }, error: null }
+                      : { data: null, error: null }
+                  )
                 })
               })
             };
@@ -95,7 +123,7 @@ test.beforeEach(async ({ page }) => {
       },
       body: JSON.stringify({
         profile: {
-          id: 'user-admin',
+          id: ADMIN_USER_ID,
           display_name: 'Daniel Meyer',
           active: true,
           mfa_enforced: true,
@@ -142,4 +170,38 @@ test('platform admin with no membership sees platform chrome only', async ({ pag
   await expect(page.locator('#provisionClientForm [name="director"]')).toBeVisible();
   await expect(page.locator('#provisionClientForm [name="director"]')).not.toHaveAttribute('required', '');
   await expect(page.locator('#provisionClientForm [name="director"]')).not.toHaveAttribute('pattern', /0-9a-fA-F/);
+});
+
+test('platform admin provisions a tenant without a director UUID and stays on platform chrome', async ({ page }) => {
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({
+      contentType: 'application/javascript',
+      body: supabaseMock()
+    });
+  });
+
+  await page.goto('/workspace.html?token_hash=fresh&type=magiclink');
+  await expect(page.locator('#provisionClientForm')).toBeVisible();
+
+  await page.locator('#provisionClientForm [name="clientId"]').fill('org_example_civic');
+  await page.locator('#provisionClientForm [name="slug"]').fill('example-civic');
+  await page.locator('#provisionClientForm [name="displayName"]').fill('Example Civic');
+  await page.locator('#provisionClientForm [name="rationale"]').fill('Provision a new civic tenant');
+  await page.getByRole('button', { name: 'Provision client' }).click();
+
+  await expect(page.locator('#workspaceContent')).toContainText('org_example_civic');
+  await expect(page.locator('#workspace .tenant-chip')).toBeHidden();
+  await expect(page.locator('#identityLine')).toHaveText('Daniel Meyer · platform administration');
+  await expect(page.locator('#clientContext')).toHaveText('Platform administration · no client selected');
+
+  const calls = await page.evaluate(() => globalThis.__provisionCalls);
+  expect(calls).toEqual([
+    {
+      p_client_id: 'org_example_civic',
+      p_slug: 'example-civic',
+      p_display_name: 'Example Civic',
+      p_initial_director: ADMIN_USER_ID,
+      p_rationale: 'Provision a new civic tenant'
+    }
+  ]);
 });
