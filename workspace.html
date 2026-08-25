@@ -81,9 +81,9 @@
           <img class="brand-mark" src="assets/brand/agi-wordmark.png" alt="Autonomously Giving Incorporated" width="1200" height="290">
           <span class="brand-divider" aria-hidden="true"></span>
           <span class="brand-product">Portfolio Signals<br />Authenticated workspace</span>
-          <span class="tenant-chip">
-            <img class="tenant-mark" src="assets/tenants/hacker-dojo/icon.svg" alt="">
-            <span>Tenant · <strong data-tenant-name>Hacker Dojo</strong></span>
+          <span class="tenant-chip" hidden>
+            <img class="tenant-mark" alt="">
+            <span>Tenant · <strong data-tenant-name></strong></span>
           </span>
         </div>
         <div class="header-actions">
@@ -95,18 +95,14 @@
           <button id="signOut" class="button secondary">Sign out</button>
         </div>
         <div class="workspace-hero-copy">
-          <p class="eyebrow">AGI Portfolio Signals · tenant operations</p>
-          <h1>Campaign operations</h1>
+          <p class="eyebrow" data-workspace-eyebrow>AGI Portfolio Signals · platform administration</p>
+          <h1 data-workspace-heading>Platform administration</h1>
           <p id="identityLine" class="lede"></p>
         </div>
       </header>
       <nav id="roleNav" class="primary-nav" aria-label="Workspace sections"></nav>
       <section class="section workspace-overview">
-        <div class="workspace-context-strip">
-          <span><strong>$420K</strong> minimum campaign</span>
-          <span><strong>$2M</strong> transformation path</span>
-          <span><strong>Outreach</strong> remains approval-gated</span>
-        </div>
+        <div class="workspace-context-strip" hidden></div>
         <div class="metric-grid">
           <article class="metric-card"><span class="metric-label">Open decisions</span><strong id="decisionCount">—</strong></article>
           <article class="metric-card"><span class="metric-label">Active opportunities</span><strong id="opportunityCount">—</strong></article>

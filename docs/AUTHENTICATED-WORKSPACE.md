@@ -93,6 +93,9 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - Client directors manage existing authenticated profiles through `set_client_membership()`. Changes are audited and cannot remove the final active director.
 - Client directors invite, resend sign-ins for, and revoke scoped infrastructure delegates through the dedicated audited workflow. Unscoped delegates cannot be created through `set_client_membership()`.
 - Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
+- A platform administrator with no selected client sees **platform chrome only** and lands on the Platform admin provision screen. The workspace does not select the first enumerable tenant (including the Hacker Dojo reference tenant) as a silent default. `provision_client` defaults `p_initial_director` to the signed-in profile; an email or UUID must already exist.
+- Tenant name, mark, heading, and campaign dollar amounts appear only after a real selected client exists, and only from that client's `display_name` or published configuration. Missing campaign numbers hide the context strip instead of inventing figures.
+- The identity line uses **platform administration** when `is_master_admin` is true and the selected client has no membership role. It never falls through to `member` for a platform administrator.
 - Master-admin and privileged client mutations require an active MFA-enforced profile.
 - **Primary `master_admin`:** resolve from the restricted operator registry (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
 - **Second admin (deferred):** Add Qi Diaz via `platform_administrators` insert with rationale ≥ 12 chars.
