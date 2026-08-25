@@ -1,5 +1,6 @@
 -- Privileged MFA persist: AAL2 sets the existing profiles.mfa_enforced flag;
 -- AAL1 and enroll-without-verify stay fail-closed.
+-- JWT exp is required; audit_log is counted as table owner (campaign_lead cannot SELECT).
 begin;
 
 create or replace function public.test_set_user(test_user uuid) returns void
