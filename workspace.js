@@ -1,6 +1,7 @@
 import {
   createWorkspaceClient,
   clearWorkspaceSessionCache,
+  getRuntimeConfig,
   requireWorkspaceSession,
   roleCan,
   selectWorkspaceClient,
@@ -18,6 +19,11 @@ import {
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 import { mountBrandConfiguration } from './workspace/configuration.js';
+import {
+  resolveInitialDirectorId,
+  resolveWorkspaceChrome,
+  workspaceIdentityRoleLabel
+} from './workspace/tenant-chrome.js';
 
 const root = document.getElementById('workspaceRoot');
 const gate = document.getElementById('authGate');
@@ -44,6 +50,7 @@ let lastSessionUserId = null;
 let renderInFlight = null;
 let loginRequestInFlight = false;
 let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
+let activeSessionEmail = null;
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -280,6 +287,7 @@ async function renderSession(session, { allowNull = false } = {}) {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) loginForm.hidden = false;
     activeProfile = null;
+    activeSessionEmail = null;
     clearWorkspaceSessionCache();
     return;
   }
@@ -328,10 +336,15 @@ async function renderSession(session, { allowNull = false } = {}) {
   activeProfile = profile;
   selectedClient = currentClient;
   isMasterAdmin = masterAdmin;
+  activeSessionEmail = session.user?.email || null;
+  let publishedConfig = null;
   if (currentClient?.id) {
-    const { data: publishedConfig, error: configError } = await activeClient.from('client_config_versions').select('config').eq('client_id', currentClient.id).eq('state', 'published').maybeSingle();
+    const { data: publishedVersion, error: configError } = await activeClient.from('client_config_versions').select('config').eq('client_id', currentClient.id).eq('state', 'published').maybeSingle();
     if (configError) throw configError;
-    enabledModules = { sponsors: publishedConfig?.config?.modules?.sponsors !== false, grants: publishedConfig?.config?.modules?.grants !== false };
+    publishedConfig = publishedVersion?.config || null;
+    enabledModules = { sponsors: publishedConfig?.modules?.sponsors !== false, grants: publishedConfig?.modules?.grants !== false };
+  } else {
+    enabledModules = { sponsors: false, grants: false };
   }
   if (generation !== renderGeneration) return;
 
@@ -339,45 +352,102 @@ async function renderSession(session, { allowNull = false } = {}) {
   workspace.hidden = false;
   lastSessionUserId = userId;
   showMessage('');
-  const roleLabel = profile.role || selectedClient?.role || (masterAdmin ? 'platform administration' : 'member');
+  const roleLabel = workspaceIdentityRoleLabel({
+    isMasterAdmin: masterAdmin,
+    selectedClient: currentClient,
+    profile
+  });
   document.getElementById('identityLine').textContent =
     `${profile.display_name || session.user.email} · ${roleLabel}`;
-  updateAuthenticatedTenantChrome(currentClient);
+  updateAuthenticatedTenantChrome(currentClient, publishedConfig);
   renderClientSelector(clients, currentClient);
   renderNavigation(profile.role || selectedClient?.role);
   await loadDashboard(profile.role || selectedClient?.role);
 }
 
-/** Tenant label/chip only after sign-in (never on public pages or auth gate). */
-function updateAuthenticatedTenantChrome(client) {
-  const name = client?.display_name || 'No client selected';
-  document.querySelectorAll('#workspace [data-tenant-name]').forEach((node) => {
-    node.textContent = name;
-  });
+function publishedTenantMarkUrl(publishedConfig) {
+  const path = publishedConfig?.assets?.icon_path || publishedConfig?.assets?.logo_path;
+  const { supabaseUrl } = getRuntimeConfig();
+  if (!path || !supabaseUrl) return '';
+  return `${supabaseUrl}/storage/v1/object/public/agi-public-assets/${encodeURIComponent(path).replaceAll('%2F', '/')}`;
+}
+
+/** Apply product chrome, or tenant chrome after a real client is selected. */
+function updateAuthenticatedTenantChrome(client, publishedConfig) {
+  const chrome = resolveWorkspaceChrome({ client, publishedConfig });
+  const markSrc = publishedTenantMarkUrl(publishedConfig) || chrome.tenantMarkSrc;
+  const eyebrow = document.querySelector('#workspace [data-workspace-eyebrow]');
+  const heading = document.querySelector('#workspace [data-workspace-heading]');
+  if (eyebrow) eyebrow.textContent = chrome.eyebrow;
+  if (heading) heading.textContent = chrome.heading;
+  document.title = chrome.documentTitle;
+
   document.querySelectorAll('#workspace .tenant-chip').forEach((node) => {
+    if (!chrome.showTenantChip) {
+      node.hidden = true;
+      node.setAttribute('aria-hidden', 'true');
+      node.removeAttribute('aria-label');
+      const mark = node.querySelector('.tenant-mark');
+      if (mark) {
+        mark.removeAttribute('src');
+        mark.alt = '';
+      }
+      node.querySelectorAll('[data-tenant-name]').forEach((nameNode) => {
+        nameNode.textContent = '';
+      });
+      return;
+    }
     node.hidden = false;
     node.removeAttribute('aria-hidden');
-    node.setAttribute('aria-label', `Tenant: ${name}`);
+    node.setAttribute('aria-label', `Tenant: ${chrome.tenantName}`);
+    const mark = node.querySelector('.tenant-mark');
+    if (mark) {
+      if (markSrc) mark.src = markSrc;
+      else mark.removeAttribute('src');
+      mark.alt = chrome.tenantName;
+    }
+    node.querySelectorAll('[data-tenant-name]').forEach((nameNode) => {
+      nameNode.textContent = chrome.tenantName;
+    });
   });
-  document.title = client?.display_name
-    ? `AGI Portfolio Signals · ${client.display_name}`
-    : 'AGI Portfolio Signals · Workspace';
+
+  const strip = document.querySelector('#workspace .workspace-context-strip');
+  if (!strip) return;
+  strip.replaceChildren();
+  if (!chrome.contextItems.length) {
+    strip.hidden = true;
+    return;
+  }
+  for (const item of chrome.contextItems) {
+    const span = document.createElement('span');
+    const amount = document.createElement('strong');
+    amount.textContent = item.amount;
+    span.append(amount, ` ${item.label}`);
+    strip.append(span);
+  }
+  strip.hidden = false;
 }
 
 function renderClientSelector(clients, currentClient) {
   const select = document.getElementById('clientSelector');
-  select.innerHTML = clients.map(client => `
+  const options = clients.map(client => `
     <option value="${escapeHtml(client.id)}" ${client.id === currentClient?.id ? 'selected' : ''}>
       ${escapeHtml(client.display_name)}${client.role ? ` · ${escapeHtml(client.role)}` : ' · platform view'}
     </option>`).join('');
-  select.disabled = clients.length < 2;
+  select.innerHTML = currentClient?.id
+    ? options
+    : `<option value="" selected>Select a client</option>${options}`;
+  select.disabled = clients.length === 0 || (Boolean(currentClient?.id) && clients.length < 2);
   select.onchange = () => {
+    if (!select.value) return;
     selectWorkspaceClient(select.value);
     location.reload();
   };
   document.getElementById('clientContext').textContent = currentClient
     ? `${currentClient.display_name} · ${currentClient.state}`
-    : 'No client membership assigned';
+    : isMasterAdmin
+      ? 'Platform administration · no client selected'
+      : 'No client membership assigned';
 }
 
 function renderNavigation(role) {
@@ -441,7 +511,10 @@ async function loadDashboard(role) {
     document.getElementById('opportunityCount').textContent = '—';
     document.getElementById('authorizedCount').textContent = '—';
     document.getElementById('exceptionCount').textContent = '—';
-    content.innerHTML = `<h2>Platform administration</h2><p>Select Platform admin to provision clients. Platform authority does not grant access to client-private campaign records.</p>`;
+    if (isMasterAdmin) {
+      return mountPlatformAdmin();
+    }
+    content.innerHTML = `<h2>Platform administration</h2><p>No client membership is assigned. Platform authority does not grant access to client-private campaign records.</p>`;
     return;
   }
   const canReadConstituents = [
@@ -791,12 +864,12 @@ async function mountPlatformAdmin() {
       <label>Client ID<input name="clientId" required pattern="org_[a-z0-9_]+" placeholder="org_example"></label>
       <label>URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="example"></label>
       <label>Display name<input name="displayName" required></label>
-      <label>Initial director UUID<input name="directorId" required pattern="[0-9a-fA-F-]{36}"></label>
+      <label>Initial director<input name="director" type="text" autocomplete="off" placeholder="Signed-in account, or an existing profile email or UUID"></label>
       <label>Rationale<input name="rationale" required minlength="12"></label>
       <button class="button" type="submit">Provision client</button>
     </form>
     <label>Activation rationale<input id="activationRationale" minlength="12" placeholder="Confirm published config and enabled modules"></label>
-    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>`;
+    <p class="note" id="platformMessage">Leave the initial director blank to assign your signed-in profile. An email or UUID must already exist as a profile. Provisioning does not invent a user, attach leftover Hacker Dojo membership, or change MFA. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>`;
 
   content.querySelectorAll('[data-activate-client]').forEach(button => {
     button.addEventListener('click', async () => {
@@ -817,20 +890,47 @@ async function mountPlatformAdmin() {
   content.querySelector('#provisionClientForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const { error: provisionError } = await activeClient.rpc('provision_client', {
-      p_client_id: form.get('clientId').trim(),
-      p_slug: form.get('slug').trim(),
-      p_display_name: form.get('displayName').trim(),
-      p_initial_director: form.get('directorId').trim(),
-      p_rationale: form.get('rationale').trim()
-    });
-    if (provisionError) {
-      content.querySelector('#platformMessage').textContent = provisionError.message;
-      return;
+    const platformMessage = content.querySelector('#platformMessage');
+    try {
+      const directorId = await resolveInitialDirectorId({
+        directorInput: form.get('director')?.toString() || '',
+        sessionUserId: lastSessionUserId || activeProfile?.id,
+        sessionEmail: activeSessionEmail,
+        lookupProfile: lookupExistingProfile
+      });
+      const { error: provisionError } = await activeClient.rpc('provision_client', {
+        p_client_id: form.get('clientId').trim(),
+        p_slug: form.get('slug').trim(),
+        p_display_name: form.get('displayName').trim(),
+        p_initial_director: directorId,
+        p_rationale: form.get('rationale').trim()
+      });
+      if (provisionError) {
+        platformMessage.textContent = provisionError.message;
+        return;
+      }
+      clearWorkspaceSessionCache();
+      await mountPlatformAdmin();
+    } catch (error) {
+      platformMessage.textContent = error.message;
     }
-    clearWorkspaceSessionCache();
-    location.reload();
   });
+}
+
+async function lookupExistingProfile({ id, email } = {}) {
+  if (id) {
+    const { data, error } = await activeClient.from('profiles').select('id').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  if (email) {
+    const normalized = String(email).trim().toLowerCase();
+    if (activeSessionEmail && activeSessionEmail.toLowerCase() === normalized && lastSessionUserId) {
+      return lookupExistingProfile({ id: lastSessionUserId });
+    }
+    return null;
+  }
+  return null;
 }
 
 void root;

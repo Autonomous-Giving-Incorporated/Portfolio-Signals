@@ -4,6 +4,7 @@ import {
   privilegedMfaMissing,
   workspaceRedirectUrl
 } from './auth-consume.js';
+import { resolveSelectedWorkspaceClient } from './tenant-chrome.js';
 
 export { workspaceRedirectUrl };
 
@@ -143,11 +144,10 @@ export async function requireWorkspaceSession(knownSession = null) {
 
   const clients = Array.isArray(context.clients) ? context.clients : [];
   const preferredClientId = localStorage.getItem(CLIENT_STORAGE_KEY);
-  const selectedClient =
-    clients.find((client) => client.id === preferredClientId) ||
-    clients.find((client) => client.role) ||
-    clients[0] ||
-    null;
+  const selectedClient = resolveSelectedWorkspaceClient({
+    clients,
+    preferredClientId
+  });
   const role = selectedClient?.role || null;
 
   if (privilegedMfaMissing({ ...profile, role }, context)) {

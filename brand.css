@@ -58,6 +58,10 @@
   font-size: .72rem;
   white-space: nowrap;
 }
+.tenant-chip[hidden],
+.workspace-context-strip[hidden] {
+  display: none !important;
+}
 .tenant-chip img { width: 24px; height: 24px; border-radius: 4px; }
 
 .site-header > div:not(.header-actions):not(.brand-identity) {
