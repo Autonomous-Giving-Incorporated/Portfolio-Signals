@@ -1,5 +1,16 @@
 import { test, expect } from '@playwright/test';
 
+function chainableFrom() {
+  return `{
+    select() { return this; },
+    eq() { return this; },
+    in() { return this; },
+    is() { return this; },
+    maybeSingle: async () => ({ data: null, error: null }),
+    then(resolve) { resolve({ data: [], count: 0, error: null }); }
+  }`;
+}
+
 function supabaseMock({
   verifyError = null,
   session = { access_token: 'sess', user: { id: 'user-1', email: 'director@example.invalid' } },
@@ -15,7 +26,10 @@ function supabaseMock({
       const session = ${sessionJson};
       return {
         auth: {
-          getSession: async () => ({ data: { session: null }, error: null }),
+          getSession: async () => ({
+            data: { session: window.__PS_MFA_VERIFIED ? session : null },
+            error: null
+          }),
           onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
           signOut: async () => ({ error: null }),
           setSession: async () => ({ data: { session }, error: null }),
@@ -31,12 +45,21 @@ function supabaseMock({
               error: null
             }),
             challenge: async () => ({ data: { id: 'challenge-1' }, error: null }),
-            verify: async () => ({ data: {}, error: null })
+            verify: async () => {
+              window.__PS_MFA_VERIFIED = true;
+              return { data: session, error: null };
+            }
           }
         },
         functions: { invoke: async () => ({ data: { accepted: true }, error: null }) },
-        rpc: async () => ({ data: null, error: { message: ${contextErrorJson} } }),
-        from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }) })
+        rpc: async (name) => {
+          if (name === 'set_mfa_enforced') {
+            window.__PS_MFA_ENFORCED = true;
+            return { data: { id: 'user-1', mfa_enforced: true, active: true }, error: null };
+          }
+          return { data: null, error: { message: ${contextErrorJson} } };
+        },
+        from: () => (${chainableFrom()})
       };
     }
   `;
@@ -62,6 +85,7 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
+    const enforced = await page.evaluate(() => Boolean(window.__PS_MFA_ENFORCED)).catch(() => false);
     await route.fulfill({
       status: 200,
       headers: {
@@ -73,7 +97,7 @@ test.beforeEach(async ({ page }) => {
           id: 'user-1',
           display_name: 'Director',
           active: true,
-          mfa_enforced: false,
+          mfa_enforced: enforced,
           role: 'director'
         },
         is_master_admin: false,
@@ -96,6 +120,25 @@ test('token_hash consume shows MFA enroll instead of the send-link form', async 
   await expect(page.getByRole('button', { name: 'Send secure sign-in link' })).toBeHidden();
   await expect(page.getByRole('heading', { name: 'Enroll an authenticator' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Verify authenticator' })).toBeVisible();
+});
+
+test('verified authenticator opens the workspace without an operator confirm step', async ({ page }) => {
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({
+      contentType: 'application/javascript',
+      body: supabaseMock()
+    });
+  });
+
+  await page.goto('/workspace.html?token_hash=fresh&type=magiclink');
+  await expect(page.locator('#mfaEnroll')).toBeVisible();
+  await page.getByLabel('Authentication code').fill('123456');
+  await page.getByRole('button', { name: 'Verify authenticator' }).click();
+  await expect(page.locator('#workspace')).toBeVisible();
+  await expect(page.locator('#mfaEnroll')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Send secure sign-in link' })).toBeHidden();
+  await expect(page.getByText(/operator must confirm/i)).toHaveCount(0);
+  await expect(page.locator('#identityLine')).toContainText('Director');
 });
 
 test('expired token_hash explains reuse instead of a cold login', async ({ page }) => {

@@ -62,6 +62,39 @@ export function buildWorkspaceConsumeUrl(
   }
 }
 
+function isProviderVerifyUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.toLowerCase();
+    if (path.includes('/auth/v1/verify')) return true;
+    if (host.endsWith('.supabase.co') && path.includes('/auth/v1/')) return true;
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Choose the URL that auth-email may put in the message.
+ * hashed_token consume URLs only. Never the provider action_link / verify URL.
+ * Missing hashed_token fails closed even when action_link is present.
+ */
+export function selectAuthEmailActionUrl(
+  redirectTo: string,
+  properties: {
+    hashed_token?: string;
+    verification_type?: string;
+    action_link?: string;
+  } | null | undefined,
+  linkType: 'invite' | 'magiclink'
+): string | null {
+  const consumeUrl = buildWorkspaceConsumeUrl(redirectTo, properties, linkType);
+  if (!consumeUrl || isProviderVerifyUrl(consumeUrl)) return null;
+  if (properties?.action_link && consumeUrl === properties.action_link) return null;
+  return consumeUrl;
+}
+
 /**
  * Parse the comma-separated AUTH_ALLOWED_ORIGINS env into a Set. Defaults to
  * production only (no localhost) so a production deploy that forgets to set the

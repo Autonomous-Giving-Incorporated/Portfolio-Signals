@@ -9,6 +9,12 @@ import {
   workspaceAssetBaseHref,
   workspaceRedirectUrl
 } from '../workspace/auth-consume.js';
+import {
+  completePrivilegedMfaVerify,
+  persistedMfaEnforced,
+  pickTotpChallengeFactor,
+  workspaceOpensAfterMfaVerify
+} from '../workspace/mfa.js';
 
 function loc(partial) {
   return {
@@ -260,9 +266,104 @@ describe('MFA enroll gate copy stays distinct from the send-link form', () => {
     assert.match(html, /id=["']mfaEnroll["']/);
     assert.match(html, /Enforced MFA/i);
     assert.match(html, /id=["']mfaVerifyForm["']/);
+    assert.match(html, /Enrolling without verification does not open the workspace/);
+    assert.doesNotMatch(html, /operator must confirm/i);
     assert.doesNotMatch(
       html.slice(html.indexOf('id="mfaEnroll"'), html.indexOf('id="mfaEnroll"') + 1200),
       /Send secure sign-in link/
     );
+  });
+});
+
+describe('verified TOTP satisfies privileged MFA', () => {
+  test('pickTotpChallengeFactor prefers a verified factor and does not treat enroll as done', () => {
+    assert.deepEqual(
+      pickTotpChallengeFactor({
+        totp: [
+          { id: 'unverified-1', status: 'unverified' },
+          { id: 'verified-1', status: 'verified' }
+        ]
+      }),
+      { factorId: 'verified-1', alreadyVerified: true }
+    );
+    assert.deepEqual(
+      pickTotpChallengeFactor({ totp: [{ id: 'pending-1', status: 'unverified' }] }),
+      { factorId: 'pending-1', alreadyVerified: false }
+    );
+    assert.deepEqual(pickTotpChallengeFactor({ totp: [] }), {
+      factorId: null,
+      alreadyVerified: false
+    });
+  });
+
+  test('workspace opens only after verify and persist succeed', () => {
+    assert.equal(workspaceOpensAfterMfaVerify({ verifySucceeded: true, persistSucceeded: true }), true);
+    assert.equal(workspaceOpensAfterMfaVerify({ verifySucceeded: true, persistSucceeded: false }), false);
+    assert.equal(workspaceOpensAfterMfaVerify({ verifySucceeded: false, persistSucceeded: true }), false);
+    assert.equal(persistedMfaEnforced({ mfa_enforced: true }), true);
+    assert.equal(persistedMfaEnforced({ mfa_enforced: false }), false);
+  });
+
+  function mfaClient({
+    verifyError = null,
+    persistError = null,
+    persistData = { mfa_enforced: true, id: 'user-1' }
+  } = {}) {
+    const calls = [];
+    return {
+      calls,
+      auth: {
+        mfa: {
+          async challenge(payload) {
+            calls.push({ method: 'challenge', payload });
+            return { data: { id: 'challenge-1' }, error: null };
+          },
+          async verify(payload) {
+            calls.push({ method: 'verify', payload });
+            if (verifyError) return { data: null, error: verifyError };
+            return { data: { access_token: 'aal2-token' }, error: null };
+          }
+        }
+      },
+      async rpc(name) {
+        calls.push({ method: 'rpc', name });
+        if (persistError) return { data: null, error: persistError };
+        return { data: persistData, error: null };
+      }
+    };
+  }
+
+  test('completePrivilegedMfaVerify persists mfa_enforced after a successful factor verify', async () => {
+    const client = mfaClient();
+    const result = await completePrivilegedMfaVerify(client, { factorId: 'factor-1', code: '123456' });
+    assert.equal(result.ok, true);
+    assert.equal(result.profile.mfa_enforced, true);
+    assert.deepEqual(client.calls[0], { method: 'challenge', payload: { factorId: 'factor-1' } });
+    assert.equal(client.calls[1].method, 'verify');
+    assert.deepEqual(client.calls[2], { method: 'rpc', name: 'set_mfa_enforced' });
+  });
+
+  test('completePrivilegedMfaVerify does not persist when verify fails', async () => {
+    const client = mfaClient({ verifyError: { message: 'Invalid TOTP code' } });
+    const result = await completePrivilegedMfaVerify(client, { factorId: 'factor-1', code: '000000' });
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, 'verify');
+    assert.equal(client.calls.some((call) => call.method === 'rpc'), false);
+  });
+
+  test('completePrivilegedMfaVerify fails closed when persist does not set mfa_enforced', async () => {
+    const client = mfaClient({ persistData: { mfa_enforced: false } });
+    const result = await completePrivilegedMfaVerify(client, { factorId: 'factor-1', code: '123456' });
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, 'persist');
+  });
+
+  test('workspace.js writes mfa_enforced through set_mfa_enforced after verify', () => {
+    const workspace = readFileSync(new URL('../workspace.js', import.meta.url), 'utf8');
+    const helper = readFileSync(new URL('../workspace/mfa.js', import.meta.url), 'utf8');
+    assert.match(workspace, /completePrivilegedMfaVerify/);
+    assert.match(helper, /set_mfa_enforced/);
+    assert.doesNotMatch(workspace, /operator must confirm/i);
+    assert.doesNotMatch(helper, /operator must confirm/i);
   });
 });

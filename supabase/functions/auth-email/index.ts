@@ -11,7 +11,7 @@ import {
   parseAllowedOrigins,
   pickAllowedOrigin,
   safeRedirect,
-  buildWorkspaceConsumeUrl,
+  selectAuthEmailActionUrl,
   CANONICAL_SUITE_WORKSPACE
 } from './lib.ts';
 
@@ -220,7 +220,8 @@ Deno.serve(async (request) => {
   // Prefer token_hash on the workspace URL so the recipient can verifyOtp
   // without a PKCE verifier from the sender's browser. Do not email the
   // provider action_link (it can bounce through a PKCE code redirect).
-  const consumeUrl = buildWorkspaceConsumeUrl(
+  // Fail closed when hashed_token is missing — never fall back to action_link.
+  const consumeUrl = selectAuthEmailActionUrl(
     linkRedirect,
     generated.data?.properties,
     linkType

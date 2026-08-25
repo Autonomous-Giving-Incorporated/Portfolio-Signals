@@ -37,6 +37,7 @@ declare
     'public.rollback_client_config(p_client_id text, p_source_version integer, p_rationale text)',
     'public.save_client_config_draft(p_client_id text, p_config jsonb, p_rationale text)',
     'public.set_client_membership(p_client_id text, p_user_id uuid, p_role app_role, p_active boolean, p_rationale text)',
+    'public.set_mfa_enforced()',
     'public.unconfirm_onboarding_document(p_document_id uuid)'
   ];
 begin
@@ -86,6 +87,7 @@ begin
 
   if not has_function_privilege('authenticated', 'public.require_privileged_mfa()', 'execute')
     or not has_function_privilege('authenticated', 'public.get_workspace_context()', 'execute')
+    or not has_function_privilege('authenticated', 'public.set_mfa_enforced()', 'execute')
     or not has_function_privilege('authenticated', 'public.current_role()', 'execute')
     or not has_function_privilege('authenticated', 'public.current_client_role(text)', 'execute') then
     raise exception 'supported authenticated RPC or RLS helper was removed';

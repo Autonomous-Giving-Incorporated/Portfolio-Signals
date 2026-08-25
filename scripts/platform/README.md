@@ -19,7 +19,7 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | --- | --- |
 | `bootstrap-master-admin.sql` | **First** master_admin only |
 | `ensure-profile.sql` | Upsert active profile (does not set MFA) |
-| `set-mfa-enforced.sql` | Set `mfa_enforced` after Auth MFA enrollment confirmed |
+| `set-mfa-enforced.sql` | Emergency set or clear of `mfa_enforced`. Workspace persist after verified TOTP uses `set_mfa_enforced()`. |
 | `grant-master-admin.sql` | Grant/reactivate platform admin (rationale ≥ 12) |
 | `revoke-master-admin.sql` | Soft-revoke platform admin |
 | `verify-operator-access.sql` | Read-only profile / admin / optional membership check |

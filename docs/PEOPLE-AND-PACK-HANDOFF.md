@@ -52,7 +52,7 @@ Probe anytime:
 
 1. Open their `action_link`s (private browser).  
 2. Complete first login; **enroll TOTP**.  
-3. Operator: for each UUID, `scripts/platform/set-mfa-enforced.sql` with `desired_mfa_enforced := true`.  
+3. Each person verifies a TOTP code in the workspace enroll path. `set_mfa_enforced()` persists the existing profile flag after AAL2. Use `scripts/platform/set-mfa-enforced.sql` only if that path cannot run.  
 4. `./scripts/platform/verify-pack-and-people.sh` → expect `totp_verified≥1` and `mfa_enforced=true`.
 
 ### Ed access check
@@ -74,5 +74,5 @@ After login, workspace context must show:
 ## Non-goals
 
 - Do not paste action links or PATs into chat/git.  
-- Do not set `mfa_enforced` before TOTP enroll for Qi/Ed.  
+- Do not set `mfa_enforced` before a verified TOTP factor.  
 - Pack `ready` ≠ import / outreach / client activate.

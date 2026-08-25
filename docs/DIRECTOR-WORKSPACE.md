@@ -19,7 +19,7 @@
 2. Apply all files under `supabase/migrations/`.
 3. Configure allowed redirect URLs for the production workspace URL.
 4. Create director and data-steward accounts manually.
-5. Set `mfa_enforced = true` only after MFA enrollment is verified.
+5. After a privileged user verifies TOTP, `set_mfa_enforced()` persists `mfa_enforced = true`. Do not set the flag before a verified factor exists.
 6. Generate `runtime-config.js` from `runtime-config.example.js` using only the public URL and anon key.
 7. Test every role against RLS before importing records.
 8. Run the first import in quarantine; do not promote any rows automatically.

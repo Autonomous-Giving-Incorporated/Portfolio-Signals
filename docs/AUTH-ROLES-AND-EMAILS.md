@@ -19,6 +19,7 @@ This specification defines authentication and tenant-scoped infrastructure acces
 | OBSERVED | 2026-08-22 — After Dashboard invite + isolation `board_viewer` membership, `auth-email` delivered the tenant-member template to Mailosaur (gold/carbon chrome, no legacy palette). Dispatch `tenant_member_magic_link` status `sent` with a provider id. Built-in Auth invite used `noreply@mail.app.supabase.io` / "You've been invited" (not AGI brand). |
 | OBSERVED | 2026-08-22 — Isolation-only promotion to `director` on `org_platform_isolation` (not Hacker Dojo, not platform admin). `auth-email` delivered the tenant-administrator template. Probe consumed the magic link (303 then 200 on `autogive.app/portfolio-signals/workspace`). `mfa_enforced` stayed false, so MFA was not exercised. |
 | PENDING | MFA-enforced synthetic drill; optional `ALERT_WEBHOOK_URL`. Platform-admin template **send + delivered** OBSERVED (`6` rows, Aug 22 gold/carbon chrome); receive/click/MFA not exercised. |
+| PENDING | 2026-08-24 — live `auth-email` SHA `3a9bd980…` still emails the provider verify `action_link`. Redeploy current main. Apply `202608240001_set_mfa_enforced`. Do not invent secrets. |
 | INFERRED | Production readiness still requires an MFA-enforced synthetic drill on platform project `utdioxwiskzatwoejgiu`. |
 
 ## Role contract
@@ -143,17 +144,32 @@ Configure the Auth redirect allowlist for both production workspace routes befor
 - `https://autogive.app/portfolio-signals/workspace`
 - `https://autogive.app/portfolio-signals/workspace.html`
 
-`auth-email` does not put the provider `action_link` in the message. It builds a workspace consume URL from `generateLink`'s `hashed_token` (`?token_hash=&type=`) so a director can open a forwarded admin-issued email without the sender's PKCE `localStorage`. Suite aliases such as `https://autogive.app/workspace` are rewritten to the canonical `workspace.html` path before the link is generated. Eligibility checks on `self_sign_in`, `invite_delegate`, and `resend_delegate_sign_in` are unchanged.
+`auth-email` does not put the provider `action_link` in the message. `selectAuthEmailActionUrl()` builds a workspace consume URL from `generateLink`'s `hashed_token` (`?token_hash=&type=`). If `hashed_token` is missing, the send fails closed. The function never emails `https://<project>.supabase.co/auth/v1/verify?...`. Suite aliases such as `https://autogive.app/workspace` are rewritten to the canonical `workspace.html` path before the link is generated. Eligibility checks on `self_sign_in`, `invite_delegate`, and `resend_delegate_sign_in` are unchanged.
+
+### Live Edge Function redeploy (operator)
+
+OBSERVED 2026-08-24 PT: live `auth-email` on `utdioxwiskzatwoejgiu` is still version 4, SHA `3a9bd980db00ba33afbf6f0ba43e393194d9f90065d7097aacd39c2bf555e465`. That build emails `generated.data.properties.action_link` (the provider verify URL). Current main already uses the consume URL. This is a redeploy of current main, not a new secret:
+
+```bash
+supabase functions deploy auth-email --project-ref utdioxwiskzatwoejgiu --no-verify-jwt
+```
+
+Do not invent or rotate Resend or service-role secrets for this redeploy. Do not publish Workers. After deploy, a fresh magic-link message must contain `https://autogive.app/portfolio-signals/workspace.html?token_hash=` and must not contain `/auth/v1/verify`.
+
+Apply migration `202608240001_set_mfa_enforced.sql` on the same project before privileged users enroll MFA in the workspace. The RPC writes the existing `profiles.mfa_enforced` flag after an AAL2 session. It does not create users.
 
 ## VALIDATION
 
 ```bash
 node --check workspace.js
+node --test tests/workspace-auth-consume.test.mjs
+node --experimental-strip-types --test supabase/functions/auth-email/lib.test.ts
 node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts
 deno check --node-modules-dir=auto supabase/functions/auth-email/index.ts
 supabase db reset
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
+psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/027_set_mfa_enforced.sql
 ```
 
 Optional Mailosaur inbox (synthetic only). Default CI stays offline.

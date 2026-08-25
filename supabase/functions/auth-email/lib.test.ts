@@ -9,6 +9,7 @@ import {
   pickAllowedOrigin,
   safeRedirect,
   buildWorkspaceConsumeUrl,
+  selectAuthEmailActionUrl,
   CANONICAL_SUITE_WORKSPACE,
   DEFAULT_ALLOWED_ORIGIN
 } from './lib.ts';
@@ -114,9 +115,45 @@ test('buildWorkspaceConsumeUrl fails closed when generateLink omits hashed_token
 
 test('auth-email emails the consume URL rather than the provider action_link', () => {
   const source = readFileSync(new URL('./index.ts', import.meta.url), 'utf8');
-  assert.match(source, /buildWorkspaceConsumeUrl/);
+  assert.match(source, /selectAuthEmailActionUrl/);
   assert.match(source, /actionUrl: consumeUrl/);
   assert.doesNotMatch(source, /actionUrl: generated\.data\.properties\.action_link/);
+  assert.doesNotMatch(source, /action_link \|\| consumeUrl|consumeUrl \|\| .*action_link/);
+});
+
+test('selectAuthEmailActionUrl never emails a hashed_token generateLink as the provider verify URL', () => {
+  const providerVerify =
+    'https://utdioxwiskzatwoejgiu.supabase.co/auth/v1/verify?token=raw-otp&type=magiclink&redirect_to=https://autogive.app/portfolio-signals/workspace.html';
+  const url = selectAuthEmailActionUrl(
+    'https://autogive.app/portfolio-signals/workspace.html',
+    {
+      hashed_token: 'hashed-otp',
+      verification_type: 'magiclink',
+      action_link: providerVerify
+    },
+    'magiclink'
+  );
+  assert.equal(
+    url,
+    'https://autogive.app/portfolio-signals/workspace.html?token_hash=hashed-otp&type=magiclink'
+  );
+  assert.doesNotMatch(url || '', /auth\/v1\/verify/);
+  assert.doesNotMatch(url || '', /token=raw-otp/);
+  assert.notEqual(url, providerVerify);
+});
+
+test('selectAuthEmailActionUrl fails closed when hashed_token is missing even if action_link exists', () => {
+  assert.equal(
+    selectAuthEmailActionUrl(
+      'https://autogive.app/portfolio-signals/workspace.html',
+      {
+        action_link:
+          'https://utdioxwiskzatwoejgiu.supabase.co/auth/v1/verify?token=raw-otp&type=magiclink'
+      },
+      'magiclink'
+    ),
+    null
+  );
 });
 
 test('clientIp prefers cf-connecting-ip, then first x-forwarded-for, then x-real-ip', () => {

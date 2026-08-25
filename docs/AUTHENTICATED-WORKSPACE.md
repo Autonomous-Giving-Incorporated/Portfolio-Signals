@@ -10,7 +10,9 @@ https://autogive.app/portfolio-signals/workspace.html
 
 Also reachable as `/portfolio-signals/workspace`. The suite alias `https://autogive.app/workspace` serves this HTML, but relative scripts 404 there unless the page sets `<base href="/portfolio-signals/">`. `workspaceRedirectUrl()` and `auth-email` canonicalize suite aliases to this asset-backed URL.
 
-Sign-in emails use a one-time `token_hash` query on that URL. `settleAuthFromUrl` calls `verifyOtp` on the recipient browser and does not need a PKCE verifier from the sender. Implicit `#access_token` links still consume. Used or expired tokens show an explicit reuse error, not a cold login. Privileged roles that authenticate without `mfa_enforced` see an authenticator enroll path; the MFA requirement stays in place.
+Sign-in emails use a one-time `token_hash` query on that URL. `settleAuthFromUrl` calls `verifyOtp` on the recipient browser and does not need a PKCE verifier from the sender. Implicit `#access_token` links still consume. Used or expired tokens show an explicit reuse error, not a cold login.
+
+Privileged roles that authenticate without `mfa_enforced` see an authenticator enroll path. The MFA requirement stays in place. After `supabase.auth.mfa.verify` succeeds, the workspace calls `set_mfa_enforced()` so the existing profile flag is true, then opens. Enrolling a TOTP factor without verification does not open the workspace.
 
 Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Legacy HD staging `ecxkhihlbrcwpavfoaoq` is **frozen** for new tenancy.
 
