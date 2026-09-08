@@ -1,6 +1,6 @@
 # People MFA + Onboarding Pack handoff
 
-**Updated:** 2026-08-22  
+**Updated:** 2026-08-08  
 **Workspace:** https://autogive.app/portfolio-signals/workspace  
 **Platform:** Supabase `utdioxwiskzatwoejgiu`
 
@@ -10,9 +10,9 @@ Evidence SoT: [CURRENT-STATE.md](CURRENT-STATE.md). Runbooks: [OPERATOR-ACCESS-O
 
 | Email | Role | MFA | Sign-in |
 | --- | --- | --- | --- |
-| Restricted operator registry | master_admin + reference-tenant director | Restricted | Restricted |
-| Restricted operator registry | second master_admin | Restricted | Restricted |
-| Restricted operator registry | reference-tenant director only | Restricted | Restricted |
+| `scrimshawlife@gmail.com` | master_admin + HD director | `mfa_enforced=true` | OBSERVED previously |
+| `qi@enkeyai.com` | master_admin | **pending** TOTP | never |
+| `ed@hackerdojo.org` | **director only** on `org_hacker_dojo` | **pending** TOTP | never |
 
 Ed is **not** platform admin and has **no** other client memberships.
 
@@ -52,7 +52,7 @@ Probe anytime:
 
 1. Open their `action_link`s (private browser).  
 2. Complete first login; **enroll TOTP**.  
-3. Each person verifies a TOTP code in the workspace enroll path. `set_mfa_enforced()` persists the existing profile flag after AAL2. Use `scripts/platform/set-mfa-enforced.sql` only if that path cannot run.  
+3. Operator: for each UUID, `scripts/platform/set-mfa-enforced.sql` with `desired_mfa_enforced := true`.  
 4. `./scripts/platform/verify-pack-and-people.sh` → expect `totp_verified≥1` and `mfa_enforced=true`.
 
 ### Ed access check
@@ -66,13 +66,12 @@ After login, workspace context must show:
 
 | Next | Owner |
 | --- | --- |
-| MFA onboarding-pack dry-run [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18) | Operator |
-| Hosted isolated restore [#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19) | Operator |
-| Durable host + live every.org webhook + director allocate [#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20) | HD nonprofit admin + director. Historical #73/#74 do not exist. Do not invent a `workers.dev` URL. |
+| every.org live webhook [#73](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/73) | HD nonprofit admin |
+| Director browser allocate + #74 | Director + durable/ephemeral host |
 | Optional SMTP | Platform Supabase Dashboard |
 
 ## Non-goals
 
 - Do not paste action links or PATs into chat/git.  
-- Do not set `mfa_enforced` before a verified TOTP factor.  
+- Do not set `mfa_enforced` before TOTP enroll for Qi/Ed.  
 - Pack `ready` ≠ import / outreach / client activate.
