@@ -602,8 +602,56 @@ async function mountPlatformAdmin() {
       <button class="button" type="submit">Provision client</button>
     </form>
     <label>Activation rationale<input id="activationRationale" minlength="12" placeholder="Confirm published config and enabled modules"></label>
-    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>`;
+    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>
+    
+    <hr style="margin: 1.5rem 0; border-color: var(--line);" />
+    
+    <!-- Tenant Management Section -->
+    <div class="workspace-toolbar">
+      <div><strong>Impact Relay tenant management</strong><span>Clone tenant from Hacker Dojo template</span></div>
+    </div>
+    <div id="tenantManagementArea">
+      <div class="control-grid" style="max-width: 40rem;">
+        <label>
+          Tenant ID (must match Client ID)
+          <input id="tenantIdInput" type="text" required pattern="org_[a-z0-9_]+" placeholder="org_your_organization" value="org_">
+          <small>Must match the Portfolio Signals Client ID exactly</small>
+        </label>
+        <label>
+          Display name
+          <input id="tenantDisplayNameInput" type="text" required placeholder="Your Organization Name">
+        </label>
+        <label>
+          Template source
+          <select id="tenantTemplateSelect">
+            <option value="org_hacker_dojo" selected>Hacker Dojo (Recommended) - org_hacker_dojo</option>
+          </select>
+        </label>
+        <div style="grid-column: 1 / -1; display: flex; gap: .5rem; flex-wrap: wrap;">
+          <button id="cloneTenantBtn" class="button" type="button">Clone tenant from template</button>
+          <button id="verifyTenantBtn" class="button secondary" type="button">Verify tenant isolation</button>
+        </div>
+        <p id="tenantMessage" class="note" style="grid-column: 1 / -1; min-height: 1.25rem;"></p>
+      </div>
+    </div>
+    <div id="tenantResultsArea" style="display: none;"></div>
+    <div id="tenantHealthCheckArea" style="display: none;"></div>
+    <hr style="margin: 1.5rem 0; border-color: var(--line);" />
+    <div class="workspace-toolbar">
+      <div><strong>Tenant registry (Impact Relay)</strong><span id="tenantRegistryCount">Loading…</span></div>
+    </div>
+    <div id="tenantRegistryArea" class="table-wrap" style="max-height: 30rem; overflow: auto;"></div>
+    
+    <style>
+      .tenant-registry-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+      .tenant-registry-table th, .tenant-registry-table td { padding: .5rem .75rem; text-align: left; border-bottom: 1px solid var(--line); }
+      .tenant-registry-table th { background: var(--bg); position: sticky; top: 0; z-index: 1; }
+      .tenant-registry-table .tag { font-size: .65rem; padding: .25rem .5rem; }
+      .tenant-registry-table .actions { display: flex; gap: .25rem; flex-wrap: wrap; }
+      .tenant-registry-table .actions button { padding: .3rem .5rem; font-size: .7rem; }
+    </style>`;
 
+  // Existing client activation handlers
   content.querySelectorAll('[data-activate-client]').forEach(button => {
     button.addEventListener('click', async () => {
       const rationale = content.querySelector('#activationRationale').value.trim();
@@ -620,6 +668,7 @@ async function mountPlatformAdmin() {
     });
   });
 
+  // Provision client handler
   content.querySelector('#provisionClientForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -636,6 +685,244 @@ async function mountPlatformAdmin() {
     }
     clearWorkspaceSessionCache();
     location.reload();
+  });
+
+  // Load tenant registry
+  await loadTenantRegistry();
+
+  // Clone tenant handler
+  content.querySelector('#cloneTenantBtn')?.addEventListener('click', async () => {
+    const tenantId = content.querySelector('#tenantIdInput')?.value.trim();
+    const displayName = content.querySelector('#tenantDisplayNameInput')?.value.trim();
+    const templateSource = content.querySelector('#tenantTemplateSelect')?.value;
+    
+    if (!tenantId || !displayName) {
+      setTenantMessage('Please fill in both Tenant ID and Display Name', true);
+      return;
+    }
+    
+    if (!/^org_[a-z0-9_]+$/.test(tenantId)) {
+      setTenantMessage('Tenant ID must match format: org_[a-z0-9_]+', true);
+      return;
+    }
+    
+    setTenantMessage('Cloning tenant…');
+    content.querySelector('#cloneTenantBtn').disabled = true;
+    
+    try {
+      const result = await cloneTenantViaAPI(tenantId, displayName, templateSource);
+      setTenantMessage(`✓ Tenant ${tenantId} cloned successfully from ${templateSource}`);
+      content.querySelector('#tenantIdInput').value = 'org_';
+      content.querySelector('#tenantDisplayNameInput').value = '';
+      await loadTenantRegistry();
+    } catch (err) {
+      setTenantMessage(`Error: ${err.message}`, true);
+    } finally {
+      content.querySelector('#cloneTenantBtn').disabled = false;
+    }
+  });
+
+  // Verify tenant isolation handler
+  content.querySelector('#verifyTenantBtn')?.addEventListener('click', async () => {
+    const tenantId = content.querySelector('#tenantIdInput')?.value.trim();
+    const targetTenantId = tenantId || selectedClient?.id;
+    
+    if (!targetTenantId) {
+      setTenantMessage('Please enter a Tenant ID or select a client first', true);
+      return;
+    }
+    
+    setTenantMessage('Running tenant health checks…');
+    content.querySelector('#verifyTenantBtn').disabled = true;
+    
+    try {
+      const health = await verifyTenantHealth(targetTenantId);
+      renderTenantHealthCheck(health, targetTenantId);
+    } catch (err) {
+      setTenantMessage(`Health check failed: ${err.message}`, true);
+    } finally {
+      content.querySelector('#verifyTenantBtn').disabled = false;
+    }
+  });
+}
+
+function setTenantMessage(msg, isError = false) {
+  const el = content.querySelector('#tenantMessage');
+  if (el) {
+    el.textContent = msg;
+    el.classList.toggle('error', isError);
+  }
+}
+
+async function loadTenantRegistry() {
+  const area = content.querySelector('#tenantRegistryArea');
+  const countEl = content.querySelector('#tenantRegistryCount');
+  if (!area) return;
+  
+  area.innerHTML = '<p class="note">Loading tenant registry…</p>';
+  
+  try {
+    // Call Impact Relay admin API or use local storage check
+    // For now, we'll show a placeholder with instructions
+    area.innerHTML = `
+      <table class="workspace-table tenant-registry-table">
+        <thead>
+          <tr><th>Tenant ID</th><th>Display Name</th><th>Template Source</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="5" class="note" style="text-align: center;">
+              <strong>Tenant registry access requires Impact Relay admin API.</strong>
+              <br>For now, use the CLI: <code>python -c "from impact_relay.storage import open_storage; store = open_storage(Path('./data')); print([t.tenant_id for t in store.tenants.list()])"</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>`;
+    countEl.textContent = 'CLI access required';
+  } catch (err) {
+    area.innerHTML = `<p class="note error">Failed to load tenant registry: ${err.message}</p>`;
+    countEl.textContent = 'Error';
+  }
+}
+
+async function cloneTenantViaAPI(tenantId, displayName, templateSource) {
+  // This would ideally call a secure API endpoint
+  // For now, we'll provide guidance on how to run it via CLI
+  // In production, this would be a secure Edge function or admin API
+  
+  // First, check if we can call a local backend or need to provide instructions
+  const config = getRuntimeConfig();
+  
+  // Try to call an admin API if available
+  if (config.impactRelayAdminUrl) {
+    const response = await fetch(`${config.impactRelayAdminUrl}/api/tenant/clone`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${activeClient.auth.session?.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tenant_id: tenantId, display_name: displayName, template_source: templateSource })
+    });
+    if (response.ok) return response.json();
+    throw new Error(await response.text());
+  }
+  
+  // Fallback: provide CLI instructions
+  throw new Error(`Tenant cloning requires Impact Relay admin API. Run via CLI:\n\npython -c "
+from pathlib import Path
+from impact_relay.storage.template import clone_tenant_from_hacker_dojo
+from impact_relay.storage import open_storage
+
+store = open_storage(Path('./data/${tenantId}'))
+policy = clone_tenant_from_hacker_dojo(
+    tenant_id='${tenantId}',
+    display_name='${displayName}',
+)
+store.tenants.upsert_from_policy(policy, template_source='${templateSource}')
+print('✓ Tenant policy cloned and registered')
+"`);
+}
+
+async function verifyTenantHealth(tenantId) {
+  const config = getRuntimeConfig();
+  
+  // Try to call health check API if available
+  if (config.impactRelayAdminUrl) {
+    const response = await fetch(`${config.impactRelayAdminUrl}/api/tenant/${tenantId}/verify`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${activeClient.auth.session?.access_token}`,
+      }
+    });
+    if (response.ok) return response.json();
+    throw new Error(await response.text());
+  }
+  
+  // Fallback: basic client-side verification using Portfolio Signals data
+  const { data: clientData, error } = await activeClient
+    .from('clients')
+    .select('id,display_name,state,reference_tenant')
+    .eq('id', tenantId)
+    .single();
+  
+  if (error) throw error;
+  
+  const fiExists = !!clientData;
+  const fiState = clientData?.state;
+  const fiRefTenant = clientData?.reference_tenant;
+  
+  // For Impact Relay, we'd need to check via API or storage
+  // For now, return what we can verify
+  return {
+    tenantId,
+    portfolioSignals: {
+      exists: fiExists,
+      state: fiState,
+      referenceTenant: fiRefTenant,
+      clientId: tenantId
+    },
+    impactRelay: {
+      // Would be populated from Impact Relay API
+      registered: 'unknown',
+      storageIsolated: 'unknown',
+      policySource: 'unknown',
+      crossTenantAccess: 'unknown'
+    },
+    idMatch: fiExists ? 'valid' : 'client_not_found',
+    overall: fiExists && fiState === 'active' ? 'partial' : 'incomplete'
+  };
+}
+
+function renderTenantHealthCheck(health, tenantId) {
+  const area = content.querySelector('#tenantHealthCheckArea');
+  if (!area) return;
+  
+  const ps = health.portfolioSignals;
+  const ir = health.impactRelay;
+  
+  area.style.display = 'block';
+  area.innerHTML = `
+    <div class="workspace-toolbar" style="margin-top: 1rem;">
+      <div><strong>Tenant health check: ${escapeHtml(tenantId)}</strong></div>
+    </div>
+    <div style="display: grid; gap: 1rem;">
+      <section class="panel" style="border-left: 4px solid ${ps.exists ? 'var(--brand-2)' : 'var(--danger)'};">
+        <h4>Portfolio Signals</h4>
+        <ul style="margin: .5rem 0; padding-left: 1.25rem;">
+          <li>Client exists: <strong>${ps.exists ? '✓ YES' : '✗ NO'}</strong></li>
+          <li>State: <strong>${ps.state || 'N/A'}</strong> ${ps.state === 'active' ? '✓' : ''}</li>
+          <li>Reference tenant: <strong>${ps.referenceTenant ? 'yes' : 'no'}</strong></li>
+          <li>Client ID: <code>${escapeHtml(ps.clientId)}</code></li>
+        </ul>
+      </section>
+      <section class="panel" style="border-left: 4px solid ${ir.registered === 'unknown' ? 'var(--warning)' : (ir.registered ? 'var(--brand-2)' : 'var(--danger)')};">
+        <h4>Impact Relay</h4>
+        <ul style="margin: .5rem 0; padding-left: 1.25rem;">
+          <li>Tenant registered: <strong>${ir.registered === 'unknown' ? 'Unknown (requires IR admin API)' : (ir.registered ? '✓ YES' : '✗ NO')}</strong></li>
+          <li>Storage isolated: <strong>${ir.storageIsolated === 'unknown' ? 'Unknown' : (ir.storageIsolated ? '✓ YES' : '✗ NO')}</strong></li>
+          <li>Policy source: <strong>${ir.policySource || 'Unknown'}</strong></li>
+          <li>Cross-tenant access: <strong>${ir.crossTenantAccess === 'unknown' ? 'Unknown' : (ir.crossTenantAccess ? '✗ DETECTED' : '✓ NONE')}</strong></li>
+        </ul>
+      </section>
+      <section class="panel" style="border-left: 4px solid ${health.overall === 'partial' ? 'var(--brand-2)' : (health.overall === 'incomplete' ? 'var(--warning)' : 'var(--danger)')};">
+        <h4>Cross-System Verification</h4>
+        <ul style="margin: .5rem 0; padding-left: 1.25rem;">
+          <li>ID Match (FI client_id == IR tenant_id): <strong>${health.idMatch === 'valid' ? '✓ VALID' : '✗ MISMATCH / NOT FOUND'}</strong></li>
+          <li>Overall status: <strong class="tag">${health.overall?.toUpperCase() || 'UNKNOWN'}</strong></li>
+        </ul>
+        <p class="note">
+          For complete verification, configure Impact Relay admin API endpoint in runtime config.
+          See <code>impactRelayAdminUrl</code> in runtime-config.js.
+        </p>
+      </section>
+      <div style="display: flex; gap: .5rem;">
+        <button id="refreshHealthCheck" class="button secondary" type="button">Refresh check</button>
+        <button id="testTenantWorkflow" class="button secondary" type="button" disabled>Test tenant workflow (requires IR)</button>
+      </div>
+    </div>`;
+  
+  content.querySelector('#refreshHealthCheck')?.addEventListener('click', () => {
+    verifyTenantHealth(tenantId).then(renderTenantHealthCheck).catch(err => setTenantMessage(`Refresh failed: ${err.message}`, true));
   });
 }
 

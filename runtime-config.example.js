@@ -8,6 +8,10 @@ window.AGI_PORTFOLIO_SIGNALS_CONFIG = {
   productName: 'Portfolio Signals',
   platformName: 'Autonomously Giving Incorporated',
   impactRelayApiBase: 'https://impact-relay.example.run.app',
+  // Impact Relay admin API for tenant management (optional - enables web-based tenant cloning)
+  // Set to your Impact Relay admin endpoint, e.g., 'https://impact-relay-admin.example.run.app'
+  // or 'http://localhost:8787' for local development
+  impactRelayAdminUrl: 'https://impact-relay-admin.example.run.app',
 };
 window.AGI_FUND_INTEL_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
 window.HACKER_DOJO_CONFIG = window.AGI_PORTFOLIO_SIGNALS_CONFIG;
