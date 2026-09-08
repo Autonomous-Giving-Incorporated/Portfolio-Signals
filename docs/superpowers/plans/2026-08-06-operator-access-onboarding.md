@@ -807,7 +807,7 @@ Expected: `check-script-safety: OK`
 
 **Option B — Read-only verification of existing primary admin (recommended default):**
 
-1. Dashboard → Authentication → Users → copy UUID for `scrimshawlife@gmail.com` (do not commit).
+1. Dashboard → Authentication → Users → resolve the primary administrator from the restricted operator registry and copy its UUID (do not commit).
 2. Paste into `verify-operator-access.sql` only; run.
 3. Expect notices: profile active; platform_admin active; mfa_enforced state observed.
 4. Browser login still works on workspace URL.

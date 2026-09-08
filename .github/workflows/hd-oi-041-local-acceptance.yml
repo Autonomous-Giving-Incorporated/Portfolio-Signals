@@ -15,12 +15,15 @@ concurrency:
 
 jobs:
   local-acceptance:
+    name: HD-OI-041 local acceptance
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.18.0'
           cache: npm
@@ -28,11 +31,11 @@ jobs:
             services/workbook-parser/package-lock.json
             services/import-api/package-lock.json
 
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
           deno-version: v2.2.7
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
         with:
           version: 2.31.8
 
@@ -51,6 +54,9 @@ jobs:
           node --check import-review.js
           node --check finance-impact.js
           node --check donor-impact.js
+
+      - name: Test role-aware Auth email templates
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts supabase/functions/_shared/mailosaur-client.test.ts
 
       - name: Install and audit workbook parser
         working-directory: services/workbook-parser
@@ -74,9 +80,13 @@ jobs:
             if deno cache --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
+              supabase/functions/auth-email/index.ts \
               && deno check --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
-              supabase/functions/upload-client-asset/index.ts; then
+              supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
+              supabase/functions/auth-email/index.ts; then
               break
             fi
             if [ "$attempt" -ge "$max" ]; then
@@ -107,6 +117,10 @@ jobs:
 
       - name: Load six synthetic roles
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+      - name: Load AutoGive synthetic dataset v1
+        run: SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
+      - name: Execute AutoGive synthetic v1 acceptance
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/024_autogive_synthetic_v1.sql
 
       - name: Execute import gate suite
         run: |
@@ -129,6 +143,14 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/013_agi_impact_relay_jwt.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/018_authenticated_security_definer_privileges.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/019_am_tenant_isolation.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/020_am_impact_notice.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/025_am_p1_connectors.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/026_am_credit_pot.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/027_set_mfa_enforced.sql
 
       - name: Reject committed sensitive exports
         run: |
@@ -161,7 +183,7 @@ jobs:
           python3 -m json.tool out/audit/local-acceptance.json >/dev/null
           cat out/audit/local-acceptance.json >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: hd-oi-041-local-acceptance-${{ github.sha }}
           path: out/audit/local-acceptance.json
@@ -170,3 +192,5 @@ jobs:
       - name: Emergency disposable-stack cleanup
         if: failure()
         run: supabase stop --no-backup || true
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

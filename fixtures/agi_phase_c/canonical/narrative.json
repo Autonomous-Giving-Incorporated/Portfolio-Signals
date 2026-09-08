@@ -1,0 +1,57 @@
+{
+  "decision": {
+    "schemaVersion": "2026-08-02",
+    "allocationId": "alloc_community_ai_lab",
+    "fundName": "Community AI Lab equipment",
+    "rationale": "25 laptops for a neighborhood AI learning lab (2500 USD). Representative public-safe fixture; not a live campaign.",
+    "status": "approved",
+    "publishedAt": "2026-08-02T16:00:00.000Z"
+  },
+  "events": [
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_ai_lab",
+      "eventId": "evt_cal_001",
+      "type": "purchase_approved",
+      "occurredAt": "2026-08-03T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "purchase-approval-community-ai-lab"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_ai_lab",
+      "eventId": "evt_cal_002",
+      "type": "receipt_attached",
+      "occurredAt": "2026-08-04T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "receipt-record-community-ai-lab"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_ai_lab",
+      "eventId": "evt_cal_003",
+      "type": "equipment_delivered",
+      "occurredAt": "2026-08-10T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "equipment-delivery-community-ai-lab"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_ai_lab",
+      "eventId": "evt_cal_004",
+      "type": "program_held",
+      "occurredAt": "2026-08-12T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "imp_community_ai_lab_001"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_ai_lab",
+      "eventId": "evt_cal_005",
+      "type": "notification_delivered",
+      "occurredAt": "2026-08-12T17:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "notification-community-ai-lab"
+    }
+  ]
+}

@@ -32,6 +32,7 @@ test('production accepts supabase instead of operator token', () => {
   });
   assert.equal(c.ok, true);
   assert.equal(c.hasSupabaseAuth, true);
+  assert.equal(c.allowOperatorFallback, false);
 });
 
 test('production fails without DATA_FILE', () => {

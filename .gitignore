@@ -21,6 +21,7 @@ supabase/.temp/
 *.swp
 
 .vercel
+.wrangler/
 
 scripts/platform/.onboarding-invite-links.md
 

@@ -1,0 +1,15 @@
+[
+  {
+    "id": 9009,
+    "action": "donation.chargeback_created",
+    "amount": "50.0",
+    "currency": "USD",
+    "stripe_charge_id": "ch_fixture_v1_not_charge_id",
+    "campaign": { "id": 2, "name": "v1 campaign" },
+    "donor": {
+      "id": 60,
+      "name": "Alex Example",
+      "email": "alex@example.org"
+    }
+  }
+]

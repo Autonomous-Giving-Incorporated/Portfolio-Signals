@@ -81,8 +81,8 @@
     const cfg = await cfgRes.json();
 
     if (!cfg.directorLoginEnabled) {
-      configMsg.innerHTML = cfg.operatorTokenFallback
-        ? 'Director login is not configured on this server. Use the <strong>operator token</strong> on the Allocation page (dev/pilot fallback).'
+      configMsg.textContent = cfg.operatorTokenFallback
+        ? 'Director login is not configured on this server. Local Node operator-token fallback is on (not used on Workers).'
         : 'Auth is not configured. Set SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY.';
     } else {
       configMsg.textContent = `Org ${cfg.orgId} · Supabase session required for writes`;

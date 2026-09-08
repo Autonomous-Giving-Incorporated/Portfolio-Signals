@@ -11,7 +11,7 @@ Private campaign CRM and development-list data use **local operator storage + Su
 | Operator machine (local) | Canonical source workbook until quarantine upload | Allowed while import is blocked; never commit |
 | Supabase Postgres + RLS | System of record for quarantine, constituents, consent, pipelines | Allowed only after governed import |
 | Supabase Storage `campaign-private` | Encrypted source objects and private documents | Allowed with private bucket policies |
-| GitHub / this repository | Code, schemas, synthetic fixtures, aggregate public JSON | **Prohibited** |
+| GitHub / this repository | Code, schemas, synthetic fixtures, aggregate public JSON | **Prohibited** for person-level **live** data. AutoGive v1 private fixtures are SYNTHETIC_ONLY JSON under `fixtures/autogive-v1/private/` (reserved `example.test` domains; never CSV/XLSX). |
 | GitHub Pages (director portal) | Public campaign aggregates | **Prohibited** for person-level data |
 | Impact Relay Pages | Aggregate raised / UOF / digests / public evidence | **Prohibited** for person-level data |
 | Notion | Strategy kits, public evidence aggregates, org research notes | **Not** the CRM system of record; no bulk donor roster |
@@ -50,11 +50,11 @@ PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu \
 ```
 
 Authenticated workspace production URL: https://autogive.app/portfolio-signals/workspace  
-Primary `master_admin`: `scrimshawlife@gmail.com`. Second admin (Qi Diaz) deferred — `platform_administrators` insert with rationale ≥ 12 chars.
+Master-administrator identities are stored only in the restricted operator registry. Additional administrators require a `platform_administrators` insert with rationale ≥ 12 chars.
 
 Never commit service-role keys, database passwords, or anon keys if they are rotated/sensitive in your threat model. Browser runtime may hold the **anon** key in a **gitignored** `runtime-config.js` only (or Vercel build from `PLATFORM_SUPABASE_*` env).
 
-Suite hosting canon: [AGI PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
+Suite hosting canon: [AGI PLATFORM.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Master Development List (source inventory only)
 
@@ -78,7 +78,7 @@ Outreach from historical membership, attendance, or this list alone remains **no
 1. `supabase link --project-ref utdioxwiskzatwoejgiu` (platform — not legacy HD staging)
 2. **Operator applies migrations** (`apply-migrations.sh remote-linked` or `supabase db push`)
 3. Wire gitignored / deploy-generated `runtime-config.js` with platform URL + anon key only
-4. Invite `scrimshawlife@gmail.com`; run `scripts/platform/bootstrap-master-admin.sql`; enable MFA as required
+4. Invite the registry-designated primary administrator; run `scripts/platform/bootstrap-master-admin.sql`; enable MFA as required
 5. Verify import gates / RLS / storage matrix (prefer disposable local, then platform)
 6. Smoke magic-link on https://autogive.app/portfolio-signals/workspace
 7. Only then consider HD-OI-020 quarantine import of the authorized workbook

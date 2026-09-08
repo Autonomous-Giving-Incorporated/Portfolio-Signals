@@ -106,9 +106,25 @@
     const pill = document.getElementById('status-pill');
     const statusLine = document.getElementById('status-line');
 
+    function authHeaders() {
+      const headers = {};
+      const jwt = sessionStorage.getItem('am_access_token');
+      const operatorToken = localStorage.getItem('operatorToken');
+      if (jwt) headers.Authorization = `Bearer ${jwt}`;
+      else if (operatorToken) headers['x-operator-token'] = operatorToken;
+      return headers;
+    }
+
     async function load() {
-      const res = await fetch('/setup');
+      const res = await fetch('/setup', { headers: authHeaders() });
       const data = await res.json();
+      if (!res.ok) {
+        urlEl.textContent = '(Privileged operator sign-in required)';
+        statusLine.textContent = 'Sign in with an AAL2 director session before viewing connector credentials.';
+        pill.textContent = 'Authorization required';
+        pill.className = 'status-pill blocked';
+        return;
+      }
       urlEl.textContent = data.webhookUrl || '(Set PUBLIC_BASE_URL and WEBHOOK_TOKEN on the server)';
 
       const live = Boolean(data.steps.receivedLiveGift ?? data.steps.receivedTestGift);
@@ -135,8 +151,18 @@
         if (step.id === 4 || step.id === 5) state = live ? 'done' : 'wait';
         const div = document.createElement('div');
         div.className = 'step';
-        div.innerHTML = `<div class="num ${state}" aria-hidden="true">${state === 'done' ? '✓' : step.id}</div>
-          <div><strong>${step.title}</strong><div class="note">${step.detail}</div></div>`;
+        const number = document.createElement('div');
+        number.className = `num ${state}`;
+        number.setAttribute('aria-hidden', 'true');
+        number.textContent = state === 'done' ? '✓' : String(step.id);
+        const detail = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = String(step.title || '');
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = String(step.detail || '');
+        detail.append(title, note);
+        div.append(number, detail);
         stepsEl.appendChild(div);
       }
     }

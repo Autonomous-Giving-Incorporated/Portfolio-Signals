@@ -1,0 +1,47 @@
+{
+  "$schema": "../../../schemas/public-campaign.schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-08-14",
+  "authority": "advisory_only",
+  "campaign": {
+    "minimumTarget": 0,
+    "stretchTarget": 0,
+    "currency": "USD",
+    "minimumCaseState": "not_public",
+    "stretchCaseState": "not_public"
+  },
+  "registry": {
+    "normalizedMemberIds": 0,
+    "bayAreaRecords": 0,
+    "organizerLabels": 0,
+    "privateRelayOccurrences": 0,
+    "highEngagementRecords": 0,
+    "outreachReadyRecords": 0,
+    "qualification": "tenant_data_authenticated_only"
+  },
+  "execution": {
+    "state": "blocked",
+    "reason": "noncanonical_hacker_dojo_integration_fixture"
+  },
+  "gates": [
+    {
+      "id": "noncanonical_fixture",
+      "label": "Non-canonical Hacker Dojo / Community Hardware integration fixture; not the public demo",
+      "state": "not_applicable"
+    }
+  ],
+  "allocations": [
+    {
+      "allocationId": "alloc_community_hardware",
+      "fundName": "Community Hardware Fund",
+      "status": "approved"
+    }
+  ],
+  "privacy": {
+    "classification": "public_aggregate_only",
+    "piiAllowed": false,
+    "rawRegistryAllowed": false,
+    "donorHistoryAllowed": false,
+    "privateNotesAllowed": false
+  }
+}

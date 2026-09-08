@@ -3,19 +3,20 @@
 Portfolio Signals is the multi-tenant **decision workspace** of **Autonomously Giving Incorporated (AGI)**. AGI is the customer-facing corporate brand; Zero State is credited only as the software builder. Impact Relay is the tenant-isolated financial and impact backend.
 
 **Live:** [autogive.app/portfolio-signals](https://autogive.app/portfolio-signals/) · **Workspace:** [autogive.app/portfolio-signals/workspace](https://autogive.app/portfolio-signals/workspace)  
+**Hosting:** **Cloudflare Workers** is the intended production host for the public/static site (in-repo Worker name `portfolio-signals`). That Worker is **ABSENT** on the connected account (OBSERVED 2026-08-15). Live `/portfolio-signals` is `agi-public` GET/HEAD-proxy to **Vercel** (`fund-intel` / [fund-intel-ten.vercel.app](https://fund-intel-ten.vercel.app)). `vercel.json` stays until a real cutover is documented. Designed stack is **Workers + platform Supabase** (`utdioxwiskzatwoejgiu`); Auth and private data are not moving off Supabase. See [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).  
 **Platform Supabase:** `utdioxwiskzatwoejgiu` · **Reference tenant:** Hacker Dojo (`org_hacker_dojo`) — pilot/regression fixture, **not** product identity (tenant assets under `assets/tenants/hacker-dojo/`).
 
 See [docs/AGI-SUITE-ARCHITECTURE.md](docs/AGI-SUITE-ARCHITECTURE.md) for boundaries, and [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) / [docs/START_HERE.md](docs/START_HERE.md) for live ops status.
 
 ## Platform specification status
 
-Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/tree/v1.0.0). It is not yet a producer of the canonical Signal, Opportunity, or Recommendation contracts. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
+Portfolio Signals currently declares **Experimental** conformance to [Autonomous Giving Platform Specification v2.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/tree/v2.0.0). Signal / Opportunity / Recommendation records are **CODE_SHIPPED** in-process against SPEC-003 v2.1.0 ([docs/FUND-INTEL-SIGNALS.md](docs/FUND-INTEL-SIGNALS.md)); they are not live and not READY. A read-only Mission Graph projection is **CODE_SHIPPED** against SPEC-029 Proposed 0.1.0 ([docs/MISSION-GRAPH.md](docs/MISSION-GRAPH.md)); SPEC-029 is not Accepted. Versioned Mission Intelligence metric policies are **CODE_SHIPPED** against SPEC-030 Proposed 0.1.0 ([docs/MISSION-INTELLIGENCE-METRICS.md](docs/MISSION-INTELLIGENCE-METRICS.md)); they fail closed (no formula) and SPEC-030 is not Accepted. A read-only AGI console projection composes those readers ([docs/AGI-CONSOLE.md](docs/AGI-CONSOLE.md)); it is not a live product console and not READY. The repo does not claim Required or Recommended runtime conformance. AGI never processes donations; every.org is the P0 connector and Stripe is tenant/SaaS billing only. The migration boundary and exit criteria are documented in [docs/PLATFORM-CONFORMANCE.md](docs/PLATFORM-CONFORMANCE.md).
 
 The repository now contains both a privacy-safe public director portal and the controlled foundation for an authenticated campaign workspace. It does **not** contain member, donor, attendee, or relationship-level source data.
 
 ## Platform specification
 
-Pinned platform canon: **[Autonomous Giving Specs v1.0.0](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Specs/releases/tag/v1.0.0)**.
+Pinned platform canon: **[Autonomous Giving Specs v2.0.0](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Specs/releases/tag/v2.0.0)** (tag `v2.0.0`, commit `c089739`).
 
 Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conformance.yml). See [`platform-spec/README.md`](platform-spec/README.md).
 
@@ -23,7 +24,7 @@ Conformance declaration: [`platform-spec/conformance.yml`](platform-spec/conform
 
 Transaction-light **middleware** between donation platforms (canonical **every.org**) and human allocation: pots → allocate → proof → exception inbox → board packet. Not a finance ledger.
 
-**Status (2026-08-07):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host and live every.org webhook still open. **Default host:** Docker Compose / local Node. **Optional hosts:** Fly.io, Render, Railway.
+**Status (2026-08-15):** MVP shipped; **local pilot smoke PASS** against platform Supabase (director auth config on). Production public host is **Cloudflare Workers** (this repo’s Worker, including `POST /webhooks/every-org`). Live every.org pointing and a controlled gift remain operator-owned — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md). **Local pilot:** Node on `:8787`.
 
 ```bash
 cd services/allocation-middleware
@@ -38,7 +39,7 @@ BASE_URL=http://127.0.0.1:8787 npm run verify:director
 | --- | --- |
 | [docs/ALLOCATION-MIDDLEWARE.md](docs/ALLOCATION-MIDDLEWARE.md) | Role, status, package map |
 | [docs/HACKER-DOJO-ALLOCATION-PILOT.md](docs/HACKER-DOJO-ALLOCATION-PILOT.md) | Pilot runbook |
-| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Compose (default) · Render · Railway · optional Fly |
+| [docs/ALLOCATION-HOSTING-OPTIONS.md](docs/ALLOCATION-HOSTING-OPTIONS.md) | Local Node/Compose for pilot; designed durable host is Workers |
 | [docs/ALLOCATION-DIRECTOR-LOGIN.md](docs/ALLOCATION-DIRECTOR-LOGIN.md) | Supabase director JWT |
 | [docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md](docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md) | Deploy gates |
 | [services/allocation-middleware/README.md](services/allocation-middleware/README.md) | npm scripts |
@@ -47,14 +48,14 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 
 ## Current evidence boundary
 
-**As of 2026-08-07** (suite production on `autogive.app` + platform Supabase). See [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) for the full live receipt. Older HD-OI-041 staging receipts are **historical** only.
+**As of 2026-08-07** (suite production on `autogive.app` + platform Supabase). See [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) for the full live receipt. Suite-wide readiness and next waves: [docs/PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md](docs/PRODUCTION-READINESS-AND-CONTINUATION-2026-08-22.md) (**Not READY**; `current_main_verdict` remains **NO_GO**). Older HD-OI-041 staging receipts are **historical** only.
 
 | Capability | State |
 |---|---|
-| Public director portal | **Live** on https://autogive.app/portfolio-signals/ |
+| Public director portal | **Live** on https://autogive.app/portfolio-signals/ (Vercel today; **Workers** intended production — [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md)) |
 | Authenticated workspace login | **Live** — operator magic-link login verified |
 | Allocation middleware MVP | Implemented; **local pilot smoke PASS** |
-| every.org live webhook (hosted) | Operator-owned (setup wizard ready; production host pending) |
+| every.org live webhook (hosted) | Worker route shipped; live URL / every.org pointing / gift operator-owned ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) |
 | Canonical public campaign data | Implemented |
 | JSON Schema validation | Passing |
 | Static security policy checks | Passing |
@@ -66,7 +67,7 @@ Portfolio Signals’s suite role is **observe/credit** (gift summaries → pot b
 | Legacy HD staging Supabase | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
 | Private data placement | Local workbook + platform Supabase (not GitHub, not Notion SoR) |
 | Impact Relay host screens / runbooks | Implemented / documented; live cohort operator-owned |
-| Client Onboarding Pack (org docs) | **Code on main** (#104); platform migrate + Edge deploy **PENDING** — [docs/CLIENT-ONBOARDING-PACK.md](docs/CLIENT-ONBOARDING-PACK.md) |
+| Client Onboarding Pack (org docs) | **Platform schema + Edge OBSERVED**; MFA workspace dry-run pending ([#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18)) — [docs/CLIENT-ONBOARDING-PACK.md](docs/CLIENT-ONBOARDING-PACK.md) |
 | Production data import | **Blocked** |
 | Outreach authority | **Not granted** |
 
@@ -95,12 +96,15 @@ services/allocation-middleware/         every.org pots → allocate → proof �
 
 docs/ALLOCATION-MIDDLEWARE.md           Middleware role + status
 docs/HACKER-DOJO-ALLOCATION-PILOT.md    Pilot seed, smoke, Docker default
-docs/ALLOCATION-HOSTING-OPTIONS.md      Compose / Render / Railway / optional Fly
+docs/CLOUDFLARE.md                      Workers static host + webhook remaining work
+docs/ALLOCATION-HOSTING-OPTIONS.md      Local pilot vs designed Workers host
 docs/ALLOCATION-DIRECTOR-LOGIN.md       Supabase director login
 docs/ALLOCATION-MIDDLEWARE-PRODUCTION.md Deploy gates
 docs/AUTHENTICATED-WORKSPACE.md         Private application architecture
 docs/DATA-PLACEMENT.md                  Local + Supabase placement; source inventory
+docs/SYNTHETIC-DATASET.md               AutoGive v1 disposable fixture universe
 docs/IMPORT-RUNBOOK.md                  Import and reconciliation procedure
+fixtures/autogive-v1/                   Canonical SYNTHETIC_ONLY Civic Forge corpus
 docs/PRODUCTION-HARDENING.md            Staging/production operator checklist
 docs/STAGING-BOOTSTRAP.md               Staging bootstrap and verification
 docs/IMPACT-RELAY.md                    Impact Relay host bridge runbook
@@ -110,7 +114,8 @@ docs/HD-OI-019.md                       Current hardening phase notes
 scripts/staging/                        Local/staging bootstrap helpers (no secrets)
 ROADMAP.md                              Current execution roadmap
 SECURITY.md                             Data-handling boundary
-.github/workflows/                      Validation, security, Pages, and Supabase CI
+.github/workflows/                      Validation, security, Pages, Workers, and Supabase CI
+wrangler.toml                           Cloudflare Workers static assets (`portfolio-signals`)
 ```
 
 ## Campaign architecture
@@ -139,7 +144,7 @@ Live public donation progress, use-of-funds receipts, and event digests are publ
 
 https://autogive.app/impact-relay/
 
-Repository: https://github.com/scrimshawlife-ctrl/Impact-Relay
+Repository: https://github.com/Autonomous-Giving-Incorporated/Impact-Relay
 
 This repo is the **canonical host app** for Impact Relay (campaign UX + Supabase auth). The library owns ledger, durable workflows, and console APIs; this app owns screens and identity.
 
@@ -175,7 +180,7 @@ The repository must never contain:
 - production credentials or service-role values;
 - native development workbooks (`.xlsx` / `.csv` exports with campaign records).
 
-GitHub Pages is a public publishing surface, not a CRM access-control layer. Restricted records belong only in **local operator custody** until upload, then in **Supabase** (Postgres RLS + `campaign-private` storage). Notion may hold strategy and aggregate public evidence; it is **not** the CRM system of record.
+A public static surface (designed host: **Cloudflare Workers**; GitHub Pages is historical) is not a CRM access-control layer. Restricted records belong only in **local operator custody** until upload, then in **Supabase** (Postgres RLS + `campaign-private` storage). Notion may hold strategy and aggregate public evidence; it is **not** the CRM system of record.
 
 The source development list is evidence, not outreach authorization. A historical relationship, attendance record, or Meetup export does not establish consent to fundraising contact.
 
@@ -211,9 +216,22 @@ The executable workflow performs the following sequence against a disposable loc
 1. Start the pinned Supabase stack.
 2. Reset the database and apply the complete migration chain.
 3. Resolve and validate the local database URL.
-4. Load synthetic profiles for all six roles.
-5. Execute RLS and import-policy acceptance tests.
-6. Stop and discard the local stack.
+4. Load Hacker Dojo synthetic profiles for all six roles.
+5. Load AutoGive Synthetic Dataset v1 (`npm run seed:synthetic`) and run `024`.
+6. Execute RLS and import-policy acceptance tests.
+7. Stop and discard the local stack.
+
+Civic Forge fixture commands (never overwrite `data/public-campaign.json`):
+
+```bash
+npm run synthetic:validate
+npm run public:fixture:synthetic
+npm run synthetic:test
+# disposable Supabase only
+SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
+```
+
+See [docs/SYNTHETIC-DATASET.md](docs/SYNTHETIC-DATASET.md).
 
 PR #14 observed a green disposable run for migrations, six-role fixtures, and RLS acceptance checks. This repository now also executes the synthetic import-gate corpus (confirmed, restricted, duplicate, suppressed, unauthorized promotion, and eligible promotion) in that same workflow.
 
@@ -270,3 +288,5 @@ Supported toolchain pins and upgrade requirements are documented in [docs/RUNTIM
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

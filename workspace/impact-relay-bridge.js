@@ -8,6 +8,10 @@ import {
   getRuntimeConfig,
   clearWorkspaceSessionCache
 } from './session.js';
+import {
+  allowFixtureBearer,
+  resolveImpactRelayAuthorization
+} from './impact-relay-auth.js';
 
 /** Display-only role map. Production authority comes from the signed JWT. */
 export const CAMPAIGN_TO_IMPACT_ROLES = {
@@ -53,17 +57,17 @@ export function impactRelayApiBase() {
 
 /**
  * Build fetch headers for Impact Relay after Supabase auth.
- * Falls back to fixture pilot email when no session (local file open).
+ * Missing runtime-config is fail-closed: no fixture Bearer unless
+ * `allowFixtureBearer: true` is set explicitly for local console work.
  */
-export function impactRelayHeaders({ accessToken, fixtureFallback = true } = {}) {
+export function impactRelayHeaders({ accessToken, fixtureFallback = false } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-    return headers;
-  }
-  if (fixtureFallback) {
-    const pilot = 'finance.approver@hackersdojo.example';
-    headers['Authorization'] = `Bearer ${pilot}`;
+  const resolved = resolveImpactRelayAuthorization({
+    accessToken,
+    allowFixtureBearer: fixtureFallback
+  });
+  if (resolved.authorization) {
+    headers.Authorization = resolved.authorization;
     return headers;
   }
   throw new Error('Not authenticated for Impact Relay');
@@ -74,6 +78,9 @@ export async function loadImpactRelaySession({ requireFinance = false, requireSt
   const hasSupabase = Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
 
   if (!hasSupabase) {
+    if (!allowFixtureBearer(cfg)) {
+      return { mode: 'unauthenticated', headers: null };
+    }
     return {
       mode: 'fixture',
       email: 'finance.approver@hackersdojo.example',

@@ -1,0 +1,86 @@
+[
+  {
+    "case_id": "edge_001",
+    "type": "duplicate_provider_event",
+    "expected": "reject_idempotently",
+    "record": "gift_syn_00037",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_002",
+    "type": "restricted_fund_overallocation",
+    "expected": "reject_negative_balance",
+    "fund_id": "fund_001",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_003",
+    "type": "expense_without_evidence",
+    "expected": "block_approval",
+    "expense_id": "exp_syn_008",
+    "owner": "BRIDGE_ONLY",
+    "bridge_owner": "Impact-Relay",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_004",
+    "type": "duplicate_invoice_digest",
+    "expected": "quarantine",
+    "expense_id": "exp_syn_007",
+    "owner": "BRIDGE_ONLY",
+    "bridge_owner": "Impact-Relay",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_005",
+    "type": "suppressed_contact",
+    "expected": "no_notification",
+    "donor_id": "donor_syn_0011",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_006",
+    "type": "stale_public_aggregate",
+    "expected": "fail_closed_after_7_days",
+    "updatedAt": "2026-08-01",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_007",
+    "type": "public_payload_with_pii",
+    "expected": "schema_or_policy_reject",
+    "field": "donor_email",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_008",
+    "type": "agent_attempts_financial_approval",
+    "expected": "deny_human_gate_required",
+    "actor": "agent",
+    "owner": "NATIVE",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_009",
+    "type": "correction_receipt",
+    "expected": "append_new_lineage_preserve_original",
+    "owner": "BRIDGE_ONLY",
+    "bridge_owner": "Impact-Relay",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "case_id": "edge_010",
+    "type": "unverified_outcome_claim",
+    "expected": "NOT_COMPUTABLE",
+    "outcome_id": "out_syn_005",
+    "owner": "BRIDGE_ONLY",
+    "bridge_owner": "Impact-Relay",
+    "native_projection": "claims.state=unverified",
+    "provenance": "SYNTHETIC"
+  }
+]

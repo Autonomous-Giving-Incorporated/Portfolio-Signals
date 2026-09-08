@@ -1,0 +1,12 @@
+{
+  "event_id": 8157,
+  "event_name": "donation.chargeback_created",
+  "created_at": "2026-08-22T12:17:28Z",
+  "donation": {
+    "id": 9001,
+    "amount": "100.0",
+    "stripe_charge_id": "ch_fixture_not_charge_id",
+    "currency": "USD",
+    "processing_fee": 0.59
+  }
+}

@@ -1,6 +1,8 @@
 -- scripts/platform/set-mfa-enforced.sql
--- Set profiles.mfa_enforced after the human has enrolled MFA in Supabase Auth.
--- NEVER set true unless enrollment is confirmed in Dashboard → Authentication → Users.
+-- Operator path to set or clear profiles.mfa_enforced.
+-- The workspace persist path is public.set_mfa_enforced() after a verified AAL2
+-- TOTP factor. Use this script to clear the flag or to repair an account that
+-- cannot reach the enroll UI. NEVER set true unless a TOTP factor is verified.
 --
 -- Run as postgres. Replace target_user_id and desired_mfa_enforced.
 -- No secrets belong in this file.

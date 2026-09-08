@@ -1,12 +1,12 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+import {
+  MFA_ENFORCED_REQUIRED,
+  privilegedMfaMissing,
+  workspaceRedirectUrl
+} from './auth-consume.js';
+import { resolveSelectedWorkspaceClient } from './tenant-chrome.js';
 
-const PRIVILEGED_ROLES = new Set([
-  'director',
-  'campaign_lead',
-  'development',
-  'data_steward',
-  'auditor'
-]);
+export { workspaceRedirectUrl };
 
 const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 
@@ -15,15 +15,6 @@ let sharedClient = null;
 
 export function getRuntimeConfig() {
   return window.AGI_PORTFOLIO_SIGNALS_CONFIG || window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
-}
-
-/** Canonical workspace return URLs (path-prefixed production + local). */
-export function workspaceRedirectUrl() {
-  const { origin, pathname, href } = window.location;
-  if (pathname.includes('workspace')) {
-    return `${origin}${pathname}`;
-  }
-  return href.split('#')[0].split('?')[0];
 }
 
 /**
@@ -38,8 +29,10 @@ export function createWorkspaceClient() {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
 
-  // Magic-link verify redirects use #access_token=…&refresh_token=… (implicit).
-  // detectSessionInUrl OFF: we parse the hash ourselves to avoid init races.
+  // Admin-issued links use ?token_hash= (verifyOtp). Implicit hash tokens
+  // remain supported. detectSessionInUrl stays off to avoid init races.
+  // Do not switch this client to PKCE: that would bind admin-issued links
+  // to the sender's localStorage.
   sharedClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -151,15 +144,16 @@ export async function requireWorkspaceSession(knownSession = null) {
 
   const clients = Array.isArray(context.clients) ? context.clients : [];
   const preferredClientId = localStorage.getItem(CLIENT_STORAGE_KEY);
-  const selectedClient =
-    clients.find((client) => client.id === preferredClientId) ||
-    clients.find((client) => client.role) ||
-    clients[0] ||
-    null;
+  const selectedClient = resolveSelectedWorkspaceClient({
+    clients,
+    preferredClientId
+  });
   const role = selectedClient?.role || null;
 
-  if ((PRIVILEGED_ROLES.has(role) || context.is_master_admin) && !profile.mfa_enforced) {
-    throw new Error('Enforced MFA is required for privileged roles.');
+  if (privilegedMfaMissing({ ...profile, role }, context)) {
+    const error = new Error('Enforced MFA is required for privileged roles.');
+    error.code = MFA_ENFORCED_REQUIRED;
+    throw error;
   }
 
   if (selectedClient) localStorage.setItem(CLIENT_STORAGE_KEY, selectedClient.id);
@@ -201,6 +195,7 @@ export function roleCan(role, capability) {
     client_admin: ['director'],
     brand_configuration: ['director'],
     onboarding_pack: ['director'],
+    infrastructure_access: ['infrastructure_delegate'],
     impact_finance: ['director', 'campaign_lead', 'development'],
     impact_donor_staff: [
       'director',
@@ -213,3 +208,5 @@ export function roleCan(role, capability) {
   };
   return (matrix[capability] || []).includes(role);
 }
+
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

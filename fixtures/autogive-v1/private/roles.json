@@ -1,0 +1,50 @@
+[
+  {
+    "user_id": "user_syn_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "director@example.test",
+    "role": "director",
+    "mfa_enforced": true,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "user_id": "user_syn_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "finance@example.test",
+    "role": "finance_approver",
+    "mfa_enforced": true,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "user_id": "user_syn_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "program@example.test",
+    "role": "program_manager",
+    "mfa_enforced": true,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "user_id": "user_syn_004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "reviewer@example.test",
+    "role": "evidence_reviewer",
+    "mfa_enforced": true,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "user_id": "user_syn_005",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "analyst@example.test",
+    "role": "analyst",
+    "mfa_enforced": false,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "user_id": "user_syn_006",
+    "tenant_id": "org_synthetic_civic_forge",
+    "email": "viewer@example.test",
+    "role": "viewer",
+    "mfa_enforced": false,
+    "provenance": "SYNTHETIC"
+  }
+]

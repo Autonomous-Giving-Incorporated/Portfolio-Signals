@@ -78,7 +78,7 @@ Checklist:
 
 After (or alongside) activate, directors and master_admins can collect **private org-proof documents** via the workspace **Onboarding pack**. Pack `ready` is **not** required for `activate_client` and does **not** authorize production CRM import or outreach.
 
-**Code:** on main ([#104](https://github.com/scrimshawlife-ctrl/Portofolio-Signals/pull/104)). **Platform:** migrate + Edge deploy still operator — evidence in [CURRENT-STATE.md](CURRENT-STATE.md).
+**Code and platform:** schema + Edge deployment are OBSERVED; MFA workspace acceptance remains tracked in [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18). Evidence: [CURRENT-STATE.md](CURRENT-STATE.md).
 
 Full runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md).
 
@@ -115,3 +115,5 @@ After one client is active, stand up a second nonprofit (FI + Impact Relay templ
 - [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md) — roles
 - [CURRENT-STATE.md](CURRENT-STATE.md) — live evidence
 - [scripts/platform/README.md](../scripts/platform/README.md)
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

@@ -7,15 +7,18 @@ on:
 
 jobs:
   contract:
+    name: Local security contract
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.18.0'
           cache: npm
           cache-dependency-path: services/workbook-parser/package-lock.json
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
           deno-version: v2.2.7
       - name: Install parser dependencies
@@ -33,6 +36,12 @@ jobs:
       - name: Test import API authentication boundary
         working-directory: services/import-api
         run: npm test
+      - name: Test role-aware Auth email templates
+        run: node --experimental-strip-types --test supabase/functions/_shared/auth-email-templates.test.ts supabase/functions/_shared/auth-assurance.test.ts supabase/functions/_shared/mailosaur-client.test.ts supabase/functions/auth-email/lib.test.ts supabase/functions/auth-email-webhook/lib.test.ts
+      - name: Test every.org webhook Worker port
+        run: |
+          node --test services/allocation-middleware/test/webhook-auth.test.mjs services/allocation-middleware/test/supabase-writer.test.mjs
+          npm --prefix workers/portfolio-signals test
       - name: Type-check Edge Functions
         run: |
           set -euo pipefail
@@ -43,9 +52,15 @@ jobs:
             if deno cache --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
               supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
+              supabase/functions/auth-email/index.ts \
+              supabase/functions/auth-email-webhook/index.ts \
               && deno check --node-modules-dir=auto \
               supabase/functions/signed-document-url/index.ts \
-              supabase/functions/upload-client-asset/index.ts; then
+              supabase/functions/upload-client-asset/index.ts \
+              supabase/functions/upload-onboarding-document/index.ts \
+              supabase/functions/auth-email/index.ts \
+              supabase/functions/auth-email-webhook/index.ts; then
               break
             fi
             if [ "$attempt" -ge "$max" ]; then
@@ -91,7 +106,17 @@ jobs:
           test -f docs/STAGING-BOOTSTRAP.md
           grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
           grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
-          grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
+          grep -q 'suite_count": 10' scripts/staging/verify-policy-suite.sh
+          test -f supabase/tests/016_delegate_auth.sql
+          test -f supabase/tests/017_security_definer_privileges.sql
+          test -f supabase/tests/018_authenticated_security_definer_privileges.sql
+          test -f supabase/tests/026_am_credit_pot.sql
+          test -f supabase/tests/027_set_mfa_enforced.sql
+          grep -q "selectAuthEmailActionUrl" supabase/functions/auth-email/index.ts
+          ! grep -q "actionUrl: generated.data.properties.action_link" supabase/functions/auth-email/index.ts
+          grep -q "create or replace function public.set_mfa_enforced()" supabase/migrations/202608240001_set_mfa_enforced.sql
+          grep -q "verify_jwt = false" supabase/config.toml
+          grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
           test -f scripts/staging/generate-runtime-config.mjs
           grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
           grep -q "Refusing to emit runtime config for unlisted Supabase host" scripts/staging/generate-runtime-config.mjs
@@ -133,4 +158,4 @@ jobs:
           grep -q "promotion_authority: false" services/workbook-parser/src/cli.js
           grep -q "only native .xlsx files are accepted" services/workbook-parser/src/cli.js
 
-# Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

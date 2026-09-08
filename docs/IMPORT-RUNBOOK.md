@@ -3,6 +3,8 @@
 **Run:** HD-OI-015  
 **Authority:** No production import or outreach is authorized by this document.
 
+Synthetic Civic Forge rows (`fixtures/autogive-v1/`) are a disposable seed, not an import source and not outreach authority. See [SYNTHETIC-DATASET.md](SYNTHETIC-DATASET.md).
+
 ## Purpose
 
 This runbook converts a native workbook export into controlled campaign records without placing source files, contact details, attendance history, private notes, or credentials in Git.

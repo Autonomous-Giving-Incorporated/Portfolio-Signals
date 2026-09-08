@@ -32,13 +32,13 @@ Create **two** managed projects before any real data:
 1. **Staging** — synthetic fixtures only; full migration and RLS suite.
 2. **Production** — empty until a governed pilot import is approved.
 
-### Current hosted project
+### Current hosted projects
 
 | Field | Value |
 |---|---|
-| Ref | `ecxkhihlbrcwpavfoaoq` |
-| Dashboard | https://supabase.com/dashboard/project/ecxkhihlbrcwpavfoaoq |
-| Default classification | **Staging** until leadership names production or creates a second project |
+| Platform (canonical) | `utdioxwiskzatwoejgiu` — https://supabase.com/dashboard/project/utdioxwiskzatwoejgiu |
+| Legacy HD staging | `ecxkhihlbrcwpavfoaoq` — **frozen** for new tenancy |
+| Isolated restore-drill project | Local-synthetic OBSERVED 2026-08-15. Hosted empty project still operator-provisioned only ([#19](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/19)) |
 | Real data | **Not authorized** |
 
 If only one project exists, do not load production CRM data into it until:
@@ -81,9 +81,9 @@ Privileged application roles:
 Requirements:
 
 1. Enable MFA at the Supabase Auth project level for production.
-2. Set `profiles.mfa_enforced = true` for each privileged account before workspace access.
+2. Privileged workspace sign-in persists `profiles.mfa_enforced = true` through `set_mfa_enforced()` after a verified AAL2 TOTP factor. Privileged authorization still requires the current JWT `aal` claim to equal `aal2`.
 3. Keep `profiles.active = false` until identity is verified.
-4. Use `deactivate_profile(profile_id, reason)` for emergency revocation; only directors may call it.
+4. Use `deactivate_profile(profile_id, reason)` for global emergency revocation; only AAL2 master admins may call it. Tenant directors must use the tenant-scoped membership lifecycle operation.
 5. Board viewers may remain MFA-optional for aggregate read surfaces, but production operators should still prefer MFA.
 
 ## Backup and recovery

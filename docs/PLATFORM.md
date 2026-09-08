@@ -8,14 +8,16 @@ This repo participates in the **AGI suite**. Hosting and Supabase targets are su
 | --- | --- |
 | Public URL (production intent) | `https://autogive.app/portfolio-signals/` |
 | **Authenticated workspace** | `https://autogive.app/portfolio-signals/workspace` |
-| Vercel project | `fund-intel` (team `scrimshawlife-8819s-projects`) |
-| GitHub Pages fallback | `https://scrimshawlife-ctrl.github.io/Fund-Intel/` |
+| **Designed public host** | Cloudflare Workers static assets (in-repo name `portfolio-signals`) — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| **Live suite path (OBSERVED 2026-08-15)** | Worker `agi-public` GET/HEAD-proxies `/portfolio-signals` to Vercel. Worker `portfolio-signals` is **ABSENT**. Allocation Worker ABSENT. Bindings listing works; no secret-set tool. |
+| Vercel project (fallback until DNS cutover) | `fund-intel` (team `scrimshawlife-8819s-projects`) |
+| GitHub Pages fallback | repository Actions fallback; production remains `autogive.app/portfolio-signals/` |
 | **Supabase platform** | `utdioxwiskzatwoejgiu` → `https://utdioxwiskzatwoejgiu.supabase.co` |
 | Legacy HD staging (freeze) | `ecxkhihlbrcwpavfoaoq` |
-| Primary `master_admin` | `scrimshawlife@gmail.com` |
-| Second `master_admin` | `qi@enkeyai.com` (Qi Diaz) — granted 2026-08-08; MFA enroll still required before privileged ops |
+| Primary `master_admin` | Restricted operator registry |
+| Second `master_admin` | Restricted operator registry; AAL2 required before privileged operations |
 
-Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/scrimshawlife-ctrl/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
+Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://github.com/Autonomous-Giving-Incorporated/Autonomous-Giving-Incorporated/blob/main/docs/PLATFORM.md).
 
 ## Roles
 
@@ -26,19 +28,23 @@ Full suite table: [Autonomous-Giving-Incorporated/docs/PLATFORM.md](https://gith
 
 1. New tenancy, AGI admin, and multi-client work use **platform** `utdioxwiskzatwoejgiu` only.
 2. Legacy `ecxkhihlbrcwpavfoaoq` is frozen for new tenancy; migrate then retire.
-3. Browser / Vercel runtime config: **anon** key only — never service role.
+3. Browser / Workers / Vercel runtime config: **anon** key only — never service role.
 4. Schema source of truth: this repo’s `supabase/migrations`. Platform has been migrated; further changes: `supabase link --project-ref utdioxwiskzatwoejgiu` then `supabase db push`.
 5. Operator SQL: [scripts/platform/README.md](../scripts/platform/README.md).
 6. Tenant brand assets: `assets/tenants/<slug>/` (Hacker Dojo is not product chrome).
 7. Operator people path (master_admin / director): [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md).
 8. Commercial client lifecycle (provision → publish → activate): [COMMERCIAL-CLIENT-LIFECYCLE.md](COMMERCIAL-CLIENT-LIFECYCLE.md).
 9. Second-tenant suite path (FI + IR clone): [SECOND-TENANT-ONBOARDING.md](SECOND-TENANT-ONBOARDING.md).
-10. Client Onboarding Pack (private org docs; not CRM import): [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — code on main (#104); platform apply still operator.
+10. Client Onboarding Pack (private org docs; not CRM import): [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md) — schema + Edge OBSERVED; MFA dry-run [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18).
 11. Suite onboarding hub: [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md).
 
 Bootstrap runbook: [STAGING-BOOTSTRAP.md](STAGING-BOOTSTRAP.md). Workspace: [AUTHENTICATED-WORKSPACE.md](AUTHENTICATED-WORKSPACE.md). Live receipt: [CURRENT-STATE.md](CURRENT-STATE.md). Placement: [DATA-PLACEMENT.md](DATA-PLACEMENT.md).
 
 ## Deploy (public)
+
+**Intended production:** Cloudflare Workers — [CLOUDFLARE.md](CLOUDFLARE.md) (`wrangler.toml`, `.github/workflows/cloudflare-workers.yml`). Requires GitHub secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+**Fallback until DNS cutover** (keep `vercel.json`):
 
 ```bash
 vercel link --yes --scope scrimshawlife-8819s-projects --project fund-intel
@@ -47,12 +53,12 @@ vercel deploy --prod --yes --scope scrimshawlife-8819s-projects
 
 Config: `vercel.json`, `.vercelignore` (excludes `node_modules`, services, secrets).
 
-**Vercel env (set on `fund-intel` project):**
+**Vercel env (set on `fund-intel` project; same anon pair for Workers CI):**
 
 - `PLATFORM_SUPABASE_URL=https://utdioxwiskzatwoejgiu.supabase.co` — **set**
 - `PLATFORM_SUPABASE_ANON_KEY=<public anon key only>` — **set**
 
-Build generates gitignored `runtime-config.js`. Do **not** set service-role keys on the Vercel project.
+Build generates gitignored `runtime-config.js`. Do **not** set service-role keys on the Vercel project or the Worker.
 
 ## Phase 3 (allocation pilot)
 
@@ -62,8 +68,9 @@ Build generates gitignored `runtime-config.js`. Do **not** set service-role keys
 | Director JWT path (#72) | OBSERVED — [ALLOCATION-DIRECTOR-LOGIN.md](ALLOCATION-DIRECTOR-LOGIN.md) |
 | Public HTTPS ephemeral (#71) | OBSERVED — Cloudflare quick tunnel |
 | Seed allocate→proof→packet (#74 partial) | OBSERVED — `npm run accept:seed-loop` |
-| Durable named host | Optional operator (Render/Railway/Fly) |
-| Live every.org webhook (#73) | **PENDING** (operator tomorrow) |
-| Full director acceptance (#74) | Partial — needs live gift + browser sign-off |
+| Durable named host | **Cloudflare Workers** (designed); local Node for pilot only |
+| Live every.org webhook + full director acceptance ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)) | Worker route shipped; live URL, every.org pointing, gift, and browser sign-off remain operator-owned |
 
 See [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md) (hub) · [ALLOCATION-MIDDLEWARE.md](ALLOCATION-MIDDLEWARE.md) · [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md) · [CURRENT-STATE.md](CURRENT-STATE.md).
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

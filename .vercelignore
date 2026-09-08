@@ -1,6 +1,7 @@
 node_modules
 .git
 .github
+.cursor
 out
 test-results
 playwright-report
@@ -12,8 +13,10 @@ scripts/staging/bootstrap.env
 runtime-config.js
 **/runtime-config.js
 services
+workers
 *.xlsx
 *.csv
 docs
+fixtures
 .idea
 .vscode

@@ -108,9 +108,9 @@ git commit -m "fix: do not ship HD pipeline rows in anonymous HTML"
 ### Task 4: Operator people follow-ups (docs + optional email)
 
 **People:**
-- `scrimshawlife@gmail.com` — master_admin, MFA on
-- `qi@enkeyai.com` — master_admin, MFA pending
-- `ed@hackerdojo.org` — HD director, MFA pending
+- Restricted operator registry — primary master_admin
+- Restricted operator registry — second master_admin
+- Restricted operator registry — reference-tenant director
 
 - [ ] **Step 1: Resend magic links when rate limit allows** (do not commit links)
 

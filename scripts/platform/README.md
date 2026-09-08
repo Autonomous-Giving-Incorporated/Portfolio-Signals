@@ -19,7 +19,7 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | --- | --- |
 | `bootstrap-master-admin.sql` | **First** master_admin only |
 | `ensure-profile.sql` | Upsert active profile (does not set MFA) |
-| `set-mfa-enforced.sql` | Set `mfa_enforced` after Auth MFA enrollment confirmed |
+| `set-mfa-enforced.sql` | Emergency set or clear of `mfa_enforced`. Workspace persist after verified TOTP uses `set_mfa_enforced()`. |
 | `grant-master-admin.sql` | Grant/reactivate platform admin (rationale ≥ 12) |
 | `revoke-master-admin.sql` | Soft-revoke platform admin |
 | `verify-operator-access.sql` | Read-only profile / admin / optional membership check |
@@ -27,8 +27,10 @@ Bootstrap and isolation checks for A.G.I. platform administration.
 | `verify-second-tenant-isolation.sql` | Read-only second client vs HD reference (not reference_tenant; public projection notice) |
 | `activate-onboarding-pack.sh` | Apply onboarding pack migrations + deploy Edge functions to platform (needs `supabase login`) |
 | `verify-pack-and-people.sh` | Read-only: pack REST/Edge + people MFA readiness (needs service role env) |
+| `dry-run-onboarding-pack.sh` | #18 local-synthetic classifier/contract check, or fail-closed MFA probe. Does not write an OBSERVED receipt |
 | `verify-platform-isolation.sql` | Reference + isolation fixture clients |
 | `check-script-safety.sh` | Local check: sentinel hard-fail present; no secret markers |
+| `probe-auth-email-mailosaur.ts` | Optional Mailosaur + `auth-email` live probe. Skips without `MAILOSAUR_API_KEY`. Never prints tokens. |
 
 ## Order of operations
 
@@ -101,3 +103,4 @@ Every mutating script must hard-fail if the sentinel UUID `00000000-0000-0000-00
 - `docs/AUTHENTICATED-WORKSPACE.md` — roles and workspace
 - `docs/PLATFORM.md` — suite platform alignment
 - `docs/CURRENT-STATE.md` — live evidence labels
+- `scripts/staging/restore-drill.sh` — #19 local-synthetic or isolated-project restore helper; writes a privacy-safe engineering receipt; no invented leadership RTO/RPO

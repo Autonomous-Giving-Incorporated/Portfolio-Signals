@@ -20,7 +20,7 @@ Live donation progress, use-of-funds receipts, and event digests:
 
 https://autogive.app/impact-relay/
 
-Repo: https://github.com/scrimshawlife-ctrl/Impact-Relay
+Repo: https://github.com/Autonomous-Giving-Incorporated/Impact-Relay
 
 Platform and any remaining HD-staging environments must not publish personal CRM data. Aggregate campaign totals belong on Impact Relay after authorized reduction (for example Every.org aggregate summary → `impact-relay --every-org-aggregate`).
 
@@ -95,7 +95,7 @@ PLATFORM_CONFIRM_PROJECT_REF=utdioxwiskzatwoejgiu \
 6. Deploy edge function `signed-document-url` with server-only env vars.
 7. Confirm Storage bucket `campaign-private` exists and is non-public (migrations).
 8. Load **synthetic** fixtures only; run import-gate / RLS / storage matrix before any real workbook.
-9. Bootstrap first `master_admin` for `scrimshawlife@gmail.com` via [scripts/platform/bootstrap-master-admin.sql](../scripts/platform/bootstrap-master-admin.sql) after the Auth user exists (see scripts/platform/README.md).
+9. Bootstrap the registry-designated first `master_admin` via [scripts/platform/bootstrap-master-admin.sql](../scripts/platform/bootstrap-master-admin.sql) after the Auth user exists (see scripts/platform/README.md).
 
 Run the complete hosted suite with the database URL supplied directly from the operator secret manager. The script never prints the URL and fails unless both project-ref confirmations match **platform**:
 
@@ -147,12 +147,12 @@ service_role_in_git: false
 production_data: false
 master_development_list_loaded: false
 workspace_url: https://autogive.app/portfolio-signals/workspace
-master_admin_primary: scrimshawlife@gmail.com
+master_admin_primary: RESTRICTED_OPERATOR_REGISTRY
 ```
 
 ## Second platform administrator (deferred)
 
-Primary operator `master_admin`: **scrimshawlife@gmail.com**.
+Primary operator `master_admin`: **restricted operator registry**.
 
 Add **Qi Diaz** later via `platform_administrators` insert with rationale **≥ 12 characters** (same pattern as `scripts/platform/bootstrap-master-admin.sql`). Not part of the initial bootstrap ship.
 

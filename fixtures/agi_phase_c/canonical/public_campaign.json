@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../schemas/public-campaign.schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-08-16",
+  "authority": "advisory_only",
+  "campaign": {
+    "minimumTarget": 0,
+    "stretchTarget": 0,
+    "currency": "USD",
+    "minimumCaseState": "not_public",
+    "stretchCaseState": "not_public"
+  },
+  "registry": {
+    "normalizedMemberIds": 0,
+    "bayAreaRecords": 0,
+    "organizerLabels": 0,
+    "privateRelayOccurrences": 0,
+    "highEngagementRecords": 0,
+    "outreachReadyRecords": 0,
+    "qualification": "representative_public_safe_fixture"
+  },
+  "execution": {
+    "state": "blocked",
+    "reason": "representative_public_safe_fixture_not_a_live_campaign"
+  },
+  "gates": [
+    {
+      "id": "fixture_only",
+      "label": "Representative public-safe C4 fixture; not a live campaign",
+      "state": "not_applicable"
+    }
+  ],
+  "allocations": [
+    {
+      "allocationId": "alloc_community_ai_lab",
+      "fundName": "Community AI Lab equipment",
+      "status": "approved",
+      "rationale": "25 laptops for a neighborhood AI learning lab (2500 USD). Representative public-safe fixture; not a live campaign.",
+      "publishedAt": "2026-08-02T16:00:00.000Z"
+    }
+  ],
+  "privacy": {
+    "classification": "public_aggregate_only",
+    "piiAllowed": false,
+    "rawRegistryAllowed": false,
+    "donorHistoryAllowed": false,
+    "privateNotesAllowed": false
+  }
+}

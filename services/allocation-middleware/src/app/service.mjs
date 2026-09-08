@@ -1,14 +1,70 @@
-import { normalizeEveryOrgDonation } from '../connectors/everyorg.mjs';
 import { parseGiftCsv } from '../connectors/csv.mjs';
-import { emptyState, creditGift, availableCents, resolvePotPath } from '../domain/pots.mjs';
+import { extractOptInContact } from '../connectors/contact.mjs';
+import { normalize_gift } from '../connectors/adapter.mjs';
+import { CONNECTOR_EVERY_ORG, requireConnectorSource } from '../connectors/sources.mjs';
+import { creditGift, availableCents } from '../domain/pots.mjs';
 import { approveAllocation } from '../domain/allocate.mjs';
 import { parseAmount, formatCents } from '../domain/money.mjs';
 import { setLabel, listLabels, mergePots, applyAliases } from '../domain/mapping.mjs';
-import { createMemoryStore, ensureExtras } from './store.mjs';
+import { createMemoryStore, ensureExtras } from './store-core.mjs';
+import { normalizeDonationLink, publicDonationLink } from './donation-link.mjs';
+import {
+  buildImpactNoticeRecord,
+  contactsForAllocation,
+  createNoopNotifier,
+  deliverImpactNotice,
+  evaluateImpactNotice,
+} from './impact-notice.mjs';
+import { maybeSignalFromVerifiedGift } from '../intel/gift-signal.mjs';
+
+const DEFAULT_LIMITS = Object.freeze({
+  maxGifts: 100_000,
+  maxPots: 10_000,
+  maxAllocations: 100_000,
+  maxExceptions: 10_000,
+  maxProofs: 100_000,
+  maxKeyLength: 128,
+});
 
 /** Seed/fixture chargeIds must not count as live every.org connect. */
 export function isFixtureChargeId(id) {
   return /^fixture[-_]/i.test(String(id || ''));
+}
+
+function setupInstructions(source) {
+  if (source === 'csv') {
+    return [
+      { id: 1, title: 'Choose CSV as the tenant source', detail: 'CSV is the offline twin. It is not a public webhook.' },
+      { id: 2, title: 'Prepare chargeId and netAmount columns', detail: 'Optional columns: amount, campaignKey, programKey, currency, donatedAt.' },
+      { id: 3, title: 'POST /import/csv with a director session', detail: 'Anonymous CSV POST is rejected. This path is not a vendor webhook.' },
+      { id: 4, title: 'Confirm each new chargeId credited once', detail: 'A second row with the same chargeId is a no-op.' },
+    ];
+  }
+  if (source === 'givebutter') {
+    return [
+      { id: 1, title: 'Copy the operator-owned Givebutter path', detail: 'Use the URL the operator pastes. Specs do not invent a workers.dev host.' },
+      { id: 2, title: 'Open Givebutter webhook settings', detail: 'Create a webhook for transaction.succeeded. Store the signing secret as a Worker binding.' },
+      { id: 3, title: 'Paste the operator-owned URL', detail: 'Givebutter sends header Signature. AGI compares it to the stored secret.' },
+      { id: 4, title: 'Send a small live test gift', detail: 'Seed/fixture gifts do not count as Connected. Givebutter does not fire this event on its CSV imports.' },
+      { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+    ];
+  }
+  if (source === 'donorbox') {
+    return [
+      { id: 1, title: 'Confirm Donorbox webhook access', detail: 'Custom webhooks need the Donorbox API/Zapier add-on or Premium. Other tenants use CSV.' },
+      { id: 2, title: 'Copy the operator-owned Donorbox path', detail: 'Use the URL the operator pastes. Specs do not invent a workers.dev host.' },
+      { id: 3, title: 'Paste the URL and store the Signature Secret', detail: 'Donorbox sends header Donorbox-Signature. Prefer payload version v2.' },
+      { id: 4, title: 'Send a small live test gift', detail: 'chargeId is the donation id. Never treat stripe_charge_id as chargeId.' },
+      { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+    ];
+  }
+  return [
+    { id: 1, title: 'Copy your webhook URL', detail: 'Use the URL shown in this wizard (includes a secret token).' },
+    { id: 2, title: 'Open every.org nonprofit settings', detail: 'Go to every.org/<your-slug>/admin/settings → Advanced settings.' },
+    { id: 3, title: 'Paste the webhook URL', detail: 'Save. every.org will POST each completed donation to AGI.' },
+    { id: 4, title: 'Send a small live test gift', detail: 'Donate $1 on your nonprofit page. Seed/fixture gifts do not count as Connected.' },
+    { id: 5, title: 'Confirm live gift landed', detail: 'Status becomes Connected when a non-fixture chargeId is received. Then allocate.' },
+  ];
 }
 
 function giftSummary(gift) {
@@ -28,62 +84,237 @@ export function createService({
   orgId,
   now = () => new Date().toISOString(),
   idgen = () => crypto.randomUUID(),
+  noticeIdgen = () => crypto.randomUUID(),
   store = createMemoryStore(),
   proofSlaHours = 72,
+  limits: configuredLimits = {},
+  notifier = createNoopNotifier(),
+  intel = null,
+  resolveNeedForGift = null,
 }) {
+  const limits = { ...DEFAULT_LIMITS, ...configuredLimits };
+  let mutationQueue = Promise.resolve();
+
   async function withState(fn) {
-    let state = ensureExtras(await store.load());
-    const result = fn(state);
-    if (result && result.state) {
-      await store.save(ensureExtras(result.state));
+    const run = mutationQueue.then(async () => {
+      const state = ensureExtras(await store.load());
+      const result = fn(state);
+      if (result && result.state) {
+        await store.save(ensureExtras(result.state));
+      }
       return result;
-    }
-    return result;
+    });
+    mutationQueue = run.catch(() => {});
+    return run;
+  }
+
+  function requireBounded(value, maximum, code) {
+    if (String(value ?? '').length > maximum) throw new Error(code);
   }
 
   function mapKeys(state, campaignKey, programKey) {
     return applyAliases(orgId, campaignKey, programKey, state);
   }
 
-  return {
-    async ingestEveryOrg(payload) {
-      return withState((state) => {
-        let gift = normalizeEveryOrgDonation(payload, { orgId });
-        const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
-        gift = { ...gift, ...mapped };
-        return creditGift(state, gift);
+  async function issueNoticeBestEffort({ allocationId, evidenceId, proofWaived }) {
+    try {
+      const state = ensureExtras(await store.load());
+      const allocation = state.allocations.get(allocationId);
+      const existing = (state.impactNotices || new Map()).get(allocationId);
+      const decision = evaluateImpactNotice({
+        allocation,
+        donationLink: state.donationLink,
+        contacts: allocation ? contactsForAllocation(state, allocation) : [],
+        existingNotice: existing,
+        evidenceId,
+        proofWaived,
       });
+      if (!decision.issue) {
+        return { issued: false, reason: decision.reason, notice: decision.notice || null, deliveries: [] };
+      }
+      const notice = buildImpactNoticeRecord({
+        id: noticeIdgen(),
+        orgId,
+        allocationId,
+        evidenceId,
+        proofWaived,
+        channel: decision.channel,
+        donationLink: decision.donationLink,
+        useSummary: decision.useSummary,
+        chargeId: decision.contact.chargeId,
+        createdAt: now(),
+      });
+      let deliveries = [];
+      try {
+        deliveries = await deliverImpactNotice({
+          notice,
+          contact: decision.contact,
+          notifier,
+          idgen: noticeIdgen,
+          now,
+        });
+      } catch {
+        deliveries = [{
+          id: noticeIdgen(),
+          noticeId: notice.impactNoticeId,
+          orgId,
+          channel: decision.channel,
+          status: 'failed',
+          attemptedAt: now(),
+          detail: 'delivery_failed',
+        }];
+      }
+      await withState((current) => {
+        if ((current.impactNotices || new Map()).has(allocationId)) {
+          return { state: current };
+        }
+        const impactNotices = new Map(current.impactNotices || []);
+        impactNotices.set(allocationId, notice);
+        return {
+          state: {
+            ...current,
+            impactNotices,
+            impactDeliveries: [...(current.impactDeliveries || []), ...deliveries],
+          },
+        };
+      });
+      return { issued: true, reason: null, notice, deliveries };
+    } catch {
+      return { issued: false, reason: 'issue_failed', notice: null, deliveries: [] };
+    }
+  }
+
+  function persistWebhookEvent(state, payload, { source, eventName, chargeId }) {
+    const webhookEvents = [...(state.webhookEvents || [])];
+    webhookEvents.push({
+      id: `wh_${source}_${chargeId || 'none'}_${webhookEvents.length + 1}`,
+      orgId,
+      source,
+      eventName: eventName || '',
+      chargeId: chargeId || null,
+      payload,
+      createdAt: now(),
+    });
+    return { ...state, webhookEvents };
+  }
+
+  function openException(state, { id, code, message, ref }) {
+    const existing = (state.exceptions || []).find((item) => item.id === id);
+    if (existing) return { state, exception: existing };
+    if (state.exceptions.length >= limits.maxExceptions) throw new Error('STATE_EXCEPTION_LIMIT');
+    const exception = {
+      id,
+      orgId,
+      code,
+      message,
+      open: true,
+      createdAt: now(),
+      ref: ref || {},
+    };
+    return { state: { ...state, exceptions: [...state.exceptions, exception] }, exception };
+  }
+
+  function persistHold(state, payload, result, source) {
+    const withEvent = persistWebhookEvent(state, payload, {
+      source,
+      eventName: result.eventName,
+      chargeId: result.chargeId,
+    });
+    const opened = openException(withEvent, {
+      id: `ex_${result.chargeId || result.eventName || 'hold'}_sync`,
+      code: 'SYNC_FAILURE',
+      message: result.reason || 'held without pot debit',
+      ref: { chargeId: result.chargeId, eventName: result.eventName, source },
+    });
+    return { ...opened, created: false, held: true, gift: null };
+  }
+
+  function persistNormalizedGift(state, payload, { source } = {}) {
+    const src = source || CONNECTOR_EVERY_ORG;
+    const result = normalize_gift(payload, { source: src, orgId, now });
+    if (result.kind === 'hold' || result.kind === 'uncomputable') {
+      return persistHold(state, payload, result, src);
+    }
+    let gift = result.gift;
+    const mapped = mapKeys(state, gift.campaignKey, gift.programKey);
+    gift = { ...gift, ...mapped };
+    if (source) gift = { ...gift, source };
+    const contact = gift.contact !== undefined ? gift.contact : extractOptInContact(payload, { source: src });
+    const { contact: _ignoredContact, ...giftRow } = gift;
+    requireBounded(giftRow.chargeId, 256, 'CHARGE_ID_TOO_LONG');
+    requireBounded(giftRow.campaignKey, limits.maxKeyLength, 'CAMPAIGN_KEY_TOO_LONG');
+    requireBounded(giftRow.programKey, limits.maxKeyLength, 'PROGRAM_KEY_TOO_LONG');
+    requireBounded(giftRow.currency, 16, 'CURRENCY_TOO_LONG');
+    const potId = `${orgId}|${giftRow.campaignKey}|${giftRow.programKey}`;
+    const potExisted = state.pots.has(potId);
+    const hints = giftRow.campaignKey !== 'general';
+    let working = persistWebhookEvent(state, payload, {
+      source: giftRow.source,
+      eventName: result.eventName,
+      chargeId: giftRow.chargeId,
+    });
+    const credited = creditGift(working, giftRow, limits);
+    let next = credited.state;
+    if (credited.created && !potExisted && hints) {
+      const labeled = openException(next, {
+        id: `ex_${giftRow.chargeId}_unmapped`,
+        code: 'UNMAPPED_FUNDRAISER',
+        message: `New — review campaign ${giftRow.campaignKey}`,
+        ref: { chargeId: giftRow.chargeId, campaignKey: giftRow.campaignKey, programKey: giftRow.programKey },
+      });
+      next = labeled.state;
+      const labels = new Map(next.labels || []);
+      labels.set(`${orgId}|campaign|${giftRow.campaignKey}`, 'New — review');
+      next = { ...next, labels };
+    }
+    if (!contact || !credited.created) return { ...credited, gift: giftRow, state: next };
+    const giftContacts = new Map(next.giftContacts || []);
+    giftContacts.set(giftRow.chargeId, { chargeId: giftRow.chargeId, ...contact });
+    return { ...credited, gift: giftRow, state: { ...next, giftContacts } };
+  }
+
+  return {
+    async maybeRecordGiftSignal(gift, { source, verified } = {}) {
+      if (!intel || !gift) return { created: false, reason: 'INTEL_NOT_ATTACHED' };
+      const needId = typeof resolveNeedForGift === 'function' ? resolveNeedForGift(gift) : null;
+      return maybeSignalFromVerifiedGift(intel, {
+        gift,
+        needId,
+        verified,
+        source: source || gift.source,
+        capturedAt: now(),
+      });
+    },
+    async ingestGift(payload, options = {}) {
+      const source = options.source || CONNECTOR_EVERY_ORG;
+      const credited = await withState((state) => persistNormalizedGift(state, payload, { ...options, source }));
+      if (credited.created && credited.gift) {
+        await this.maybeRecordGiftSignal(credited.gift, { source: credited.gift.source, verified: true });
+      }
+      return credited;
+    },
+    async ingestEveryOrg(payload, options = {}) {
+      return this.ingestGift(payload, { ...options, source: options.source || CONNECTOR_EVERY_ORG });
     },
     async importCsv(text) {
       const rows = parseGiftCsv(text);
+      const createdGifts = [];
       let created = 0;
       await withState((state) => {
         let s = state;
         for (const row of rows) {
-          let { campaignKey, programKey } = resolvePotPath({
-            fundraiserKey: row.campaignKey,
-            designationKey: row.programKey,
-          });
-          ({ campaignKey, programKey } = mapKeys(s, campaignKey, programKey));
-          const net = parseAmount(row.netAmount);
-          const gross = parseAmount(row.amount || row.netAmount);
-          const gift = {
-            chargeId: row.chargeId,
-            orgId,
-            campaignKey,
-            programKey,
-            netCents: net.cents,
-            grossCents: gross.cents,
-            currency: row.currency || 'USD',
-            donatedAt: row.donatedAt || now(),
-            source: 'csv',
-          };
-          const r = creditGift(s, gift);
+          const r = persistNormalizedGift(s, row, { source: 'csv' });
           s = r.state;
-          if (r.created) created += 1;
+          if (r.created) {
+            created += 1;
+            if (r.gift) createdGifts.push(r.gift);
+          }
         }
         return { state: s };
       });
+      for (const gift of createdGifts) {
+        await this.maybeRecordGiftSignal(gift, { source: 'csv', verified: true });
+      }
       return { created, total: rows.length };
     },
     async listAvailable() {
@@ -105,11 +336,15 @@ export function createService({
           ),
         }));
     },
-    async allocate({ campaignKey, programKey, amount, purpose, approvedBy }) {
+    async allocate({ campaignKey, programKey, amount, purpose, approvedBy, id: requestedId }) {
       const amountCents = parseAmount(amount).cents;
-      const id = idgen();
+      const id =
+        requestedId && /^alloc_[a-z0-9_]+$/.test(requestedId) ? requestedId : idgen();
       const approvedAt = now();
       await withState((state) => {
+        if (!state.allocations.has(id) && state.allocations.size >= limits.maxAllocations) {
+          throw new Error('STATE_ALLOCATION_LIMIT');
+        }
         const mapped = mapKeys(state, campaignKey, programKey);
         return approveAllocation(state, {
           id,
@@ -126,6 +361,8 @@ export function createService({
       return state.allocations.get(id);
     },
     async setLabel(input) {
+      requireBounded(input.key, limits.maxKeyLength, 'LABEL_KEY_TOO_LONG');
+      requireBounded(input.label, 256, 'LABEL_TOO_LONG');
       await withState((state) => setLabel(state, { orgId, ...input }));
       return { ok: true };
     },
@@ -137,20 +374,54 @@ export function createService({
       await withState((state) => mergePots(state, { orgId, ...input }));
       return { ok: true };
     },
+    async setDonationLink(value) {
+      const result = await this.setOnboarding({ donationLink: value });
+      return { donationLink: result.donationLink };
+    },
+    async setOnboarding({ donationLink, source } = {}) {
+      let nextSource;
+      if (source !== undefined && source !== null && String(source).trim() !== '') {
+        nextSource = requireConnectorSource(source);
+      }
+      const nextLink = donationLink !== undefined ? normalizeDonationLink(donationLink) : undefined;
+      await withState((state) => ({
+        state: {
+          ...state,
+          donationLink: nextLink !== undefined ? nextLink : state.donationLink,
+          tenantSource: nextSource || state.tenantSource || CONNECTOR_EVERY_ORG,
+        },
+      }));
+      const state = ensureExtras(await store.load());
+      return {
+        donationLink: publicDonationLink(state.donationLink),
+        source: state.tenantSource || CONNECTOR_EVERY_ORG,
+      };
+    },
+    async getDonationLink() {
+      const state = ensureExtras(await store.load());
+      return publicDonationLink(state.donationLink);
+    },
+    async getTenantSource() {
+      const state = ensureExtras(await store.load());
+      return state.tenantSource || CONNECTOR_EVERY_ORG;
+    },
     async attachProof({ allocationId, uri, note, attachedBy }) {
       if (!uri || !String(uri).trim()) throw new Error('PROOF_URI_REQUIRED');
+      const proof = {
+        id: idgen(),
+        allocationId,
+        uri: String(uri).trim(),
+        note: note || '',
+        attachedBy: attachedBy || '',
+        attachedAt: now(),
+      };
       await withState((state) => {
         if (!state.allocations.has(allocationId)) throw new Error('ALLOCATION_NOT_FOUND');
         const proofs = new Map(state.proofs || []);
+        const proofCount = [...proofs.values()].reduce((count, rows) => count + rows.length, 0);
+        if (proofCount >= limits.maxProofs) throw new Error('STATE_PROOF_LIMIT');
         const list = proofs.get(allocationId) || [];
-        list.push({
-          id: idgen(),
-          allocationId,
-          uri: String(uri).trim(),
-          note: note || '',
-          attachedBy: attachedBy || '',
-          attachedAt: now(),
-        });
+        list.push(proof);
         proofs.set(allocationId, list);
         const exceptions = state.exceptions.map((e) =>
           e.code === 'MISSING_PROOF' && e.ref?.allocationId === allocationId
@@ -159,7 +430,52 @@ export function createService({
         );
         return { state: { ...state, proofs, exceptions } };
       });
-      return { ok: true };
+      const impactNotice = await issueNoticeBestEffort({
+        allocationId,
+        evidenceId: proof.id,
+        proofWaived: false,
+      });
+      return { ok: true, proof, impactNotice };
+    },
+    async waiveProof({ allocationId, note, waivedBy }) {
+      if (!allocationId) throw new Error('ALLOCATION_NOT_FOUND');
+      const waiver = {
+        allocationId,
+        waivedBy: waivedBy || '',
+        waivedAt: now(),
+        note: note || '',
+      };
+      if (!String(waiver.waivedBy).trim()) throw new Error('WAIVE_ACTOR_REQUIRED');
+      await withState((state) => {
+        if (!state.allocations.has(allocationId)) throw new Error('ALLOCATION_NOT_FOUND');
+        const proofWaivers = new Map(state.proofWaivers || []);
+        if (!proofWaivers.has(allocationId)) proofWaivers.set(allocationId, waiver);
+        const exceptions = state.exceptions.map((e) =>
+          e.code === 'MISSING_PROOF' && e.ref?.allocationId === allocationId
+            ? { ...e, open: false }
+            : e,
+        );
+        return { state: { ...state, proofWaivers, exceptions } };
+      });
+      const impactNotice = await issueNoticeBestEffort({
+        allocationId,
+        evidenceId: null,
+        proofWaived: true,
+      });
+      return { ok: true, waiver, impactNotice };
+    },
+    async listImpactNotices() {
+      const state = ensureExtras(await store.load());
+      return [...(state.impactNotices || new Map()).values()].filter((n) => n.orgId === orgId);
+    },
+    async listImpactDeliveries() {
+      const state = ensureExtras(await store.load());
+      const noticeIds = new Set(
+        [...(state.impactNotices || new Map()).values()]
+          .filter((n) => n.orgId === orgId)
+          .map((n) => n.impactNoticeId),
+      );
+      return (state.impactDeliveries || []).filter((d) => noticeIds.has(d.noticeId));
     },
     async listExceptions({ openOnly = true } = {}) {
       const state = ensureExtras(await store.load());
@@ -212,6 +528,11 @@ export function createService({
             return a && a.orgId === orgId;
           }),
         ),
+        donationLink: publicDonationLink(state.donationLink),
+        source: state.tenantSource || CONNECTOR_EVERY_ORG,
+        impactNotices: [...(state.impactNotices || new Map()).values()].filter((n) => n.orgId === orgId),
+        impactDeliveries: (state.impactDeliveries || []).filter((d) => d.orgId === orgId),
+        proofWaivers: [...(state.proofWaivers || new Map()).values()],
       };
     },
     async getPacket() {
@@ -243,6 +564,7 @@ export function createService({
           allocated: formatCents(allocated),
           available: formatCents(credited - allocated),
         },
+        donationLink: publicDonationLink(state.donationLink),
       };
     },
     async health() {
@@ -271,9 +593,10 @@ export function createService({
       const lastGift = gifts.slice().sort(byDonatedDesc)[0];
       const lastLiveGift = liveGifts.slice().sort(byDonatedDesc)[0];
       const receivedLive = liveGifts.length > 0;
+      const tenantSource = state.tenantSource || CONNECTOR_EVERY_ORG;
       const steps = {
         copyWebhookUrl: Boolean(meta.webhookUrl),
-        pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see every.org admin
+        pasteInEveryOrg: Boolean(meta.webhookUrl), // operator confirms; we can't see vendor admin
         receivedFixtureGifts: fixtureGifts.length > 0,
         // API name kept for clients; meaning is live (non-fixture) gift only
         receivedTestGift: receivedLive,
@@ -283,10 +606,15 @@ export function createService({
       };
       return {
         orgId,
-        connector: 'every.org',
-        authModel: 'webhook_url', // not OAuth
+        connector: tenantSource,
+        source: tenantSource,
+        authModel: tenantSource === 'csv' ? 'csv_import' : 'webhook_url', // not OAuth
+        donationLink: publicDonationLink(state.donationLink),
         webhookUrl: meta.webhookUrl || null,
+        webhookPath: meta.webhookPath || null,
         hasWebhookToken: Boolean(meta.hasWebhookToken),
+        hasGivebutterSecret: Boolean(meta.hasGivebutterSecret),
+        hasDonorboxSecret: Boolean(meta.hasDonorboxSecret),
         hasOperatorToken: Boolean(meta.hasOperatorToken),
         steps,
         counts: {
@@ -298,35 +626,7 @@ export function createService({
         },
         lastGift: giftSummary(lastGift),
         lastLiveGift: giftSummary(lastLiveGift),
-        instructions: [
-          {
-            id: 1,
-            title: 'Copy your webhook URL',
-            detail: 'Use the URL shown in this wizard (includes a secret token).',
-          },
-          {
-            id: 2,
-            title: 'Open every.org nonprofit settings',
-            detail: 'Go to every.org/<your-slug>/admin/settings → Advanced settings.',
-          },
-          {
-            id: 3,
-            title: 'Paste the webhook URL',
-            detail: 'Save. every.org will POST each completed donation to AGI.',
-          },
-          {
-            id: 4,
-            title: 'Send a small live test gift',
-            detail:
-              'Donate $1 on your nonprofit page. Seed/fixture gifts do not count as Connected.',
-          },
-          {
-            id: 5,
-            title: 'Confirm live gift landed',
-            detail:
-              'Status becomes Connected when a non-fixture chargeId is received. Then allocate.',
-          },
-        ],
+        instructions: setupInstructions(tenantSource),
       };
     },
   };

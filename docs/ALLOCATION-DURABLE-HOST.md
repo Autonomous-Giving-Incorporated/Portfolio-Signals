@@ -1,16 +1,21 @@
-# Allocation middleware — durable named host (optional)
+# Allocation middleware — durable named host
 
-Ephemeral Cloudflare quick tunnel is **OBSERVED** for pilot smoke. A **named durable** host is optional until every.org needs a stable webhook URL.
+Designed durable host is **Cloudflare Workers** (static site live in this repo; every.org webhook is a Worker port). Platform data and Auth stay on Supabase `utdioxwiskzatwoejgiu`. **Do not** treat Render / Railway / Fly as the production webhook host.
 
-This page is the operator preflight + deploy checklist. Runtime recipes: [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md).
+Ephemeral Cloudflare quick tunnel remains valid for **local** Node pilot smoke only.
+
+This page is the **local** operator preflight. Production webhook remaining work: [CLOUDFLARE.md](CLOUDFLARE.md). Historical Compose/VPS recipes below are for local durability, not the named public host.
 
 ## Status labels
 
 | State | Meaning |
 | --- | --- |
-| Recipe READY | In-repo Dockerfile, `render.yaml`, `railway.toml`, `fly.toml`, Compose |
-| Local durable OBSERVED | Docker Compose volume on this machine / VPS smoke |
-| Named public PENDING | Render / Railway / Fly (or VPS + TLS) dashboard deploy |
+| Designed host | Cloudflare Workers + Supabase — [CLOUDFLARE.md](CLOUDFLARE.md) |
+| Public static site | In-repo Worker name `portfolio-signals` (CI deploy once CF secrets are set). **ABSENT** on the connected account (OBSERVED 2026-08-15). Live HTML is `agi-public` GET/HEAD-proxy to Vercel. |
+| Webhook on Workers | CODE_SHIPPED (`POST /webhooks/every-org` in-repo); not live on a named Worker; every.org pointing PENDING |
+| Allocation API on Workers | CODE_SHIPPED (`/seed` `/allocations` `/proofs` `/packet` `/import/csv`); operator-token fallback off; **no live allocation Worker** |
+| Local durable OBSERVED | Docker Compose volume / local Node smoke |
+| Render / Railway / Fly | Not the designed durable host |
 
 ## Preflight (no dashboard)
 
@@ -47,30 +52,29 @@ BASE_URL=http://127.0.0.1:8787 npm run verify:director   # if Supabase set
 
 VPS: put Caddy/nginx TLS in front of `:8787`, set `PUBLIC_BASE_URL=https://allocation.example.com`.
 
-## Path B — Render (recommended managed public)
+## Path B — Render (historical only — not recommended)
 
-1. [render.com](https://render.com) → Blueprint → connect `scrimshawlife-ctrl/Fund-Intel` → `services/allocation-middleware/render.yaml`  
-   **or** Docker web service, root `services/allocation-middleware`, disk `/data` 1 GB.
-2. Dashboard secrets: `PUBLIC_BASE_URL`, `SUPABASE_*` (sync:false in blueprint).
-3. Prefer `ALLOW_OPERATOR_TOKEN_FALLBACK=0`.
-4. Smoke: `BASE_URL=https://<service>.onrender.com npm run pilot:smoke`
-5. After stable seed: set `SEED_ON_BOOT=0` in dashboard.
-6. Open `/setup.html` for every.org webhook URL.
+`services/allocation-middleware/render.yaml` remains in-tree as a **historical** local/managed recipe. Render is **not** the designed public or webhook host. Do not treat a Render URL as `durable_named_host`.
 
-## Path C — Railway / Fly
+If an operator still needs the old recipe for a disposable experiment: Blueprint → `render.yaml`, disk `/data`, dashboard secrets, then `SEED_ON_BOOT=0`. That path does not replace Workers + platform Supabase.
 
-See [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md). Fly: `npm run bootstrap:fly` when flyctl authenticated.
+## Path C — Railway / Fly (historical only)
 
-## After host is up
+See [ALLOCATION-HOSTING-OPTIONS.md](ALLOCATION-HOSTING-OPTIONS.md). These files are not the production webhook host. Fly: `npm run bootstrap:fly` when flyctl authenticated, for local experiments only.
 
-1. `pilot:smoke` + `verify:director` against public `BASE_URL`  
-2. `/setup.html` → every.org (#73)  
-3. Director allocate in browser (#74 remainder)  
-4. Record in [CURRENT-STATE.md](CURRENT-STATE.md):
+## After a live Worker URL exists (operator — not claimed here)
+
+1. Set Worker secrets (`WEBHOOK_TOKEN`, platform Supabase URL + service role). Never commit them.  
+2. Confirm `POST /webhooks/every-org` rejects a bad token and accepts a fixture token against platform `am_*`.  
+3. Point every.org Advanced settings at the Worker HTTPS URL (do not do this until the live URL is operator-verified).  
+4. Controlled live gift + director JWT allocate/proof/packet + sign-off ([#20](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/20)).  
+5. Only then record in [CURRENT-STATE.md](CURRENT-STATE.md):
 
 ```yaml
-durable_named_host: OBSERVED  # YYYY-MM-DD provider + hostname only (no tokens)
+durable_named_host: OBSERVED  # YYYY-MM-DD workers.dev or custom hostname only (no tokens)
 ```
+
+This change does **not** record `durable_named_host: OBSERVED`.
 
 ## Non-goals
 
@@ -83,3 +87,5 @@ durable_named_host: OBSERVED  # YYYY-MM-DD provider + hostname only (no tokens)
 - [HACKER-DOJO-ALLOCATION-PILOT.md](HACKER-DOJO-ALLOCATION-PILOT.md)
 - [ALLOCATION-MIDDLEWARE-PRODUCTION.md](ALLOCATION-MIDDLEWARE-PRODUCTION.md)
 - [SUITE-ONBOARDING.md](SUITE-ONBOARDING.md)
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

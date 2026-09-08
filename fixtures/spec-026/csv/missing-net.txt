@@ -1,0 +1,2 @@
+chargeId,amount
+fixture-csv-no-net,10.00

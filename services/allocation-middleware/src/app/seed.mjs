@@ -1,12 +1,10 @@
-import { readFile } from 'node:fs/promises';
 import { resolvePotPath } from '../domain/pots.mjs';
 
 /**
- * Load Hacker Dojo (or other) pilot fixture into a service instance.
- * Idempotent: existing chargeIds are skipped.
+ * Load a parsed fixture object into a service instance.
+ * Idempotent: existing chargeIds are skipped. Workers-safe (no fs).
  */
-export async function seedFromFixture(service, fixturePath, { applySuggestedAllocation = true } = {}) {
-  const raw = JSON.parse(await readFile(fixturePath, 'utf8'));
+export async function seedFromObject(service, raw, { applySuggestedAllocation = true } = {}) {
   const orgId = raw.orgId;
   let giftsCreated = 0;
   let labelsSet = 0;
@@ -42,7 +40,9 @@ export async function seedFromFixture(service, fixturePath, { applySuggestedAllo
     };
     // Override normalized keys: force fixture keys after normalize by using campaign title
     // every.org normalizer lowercases title → campaign key
-    const r = await service.ingestEveryOrg(payload);
+    const r = await service.ingestEveryOrg(payload, {
+      source: raw.source === 'fixture' || /^fixture[-_]/i.test(g.chargeId) ? 'fixture' : undefined,
+    });
     if (r.created) giftsCreated += 1;
   }
 
@@ -55,6 +55,7 @@ export async function seedFromFixture(service, fixturePath, { applySuggestedAllo
     const s = raw.suggestedAllocation;
     try {
       allocation = await service.allocate({
+        id: s.id,
         campaignKey: s.campaignKey,
         programKey: s.programKey,
         amount: s.amount,
@@ -87,4 +88,13 @@ export async function seedFromFixture(service, fixturePath, { applySuggestedAllo
     available: await service.listAvailable(),
     packet: await service.getPacket(),
   };
+}
+
+/**
+ * Node helper: read a fixture file, then seedFromObject.
+ */
+export async function seedFromFixture(service, fixturePath, options = {}) {
+  const { readFile } = await import('node:fs/promises');
+  const raw = JSON.parse(await readFile(fixturePath, 'utf8'));
+  return seedFromObject(service, raw, options);
 }

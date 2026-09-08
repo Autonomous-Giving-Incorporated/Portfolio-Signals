@@ -1,0 +1,39 @@
+{
+  "decision": {
+    "schemaVersion": "2026-08-02",
+    "allocationId": "alloc_community_hardware",
+    "fundName": "Community Hardware Fund",
+    "rationale": "Hands-on computing equipment enables an accessible introductory robotics workshop. Non-canonical Hacker Dojo / Community Hardware integration fixture; not the public demo.",
+    "status": "approved",
+    "publishedAt": "2026-08-02T16:00:00.000Z"
+  },
+  "events": [
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_hardware",
+      "eventId": "evt_001",
+      "type": "purchase_approved",
+      "occurredAt": "2026-08-03T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "purchase-approval-001"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_hardware",
+      "eventId": "evt_002",
+      "type": "receipt_attached",
+      "occurredAt": "2026-08-04T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "receipt-record-001"
+    },
+    {
+      "schemaVersion": "2026-08-02",
+      "allocationId": "alloc_community_hardware",
+      "eventId": "evt_003",
+      "type": "attendance_verified",
+      "occurredAt": "2026-08-12T16:00:00.000Z",
+      "verificationStatus": "verified",
+      "evidenceReference": "attendance-record-001"
+    }
+  ]
+}

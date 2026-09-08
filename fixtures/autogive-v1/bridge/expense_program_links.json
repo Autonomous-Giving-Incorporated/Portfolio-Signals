@@ -1,0 +1,32 @@
+[
+  {
+    "link_id": "link_syn_001",
+    "expense_id": "exp_syn_001",
+    "program_id": "prog_syn_001",
+    "relationship": "enabled"
+  },
+  {
+    "link_id": "link_syn_002",
+    "expense_id": "exp_syn_002",
+    "program_id": "prog_syn_001",
+    "relationship": "enabled"
+  },
+  {
+    "link_id": "link_syn_003",
+    "expense_id": "exp_syn_003",
+    "program_id": "prog_syn_002",
+    "relationship": "enabled"
+  },
+  {
+    "link_id": "link_syn_004",
+    "expense_id": "exp_syn_004",
+    "program_id": "prog_syn_003",
+    "relationship": "enabled"
+  },
+  {
+    "link_id": "link_syn_005",
+    "expense_id": "exp_syn_005",
+    "program_id": "prog_syn_003",
+    "relationship": "enabled"
+  }
+]

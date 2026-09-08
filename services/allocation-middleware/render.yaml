@@ -1,9 +1,8 @@
-# Render Blueprint — https://render.com
-# Dashboard: New → Blueprint → connect Fund-Intel repo → this file.
-# Or: create a Docker Web Service with root dir services/allocation-middleware.
+# HISTORICAL recipe only. Designed durable host is Cloudflare Workers + Supabase.
+# Do not treat a Render URL as durable_named_host. See docs/CLOUDFLARE.md.
 #
-# Closest Fly-like host without flyctl (GitHub deploy + dashboard secrets).
-# Persistent disk mounts at /data for DATA_FILE.
+# Render Blueprint — https://render.com
+# Persistent disk mounts at /data for DATA_FILE (Node file store, not production).
 
 services:
   - type: web

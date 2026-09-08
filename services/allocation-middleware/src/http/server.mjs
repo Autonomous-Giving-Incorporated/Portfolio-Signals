@@ -2,20 +2,44 @@ import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildEveryOrgWebhookUrl } from '../app/config.mjs';
+import { buildConnectorWebhookUrl } from '../app/config.mjs';
 import { createAuthVerifier, bearerToken } from '../app/auth.mjs';
+import { authorizeWebhookToken, parseWebhookJson } from './webhook-auth.mjs';
+import { verify_webhook } from '../connectors/adapter.mjs';
+import {
+  CONNECTOR_DONORBOX,
+  CONNECTOR_EVERY_ORG,
+  CONNECTOR_GIVEBUTTER,
+  webhookPathForSource,
+} from '../connectors/sources.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startedAt = Date.now();
 
-async function readBody(req) {
+const DEFAULT_JSON_BODY_BYTES = 256 * 1024;
+const DEFAULT_CSV_BODY_BYTES = 5 * 1024 * 1024;
+
+class PayloadTooLargeError extends Error {
+  constructor() {
+    super('PAYLOAD_TOO_LARGE');
+  }
+}
+
+async function readBody(req, maxBytes) {
+  const declared = Number(req.headers['content-length'] || 0);
+  if (Number.isFinite(declared) && declared > maxBytes) throw new PayloadTooLargeError();
   const chunks = [];
-  for await (const c of req) chunks.push(c);
+  let bytes = 0;
+  for await (const c of req) {
+    bytes += c.length;
+    if (bytes > maxBytes) throw new PayloadTooLargeError();
+    chunks.push(c);
+  }
   return Buffer.concat(chunks).toString('utf8');
 }
 
-async function readJson(req) {
-  const raw = (await readBody(req)) || '{}';
+async function readJson(req, maxBytes) {
+  const raw = (await readBody(req, maxBytes)) || '{}';
   return JSON.parse(raw);
 }
 
@@ -52,10 +76,14 @@ export function createAllocationServer({
   service,
   operatorToken = '',
   webhookToken = '',
+  givebutterWebhookSecret = '',
+  donorboxWebhookSecret = '',
   publicBaseUrl = '',
   authVerifier = null,
   allowOperatorFallback = true,
   authPublic = null,
+  maxJsonBodyBytes = DEFAULT_JSON_BODY_BYTES,
+  maxCsvBodyBytes = DEFAULT_CSV_BODY_BYTES,
 }) {
   function operatorTokenOk(req) {
     if (!operatorToken || !allowOperatorFallback) return false;
@@ -78,7 +106,12 @@ export function createAllocationServer({
           return { ok: true, actor, mode: 'supabase_director' };
         }
         if (actor && !actor.canWrite) {
-          forbidden(res, 'director_or_campaign_lead_required');
+          const code = actor.aal !== 'aal2'
+            ? 'aal2_session_required'
+            : !actor.mfaEnforced
+              ? 'mfa_enrollment_required'
+              : 'director_or_campaign_lead_required';
+          forbidden(res, code);
           return { ok: false };
         }
       } catch {
@@ -104,12 +137,35 @@ export function createAllocationServer({
     return { ok: false };
   }
 
+  async function authorizeRead(req, res) {
+    if (authVerifier) {
+      try {
+        const actor = await authVerifier.resolve(req);
+        if (actor?.canRead) return { ok: true, actor, mode: 'supabase_member' };
+      } catch {
+        send(res, 503, { error: 'authentication_unavailable' });
+        return { ok: false };
+      }
+    }
+    if (operatorTokenOk(req)) {
+      return { ok: true, actor: { role: 'operator', canRead: true }, mode: 'operator_token' };
+    }
+    if (!authVerifier && !operatorToken) {
+      return { ok: true, actor: { role: 'open_dev', canRead: true }, mode: 'open_dev' };
+    }
+    unauthorized(res, 'valid_bearer_session_required');
+    return { ok: false };
+  }
+
   function requireWebhook(req, res, url) {
+    // Local Node open-dev keeps the historical empty-token allow. The Worker port
+    // fail-closes when WEBHOOK_TOKEN is unset — see workers/portfolio-signals.
     if (!webhookToken) return true;
     const header = req.headers['x-webhook-token'] || '';
     const query = url.searchParams.get('token') || '';
-    if (header === webhookToken || query === webhookToken) return true;
-    unauthorized(res);
+    const auth = authorizeWebhookToken(header, query, webhookToken);
+    if (auth.ok) return true;
+    unauthorized(res, auth.error);
     return false;
   }
 
@@ -237,16 +293,31 @@ export function createAllocationServer({
       }
 
       if (req.method === 'GET' && url.pathname === '/setup') {
-        const webhookUrl = buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken);
+        const authz = await authorizeWrite(req, res);
+        if (!authz.ok) return;
+        const tenantSource = await service.getTenantSource();
+        const webhookUrl = buildConnectorWebhookUrl(publicBaseUrl, tenantSource, { webhookToken });
         const status = await service.getSetupStatus({
           webhookUrl,
+          webhookPath: webhookPathForSource(tenantSource),
           hasWebhookToken: Boolean(webhookToken),
+          hasGivebutterSecret: Boolean(givebutterWebhookSecret),
+          hasDonorboxSecret: Boolean(donorboxWebhookSecret),
           hasOperatorToken: Boolean(operatorToken),
         });
         return send(res, 200, {
           ...status,
           directorLoginEnabled: Boolean(authVerifier),
         });
+      }
+      if (req.method === 'POST' && url.pathname === '/setup') {
+        const authz = await authorizeWrite(req, res);
+        if (!authz.ok) return;
+        const body = await readJson(req, maxJsonBodyBytes);
+        return send(res, 200, await service.setOnboarding({
+          donationLink: body.donationLink,
+          source: body.source,
+        }));
       }
       if (req.method === 'GET' && (url.pathname === '/setup.html' || url.pathname === '/connect')) {
         return serveHtml(res, 'setup.html');
@@ -257,8 +328,31 @@ export function createAllocationServer({
 
       if (req.method === 'POST' && url.pathname === '/webhooks/every-org') {
         if (!requireWebhook(req, res, url)) return;
-        const payload = await readJson(req);
-        const result = await service.ingestEveryOrg(payload);
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes);
+        const result = await service.ingestGift(payload, { source: CONNECTOR_EVERY_ORG });
+        return send(res, 200, { created: result.created });
+      }
+      if (req.method === 'POST' && url.pathname === '/webhooks/givebutter') {
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const auth = await verify_webhook(
+          { headers: req.headers, url: url.toString() },
+          { source: CONNECTOR_GIVEBUTTER, secrets: { givebutterSecret: givebutterWebhookSecret }, rawBody: raw },
+        );
+        if (!auth.ok) return send(res, auth.status, { error: auth.error });
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes);
+        const result = await service.ingestGift(payload, { source: CONNECTOR_GIVEBUTTER });
+        return send(res, 200, { created: result.created });
+      }
+      if (req.method === 'POST' && url.pathname === '/webhooks/donorbox') {
+        const raw = (await readBody(req, maxJsonBodyBytes)) || '{}';
+        const auth = await verify_webhook(
+          { headers: req.headers, url: url.toString() },
+          { source: CONNECTOR_DONORBOX, secrets: { donorboxSecret: donorboxWebhookSecret }, rawBody: raw },
+        );
+        if (!auth.ok) return send(res, auth.status, { error: auth.error });
+        const payload = parseWebhookJson(raw, maxJsonBodyBytes, { allowArray: true });
+        const result = await service.ingestGift(payload, { source: CONNECTOR_DONORBOX });
         return send(res, 200, { created: result.created });
       }
       if (req.method === 'POST' && url.pathname === '/import/csv') {
@@ -267,21 +361,23 @@ export function createAllocationServer({
         const ct = req.headers['content-type'] || '';
         let csvText = '';
         if (ct.includes('application/json')) {
-          const body = await readJson(req);
+          const body = await readJson(req, maxCsvBodyBytes);
           csvText = body.csv || '';
         } else {
-          csvText = await readBody(req);
+          csvText = await readBody(req, maxCsvBodyBytes);
         }
         const result = await service.importCsv(csvText);
         return send(res, 200, result);
       }
       if (req.method === 'GET' && url.pathname === '/available') {
+        const authz = await authorizeRead(req, res);
+        if (!authz.ok) return;
         return send(res, 200, await service.listAvailable());
       }
       if (req.method === 'POST' && url.pathname === '/allocations') {
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
-        const body = await readJson(req);
+        const body = await readJson(req, maxJsonBodyBytes);
         if (!body.approvedBy && authz.actor?.email) {
           body.approvedBy = authz.actor.email;
         }
@@ -296,31 +392,46 @@ export function createAllocationServer({
       if (req.method === 'POST' && url.pathname === '/proofs') {
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
-        const body = await readJson(req);
+        const body = await readJson(req, maxJsonBodyBytes);
         if (!body.attachedBy && authz.actor?.email) {
           body.attachedBy = authz.actor.email;
+        }
+        if (body.waive === true || body.proofWaived === true) {
+          if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+          return send(res, 201, await service.waiveProof(body));
         }
         const result = await service.attachProof(body);
         return send(res, 201, result);
       }
+      if (req.method === 'POST' && url.pathname === '/waivers') {
+        const authz = await authorizeWrite(req, res);
+        if (!authz.ok) return;
+        const body = await readJson(req, maxJsonBodyBytes);
+        if (!body.waivedBy && authz.actor?.email) body.waivedBy = authz.actor.email;
+        return send(res, 201, await service.waiveProof(body));
+      }
       if (req.method === 'GET' && url.pathname === '/labels') {
+        const authz = await authorizeRead(req, res);
+        if (!authz.ok) return;
         return send(res, 200, await service.listLabels());
       }
       if (req.method === 'POST' && url.pathname === '/labels') {
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
-        const body = await readJson(req);
+        const body = await readJson(req, maxJsonBodyBytes);
         await service.setLabel(body);
         return send(res, 200, { ok: true });
       }
       if (req.method === 'POST' && url.pathname === '/pots/merge') {
         const authz = await authorizeWrite(req, res);
         if (!authz.ok) return;
-        const body = await readJson(req);
+        const body = await readJson(req, maxJsonBodyBytes);
         await service.mergePots(body);
         return send(res, 200, { ok: true });
       }
       if (req.method === 'GET' && url.pathname === '/exceptions') {
+        const authz = await authorizeRead(req, res);
+        if (!authz.ok) return;
         return send(res, 200, await service.listExceptions());
       }
       if (
@@ -335,6 +446,8 @@ export function createAllocationServer({
         return send(res, 200, { ok: true });
       }
       if (req.method === 'GET' && url.pathname === '/trail') {
+        const authz = await authorizeRead(req, res);
+        if (!authz.ok) return;
         const t = await service.getTrail();
         return send(res, 200, {
           gifts: t.gifts.map((g) => ({
@@ -350,6 +463,8 @@ export function createAllocationServer({
         });
       }
       if (req.method === 'GET' && url.pathname === '/packet') {
+        const authz = await authorizeRead(req, res);
+        if (!authz.ok) return;
         return send(res, 200, await service.getPacket());
       }
       if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {
@@ -361,7 +476,7 @@ export function createAllocationServer({
       send(res, 404, { error: 'not_found' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'error';
-      const status = message === 'OVER_ALLOCATION' ? 409 : 400;
+      const status = message === 'PAYLOAD_TOO_LARGE' ? 413 : message === 'OVER_ALLOCATION' ? 409 : 400;
       send(res, status, { error: message });
     }
   });
@@ -398,6 +513,8 @@ if (isMain) {
     service,
     operatorToken: cfg.operatorToken,
     webhookToken: cfg.webhookToken,
+    givebutterWebhookSecret: process.env.GIVEBUTTER_WEBHOOK_SECRET || '',
+    donorboxWebhookSecret: process.env.DONORBOX_WEBHOOK_SECRET || '',
     publicBaseUrl: cfg.publicBaseUrl || `http://127.0.0.1:${cfg.port}`,
     authVerifier,
     allowOperatorFallback: cfg.allowOperatorFallback,

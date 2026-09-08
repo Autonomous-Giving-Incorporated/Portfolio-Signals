@@ -26,7 +26,12 @@ grep -qx 'postgres 15.8' .tool-versions
 grep -q 'version: 2.31.8' .github/workflows/local-supabase-tests.yml
 grep -q "remote-staging" scripts/staging/verify-policy-suite.sh
 grep -q "STAGING_CONFIRM_PROJECT_REF" scripts/staging/apply-migrations.sh
-grep -q 'suite_count": 7' scripts/staging/verify-policy-suite.sh
+grep -q 'suite_count": 10' scripts/staging/verify-policy-suite.sh
+test -f supabase/tests/016_delegate_auth.sql
+test -f supabase/tests/017_security_definer_privileges.sql
+test -f supabase/tests/018_authenticated_security_definer_privileges.sql
+grep -q "verify_jwt = false" supabase/config.toml
+grep -q "RESEND_API_KEY" supabase/functions/auth-email/index.ts
 grep -q "STAGING_SUPABASE_ANON_KEY" .github/workflows/validate-and-deploy.yml
 grep -q "Refusing to emit runtime config for unlisted Supabase host" scripts/staging/generate-runtime-config.mjs
 ! grep -q "SUPABASE_SERVICE_ROLE_KEY" scripts/staging/generate-runtime-config.mjs
@@ -66,3 +71,5 @@ for path in Path('.').rglob('*'):
 if findings:
     raise SystemExit('Potential embedded service credential found:\n' + '\n'.join(findings))
 PY
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

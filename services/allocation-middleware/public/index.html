@@ -70,15 +70,15 @@
       <article class="metric-card"><span class="metric-label">Open exceptions</span><strong id="m-exceptions">—</strong><small>Inbox</small></article>
     </section>
 
-    <section class="panel" id="auth-bar" aria-label="Operator credentials">
+    <section class="panel" id="auth-bar" aria-label="Session">
       <div class="panel-heading">
         <h2>Session</h2>
         <span class="tag warning">HUMAN GATE</span>
       </div>
-      <p class="note" id="auth-state">Not signed in — use Director login or pilot operator token.</p>
-      <div class="control-grid">
-        <label>Operator token (pilot fallback)
-          <input id="token" type="password" placeholder="x-operator-token when Supabase is off" autocomplete="off" />
+      <p class="note" id="auth-state">Not signed in — use Director login.</p>
+      <div class="control-grid" id="operator-fallback" hidden>
+        <label>Operator token (local Node fallback only)
+          <input id="token" type="password" placeholder="disabled on Workers / pilot" autocomplete="off" />
         </label>
         <div class="row-actions">
           <button type="button" class="button" id="btn-save-token">Save token</button>
@@ -183,7 +183,21 @@
 
   <script type="module">
     const tokenEl = document.getElementById('token');
-    tokenEl.value = localStorage.getItem('operatorToken') || '';
+    const fallbackPanel = document.getElementById('operator-fallback');
+    let operatorFallbackEnabled = false;
+    try {
+      const cfg = await fetch('/auth/config').then((r) => r.json());
+      operatorFallbackEnabled = Boolean(cfg.operatorTokenFallback);
+    } catch {
+      operatorFallbackEnabled = false;
+    }
+    if (operatorFallbackEnabled) {
+      fallbackPanel.hidden = false;
+      tokenEl.value = localStorage.getItem('operatorToken') || '';
+    } else {
+      localStorage.removeItem('operatorToken');
+      tokenEl.value = '';
+    }
 
     function opHeaders(json = true) {
       const h = {};
@@ -208,7 +222,9 @@
       const pill = document.getElementById('auth-pill');
       const headers = opHeaders(false);
       if (!headers.Authorization && !headers['x-operator-token']) {
-        el.textContent = 'Not signed in — use Director login or operator token';
+        el.textContent = operatorFallbackEnabled
+          ? 'Not signed in — use Director login or operator token'
+          : 'Not signed in — use Director login. Operator-token fallback is off.';
         pill.textContent = 'Not signed in';
         pill.className = 'status-pill pending';
         return;
@@ -256,7 +272,9 @@
     }
 
     async function loadAvailable() {
-      const rows = await (await fetch('/available')).json();
+      const response = await fetch('/available', { headers: opHeaders(false) });
+      if (!response.ok) throw new Error('available_authorization_required');
+      const rows = await response.json();
       const host = document.getElementById('available-body');
       if (!rows.length) {
         host.innerHTML = '<p class="note">No pots yet. Configure every.org webhook or import CSV.</p>';
@@ -275,13 +293,26 @@
       const tb = document.createElement('tbody');
       for (const r of rows) {
         const tr = document.createElement('tr');
-        const c = r.campaignLabel && r.campaignLabel !== r.campaignKey
-          ? `${r.campaignLabel}<br><code>${r.campaignKey}</code>`
-          : `<code>${r.campaignKey}</code>`;
-        const p = r.programLabel && r.programLabel !== r.programKey
-          ? `${r.programLabel}<br><code>${r.programKey}</code>`
-          : `<code>${r.programKey}</code>`;
-        tr.innerHTML = `<td>${c}</td><td>${p}</td><td>${r.credited}</td><td>${r.allocated}</td><td><strong>${r.available}</strong></td>`;
+        for (const [label, key] of [[r.campaignLabel, r.campaignKey], [r.programLabel, r.programKey]]) {
+          const td = document.createElement('td');
+          if (label && label !== key) {
+            td.append(document.createTextNode(String(label)), document.createElement('br'));
+          }
+          const code = document.createElement('code');
+          code.textContent = String(key || '');
+          td.appendChild(code);
+          tr.appendChild(td);
+        }
+        for (const value of [r.credited, r.allocated]) {
+          const td = document.createElement('td');
+          td.textContent = String(value ?? '');
+          tr.appendChild(td);
+        }
+        const available = document.createElement('td');
+        const strong = document.createElement('strong');
+        strong.textContent = String(r.available ?? '');
+        available.appendChild(strong);
+        tr.appendChild(available);
         tb.appendChild(tr);
       }
       table.appendChild(tb);
@@ -289,7 +320,9 @@
     }
 
     async function loadExceptions() {
-      const rows = await (await fetch('/exceptions')).json();
+      const response = await fetch('/exceptions', { headers: opHeaders(false) });
+      if (!response.ok) throw new Error('exceptions_authorization_required');
+      const rows = await response.json();
       document.getElementById('m-exceptions').textContent = String(rows.length);
       const host = document.getElementById('exceptions');
       if (!rows.length) {
@@ -300,7 +333,9 @@
       ul.className = 'inbox-list';
       for (const e of rows) {
         const li = document.createElement('li');
-        li.innerHTML = `<code>${e.code}</code> — ${e.message || ''}`;
+        const code = document.createElement('code');
+        code.textContent = String(e.code || '');
+        li.append(code, document.createTextNode(` — ${String(e.message || '')}`));
         ul.appendChild(li);
       }
       host.replaceChildren(ul);
@@ -344,13 +379,19 @@
     });
 
     document.getElementById('btn-packet').addEventListener('click', async () => {
-      const data = await (await fetch('/packet')).json();
+      const response = await fetch('/packet', { headers: opHeaders(false) });
+      if (!response.ok) throw new Error('packet_authorization_required');
+      const data = await response.json();
       document.getElementById('packet-body').textContent = JSON.stringify(data, null, 2);
     });
 
     await refreshAuthBanner();
-    await loadAvailable();
-    await loadExceptions();
+    await loadAvailable().catch(() => {
+      document.getElementById('available-body').textContent = 'Sign in to view operational balances.';
+    });
+    await loadExceptions().catch(() => {
+      document.getElementById('exceptions').textContent = 'Sign in to view operational exceptions.';
+    });
   </script>
 </body>
 </html>

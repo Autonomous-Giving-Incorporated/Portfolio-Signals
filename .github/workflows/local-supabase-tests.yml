@@ -5,12 +5,18 @@ on:
     paths:
       - 'supabase/**'
       - 'services/import-api/**'
+      - 'fixtures/autogive-v1/**'
+      - 'scripts/synthetic/**'
+      - 'tests/autogive-synthetic-v1.test.mjs'
       - '.github/workflows/local-supabase-tests.yml'
   push:
     branches: [main]
     paths:
       - 'supabase/**'
       - 'services/import-api/**'
+      - 'fixtures/autogive-v1/**'
+      - 'scripts/synthetic/**'
+      - 'tests/autogive-synthetic-v1.test.mjs'
       - '.github/workflows/local-supabase-tests.yml'
   workflow_dispatch:
 
@@ -26,8 +32,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.18.0'
+      - uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
         with:
           version: 2.31.8
       - name: Start disposable Supabase project
@@ -43,6 +54,10 @@ jobs:
           printf 'DB_URL=%s\n' "$DB_URL" >> "$GITHUB_ENV"
       - name: Load synthetic role fixtures
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
+      - name: Load AutoGive synthetic dataset v1
+        run: SYNTHETIC_SEED_CONFIRM=1 DB_URL="$DB_URL" npm run seed:synthetic
+      - name: Execute AutoGive synthetic v1 acceptance
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/024_autogive_synthetic_v1.sql
       - name: Execute synthetic import-gate acceptance checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/003_import_gate_cases.sql
       - name: Execute import-review action checks
@@ -75,6 +90,28 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/014_agi_two_tenant_acceptance.sql
       - name: Execute client onboarding pack checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/015_client_onboarding_pack.sql
+      - name: Execute delegate Auth checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/016_delegate_auth.sql
+      - name: Execute SECURITY DEFINER privilege checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/017_security_definer_privileges.sql
+      - name: Execute authenticated SECURITY DEFINER architecture checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/018_authenticated_security_definer_privileges.sql
+      - name: Execute allocation tenant isolation checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/019_am_tenant_isolation.sql
+      - name: Execute ImpactNotice and donation_link checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/020_am_impact_notice.sql
+      - name: P1 connector source
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/025_am_p1_connectors.sql
+      - name: Atomic pot credit
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/026_am_credit_pot.sql
+      - name: Execute auth-email per-source dispatch budget checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/021_auth_email_ip_budget.sql
+      - name: Execute auth-email delivery-status checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/022_auth_email_delivery_status.sql
+      - name: Execute auth-email hard-failure alert checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/023_auth_email_alerts.sql
+      - name: Execute privileged MFA persist checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/027_set_mfa_enforced.sql
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
@@ -84,3 +121,5 @@ jobs:
       - name: Stop local stack
         if: always()
         run: supabase stop --no-backup
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice 21 + Hash: da66dae31b4c439371561396852822a0257505e8

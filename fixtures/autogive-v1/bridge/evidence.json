@@ -1,0 +1,65 @@
+[
+  {
+    "evidence_id": "ev_syn_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "invoice",
+    "reference": "fixture://evidence/invoice-001.pdf",
+    "verification_status": "verified",
+    "content_digest": "sha256:synthetic001",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "invoice",
+    "reference": "fixture://evidence/invoice-002.pdf",
+    "verification_status": "verified",
+    "content_digest": "sha256:synthetic002",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "approval_packet",
+    "reference": "fixture://evidence/approval-003.json",
+    "verification_status": "verified",
+    "content_digest": "sha256:synthetic003",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "invoice",
+    "reference": "fixture://evidence/invoice-004.pdf",
+    "verification_status": "verified",
+    "content_digest": "sha256:synthetic004",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_005",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "inspection_report",
+    "reference": "fixture://evidence/report-005.pdf",
+    "verification_status": "verified",
+    "content_digest": "sha256:synthetic005",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_006",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "estimate",
+    "reference": "fixture://evidence/estimate-006.pdf",
+    "verification_status": "pending_review",
+    "content_digest": "sha256:synthetic006",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "evidence_id": "ev_syn_dup",
+    "tenant_id": "org_synthetic_civic_forge",
+    "evidence_type": "invoice",
+    "reference": "fixture://evidence/invoice-001-duplicate.pdf",
+    "verification_status": "duplicate",
+    "content_digest": "sha256:synthetic001",
+    "provenance": "SYNTHETIC"
+  }
+]

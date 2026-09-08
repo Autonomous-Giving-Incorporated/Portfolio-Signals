@@ -1,23 +1,22 @@
 # Allocation middleware — hosting options
 
-Runtime needs: **Docker image**, **HTTPS URL**, **env secrets**, **durable file** at `DATA_FILE` (volume or disk).  
-No payment processing, no multi-region requirement.
+Runtime needs: **HTTPS URL**, **env secrets**, and durable state. Designed production is **Cloudflare Workers + platform Supabase** (`utdioxwiskzatwoejgiu`). See [CLOUDFLARE.md](CLOUDFLARE.md).
+
+Render, Fly, and Railway are **not** the durable public or webhook host. In-repo `render.yaml` / `fly.toml` / `railway.toml` are historical local recipes only.
 
 ## Recommendation
 
-| Rank | Host | Role | CLI |
-| --- | --- | --- | --- |
-| **1** | **Local Node** | **Phase 3a default** — no Docker; director auth against platform Supabase | Node 22 |
-| **2** | **Cloudflare quick tunnel** | **Phase 3b ephemeral public HTTPS** — no Docker/SaaS | cloudflared |
-| **3** | **Docker Compose** | Durable pilot volume (local or any VPS) | Docker |
-| **4** | **Render** | Managed durable public host (Phase 3b) | Dashboard |
-| **5** | **Railway** | Managed public host + volume | Dashboard |
-| **Optional** | **Fly.io** | Public host when flyctl works | flyctl |
+| Rank | Host | Role |
+| --- | --- | --- |
+| **1** | **Cloudflare Workers** | **Designed production** — static public site + `POST /webhooks/every-org` in-repo. Live deploy/pointing remain operator-owned. Data/Auth stay on Supabase. |
+| **2** | **Local Node** | **Pilot only** — director auth against platform Supabase; no Docker |
+| **3** | **Cloudflare quick tunnel** | Ephemeral public HTTPS for local Node smoke (`*.trycloudflare.com`) |
+| **4** | **Docker Compose** | Local durable volume for pilot files; not the named production webhook |
 
-**Day-to-day director-auth pilot:** Local Node.  
-**Public HTTPS without account:** Cloudflare quick tunnel → local Node.  
-**Durable public / every.org webhook:** Render (or Railway / Fly / VPS).  
-**Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · `npm run preflight:durable`.
+**Production public site (designed):** Workers (in-repo name `portfolio-signals`). **ABSENT** on the connected account (OBSERVED 2026-08-15). Live HTML is `agi-public` GET/HEAD-proxy to Vercel.  
+**Production webhook (designed):** Workers `POST /webhooks/every-org` in-repo; not live on a named Worker. Do not deploy this service to Render/Fly/Railway. Live every.org pointing is still operator-owned.  
+**Day-to-day director path:** local Node until an allocation Worker exists. Do not use the suite-gateway origin.  
+**Operator checklist:** [ALLOCATION-DURABLE-HOST.md](ALLOCATION-DURABLE-HOST.md) · [CLOUDFLARE.md](CLOUDFLARE.md).
 
 ## 0a) Cloudflare quick tunnel (ephemeral public HTTPS)
 
@@ -27,7 +26,7 @@ cloudflared tunnel --url http://127.0.0.1:8787
 BASE_URL=https://….trycloudflare.com npm run pilot:smoke
 ```
 
-No Docker, no Render account. URL is temporary.
+No Docker. URL is temporary. Not the production webhook host.
 
 ## 0) Local Node (no Docker)
 
@@ -60,10 +59,12 @@ BASE_URL=http://127.0.0.1:8787 npm run pilot:smoke
 
 Files: `docker-compose.yml`, `scripts/gen-pilot-env.sh`.
 
-## 2) Render
+## 2) Render (historical recipe — not the designed host)
+
+Do not use Render for production webhooks or the public portal. Designed host: [CLOUDFLARE.md](CLOUDFLARE.md).
 
 1. [render.com](https://render.com) → New → Blueprint  
-2. Connect `scrimshawlife-ctrl/Fund-Intel`, select `services/allocation-middleware/render.yaml`  
+2. Connect `Autonomous-Giving-Incorporated/Portfolio-Signals`, select `services/allocation-middleware/render.yaml`
    **or** New Web Service → Docker → root directory `services/allocation-middleware`  
 3. Persistent disk at `/data` (1 GB) if not using blueprint  
 4. Set `PUBLIC_BASE_URL=https://<service>.onrender.com` (+ optional `SUPABASE_*`)  
@@ -71,7 +72,9 @@ Files: `docker-compose.yml`, `scripts/gen-pilot-env.sh`.
 
 File: `render.yaml`.
 
-## 3) Railway
+## 3) Railway (historical recipe — not the designed host)
+
+Do not use Railway for production webhooks or the public portal.
 
 1. [railway.app](https://railway.app) → New Project → Deploy from GitHub  
 2. Root directory: `services/allocation-middleware`  
@@ -81,10 +84,9 @@ File: `render.yaml`.
 
 File: `railway.toml`.
 
-## 4) Fly.io (optional)
+## 4) Fly.io (historical recipe — not the designed host)
 
-Supported optional host. Use when flyctl is available and authenticated.  
-Config and scripts stay in-repo: `fly.toml`, `npm run bootstrap:fly`, `npm run deploy:fly`.
+Do not use Fly for production webhooks or the public portal. Config and scripts that remain in-repo are local/optional only.
 
 ### Prerequisites
 
@@ -104,7 +106,7 @@ export PATH="$HOME/.fly/bin:$PATH"
 fly version
 ```
 
-If still blocked: use Docker Compose / Render for the pilot; retry Fly later. Do not require Fly for suite progress.
+If still blocked: use local Node / Docker Compose for the pilot. Do not require Fly for suite progress.
 
 ### One-command bootstrap
 
@@ -148,3 +150,5 @@ Files: `fly.toml`, `scripts/bootstrap-fly-pilot.sh`, `scripts/deploy-fly.sh`.
 - Kubernetes / service mesh  
 - Multi-tenant process  
 - Replacing Supabase or Impact Relay  
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

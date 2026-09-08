@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>AGI Portfolio Signals · Director login</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="brand.css" />
+  <link rel="stylesheet" href="allocation-shell.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="allocation-host">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="brand-identity">
+      <span class="brand-product">Portfolio Signals<br />Allocation</span>
+      <nav class="brand-suite-links" aria-label="Allocation">
+        <a href="allocation.html">Allocate</a>
+        <a href="allocation-login.html" aria-current="page">Director login</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="eyebrow">Restricted · Cloudflare Workers</p>
+    <h1>Director login</h1>
+    <p class="lede">
+      Sign in with an existing AGI / Portfolio Signals account that has an active
+      <strong>org_hacker_dojo</strong> membership (<code>director</code> or <code>campaign_lead</code>).
+      Writes also need AAL2 and <code>mfa_enforced</code>. Operator tokens are not accepted on this host.
+    </p>
+    <section class="panel">
+      <p class="note" id="config-msg">Loading auth config…</p>
+      <form id="login-form" class="stack-form auth-form" hidden>
+        <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+        <label>Password <input name="password" type="password" required autocomplete="current-password" /></label>
+        <button type="submit" class="button">Sign in</button>
+      </form>
+      <p class="note" id="msg" role="status"></p>
+    </section>
+  </main>
+  <script type="module">
+    const form = document.getElementById('login-form');
+    const msg = document.getElementById('msg');
+    const configMsg = document.getElementById('config-msg');
+    const cfgRes = await fetch('/auth/config');
+    const cfg = await cfgRes.json();
+    if (!cfg.directorLoginEnabled) {
+      configMsg.textContent = 'Director login is not configured. Operator must set PLATFORM_SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY on the Worker.';
+    } else {
+      configMsg.textContent = `Org ${cfg.orgId} · operator-token fallback ${cfg.operatorTokenFallback ? 'on' : 'off'}`;
+      form.hidden = false;
+    }
+    if (cfg.directorLoginEnabled && window.supabase) {
+      const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        msg.textContent = 'Signing in…';
+        const fd = new FormData(form);
+        const { data: sign, error } = await sb.auth.signInWithPassword({
+          email: String(fd.get('email') || ''),
+          password: String(fd.get('password') || ''),
+        });
+        if (error) {
+          msg.className = 'note err';
+          msg.textContent = error.message;
+          return;
+        }
+        const token = sign.session?.access_token;
+        if (!token) {
+          msg.className = 'note err';
+          msg.textContent = 'No session returned';
+          return;
+        }
+        sessionStorage.setItem('am_access_token', token);
+        const me = await fetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+        const body = await me.json();
+        if (!me.ok) {
+          msg.className = 'note err';
+          msg.textContent = body.error || 'Not authorized for this org';
+          await sb.auth.signOut();
+          sessionStorage.removeItem('am_access_token');
+          return;
+        }
+        msg.className = 'note ok';
+        msg.textContent = `Welcome ${body.displayName || body.email} (${body.role})`;
+        setTimeout(() => { location.href = 'allocation.html'; }, 400);
+      });
+    }
+  </script>
+</body>
+</html>

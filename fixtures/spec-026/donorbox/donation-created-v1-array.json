@@ -1,0 +1,11 @@
+[
+  {
+    "id": 9010,
+    "action": "new",
+    "amount": "25.0",
+    "currency": "USD",
+    "stripe_charge_id": "ch_fixture_v1_created_ignored",
+    "campaign": { "id": 3, "name": "v1 created campaign" },
+    "join_mailing_list": false
+  }
+]

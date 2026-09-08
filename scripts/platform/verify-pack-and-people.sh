@@ -17,6 +17,12 @@ if [[ -z "$U" || -z "$K" ]]; then
   echo "ERROR: set PLATFORM_SUPABASE_URL and PLATFORM_SUPABASE_SECRET_KEY" >&2
   exit 1
 fi
+for required in PRIMARY_MASTER_ADMIN_EMAIL SECOND_MASTER_ADMIN_EMAIL TENANT_DIRECTOR_EMAIL; do
+  if [[ -z "${!required:-}" ]]; then
+    echo "ERROR: set $required from the restricted operator registry" >&2
+    exit 1
+  fi
+done
 U="${U%/}"
 
 hdr=(-H "apikey: $K" -H "Authorization: Bearer $K")
@@ -51,9 +57,9 @@ req = urllib.request.Request(url + "/auth/v1/admin/users?page=1&per_page=50", he
 with urllib.request.urlopen(req, timeout=60) as r:
     users = json.loads(r.read().decode()).get("users") or []
 want = {
-    "scrimshawlife@gmail.com": "primary master_admin",
-    "qi@enkeyai.com": "second master_admin",
-    "ed@hackerdojo.org": "HD director only",
+    os.environ["PRIMARY_MASTER_ADMIN_EMAIL"].lower(): "primary master_admin",
+    os.environ["SECOND_MASTER_ADMIN_EMAIL"].lower(): "second master_admin",
+    os.environ["TENANT_DIRECTOR_EMAIL"].lower(): "reference-tenant director only",
 }
 for email, role in want.items():
     u = next((x for x in users if (x.get("email") or "").lower() == email), None)

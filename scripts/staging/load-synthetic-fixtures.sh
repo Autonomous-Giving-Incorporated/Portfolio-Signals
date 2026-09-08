@@ -22,4 +22,5 @@ if [[ -z "${DB_URL:-}" ]]; then
 fi
 
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/six_roles.sql
-echo "Synthetic role fixtures loaded."
+echo "Synthetic Hacker Dojo role fixtures loaded."
+echo "Civic Forge universe is separate: SYNTHETIC_SEED_CONFIRM=1 DB_URL=\"\$DB_URL\" npm run seed:synthetic"

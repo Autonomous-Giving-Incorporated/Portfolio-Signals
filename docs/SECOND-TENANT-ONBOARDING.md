@@ -64,7 +64,7 @@ Notes:
 
 - Same confidence / evidence / L3 **shape** as HD; new tenant ids.  
 - Do **not** hard-code Hacker Dojo money invariants in product code — only fixtures/tests/docs.  
-- See IR [docs/HACKER-DOJO-INTEGRATION.md](https://github.com/scrimshawlife-ctrl/Impact-Relay/blob/main/docs/HACKER-DOJO-INTEGRATION.md).
+- See IR [docs/HACKER-DOJO-INTEGRATION.md](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/blob/main/docs/HACKER-DOJO-INTEGRATION.md).
 
 ### 4. Isolation verify
 
@@ -104,5 +104,5 @@ Examples: `org_second_makerspace`, `org_lifecycle_dry_run` (if activated in B). 
 - [OPERATOR-ACCESS-ONBOARDING.md](OPERATOR-ACCESS-ONBOARDING.md)  
 - [CLIENT-CONFIGURATION.md](CLIENT-CONFIGURATION.md)  
 - [AGI-SUITE-ARCHITECTURE.md](AGI-SUITE-ARCHITECTURE.md)  
-- IR: [HACKER-DOJO-INTEGRATION.md](https://github.com/scrimshawlife-ctrl/Impact-Relay/blob/main/docs/HACKER-DOJO-INTEGRATION.md)  
-- IR: [docs/architecture/AGI-SUITE.md](https://github.com/scrimshawlife-ctrl/Impact-Relay/blob/main/docs/architecture/AGI-SUITE.md)  
+- IR: [HACKER-DOJO-INTEGRATION.md](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/blob/main/docs/HACKER-DOJO-INTEGRATION.md)  
+- IR: [docs/architecture/AGI-SUITE.md](https://github.com/Autonomous-Giving-Incorporated/Impact-Relay/blob/main/docs/architecture/AGI-SUITE.md)  

@@ -1,0 +1,10 @@
+{
+  "data": {
+    "id": "fixture-gb-missing-event",
+    "campaign_code": "ABCDEF",
+    "donated": 10,
+    "currency": "USD",
+    "email": "alex@example.org",
+    "communication_opt_in": true
+  }
+}

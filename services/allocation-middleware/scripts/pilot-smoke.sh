@@ -2,6 +2,15 @@
 set -euo pipefail
 BASE_URL="${BASE_URL:-http://127.0.0.1:8787}"
 BASE_URL="${BASE_URL%/}"
+AUTH_ARGS=()
+if [[ -n "${ACCESS_TOKEN:-}" ]]; then
+  AUTH_ARGS=(-H "authorization: Bearer ${ACCESS_TOKEN}")
+elif [[ -n "${OPERATOR_TOKEN:-}" ]]; then
+  AUTH_ARGS=(-H "x-operator-token: ${OPERATOR_TOKEN}")
+else
+  echo "ACCESS_TOKEN or OPERATOR_TOKEN is required for protected smoke checks"
+  exit 1
+fi
 echo "Smoke against $BASE_URL"
 code=$(curl -sS -o /tmp/am-healthz.json -w "%{http_code}" "$BASE_URL/healthz")
 test "$code" = "200" || { echo "healthz failed: $code"; cat /tmp/am-healthz.json; exit 1; }
@@ -9,10 +18,10 @@ echo "OK healthz"
 code=$(curl -sS -o /tmp/am-readyz.json -w "%{http_code}" "$BASE_URL/readyz")
 test "$code" = "200" || { echo "readyz failed: $code"; cat /tmp/am-readyz.json; exit 1; }
 echo "OK readyz"
-code=$(curl -sS -o /tmp/am-available.json -w "%{http_code}" "$BASE_URL/available")
+code=$(curl -sS -o /tmp/am-available.json -w "%{http_code}" "${AUTH_ARGS[@]}" "$BASE_URL/available")
 test "$code" = "200" || { echo "available failed: $code"; exit 1; }
 echo "OK available"
-code=$(curl -sS -o /tmp/am-setup.json -w "%{http_code}" "$BASE_URL/setup")
+code=$(curl -sS -o /tmp/am-setup.json -w "%{http_code}" "${AUTH_ARGS[@]}" "$BASE_URL/setup")
 test "$code" = "200" || { echo "setup failed: $code"; exit 1; }
 echo "OK setup"
 code=$(curl -sS -o /dev/null -w "%{http_code}" "$BASE_URL/setup.html")

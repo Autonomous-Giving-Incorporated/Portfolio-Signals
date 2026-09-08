@@ -6,9 +6,13 @@ Move Hacker Dojo campaign operations from a read-only aggregate dashboard to an 
 
 ## Production workspace URL
 
-https://autogive.app/portfolio-signals/workspace
+https://autogive.app/portfolio-signals/workspace.html
 
-(Also reachable as `workspace.html` depending on rewrite configuration.)
+Also reachable as `/portfolio-signals/workspace`. The suite alias `https://autogive.app/workspace` serves this HTML, but relative scripts 404 there unless the page sets `<base href="/portfolio-signals/">`. `workspaceRedirectUrl()` and `auth-email` canonicalize suite aliases to this asset-backed URL.
+
+Sign-in emails use a one-time `token_hash` query on that URL. `settleAuthFromUrl` calls `verifyOtp` on the recipient browser and does not need a PKCE verifier from the sender. Implicit `#access_token` links still consume. Used or expired tokens show an explicit reuse error, not a cold login.
+
+Privileged roles that authenticate without `mfa_enforced` see an authenticator enroll path. The MFA requirement stays in place. After `supabase.auth.mfa.verify` succeeds, the workspace calls `set_mfa_enforced()` so the existing profile flag is true, then opens. Enrolling a TOTP factor without verification does not open the workspace.
 
 Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Legacy HD staging `ecxkhihlbrcwpavfoaoq` is **frozen** for new tenancy.
 
@@ -18,7 +22,7 @@ Identity and data plane use **platform** Supabase ref `utdioxwiskzatwoejgiu`. Le
 | --- | --- |
 | Migrations on platform | Applied |
 | Vercel `PLATFORM_SUPABASE_URL` + `ANON_KEY` | Set; `runtime-config.js` generated with platform host |
-| Primary master_admin | `scrimshawlife@gmail.com` bootstrapped |
+| Primary master_admin | identity held in restricted operator registry |
 | Reference tenant HD director membership | Active |
 | Magic-link login (implicit hash + session persist) | **Verified** on production |
 | Built-in Auth email rate limit | Still low without custom SMTP — use admin `generate_link` or configure SMTP |
@@ -78,6 +82,7 @@ Placement details: [DATA-PLACEMENT.md](DATA-PLACEMENT.md). Platform bootstrap: [
 | Board viewer | Read-only aggregate and board-approved records |
 | Data steward | Imports, deduplication, consent, suppression, provenance |
 | Auditor | Read-only audit log and control verification |
+| Infrastructure delegate | Tenant-approved infrastructure scopes only; no campaign or donor authority |
 
 Roles are assigned per A.G.I. client through `client_memberships`. The profile role is retained only for compatibility and MFA policy evaluation. Workspace authorization and navigation use the selected client's live membership role.
 
@@ -86,9 +91,13 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - `get_workspace_context()` returns the active profile, master-admin flag, and only the client shells the caller may enumerate.
 - The browser stores only the selected public client identifier. Every operational query also filters by that `client_id`; database RLS remains authoritative.
 - Client directors manage existing authenticated profiles through `set_client_membership()`. Changes are audited and cannot remove the final active director.
+- Client directors invite, resend sign-ins for, and revoke scoped infrastructure delegates through the dedicated audited workflow. Unscoped delegates cannot be created through `set_client_membership()`.
 - Master administrators can enumerate and provision client shells, but platform authority does not imply membership or access to client-private operational records.
+- A platform administrator with no selected client sees **platform chrome only** and lands on the Platform admin provision screen. The workspace does not select the first enumerable tenant (including the Hacker Dojo reference tenant) as a silent default. `provision_client` defaults `p_initial_director` to the signed-in profile; an email or UUID must already exist.
+- Tenant name, mark, heading, and campaign dollar amounts appear only after a real selected client exists, and only from that client's `display_name` or published configuration. Missing campaign numbers hide the context strip instead of inventing figures.
+- The identity line uses **platform administration** when `is_master_admin` is true and the selected client has no membership role. It never falls through to `member` for a platform administrator.
 - Master-admin and privileged client mutations require an active MFA-enforced profile.
-- **Primary `master_admin`:** `scrimshawlife@gmail.com` (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
+- **Primary `master_admin`:** resolve from the restricted operator registry (bootstrap via `scripts/platform/bootstrap-master-admin.sql` after Auth invite; **operator applies** after migrations).
 - **Second admin (deferred):** Add Qi Diaz via `platform_administrators` insert with rationale ≥ 12 chars.
 
 ## Director workflow
@@ -115,13 +124,15 @@ Roles are assigned per A.G.I. client through `client_memberships`. The profile r
 - Board/advisor status cannot be granted automatically as a donor benefit.
 - Browser config is **anon-only**; never place service-role keys in `runtime-config.js`, Vercel public env, or git.
 
+Role-aware templates, delegate scopes, mail transport, revocation, and acceptance tests are specified in [AUTH-ROLES-AND-EMAILS.md](AUTH-ROLES-AND-EMAILS.md).
+
 ## Onboarding pack (document phase)
 
 Workspace nav **Onboarding pack** (director of selected client, or master_admin): private multi-file upload to `campaign-private`, heuristic type suggest, human confirm onto org-proof checklist, pack `ready` when required slots confirmed. CRM xlsx/csv are **parked** (not import).
 
 - Runbook: [CLIENT-ONBOARDING-PACK.md](CLIENT-ONBOARDING-PACK.md)  
 - Evidence: [CURRENT-STATE.md](CURRENT-STATE.md) (`client_onboarding_pack`)  
-- Code on main (#104); platform migration + Edge functions must be applied before production use.  
+- Platform migration + Edge Functions are OBSERVED; MFA workspace dry-run remains in [#18](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/issues/18).
 - Pack `ready` does **not** authorize CRM import, outreach, or client activation.
 
 ## Import quarantine
@@ -175,3 +186,5 @@ The 517-page PDF is evidence and recovery material, not the canonical import for
 - Lists authorized.
 - Donation tracking reconciled.
 - Stewardship owners assigned.
+
+Provenance: Notion Sprint 001 Hub + Loop 805 Slice 22 + Hash: 645560ecfc722b6d040d9c21562681bbf579ba23

@@ -10,7 +10,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Prefer GITHUB_REPOSITORY (Actions) so renames (Fund-Intel → Portofolio-Signals) do not break CI.
-REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "scrimshawlife-ctrl/Portofolio-Signals")
+REPOSITORY = os.environ.get(
+    "GITHUB_REPOSITORY", "Autonomous-Giving-Incorporated/Portfolio-Signals"
+)
 PASS_GATES = (
     "publicContract",
     "securityContract",
@@ -77,3 +79,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# Provenance: Notion Sprint 001 Hub + Loop 805 Slice AGI-AUTH-DELEGATES + Hash: 8e2d66e30c2a77967a3c0aa064c24422eedfac59

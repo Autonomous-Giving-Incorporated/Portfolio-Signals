@@ -67,8 +67,18 @@ export function loadConfig(env = process.env) {
 }
 
 export function buildEveryOrgWebhookUrl(publicBaseUrl, webhookToken) {
+  return buildConnectorWebhookUrl(publicBaseUrl, 'every.org', { webhookToken });
+}
+
+/**
+ * Operator-owned origin only. Empty publicBaseUrl returns empty — never invent a host.
+ */
+export function buildConnectorWebhookUrl(publicBaseUrl, source, { webhookToken } = {}) {
   const base = (publicBaseUrl || '').replace(/\/$/, '');
   if (!base) return '';
+  if (source === 'givebutter') return `${base}/webhooks/givebutter`;
+  if (source === 'donorbox') return `${base}/webhooks/donorbox`;
+  if (source === 'csv') return '';
   const path = '/webhooks/every-org';
   if (!webhookToken) return `${base}${path}`;
   return `${base}${path}?token=${encodeURIComponent(webhookToken)}`;

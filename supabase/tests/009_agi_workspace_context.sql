@@ -8,6 +8,7 @@ values ('org_context_other', '00000000-0000-0000-0000-000000000102', 'director')
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+select set_config('request.jwt.claim.aal', 'aal2', true);
 select set_config('request.jwt.claim.exp', (extract(epoch from now())::bigint + 3600)::text, true);
 
 do $$

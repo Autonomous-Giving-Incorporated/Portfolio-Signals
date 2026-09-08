@@ -1,0 +1,46 @@
+[
+  {
+    "allocation_id": "aln_syn_001",
+    "tenant_id": "org_synthetic_civic_forge",
+    "campaign_id": "cmp_synthetic_builder_fund_2026",
+    "source_type": "gift_pool",
+    "fund_id": "fund_001",
+    "amount": 72000,
+    "status": "approved",
+    "decision_source": "human_finance",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "allocation_id": "aln_syn_002",
+    "tenant_id": "org_synthetic_civic_forge",
+    "campaign_id": "cmp_synthetic_builder_fund_2026",
+    "source_type": "gift_pool",
+    "fund_id": "fund_002",
+    "amount": 42000,
+    "status": "approved",
+    "decision_source": "human_finance",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "allocation_id": "aln_syn_003",
+    "tenant_id": "org_synthetic_civic_forge",
+    "campaign_id": "cmp_synthetic_builder_fund_2026",
+    "source_type": "gift_pool",
+    "fund_id": "fund_003",
+    "amount": 50200,
+    "status": "approved",
+    "decision_source": "human_finance",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "allocation_id": "aln_syn_004",
+    "tenant_id": "org_synthetic_civic_forge",
+    "campaign_id": "cmp_synthetic_builder_fund_2026",
+    "source_type": "gift_pool",
+    "fund_id": "fund_004",
+    "amount": 10000,
+    "status": "proposed",
+    "decision_source": "agent_proposal",
+    "provenance": "SYNTHETIC"
+  }
+]
