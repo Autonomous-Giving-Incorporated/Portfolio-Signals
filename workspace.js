@@ -1,15 +1,29 @@
 import {
   createWorkspaceClient,
   clearWorkspaceSessionCache,
+  getRuntimeConfig,
   requireWorkspaceSession,
   roleCan,
   selectWorkspaceClient,
   workspaceRedirectUrl,
   getRecoveredSession
 } from './workspace/session.js';
+import {
+  isPrivilegedMfaRequiredError,
+  settleAuthFromUrl as consumeAuthFromUrl
+} from './workspace/auth-consume.js';
+import {
+  completePrivilegedMfaVerify,
+  pickTotpChallengeFactor
+} from './workspace/mfa.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 import { mountBrandConfiguration } from './workspace/configuration.js';
+import {
+  resolveInitialDirectorId,
+  resolveWorkspaceChrome,
+  workspaceIdentityRoleLabel
+} from './workspace/tenant-chrome.js';
 
 const root = document.getElementById('workspaceRoot');
 const gate = document.getElementById('authGate');
@@ -22,7 +36,8 @@ const PRIVILEGED_ROLES = new Set([
   'campaign_lead',
   'development',
   'data_steward',
-  'auditor'
+  'auditor',
+  'infrastructure_delegate'
 ]);
 
 let activeClient = null;
@@ -33,6 +48,9 @@ let enabledModules = { sponsors: false, grants: false };
 let renderGeneration = 0;
 let lastSessionUserId = null;
 let renderInFlight = null;
+let loginRequestInFlight = false;
+let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
+let activeSessionEmail = null;
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -69,93 +87,89 @@ function withTimeout(promise, ms, label) {
   });
 }
 
-/**
- * Consume auth redirect payloads before session reads.
- * Supabase email/admin magic links redirect as:
- *   /workspace#access_token=…&refresh_token=…&type=magiclink
- */
 async function settleAuthFromUrl(client) {
-  const url = new URL(window.location.href);
-  const hashParams = new URLSearchParams(
-    url.hash.startsWith('#') ? url.hash.slice(1) : url.hash
-  );
+  return consumeAuthFromUrl(client, {
+    href: window.location.href,
+    onMessage: showMessage,
+    onCleanUrl: cleanAuthUrl
+  });
+}
 
-  const hashError = hashParams.get('error') || hashParams.get('error_code');
-  if (hashError) {
-    const detail =
-      hashParams.get('error_description') ||
-      hashParams.get('error_code') ||
-      hashParams.get('error') ||
-      'sign-in link invalid';
-    showMessage(
-      `Sign-in link failed: ${decodeURIComponent(detail.replace(/\+/g, ' '))}. Request a new link.`
-    );
-    cleanAuthUrl();
-    return null;
-  }
+let mfaEnrollStarted = false;
+let mfaFactorId = null;
 
-  const code = url.searchParams.get('code');
-  const tokenHash = url.searchParams.get('token_hash');
-  const otpType = url.searchParams.get('type') || hashParams.get('type');
-  const accessToken = hashParams.get('access_token');
-  const refreshToken = hashParams.get('refresh_token');
+function hideSendLinkForm() {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) loginForm.hidden = true;
+}
 
-  const hasAuthPayload = Boolean(code || tokenHash || accessToken || refreshToken);
-  if (!hasAuthPayload) {
-    return getRecoveredSession(client);
-  }
+async function showMfaEnrollPath() {
+  const enroll = document.getElementById('mfaEnroll');
+  const mfaMessage = document.getElementById('mfaMessage');
+  hideSendLinkForm();
+  if (gate) gate.hidden = false;
+  if (workspace) workspace.hidden = true;
+  if (enroll) enroll.hidden = false;
+  showMessage('Enforced MFA is required for this privileged account.');
 
-  showMessage('Completing secure sign-in…');
+  if (mfaEnrollStarted || !activeClient?.auth?.mfa) return;
+  mfaEnrollStarted = true;
 
   try {
-    if (code) {
-      const { data, error } = await withTimeout(
-        client.auth.exchangeCodeForSession(code),
-        12000,
-        'Code exchange'
-      );
-      if (error) throw error;
-      cleanAuthUrl();
-      showMessage('');
-      return data.session;
+    const { data: listed, error: listError } = await withTimeout(
+      activeClient.auth.mfa.listFactors(),
+      12000,
+      'MFA factor list'
+    );
+    if (listError) throw listError;
+    const existing = pickTotpChallengeFactor(listed);
+    if (existing.factorId && existing.alreadyVerified) {
+      mfaFactorId = existing.factorId;
+      const form = document.getElementById('mfaVerifyForm');
+      if (form) form.hidden = false;
+      if (mfaMessage) {
+        mfaMessage.textContent =
+          'Enter a 6-digit authenticator code. A verified factor satisfies enforced MFA and opens the workspace.';
+      }
+      return;
     }
 
-    if (tokenHash && otpType) {
-      const { data, error } = await withTimeout(
-        client.auth.verifyOtp({ token_hash: tokenHash, type: otpType }),
-        12000,
-        'OTP verify'
-      );
-      if (error) throw error;
-      cleanAuthUrl();
-      showMessage('');
-      return data.session;
+    if (existing.factorId && !existing.alreadyVerified) {
+      mfaFactorId = existing.factorId;
+      if (mfaMessage) {
+        mfaMessage.textContent =
+          'Finish verification with a 6-digit authenticator code. Enrolling alone does not open the workspace.';
+      }
+      return;
     }
 
-    if (accessToken && refreshToken) {
-      // Strip hash BEFORE setSession so a re-entry cannot re-process tokens,
-      // and so detect/init never re-reads the same fragment.
-      cleanAuthUrl();
-      const { data, error } = await withTimeout(
-        client.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        }),
-        12000,
-        'Session establish'
-      );
-      if (error) throw error;
-      showMessage('');
-      return data.session;
+    const { data: enrolled, error: enrollError } = await withTimeout(
+      activeClient.auth.mfa.enroll({
+        factorType: 'totp',
+        friendlyName: 'Portfolio Signals'
+      }),
+      12000,
+      'MFA enroll'
+    );
+    if (enrollError) throw enrollError;
+    mfaFactorId = enrolled?.id || null;
+    const qr = document.getElementById('mfaQr');
+    const secret = document.getElementById('mfaSecret');
+    if (qr && enrolled?.totp?.qr_code) {
+      qr.src = enrolled.totp.qr_code;
+      qr.hidden = false;
     }
-
-    showMessage('Sign-in link incomplete. Request a new link.');
-    cleanAuthUrl();
-    return null;
+    if (secret && enrolled?.totp?.secret) {
+      secret.textContent = `If you cannot scan the code, enter this secret: ${enrolled.totp.secret}`;
+    }
+    if (mfaMessage) {
+      mfaMessage.textContent =
+        'Scan the code, then enter a 6-digit authenticator code. Enrolling without verification does not open the workspace.';
+    }
   } catch (error) {
-    showMessage(`Sign-in link failed: ${error.message}. Request a new link.`);
-    cleanAuthUrl();
-    return null;
+    if (mfaMessage) {
+      mfaMessage.textContent = `Unable to start MFA enrollment: ${error.message}`;
+    }
   }
 }
 
@@ -173,25 +187,64 @@ if (!document.getElementById('loginForm')) {
 if (activeClient) {
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (loginRequestInFlight) return;
+
+    const form = event.currentTarget;
+    const submitButton = form.querySelector('button[type="submit"]');
     const email = document.getElementById('email').value.trim();
     const redirectTo = workspaceRedirectUrl();
-    const { error } = await activeClient.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectTo,
-        shouldCreateUser: false
-      }
-    });
-    showMessage(
-      error
-        ? error.message
-        : `Check your email for the secure sign-in link. Return to this exact page (${redirectTo}).`
-    );
+    loginRequestInFlight = true;
+    submitButton.disabled = true;
+    submitButton.setAttribute('aria-disabled', 'true');
+    showMessage('Requesting a secure sign-in link…');
+
+    try {
+      const { error } = await activeClient.functions.invoke('auth-email', {
+        body: { action: 'self_sign_in', email, redirect_to: redirectTo }
+      });
+      showMessage(
+        error
+          ? 'Unable to request a sign-in link right now. Try again shortly.'
+          : `If this email is eligible, a secure sign-in link is on its way. Return to this exact page (${redirectTo}).`
+      );
+    } finally {
+      loginRequestInFlight = false;
+      submitButton.disabled = false;
+      submitButton.removeAttribute('aria-disabled');
+    }
   });
 
   document.getElementById('signOut').addEventListener('click', async () => {
     clearWorkspaceSessionCache();
     await activeClient.auth.signOut();
+  });
+
+  document.getElementById('mfaVerifyForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const mfaMessage = document.getElementById('mfaMessage');
+    const code = document.getElementById('mfaCode')?.value.trim();
+    if (!mfaFactorId || !code || !activeClient?.auth?.mfa) return;
+    try {
+      const result = await completePrivilegedMfaVerify(activeClient, {
+        factorId: mfaFactorId,
+        code,
+        withTimeout
+      });
+      if (!result.ok) {
+        throw result.error || new Error(result.reason || 'mfa_verify_failed');
+      }
+      clearWorkspaceSessionCache();
+      lastSessionUserId = null;
+      const nextSession = result.session?.access_token
+        ? result.session
+        : (await getRecoveredSession(activeClient));
+      if (mfaMessage) {
+        mfaMessage.textContent = 'Authenticator verified. Opening the workspace…';
+      }
+      await scheduleRender(nextSession, { allowNull: false });
+    } catch (error) {
+      if (mfaMessage) mfaMessage.textContent = `Authenticator verification failed: ${error.message}`;
+    }
   });
 
   // CRITICAL: never await auth APIs inside onAuthStateChange — supabase-js
@@ -229,7 +282,12 @@ async function renderSession(session, { allowNull = false } = {}) {
     lastSessionUserId = null;
     gate.hidden = false;
     workspace.hidden = true;
+    const enroll = document.getElementById('mfaEnroll');
+    if (enroll) enroll.hidden = true;
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) loginForm.hidden = false;
     activeProfile = null;
+    activeSessionEmail = null;
     clearWorkspaceSessionCache();
     return;
   }
@@ -245,10 +303,23 @@ async function renderSession(session, { allowNull = false } = {}) {
   let workspaceSession;
   try {
     showMessage('Loading workspace…');
+    if (pendingDelegateInvitationId) {
+      const { error: acceptanceError } = await activeClient.rpc('accept_delegate_invitation', {
+        p_invitation_id: pendingDelegateInvitationId
+      });
+      if (acceptanceError) throw acceptanceError;
+      pendingDelegateInvitationId = null;
+      cleanAuthUrl();
+      showMessage('Delegate invitation accepted. Loading assigned access.');
+    }
     // Pass the known session; context fetch uses raw JWT (no supabase-js lock).
     workspaceSession = await requireWorkspaceSession(session);
   } catch (error) {
     if (generation !== renderGeneration) return;
+    if (isPrivilegedMfaRequiredError(error)) {
+      await showMfaEnrollPath();
+      return;
+    }
     gate.hidden = false;
     workspace.hidden = true;
     showMessage(`Access blocked: ${error.message}`);
@@ -258,14 +329,22 @@ async function renderSession(session, { allowNull = false } = {}) {
 
   const { profile, clients, selectedClient: currentClient, isMasterAdmin: masterAdmin } = workspaceSession;
   const mfaRequired = PRIVILEGED_ROLES.has(profile.role) || masterAdmin;
-  if (mfaRequired && !profile.mfa_enforced) throw new Error('Enforced MFA is required.');
+  if (mfaRequired && !profile.mfa_enforced) {
+    await showMfaEnrollPath();
+    return;
+  }
   activeProfile = profile;
   selectedClient = currentClient;
   isMasterAdmin = masterAdmin;
+  activeSessionEmail = session.user?.email || null;
+  let publishedConfig = null;
   if (currentClient?.id) {
-    const { data: publishedConfig, error: configError } = await activeClient.from('client_config_versions').select('config').eq('client_id', currentClient.id).eq('state', 'published').maybeSingle();
+    const { data: publishedVersion, error: configError } = await activeClient.from('client_config_versions').select('config').eq('client_id', currentClient.id).eq('state', 'published').maybeSingle();
     if (configError) throw configError;
-    enabledModules = { sponsors: publishedConfig?.config?.modules?.sponsors !== false, grants: publishedConfig?.config?.modules?.grants !== false };
+    publishedConfig = publishedVersion?.config || null;
+    enabledModules = { sponsors: publishedConfig?.modules?.sponsors !== false, grants: publishedConfig?.modules?.grants !== false };
+  } else {
+    enabledModules = { sponsors: false, grants: false };
   }
   if (generation !== renderGeneration) return;
 
@@ -273,50 +352,110 @@ async function renderSession(session, { allowNull = false } = {}) {
   workspace.hidden = false;
   lastSessionUserId = userId;
   showMessage('');
-  const roleLabel = profile.role || selectedClient?.role || (masterAdmin ? 'platform administration' : 'member');
+  const roleLabel = workspaceIdentityRoleLabel({
+    isMasterAdmin: masterAdmin,
+    selectedClient: currentClient,
+    profile
+  });
   document.getElementById('identityLine').textContent =
     `${profile.display_name || session.user.email} · ${roleLabel}`;
-  updateAuthenticatedTenantChrome(currentClient);
+  updateAuthenticatedTenantChrome(currentClient, publishedConfig);
   renderClientSelector(clients, currentClient);
   renderNavigation(profile.role || selectedClient?.role);
   await loadDashboard(profile.role || selectedClient?.role);
 }
 
-/** Tenant label/chip only after sign-in (never on public pages or auth gate). */
-function updateAuthenticatedTenantChrome(client) {
-  const name = client?.display_name || 'No client selected';
-  document.querySelectorAll('#workspace [data-tenant-name]').forEach((node) => {
-    node.textContent = name;
-  });
+function publishedTenantMarkUrl(publishedConfig) {
+  const path = publishedConfig?.assets?.icon_path || publishedConfig?.assets?.logo_path;
+  const { supabaseUrl } = getRuntimeConfig();
+  if (!path || !supabaseUrl) return '';
+  return `${supabaseUrl}/storage/v1/object/public/agi-public-assets/${encodeURIComponent(path).replaceAll('%2F', '/')}`;
+}
+
+/** Apply product chrome, or tenant chrome after a real client is selected. */
+function updateAuthenticatedTenantChrome(client, publishedConfig) {
+  const chrome = resolveWorkspaceChrome({ client, publishedConfig });
+  const markSrc = publishedTenantMarkUrl(publishedConfig) || chrome.tenantMarkSrc;
+  const eyebrow = document.querySelector('#workspace [data-workspace-eyebrow]');
+  const heading = document.querySelector('#workspace [data-workspace-heading]');
+  if (eyebrow) eyebrow.textContent = chrome.eyebrow;
+  if (heading) heading.textContent = chrome.heading;
+  document.title = chrome.documentTitle;
+
   document.querySelectorAll('#workspace .tenant-chip').forEach((node) => {
+    if (!chrome.showTenantChip) {
+      node.hidden = true;
+      node.setAttribute('aria-hidden', 'true');
+      node.removeAttribute('aria-label');
+      const mark = node.querySelector('.tenant-mark');
+      if (mark) {
+        mark.removeAttribute('src');
+        mark.alt = '';
+      }
+      node.querySelectorAll('[data-tenant-name]').forEach((nameNode) => {
+        nameNode.textContent = '';
+      });
+      return;
+    }
     node.hidden = false;
     node.removeAttribute('aria-hidden');
-    node.setAttribute('aria-label', `Tenant: ${name}`);
+    node.setAttribute('aria-label', `Tenant: ${chrome.tenantName}`);
+    const mark = node.querySelector('.tenant-mark');
+    if (mark) {
+      if (markSrc) mark.src = markSrc;
+      else mark.removeAttribute('src');
+      mark.alt = chrome.tenantName;
+    }
+    node.querySelectorAll('[data-tenant-name]').forEach((nameNode) => {
+      nameNode.textContent = chrome.tenantName;
+    });
   });
-  document.title = client?.display_name
-    ? `AGI Portfolio Signals · ${client.display_name}`
-    : 'AGI Portfolio Signals · Workspace';
+
+  const strip = document.querySelector('#workspace .workspace-context-strip');
+  if (!strip) return;
+  strip.replaceChildren();
+  if (!chrome.contextItems.length) {
+    strip.hidden = true;
+    return;
+  }
+  for (const item of chrome.contextItems) {
+    const span = document.createElement('span');
+    const amount = document.createElement('strong');
+    amount.textContent = item.amount;
+    span.append(amount, ` ${item.label}`);
+    strip.append(span);
+  }
+  strip.hidden = false;
 }
 
 function renderClientSelector(clients, currentClient) {
   const select = document.getElementById('clientSelector');
-  select.innerHTML = clients.map(client => `
+  const options = clients.map(client => `
     <option value="${escapeHtml(client.id)}" ${client.id === currentClient?.id ? 'selected' : ''}>
       ${escapeHtml(client.display_name)}${client.role ? ` · ${escapeHtml(client.role)}` : ' · platform view'}
     </option>`).join('');
-  select.disabled = clients.length < 2;
+  select.innerHTML = currentClient?.id
+    ? options
+    : `<option value="" selected>Select a client</option>${options}`;
+  select.disabled = clients.length === 0 || (Boolean(currentClient?.id) && clients.length < 2);
   select.onchange = () => {
+    if (!select.value) return;
     selectWorkspaceClient(select.value);
     location.reload();
   };
   document.getElementById('clientContext').textContent = currentClient
     ? `${currentClient.display_name} · ${currentClient.state}`
-    : 'No client membership assigned';
+    : isMasterAdmin
+      ? 'Platform administration · no client selected'
+      : 'No client membership assigned';
 }
 
 function renderNavigation(role) {
   const items = [];
   if (isMasterAdmin) items.push({ id: 'platform_admin', label: 'Platform admin' });
+  if (roleCan(role, 'infrastructure_access')) {
+    items.push({ id: 'infrastructure_access', label: 'Infrastructure access' });
+  }
   if (roleCan(role, 'client_admin')) items.push({ id: 'client_admin', label: 'Client admin' });
   if (roleCan(role, 'brand_configuration')) items.push({ id: 'brand_configuration', label: 'Brand & content' });
   if (roleCan(role, 'onboarding_pack') || isMasterAdmin) {
@@ -364,12 +503,18 @@ function renderNavigation(role) {
 }
 
 async function loadDashboard(role) {
+  if (role === 'infrastructure_delegate') {
+    return mountInfrastructureAccess();
+  }
   if (!selectedClient?.role) {
     document.getElementById('decisionCount').textContent = '—';
     document.getElementById('opportunityCount').textContent = '—';
     document.getElementById('authorizedCount').textContent = '—';
     document.getElementById('exceptionCount').textContent = '—';
-    content.innerHTML = `<h2>Platform administration</h2><p>Select Platform admin to provision clients. Platform authority does not grant access to client-private campaign records.</p>`;
+    if (isMasterAdmin) {
+      return mountPlatformAdmin();
+    }
+    content.innerHTML = `<h2>Platform administration</h2><p>No client membership is assigned. Platform authority does not grant access to client-private campaign records.</p>`;
     return;
   }
   const canReadConstituents = [
@@ -430,6 +575,8 @@ async function openSection(section) {
 
   if (section === 'client_admin') {
     await mountClientAdmin();
+  } else if (section === 'infrastructure_access') {
+    await mountInfrastructureAccess();
   } else if (section === 'platform_admin') {
     await mountPlatformAdmin();
   } else if (section === 'brand_configuration') {
@@ -538,19 +685,55 @@ async function mountClientAdmin() {
   if (activeProfile.role !== 'director' || !selectedClient?.role) {
     throw new Error('Client director access required.');
   }
-  const { data, error } = await activeClient
-    .from('client_memberships')
-    .select('user_id,role,active,membership_version,profiles(display_name)')
-    .eq('client_id', selectedClient.id)
-    .order('role');
-  if (error) throw error;
+  const [memberships, delegations, invitations] = await Promise.all([
+    activeClient.from('client_memberships')
+      .select('user_id,role,active,membership_version,profiles(display_name)')
+      .eq('client_id', selectedClient.id).order('role'),
+    activeClient.from('infrastructure_delegations')
+      .select('user_id,scopes,active,delegation_version')
+      .eq('client_id', selectedClient.id),
+    activeClient.from('client_delegate_invitations')
+      .select('id,email,scopes,state,expires_at,send_count')
+      .eq('client_id', selectedClient.id).eq('state', 'pending')
+  ]);
+  if (memberships.error) throw memberships.error;
+  if (delegations.error) throw delegations.error;
+  if (invitations.error) throw invitations.error;
+  const delegationByUser = new Map(delegations.data.map(item => [item.user_id, item]));
+  const data = memberships.data;
 
   content.innerHTML = `
     <div class="workspace-toolbar"><div><strong>Client administration</strong><span>${selectedClient.display_name}</span></div></div>
     <div class="table-wrap"><table class="workspace-table">
-      <thead><tr><th>Member</th><th>Role</th><th>State</th><th>Version</th></tr></thead>
-      <tbody>${data.map(member => `<tr><td>${escapeHtml(member.profiles?.display_name || member.user_id)}<small>${escapeHtml(member.user_id)}</small></td><td>${escapeHtml(member.role)}</td><td>${member.active ? 'active' : 'inactive'}</td><td>${member.membership_version}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Member</th><th>Role / scope</th><th>State</th><th>Actions</th></tr></thead>
+      <tbody>${data.map(member => {
+        const delegation = delegationByUser.get(member.user_id);
+        const scope = delegation?.scopes?.join(', ') || 'none';
+        const actions = member.role === 'infrastructure_delegate' && member.active
+          ? `<button class="button secondary" type="button" data-send-delegate="${escapeHtml(member.user_id)}">Send sign-in</button>
+             <button class="button secondary" type="button" data-revoke-delegate="${escapeHtml(member.user_id)}">Revoke</button>`
+          : 'none';
+        return `<tr><td>${escapeHtml(member.profiles?.display_name || member.user_id)}<small>${escapeHtml(member.user_id)}</small></td><td>${escapeHtml(member.role)}<small>${escapeHtml(scope)}</small></td><td>${member.active ? 'active' : 'inactive'}</td><td>${actions}</td></tr>`;
+      }).join('')}</tbody>
     </table></div>
+    <h3>Invite infrastructure delegate</h3>
+    <form id="delegateInviteForm" class="control-grid">
+      <label>Email address<input name="email" type="email" autocomplete="off" required></label>
+      <fieldset><legend>Approved infrastructure scope</legend>
+        ${[
+          ['workspace_access', 'Workspace access'],
+          ['identity_support', 'Identity support'],
+          ['integration_operations', 'Integration operations'],
+          ['delivery_observability', 'Delivery observability'],
+          ['configuration_support', 'Configuration support']
+        ].map(([value, label]) => `<label><input name="scopes" type="checkbox" value="${value}" ${value === 'workspace_access' ? 'checked' : ''}> ${label}</label>`).join('')}
+      </fieldset>
+      <label>Invitation rationale<input name="rationale" required minlength="12" placeholder="Why this delegate needs access"></label>
+      <button class="button" type="submit">Invite delegate</button>
+    </form>
+    ${invitations.data.length ? `<h4>Pending delegate invitations</h4><ul>${invitations.data.map(item => `<li>${escapeHtml(item.email)} &middot; ${escapeHtml(item.scopes.join(', '))} &middot; expires ${escapeHtml(item.expires_at)} <button class="button secondary" type="button" data-revoke-invitation="${escapeHtml(item.id)}">Revoke invitation</button></li>`).join('')}</ul>` : ''}
+    <label>Delegate action rationale<input id="delegateActionRationale" minlength="12" placeholder="Reason for sign-in or revocation"></label>
+    <h3>Manage existing member</h3>
     <form id="membershipForm" class="control-grid">
       <label>User UUID<input name="userId" required pattern="[0-9a-fA-F-]{36}" placeholder="Existing authenticated profile UUID"></label>
       <label>Client role<select name="role">${['director','campaign_lead','development','board_viewer','data_steward','auditor'].map(role => `<option>${role}</option>`).join('')}</select></label>
@@ -558,7 +741,77 @@ async function mountClientAdmin() {
       <label>Rationale<input name="rationale" required minlength="12" placeholder="Reason for membership change"></label>
       <button class="button" type="submit">Save membership</button>
     </form>
-    <p class="note" id="adminMessage">Membership changes are audited. The final active director cannot be removed.</p>`;
+    <p class="note" id="adminMessage">Membership and delegate-email changes are audited. The final active director cannot be removed.</p>`;
+
+  content.querySelector('#delegateInviteForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { error: inviteError } = await activeClient.functions.invoke('auth-email', {
+      body: {
+        action: 'invite_delegate',
+        client_id: selectedClient.id,
+        email: form.get('email').trim(),
+        scopes: form.getAll('scopes').map(String),
+        rationale: form.get('rationale').trim(),
+        redirect_to: workspaceRedirectUrl()
+      }
+    });
+    if (inviteError) {
+      content.querySelector('#adminMessage').textContent = inviteError.message;
+      return;
+    }
+    await mountClientAdmin();
+  });
+
+  content.querySelectorAll('[data-send-delegate]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: sendError } = await activeClient.functions.invoke('auth-email', {
+        body: {
+          action: 'resend_delegate_sign_in',
+          client_id: selectedClient.id,
+          user_id: button.dataset.sendDelegate,
+          rationale,
+          redirect_to: workspaceRedirectUrl()
+        }
+      });
+      content.querySelector('#adminMessage').textContent = sendError
+        ? sendError.message
+        : 'Secure delegate sign-in email sent.';
+    });
+  });
+
+  content.querySelectorAll('[data-revoke-delegate]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: revokeError } = await activeClient.rpc('revoke_infrastructure_delegate', {
+        p_client_id: selectedClient.id,
+        p_user_id: button.dataset.revokeDelegate,
+        p_rationale: rationale
+      });
+      if (revokeError) {
+        content.querySelector('#adminMessage').textContent = revokeError.message;
+        return;
+      }
+      clearWorkspaceSessionCache();
+      await mountClientAdmin();
+    });
+  });
+
+  content.querySelectorAll('[data-revoke-invitation]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const rationale = content.querySelector('#delegateActionRationale').value.trim();
+      const { error: revokeError } = await activeClient.rpc('revoke_delegate_invitation', {
+        p_invitation_id: button.dataset.revokeInvitation,
+        p_rationale: rationale
+      });
+      if (revokeError) {
+        content.querySelector('#adminMessage').textContent = revokeError.message;
+        return;
+      }
+      await mountClientAdmin();
+    });
+  });
 
   content.querySelector('#membershipForm').addEventListener('submit', async event => {
     event.preventDefault();
@@ -579,6 +832,20 @@ async function mountClientAdmin() {
   });
 }
 
+async function mountInfrastructureAccess() {
+  if (activeProfile?.role !== 'infrastructure_delegate' || !selectedClient?.id) {
+    throw new Error('Active infrastructure delegate access required.');
+  }
+  const scopes = Array.isArray(selectedClient.delegate_scopes)
+    ? selectedClient.delegate_scopes
+    : [];
+  content.innerHTML = `
+    <div class="workspace-toolbar"><div><strong>Infrastructure delegation</strong><span>${escapeHtml(selectedClient.display_name)}</span></div></div>
+    <p>Your access is limited to infrastructure support scopes assigned by this tenant.</p>
+    <ul>${scopes.map(scope => `<li>${escapeHtml(scope.replaceAll('_', ' '))}</li>`).join('') || '<li>No active scopes</li>'}</ul>
+    <p class="note">This role grants no campaign, donor, outreach, allocation, payment, or publication authority. Contact a tenant director to change or revoke access.</p>`;
+}
+
 async function mountPlatformAdmin() {
   if (!isMasterAdmin) throw new Error('Master administrator access required.');
   const { data, error } = await activeClient
@@ -597,13 +864,12 @@ async function mountPlatformAdmin() {
       <label>Client ID<input name="clientId" required pattern="org_[a-z0-9_]+" placeholder="org_example"></label>
       <label>URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="example"></label>
       <label>Display name<input name="displayName" required></label>
-      <label>Initial director UUID<input name="directorId" required pattern="[0-9a-fA-F-]{36}"></label>
+      <label>Initial director<input name="director" type="text" autocomplete="off" placeholder="Signed-in account, or an existing profile email or UUID"></label>
       <label>Rationale<input name="rationale" required minlength="12"></label>
       <button class="button" type="submit">Provision client</button>
     </form>
     <label>Activation rationale<input id="activationRationale" minlength="12" placeholder="Confirm published config and enabled modules"></label>
-    <p class="note" id="platformMessage">Provisioning creates the client boundary and initial director membership. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>
-    
+    <p class="note" id="platformMessage">Leave the initial director blank to assign your signed-in profile. An email or UUID must already exist as a profile. Provisioning does not invent a user, attach leftover Hacker Dojo membership, or change MFA. Activation requires a published configuration, at least one fundraising module, MFA, and master-administrator authority.</p>
     <hr style="margin: 1.5rem 0; border-color: var(--line);" />
     
     <!-- Tenant Management Section -->
@@ -651,7 +917,6 @@ async function mountPlatformAdmin() {
       .tenant-registry-table .actions button { padding: .3rem .5rem; font-size: .7rem; }
     </style>`;
 
-  // Existing client activation handlers
   content.querySelectorAll('[data-activate-client]').forEach(button => {
     button.addEventListener('click', async () => {
       const rationale = content.querySelector('#activationRationale').value.trim();
@@ -668,25 +933,34 @@ async function mountPlatformAdmin() {
     });
   });
 
-  // Provision client handler
   content.querySelector('#provisionClientForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const { error: provisionError } = await activeClient.rpc('provision_client', {
-      p_client_id: form.get('clientId').trim(),
-      p_slug: form.get('slug').trim(),
-      p_display_name: form.get('displayName').trim(),
-      p_initial_director: form.get('directorId').trim(),
-      p_rationale: form.get('rationale').trim()
-    });
-    if (provisionError) {
-      content.querySelector('#platformMessage').textContent = provisionError.message;
-      return;
+    const platformMessage = content.querySelector('#platformMessage');
+    try {
+      const directorId = await resolveInitialDirectorId({
+        directorInput: form.get('director')?.toString() || '',
+        sessionUserId: lastSessionUserId || activeProfile?.id,
+        sessionEmail: activeSessionEmail,
+        lookupProfile: lookupExistingProfile
+      });
+      const { error: provisionError } = await activeClient.rpc('provision_client', {
+        p_client_id: form.get('clientId').trim(),
+        p_slug: form.get('slug').trim(),
+        p_display_name: form.get('displayName').trim(),
+        p_initial_director: directorId,
+        p_rationale: form.get('rationale').trim()
+      });
+      if (provisionError) {
+        platformMessage.textContent = provisionError.message;
+        return;
+      }
+      clearWorkspaceSessionCache();
+      await mountPlatformAdmin();
+    } catch (error) {
+      platformMessage.textContent = error.message;
     }
-    clearWorkspaceSessionCache();
-    location.reload();
   });
-
   // Load tenant registry
   await loadTenantRegistry();
 
@@ -744,6 +1018,22 @@ async function mountPlatformAdmin() {
       content.querySelector('#verifyTenantBtn').disabled = false;
     }
   });
+}
+
+async function lookupExistingProfile({ id, email } = {}) {
+  if (id) {
+    const { data, error } = await activeClient.from('profiles').select('id').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  if (email) {
+    const normalized = String(email).trim().toLowerCase();
+    if (activeSessionEmail && activeSessionEmail.toLowerCase() === normalized && lastSessionUserId) {
+      return lookupExistingProfile({ id: lastSessionUserId });
+    }
+    return null;
+  }
+  return null;
 }
 
 function setTenantMessage(msg, isError = false) {
@@ -927,3 +1217,5 @@ function renderTenantHealthCheck(health, tenantId) {
 }
 
 void root;
+
+// Provenance: Notion Sprint 001 Hub + Loop 805 Slice 18 + Hash: b67241f265e5a887b205cd60f6dcfa8912847b72

@@ -1,4 +1,5 @@
 import { createWorkspaceClient, getRuntimeConfig } from './session.js';
+import { collectionMessages } from './onboarding-messages.js';
 
 const SLOT_LABELS = {
   org_legal_name_proof: 'Legal name / formation',
@@ -46,6 +47,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   const supabase = workspaceSession.supabase || createWorkspaceClient();
   const accessToken = workspaceSession.session.access_token;
   const config = getRuntimeConfig();
+  const t = collectionMessages(config.onboardingMessages);
   if (!config.supabaseUrl || !config.supabaseAnonKey) {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
@@ -53,6 +55,21 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   const functionsBase = `${config.supabaseUrl}/functions/v1`;
   let packView = null;
   let statusEl = null;
+  let uploading = false;
+  let uploadResults = [];
+
+  function renderUploadResults() {
+    const list = container.querySelector('#onboardingUploadResults');
+    if (list) list.innerHTML = uploadResults.map(result =>
+      `<li>${escapeHtml(result.name)}: ${escapeHtml(result.message)}</li>`
+    ).join('');
+  }
+
+  function setUploading(value) {
+    uploading = value;
+    container.querySelector('#onboardingDropzone')?.setAttribute('aria-busy', String(value));
+    container.querySelectorAll('#onboardingPickFiles, #onboardingFileInput, [data-confirm], [data-unconfirm]').forEach(el => { el.disabled = value; });
+  }
 
   const setStatus = (text, isError = false) => {
     if (!statusEl) return;
@@ -69,10 +86,30 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
 
   async function uploadFiles(fileList) {
     const files = Array.from(fileList || []).filter(Boolean);
-    if (!files.length) return;
-    setStatus(`Uploading ${files.length} file${files.length === 1 ? '' : 's'}…`);
+    if (!files.length || uploading) return;
+    uploadResults = [];
+    setUploading(true);
+    const progress = container.querySelector('#onboardingUploadProgress');
+    progress.hidden = false;
+    progress.max = files.length;
+    progress.value = 0;
+    let uploaded = 0;
     const errors = [];
     for (const file of files) {
+      setStatus(t('uploading', { current: progress.value + 1, total: files.length, name: file.name }));
+      // Match the edge contract: allowed extension OR MIME, nonempty, <= 25 MiB.
+      const extension = file.name.toLowerCase().match(/\.[a-z0-9]+$/)?.[0];
+      const accepted = ACCEPT.split(',');
+      const invalid = file.size <= 0 ? t('emptyFile')
+        : file.size > 26214400 ? t('largeFile')
+        : !accepted.includes(extension) && !accepted.includes(file.type) ? t('unsupportedFile') : '';
+      if (invalid) {
+        errors.push(`${file.name}: ${invalid}`);
+        uploadResults.push({ name: file.name, message: invalid });
+        progress.value += 1;
+        renderUploadResults();
+        continue;
+      }
       try {
         const body = new FormData();
         body.set('client_id', clientId);
@@ -86,21 +123,32 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
           body
         });
         const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          const reason = payload.reject_reason || payload.error || response.statusText;
-          errors.push(`${file.name}: ${reason}`);
-        }
+        if (!response.ok) throw new Error(payload.reject_reason || payload.error || response.statusText);
+        uploaded += 1;
+        uploadResults.push({ name: file.name, message: payload.classification?.status === 'parked_crm' ? t('parked') : t('uploaded') });
       } catch (err) {
-        errors.push(`${file.name}: ${err.message || 'upload failed'}`);
+        const reason = err.message || t('uploadFailed');
+        errors.push(`${file.name}: ${reason}`);
+        uploadResults.push({ name: file.name, message: reason });
       }
+      progress.value += 1;
+      renderUploadResults();
     }
-    await loadPack();
-    render();
-    if (errors.length) {
-      setStatus(errors.join(' · '), true);
-    } else {
-      setStatus(`Uploaded ${files.length} file${files.length === 1 ? '' : 's'}.`);
+    let refreshError = '';
+    try {
+      await loadPack();
+      render();
+    } catch (err) {
+      refreshError = t('refreshFailed', { reason: err.message });
+    } finally {
+      setUploading(false);
+      renderUploadResults();
+      const currentProgress = container.querySelector('#onboardingUploadProgress');
+      currentProgress.hidden = false;
+      currentProgress.max = files.length;
+      currentProgress.value = files.length;
     }
+    setStatus(t('summary', { uploaded, failed: errors.length, refreshError }), errors.length > 0 || Boolean(refreshError));
   }
 
   async function confirmDocument(documentId, type) {
@@ -113,6 +161,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
     await loadPack();
     render();
     setStatus(`Confirmed as ${slotLabel(type)}.`);
+    statusEl.focus();
   }
 
   async function unconfirmDocument(documentId) {
@@ -138,7 +187,23 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || 'Could not open preview.');
     if (!payload.signedUrl) throw new Error('Preview URL missing.');
-    window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
+    const url = new URL(payload.signedUrl);
+    const base = new URL(config.supabaseUrl);
+    const localHttp = base.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname);
+    if (url.origin !== base.origin || (url.protocol !== 'https:' && !localHttp) || url.username || url.password ||
+        !url.pathname.startsWith(`/storage/v1/object/sign/campaign-private/onboarding/${encodeURIComponent(clientId)}/`)) {
+      throw new Error(t('unsafePreview'));
+    }
+    // A deliberate link avoids popup blockers after async authorization. Never embed untrusted SVG/HTML.
+    setStatus(t('previewReady'));
+    const link = document.createElement('a');
+    link.textContent = t('openPreview');
+    link.href = url.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    statusEl.append(' ', link);
+    link.focus();
+    setTimeout(() => link.remove(), 60000);
   }
 
   function progressCounts(view) {
@@ -277,11 +342,13 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   }
 
   function renderDropzone() {
-    return `<section class="onboarding-dropzone" id="onboardingDropzone" tabindex="0" aria-label="Upload onboarding documents">
-      <p><strong>Drop files here</strong> or choose files to upload (max 25 MiB each).</p>
-      <p class="note">PDF, images, DOCX, text — or CSV/XLSX (parked for list ingest, not org-proof).</p>
+    return `<section class="onboarding-dropzone" id="onboardingDropzone" tabindex="0" aria-label="${escapeHtml(t('uploadLabel'))}" aria-describedby="onboardingDropHint">
+      <p id="onboardingDropHint">${escapeHtml(t('dropHint'))}</p>
+      <p class="note">${escapeHtml(t('typesHint'))}</p>
       <input id="onboardingFileInput" type="file" multiple accept="${ACCEPT}" hidden />
-      <button type="button" class="button secondary" id="onboardingPickFiles">Choose files</button>
+      <button type="button" class="button secondary" id="onboardingPickFiles">${escapeHtml(t('chooseFiles'))}</button>
+      <progress id="onboardingUploadProgress" aria-label="${escapeHtml(t('uploadProgress'))}" hidden></progress>
+      <ul id="onboardingUploadResults" aria-label="${escapeHtml(t('uploadResults'))}"></ul>
     </section>`;
   }
 
@@ -302,6 +369,12 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
     });
 
     if (dropzone) {
+      dropzone.addEventListener('keydown', event => {
+        if (event.target === dropzone && ['Enter', ' '].includes(event.key)) {
+          event.preventDefault();
+          if (!uploading) fileInput?.click();
+        }
+      });
       const prevent = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -392,7 +465,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
             ${renderDocuments()}
           </div>
         </div>
-        <p id="onboardingPackStatus" class="note" role="status"></p>
+        <p id="onboardingPackStatus" class="note" role="status" aria-atomic="true" tabindex="-1"></p>
       </div>
       <style>
         .onboarding-slot-list, .onboarding-doc-list { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .65rem; }
