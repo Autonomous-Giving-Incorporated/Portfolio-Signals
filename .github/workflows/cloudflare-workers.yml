@@ -1,4 +1,4 @@
-name: Deploy Cloudflare Workers static assets
+name: Cloudflare Workers bootstrap runtime
 
 on:
   push:
@@ -6,13 +6,19 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      approved_bootstrap_release:
+        description: 'Separate operator approval obtained for exact-main read-only bootstrap (not database release)'
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
   group: cloudflare-workers-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   validate:
@@ -25,16 +31,19 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.18.0'
+      - run: npm ci
       - name: Verify static entry points
         run: node scripts/validate-static-routes.mjs
-      - name: Test every.org webhook Worker port
+      - name: Test Worker handlers
         working-directory: workers/portfolio-signals
         run: npm test
+      - name: Public binding and actual workerd bootstrap acceptance
+        run: node --test tests/worker-public-bindings.test.mjs tests/worker-runtime.workerd.test.mjs
       - name: Wrangler config dry-run
-        run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/wrangler-dry-run
+        run: npx --no-install wrangler deploy --dry-run --outdir=/tmp/wrangler-dry-run
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.approved_bootstrap_release == true
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -45,33 +54,26 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.18.0'
-      - name: Check Cloudflare credentials
-        id: creds
+      - run: npm ci
+      - name: Deploy approved read-only Worker with public binding
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${CLOUDFLARE_API_TOKEN}" || -z "${CLOUDFLARE_ACCOUNT_ID}" ]]; then
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "CLOUDFLARE_API_TOKEN and/or CLOUDFLARE_ACCOUNT_ID are unset."
-            echo "Static portal validation passed; Workers deploy is skipped until the operator adds those GitHub secrets."
-          else
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Generate browser runtime-config
-        if: steps.creds.outputs.present == 'true'
-        env:
           PLATFORM_SUPABASE_URL: ${{ vars.PLATFORM_SUPABASE_URL || vars.STAGING_SUPABASE_URL }}
           PLATFORM_SUPABASE_ANON_KEY: ${{ secrets.PLATFORM_SUPABASE_ANON_KEY || secrets.STAGING_SUPABASE_ANON_KEY }}
-          STAGING_SUPABASE_URL: ${{ vars.STAGING_SUPABASE_URL }}
-          STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-        run: bash scripts/vercel-build.sh
-      - name: Deploy Worker static assets
-        if: steps.creds.outputs.present == 'true'
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: '4'
-          command: deploy
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing Cloudflare credential'; exit 1; }
+          test "$CLOUDFLARE_ACCOUNT_ID" = '315fb44b61212825452aad0ca566ea42' || { echo 'Cloudflare account mismatch'; exit 1; }
+          umask 077
+          private_dir=$(mktemp -d)
+          trap 'rm -rf "$private_dir"' EXIT
+          node scripts/prepare-worker-public-bindings.mjs "$private_dir/bindings.json"
+          bash scripts/vercel-build.sh
+          # Version-atomic binding upload, not a separate secret mutation.
+          npx --no-install wrangler deploy --secrets-file "$private_dir/bindings.json"
+          # Read back deployment metadata and binding names, never values.
+          npx --no-install wrangler deployments list
+          npx --no-install wrangler secret list
+          echo 'Deployment metadata read back. Operator must complete exact-origin HTTP and suite readback in docs/CF-RUNTIME-CONTINUATION.md; no readiness claim.'

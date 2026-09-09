@@ -60,7 +60,8 @@ patterns = [
 ]
 findings = []
 for path in Path('.').rglob('*'):
-    if not path.is_file() or path.suffix == '.md' or '.git' in path.parts:
+    # Scan first-party files, not installed vendor CLI/example strings.
+    if not path.is_file() or path.suffix == '.md' or '.git' in path.parts or 'node_modules' in path.parts:
         continue
     try:
         text = path.read_text(encoding='utf-8')

@@ -51,12 +51,13 @@ export async function handleIrProvisioning(request, env, { fetchImpl = fetch } =
   }
   const headers = { apikey: key, authorization: `Bearer ${token}`, 'content-type': 'application/json' };
   try {
-    const user = await fetchImpl(`${base}/auth/v1/user`, { headers, redirect: 'error', signal: AbortSignal.timeout(10000) });
-    if (!user.ok) return reply(user.status >= 500 ? 503 : 401, { error: 'authentication_failed' });
+    // workerd supports manual, not error; reject redirects without forwarding credentials.
+    const user = await fetchImpl(`${base}/auth/v1/user`, { headers, redirect: 'manual', signal: AbortSignal.timeout(10000) });
+    if (!user.ok) return reply(user.status >= 500 || user.status < 400 ? 503 : 401, { error: 'authentication_failed' });
     if (!(await user.json())?.id) return reply(401, { error: 'authentication_failed' });
     const rpc = async (name, body) => {
       const response = await fetchImpl(`${base}/rest/v1/rpc/${name}`, {
-        method: 'POST', headers, body: JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(10000)
+        method: 'POST', headers, body: JSON.stringify(body), redirect: 'manual', signal: AbortSignal.timeout(10000)
       });
       if (!response.ok) {
         const error = new Error('provisioning_failed');
