@@ -2,8 +2,9 @@
  * Magic-link consume and suite-host redirect helpers.
  * Kept free of the supabase-js CDN import so Node tests can load this module.
  */
+import { onboardingIntentSearch, parseOnboardingIntent } from './onboarding-intent.js';
 
-export const CANONICAL_SUITE_WORKSPACE_URL = 'https://autogive.app/portfolio-signals/workspace.html';
+export const CANONICAL_SUITE_WORKSPACE_URL = 'https://autogive.app/portfolio-signals/workspace';
 
 export const MFA_ENFORCED_REQUIRED = 'mfa_enforced_required';
 
@@ -43,21 +44,24 @@ export function workspaceAssetBaseHref(pathname = '') {
  * Return URL that auth-email should use as redirect_to.
  * Prefer a path whose workspace.js actually loads.
  */
-export function workspaceRedirectUrl(locationLike = globalThis.location) {
+export function workspaceRedirectUrl(locationLike = globalThis.location, pendingIntent = null) {
   const origin = locationLike?.origin || '';
   const pathname = locationLike?.pathname || '';
   const hostname = locationLike?.hostname || '';
 
+  const intent = pendingIntent || parseOnboardingIntent(locationLike?.href || `${origin}${pathname}`);
+  const intentSearch = onboardingIntentSearch(intent);
+
   if (isSuiteHost(hostname) && isWorkspacePath(pathname)) {
-    return CANONICAL_SUITE_WORKSPACE_URL;
+    return `${CANONICAL_SUITE_WORKSPACE_URL}${intentSearch}`;
   }
 
   if (pathname === '/workspace' || pathname === '/workspace/') {
-    return `${origin}/workspace.html`;
+    return `${origin}/workspace.html${intentSearch}`;
   }
 
   if (isWorkspacePath(pathname)) {
-    return `${origin}${pathname}`;
+    return `${origin}${pathname}${intentSearch}`;
   }
 
   const href = locationLike?.href || `${origin}${pathname}`;

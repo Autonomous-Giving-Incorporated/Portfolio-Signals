@@ -6,6 +6,7 @@ function chainableFrom() {
     eq() { return this; },
     in() { return this; },
     is() { return this; },
+    order() { return this; },
     maybeSingle: async () => ({ data: null, error: null }),
     then(resolve) { resolve({ data: [], count: 0, error: null }); }
   }`;
@@ -13,11 +14,13 @@ function chainableFrom() {
 
 function supabaseMock({
   verifyError = null,
+  mfaVerifyError = null,
   session = { access_token: 'sess', user: { id: 'user-1', email: 'director@example.invalid' } },
   contextError = 'Enforced MFA is required for privileged roles.',
   factors = []
 } = {}) {
   const verifyErrorJson = verifyError ? JSON.stringify(verifyError) : 'null';
+  const mfaVerifyErrorJson = mfaVerifyError ? JSON.stringify(mfaVerifyError) : 'null';
   const sessionJson = JSON.stringify(session);
   const contextErrorJson = JSON.stringify(contextError);
   const factorsJson = JSON.stringify(factors);
@@ -46,12 +49,13 @@ function supabaseMock({
             }),
             challenge: async () => ({ data: { id: 'challenge-1' }, error: null }),
             verify: async () => {
+              if (${mfaVerifyErrorJson}) return { data: null, error: ${mfaVerifyErrorJson} };
               window.__PS_MFA_VERIFIED = true;
               return { data: session, error: null };
             }
           }
         },
-        functions: { invoke: async () => ({ data: { accepted: true }, error: null }) },
+        functions: { invoke: async (_name, options) => { window.__authEmailBody = options?.body; return { data: { accepted: true }, error: null }; } },
         rpc: async (name) => {
           if (name === 'set_mfa_enforced') {
             window.__PS_MFA_ENFORCED = true;
@@ -85,7 +89,10 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
-    const enforced = await page.evaluate(() => Boolean(window.__PS_MFA_ENFORCED)).catch(() => false);
+    const state = await page.evaluate(() => ({
+      enforced: Boolean(window.__PS_MFA_ENFORCED),
+      master: Boolean(window.__PS_TEST_MASTER)
+    })).catch(() => ({ enforced: false, master: false }));
     await route.fulfill({
       status: 200,
       headers: {
@@ -97,10 +104,10 @@ test.beforeEach(async ({ page }) => {
           id: 'user-1',
           display_name: 'Director',
           active: true,
-          mfa_enforced: enforced,
+          mfa_enforced: state.enforced,
           role: 'director'
         },
-        is_master_admin: false,
+        is_master_admin: state.master,
         clients: [{ id: 'org_example', display_name: 'Example', role: 'director', state: 'active' }]
       })
     });
@@ -141,6 +148,34 @@ test('verified authenticator opens the workspace without an operator confirm ste
   await expect(page.locator('#identityLine')).toContainText('Director');
 });
 
+test('Impact Relay intent survives fixture MFA and is consumed after authorized focus', async ({ page }) => {
+  await page.addInitScript(() => { window.__PS_TEST_MASTER = true; });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_example&token_hash=fresh&type=magiclink');
+  await expect(page.locator('#mfaEnroll')).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('agi.onboardingIntent'))).not.toBeNull();
+  await page.getByLabel('Authentication code').fill('123456');
+  await page.getByRole('button', { name: 'Verify authenticator' }).click();
+  await expect(page.locator('#sharedOnboardingEntry')).toBeFocused();
+  expect(await page.evaluate(() => sessionStorage.getItem('agi.onboardingIntent'))).toBeNull();
+});
+
+test('Impact Relay intent remains pending when MFA verification fails closed', async ({ page }) => {
+  await page.addInitScript(() => { window.__PS_TEST_MASTER = true; });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock({ mfaVerifyError: { message: 'bad code' } }) });
+  });
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_example&token_hash=fresh&type=magiclink');
+  await page.getByLabel('Authentication code').fill('000000');
+  await page.getByRole('button', { name: 'Verify authenticator' }).click();
+  await expect(page.locator('#mfaMessage')).toContainText('failed');
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem('agi.onboardingIntent'))).not.toBeNull();
+});
+
 test('expired token_hash explains reuse instead of a cold login', async ({ page }) => {
   await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
     route.fulfill({
@@ -152,8 +187,13 @@ test('expired token_hash explains reuse instead of a cold login', async ({ page 
     });
   });
 
-  await page.goto('/workspace.html?token_hash=used&type=magiclink');
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_example&token_hash=used&type=magiclink');
   await expect(page.getByText(/already used or has expired/i)).toBeVisible();
   await expect(page.locator('#mfaEnroll')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Send secure sign-in link' })).toBeVisible();
+  await page.getByLabel('Email address').fill('director@example.invalid');
+  await page.getByRole('button', { name: 'Send secure sign-in link' }).click();
+  await expect.poll(() => page.evaluate(() => window.__authEmailBody?.redirect_to)).toBe(
+    'http://127.0.0.1:4173/workspace.html?onboarding=impact-relay&tenant=org_example'
+  );
 });

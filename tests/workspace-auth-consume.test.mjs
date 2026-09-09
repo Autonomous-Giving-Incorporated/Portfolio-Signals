@@ -45,14 +45,39 @@ describe('workspaceRedirectUrl prefers an asset-backed consume target', () => {
     );
   });
 
-  test('canonicalizes suite /portfolio-signals/workspace to workspace.html', () => {
+  test('canonicalizes suite auth return to the verified workspace route', () => {
     assert.equal(
       workspaceRedirectUrl(loc({
         origin: 'https://autogive.app',
         hostname: 'autogive.app',
         pathname: '/portfolio-signals/workspace'
       })),
-      CANONICAL_SUITE_WORKSPACE_URL
+      'https://autogive.app/portfolio-signals/workspace'
+    );
+    assert.equal(CANONICAL_SUITE_WORKSPACE_URL, 'https://autogive.app/portfolio-signals/workspace');
+  });
+
+  test('preserves only the validated onboarding intent in a sign-in return URL', () => {
+    assert.equal(
+      workspaceRedirectUrl(loc({
+        origin: 'https://autogive.app',
+        hostname: 'autogive.app',
+        pathname: '/portfolio-signals/workspace',
+        href: 'https://autogive.app/portfolio-signals/workspace?onboarding=impact-relay&tenant=org_example&next=https://evil.invalid'
+      })),
+      `${CANONICAL_SUITE_WORKSPACE_URL}?onboarding=impact-relay&tenant=org_example`
+    );
+  });
+
+  test('preserves pending intent when an expired callback URL has already been cleaned', () => {
+    assert.equal(
+      workspaceRedirectUrl(loc({
+        origin: 'https://autogive.app',
+        hostname: 'autogive.app',
+        pathname: '/portfolio-signals/workspace',
+        href: 'https://autogive.app/portfolio-signals/workspace'
+      }), { source: 'impact-relay', tenantHint: 'org_example' }),
+      'https://autogive.app/portfolio-signals/workspace?onboarding=impact-relay&tenant=org_example'
     );
   });
 

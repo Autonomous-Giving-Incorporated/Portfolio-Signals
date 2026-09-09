@@ -17,6 +17,13 @@ import {
   pickTotpChallengeFactor
 } from './workspace/mfa.js';
 import { mountIrProvisioning } from './workspace/ir-provisioning.js';
+import {
+  captureOnboardingIntent,
+  bindOnboardingIntentToUser,
+  clearOnboardingIntent,
+  readOnboardingIntent,
+  resolveOnboardingIntent
+} from './workspace/onboarding-intent.js';
 import { mountDecisionQueue } from './workspace/decisions.js';
 import { mountPipelineWorkspace } from './workspace/pipelines.js';
 import { mountBrandConfiguration } from './workspace/configuration.js';
@@ -52,6 +59,9 @@ let renderInFlight = null;
 let loginRequestInFlight = false;
 let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
 let activeSessionEmail = null;
+const entryUrl = new URL(window.location.href);
+if (entryUrl.searchParams.has('onboarding')) clearOnboardingIntent();
+let pendingOnboardingIntent = captureOnboardingIntent(window.location.href) || readOnboardingIntent();
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, character => ({
@@ -193,7 +203,7 @@ if (activeClient) {
     const form = event.currentTarget;
     const submitButton = form.querySelector('button[type="submit"]');
     const email = document.getElementById('email').value.trim();
-    const redirectTo = workspaceRedirectUrl();
+    const redirectTo = workspaceRedirectUrl(globalThis.location, pendingOnboardingIntent);
     loginRequestInFlight = true;
     submitButton.disabled = true;
     submitButton.setAttribute('aria-disabled', 'true');
@@ -272,12 +282,14 @@ if (activeClient) {
 }
 
 async function scheduleRender(session, { allowNull = false } = {}) {
-  const run = async () => renderSession(session, { allowNull });
+  const generation = ++renderGeneration;
+  const run = async () => renderSession(session, { allowNull }, generation);
   renderInFlight = (renderInFlight || Promise.resolve()).then(run, run);
   return renderInFlight;
 }
 
-async function renderSession(session, { allowNull = false } = {}) {
+async function renderSession(session, { allowNull = false } = {}, generation) {
+  if (generation !== renderGeneration) return;
   if (!session) {
     if (!allowNull && lastSessionUserId) return;
     lastSessionUserId = null;
@@ -294,12 +306,14 @@ async function renderSession(session, { allowNull = false } = {}) {
   }
 
   const userId = session.user?.id || null;
+  if (pendingOnboardingIntent) {
+    pendingOnboardingIntent = bindOnboardingIntentToUser(pendingOnboardingIntent, userId);
+  }
   if (userId && userId === lastSessionUserId && !workspace.hidden && activeProfile) {
     showMessage('');
     return;
   }
 
-  const generation = ++renderGeneration;
   clearWorkspaceSessionCache();
   let workspaceSession;
   try {
@@ -328,6 +342,21 @@ async function renderSession(session, { allowNull = false } = {}) {
   }
   if (generation !== renderGeneration) return;
 
+  let intentResolution = resolveOnboardingIntent(pendingOnboardingIntent, workspaceSession.clients);
+  if (intentResolution.client && intentResolution.client.id !== workspaceSession.selectedClient?.id) {
+    selectWorkspaceClient(intentResolution.client.id);
+    try {
+      workspaceSession = await requireWorkspaceSession(session);
+    } catch (error) {
+      if (generation !== renderGeneration) return;
+      gate.hidden = false;
+      workspace.hidden = true;
+      showMessage(`Access blocked: ${error.message}`);
+      return;
+    }
+    if (generation !== renderGeneration) return;
+    intentResolution = resolveOnboardingIntent(pendingOnboardingIntent, workspaceSession.clients);
+  }
   const { profile, clients, selectedClient: currentClient, isMasterAdmin: masterAdmin } = workspaceSession;
   const mfaRequired = PRIVILEGED_ROLES.has(profile.role) || masterAdmin;
   if (mfaRequired && !profile.mfa_enforced) {
@@ -364,6 +393,69 @@ async function renderSession(session, { allowNull = false } = {}) {
   renderClientSelector(clients, currentClient);
   renderNavigation(profile.role || selectedClient?.role);
   await loadDashboard(profile.role || selectedClient?.role);
+  if (generation !== renderGeneration) return;
+  if (pendingOnboardingIntent) {
+    await openSharedOnboardingEntry(intentResolution, generation);
+  }
+}
+
+async function openSharedOnboardingEntry(resolution, generation) {
+  const intent = pendingOnboardingIntent;
+  const configured = getRuntimeConfig().sharedOnboardingMessages || {};
+  const entryTitle = configured.title || 'Continue Impact Relay onboarding';
+  const entryHelp = configured.help || 'Use this existing guided pane to review or request the next explicit step. Navigation performs no provisioning or initialization. Requested, reserved, or initialized does not mean operational.';
+  const operational = 'Operational: no.';
+  const unavailable = configured.unavailable || 'The requested onboarding destination is unavailable for this account.';
+  if (resolution.available && isMasterAdmin) {
+    const platformTab = document.querySelector('[data-section="platform_admin"]');
+    document.querySelectorAll('#roleNav .workspace-nav-button').forEach(button => {
+      button.classList.toggle('is-active', button === platformTab);
+      button.setAttribute('aria-selected', button === platformTab ? 'true' : 'false');
+      button.tabIndex = button === platformTab ? 0 : -1;
+    });
+    await openSection('platform_admin');
+    if (generation !== renderGeneration) return;
+  }
+
+  pendingOnboardingIntent = null;
+  clearOnboardingIntent();
+  // Consume the navigation fields even when no auth callback cleaned the URL.
+  // Otherwise a signed-in reload would capture the same intent and steal focus.
+  const consumedUrl = new URL(window.location.href);
+  consumedUrl.searchParams.delete('onboarding');
+  consumedUrl.searchParams.delete('tenant');
+  history.replaceState(history.state, '', consumedUrl.pathname + consumedUrl.search + consumedUrl.hash);
+
+  if (resolution.available && isMasterAdmin) {
+    const irArea = document.getElementById('irProvisioningArea');
+    const select = irArea?.querySelector('[name="irClient"]');
+    if (intent.tenantHint && [...(select?.options || [])].some(option => option.value === intent.tenantHint)) {
+      select.value = intent.tenantHint;
+    }
+    const entry = document.createElement('aside');
+    entry.id = 'sharedOnboardingEntry';
+    entry.className = 'note shared-onboarding-entry';
+    entry.tabIndex = -1;
+    entry.setAttribute('role', 'note');
+    const title = document.createElement('strong');
+    title.textContent = entryTitle;
+    const state = document.createElement('strong');
+    state.textContent = operational;
+    entry.append(title, document.createElement('br'), `${entryHelp} `, state);
+    irArea?.prepend(entry);
+    entry.scrollIntoView({ block: 'center', behavior: 'auto' });
+    entry.focus({ preventScroll: true });
+    return;
+  }
+
+  const entry = document.createElement('p');
+  entry.id = 'sharedOnboardingEntry';
+  entry.className = 'note error';
+  entry.tabIndex = -1;
+  entry.setAttribute('role', 'status');
+  entry.textContent = unavailable;
+  content.prepend(entry);
+  entry.focus({ preventScroll: true });
 }
 
 function publishedTenantMarkUrl(publishedConfig) {
@@ -856,8 +948,8 @@ async function mountPlatformAdmin() {
   if (error) throw error;
 
   content.innerHTML = `
-    <div class="workspace-toolbar"><div><strong>A.G.I. platform administration</strong><span>${data.length} clients</span></div></div>
-    <div class="table-wrap"><table class="workspace-table">
+    <div class="workspace-toolbar"><div><h2>A.G.I. platform administration</h2><span>${data.length} clients</span></div></div>
+    <div class="table-wrap" tabindex="0"><table class="workspace-table">
       <thead><tr><th>Client</th><th>Identifier</th><th>State</th><th>Reference</th><th>Onboarding</th></tr></thead>
       <tbody>${data.map(client => `<tr><td>${escapeHtml(client.display_name)}<small>${escapeHtml(client.slug)}</small></td><td>${escapeHtml(client.id)}</td><td>${escapeHtml(client.state)}</td><td>${client.reference_tenant ? 'yes' : 'no'}</td><td>${client.state === 'provisioning' ? `<button class="button secondary" type="button" data-activate-client="${escapeHtml(client.id)}">Activate</button>` : 'complete'}</td></tr>`).join('')}</tbody>
     </table></div>

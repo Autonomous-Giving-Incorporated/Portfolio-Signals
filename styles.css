@@ -55,6 +55,16 @@ html[data-theme="dark"] {
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; overflow-x: clip; }
+.shared-onboarding-entry {
+  border-inline-start: 4px solid var(--accent);
+  padding: 1rem;
+}
+
+.shared-onboarding-entry:focus {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
 body {
   margin: 0;
   background: var(--bg);

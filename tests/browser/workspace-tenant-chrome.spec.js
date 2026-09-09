@@ -7,12 +7,16 @@ function supabaseMock({
   session = {
     access_token: 'sess',
     user: { id: ADMIN_USER_ID, email: 'zer0state@zer0state.com' }
-  }
+  },
+  authEventDelay = null
 } = {}) {
   const sessionJson = JSON.stringify(session);
+  const authEventDelayJson = JSON.stringify(authEventDelay);
   return `
     export function createClient() {
       const session = ${sessionJson};
+      const authEventDelay = ${authEventDelayJson};
+      let authListener;
       if (!globalThis.__provisionCalls) globalThis.__provisionCalls = [];
       const clients = [
         {
@@ -26,11 +30,19 @@ function supabaseMock({
       ];
       return {
         auth: {
-          getSession: async () => ({ data: { session: null }, error: null }),
-          onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+          getSession: async () => ({ data: { session: sessionStorage.getItem('fixtureSignedIn') ? session : null }, error: null }),
+          onAuthStateChange: (listener) => {
+            authListener = listener;
+            globalThis.__emitAuth = (event, nextSession) => authListener?.(event, nextSession);
+            return { data: { subscription: { unsubscribe() {} } } };
+          },
           signOut: async () => ({ error: null }),
-          setSession: async () => ({ data: { session }, error: null }),
-          verifyOtp: async () => ({ data: { session }, error: null }),
+          setSession: async () => { sessionStorage.setItem('fixtureSignedIn', '1'); return { data: { session }, error: null }; },
+          verifyOtp: async () => {
+            sessionStorage.setItem('fixtureSignedIn', '1');
+            if (authEventDelay !== null) setTimeout(() => authListener?.('SIGNED_IN', session), authEventDelay);
+            return { data: { session }, error: null };
+          },
           exchangeCodeForSession: async () => ({
             data: { session: null },
             error: { message: 'both auth code and code verifier should be non-empty' }
@@ -80,7 +92,14 @@ function supabaseMock({
           if (table === 'clients') {
             return {
               select: () => ({
-                order: async () => ({ data: [...clients], error: null })
+                order: async () => {
+                  if (globalThis.__delayClientLoad) {
+                    globalThis.__clientLoadStarted = true;
+                    await new Promise(resolve => { globalThis.__releaseClientLoad = resolve; });
+                    globalThis.__delayClientLoad = false;
+                  }
+                  return { data: [...clients], error: null };
+                }
               })
             };
           }
@@ -117,7 +136,8 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.AGI_PORTFOLIO_SIGNALS_CONFIG = {
       supabaseUrl: 'https://acceptance.invalid',
-      supabaseAnonKey: 'public-test-key'
+      supabaseAnonKey: 'public-test-key',
+      sharedOnboardingMessages: { operational: 'Operational: yes.' }
     };
     window.localStorage.removeItem('agi.activeClientId');
   });
@@ -134,6 +154,22 @@ test.beforeEach(async ({ page }) => {
       });
       return;
     }
+    const contextState = await page.evaluate(() => {
+      window.__contextCallCount = (window.__contextCallCount || 0) + 1;
+      return {
+        dropTarget: Boolean(window.__dropTargetOnSecondContext),
+        nonMaster: Boolean(window.__nonMaster),
+        call: window.__contextCallCount
+      };
+    });
+    const clients = contextState.dropTarget
+      ? (contextState.call === 1
+          ? [
+              { id: 'org_other', display_name: 'Other', state: 'active' },
+              { id: 'org_hacker_dojo', slug: 'hacker-dojo', display_name: 'Hacker Dojo', state: 'active' }
+            ]
+          : [{ id: 'org_other', display_name: 'Other', state: 'active' }])
+      : [{ id: 'org_hacker_dojo', slug: 'hacker-dojo', display_name: 'Hacker Dojo', state: 'active' }];
     await route.fulfill({
       status: 200,
       headers: {
@@ -148,15 +184,8 @@ test.beforeEach(async ({ page }) => {
           mfa_enforced: true,
           role: 'director'
         },
-        is_master_admin: true,
-        clients: [
-          {
-            id: 'org_hacker_dojo',
-            slug: 'hacker-dojo',
-            display_name: 'Hacker Dojo',
-            state: 'active'
-          }
-        ]
+        is_master_admin: !contextState.nonMaster,
+        clients
       })
     });
   });
@@ -189,6 +218,117 @@ test('platform admin with no membership sees platform chrome only', async ({ pag
   await expect(page.locator('#provisionClientForm [name="director"]')).toBeVisible();
   await expect(page.locator('#provisionClientForm [name="director"]')).not.toHaveAttribute('required', '');
   await expect(page.locator('#provisionClientForm [name="director"]')).not.toHaveAttribute('pattern', /0-9a-fA-F/);
+});
+
+test('Impact Relay deep link opens and focuses the existing guided admin pane without writes', async ({ page }) => {
+  const posts = [];
+  page.on('request', request => { if (request.method() === 'POST') posts.push(request.url()); });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock({ authEventDelay: 25 }) });
+  });
+
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_hacker_dojo&token_hash=fresh&type=magiclink');
+
+  const entry = page.locator('#sharedOnboardingEntry');
+  await expect(entry).toBeVisible();
+  await expect(entry).toBeFocused();
+  await expect(entry).toContainText('Continue Impact Relay onboarding');
+  await expect(entry).toContainText('Operational: no');
+  await expect(entry).not.toContainText('Operational: yes');
+  await expect(page.getByLabel('Existing client for IR request')).toHaveValue('org_hacker_dojo');
+  expect(await page.evaluate(() => globalThis.__irCalls || [])).toEqual([]);
+  expect(await page.evaluate(() => globalThis.__provisionCalls || [])).toEqual([]);
+  expect(posts.length).toBeGreaterThan(0);
+  expect(posts.every(url => url === 'https://acceptance.invalid/rest/v1/rpc/get_workspace_context')).toBe(true);
+  await expect(page).toHaveURL('/workspace.html');
+  expect(await page.evaluate(() => sessionStorage.getItem('agi.onboardingIntent'))).toBeNull();
+  await page.getByRole('button', { name: 'Sign out' }).focus();
+  await page.waitForTimeout(50);
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(page.getByRole('button', { name: 'Sign out' })).toBeFocused();
+  const audit = await new AxeBuilder({ page }).include('#workspace').analyze();
+  expect(audit.violations).toEqual([]);
+  const platformTab = page.getByRole('tab', { name: 'Platform admin' });
+  await platformTab.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('tab', { name: 'Onboarding pack' })).toBeFocused();
+  await page.reload();
+  await expect(page.locator('#workspace')).toBeVisible();
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveCount(0);
+});
+
+test('already-authenticated entry waits for authorized context without an auth query', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('fixtureSignedIn', '1'));
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_hacker_dojo');
+  await expect(page.locator('#sharedOnboardingEntry')).toBeFocused();
+  await expect(page.getByLabel('Existing client for IR request')).toHaveValue('org_hacker_dojo');
+  await page.reload();
+  await expect(page.locator('#workspace')).toBeVisible();
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveCount(0);
+});
+
+test('sign-out during a delayed render cannot consume or focus onboarding intent', async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem('fixtureSignedIn', '1');
+    window.__delayClientLoad = true;
+  });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_hacker_dojo');
+  await expect.poll(() => page.evaluate(() => Boolean(window.__clientLoadStarted))).toBe(true);
+  await page.evaluate(() => window.__emitAuth('SIGNED_OUT', null));
+  await page.waitForTimeout(20);
+  await page.evaluate(() => window.__releaseClientLoad());
+
+  await expect(page.locator('#authGate')).toBeVisible();
+  await expect(page.locator('#workspace')).toBeHidden();
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem('agi.onboardingIntent'))).not.toBeNull();
+});
+
+test('malformed or unavailable tenant hints disclose nothing and perform no writes', async ({ page }) => {
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=../../private-user&token_hash=fresh&type=magiclink');
+  const entry = page.locator('#sharedOnboardingEntry');
+  await expect(entry).toHaveText('The requested onboarding destination is unavailable for this account.');
+  await expect(entry).toBeFocused();
+  await expect(page.locator('#workspace')).not.toContainText('private-user');
+  expect(await page.evaluate(() => globalThis.__irCalls || [])).toEqual([]);
+  expect(await page.evaluate(() => globalThis.__provisionCalls || [])).toEqual([]);
+});
+
+test('well-formed unknown tenant and non-master access use the same generic response', async ({ page }) => {
+  await page.addInitScript(() => { window.__nonMaster = true; });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_unknown&token_hash=fresh&type=magiclink');
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveText(
+    'The requested onboarding destination is unavailable for this account.'
+  );
+  await expect(page.locator('#workspace')).not.toContainText('org_unknown');
+  await expect(page.getByRole('tab', { name: 'Platform admin' })).toHaveCount(0);
+});
+
+test('tenant hint is re-authorized when context changes before selection completes', async ({ page }) => {
+  await page.addInitScript(() => { window.__dropTargetOnSecondContext = true; });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route => {
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() });
+  });
+  await page.goto('/workspace.html?onboarding=impact-relay&tenant=org_hacker_dojo&token_hash=fresh&type=magiclink');
+  await expect(page.locator('#sharedOnboardingEntry')).toHaveText(
+    'The requested onboarding destination is unavailable for this account.'
+  );
+  await expect(page.locator('#sharedOnboardingEntry')).toBeFocused();
+  await expect(page.locator('#workspaceContent')).not.toContainText('Continue Impact Relay onboarding');
 });
 
 test('platform admin provisions a tenant without a director UUID and stays on platform chrome', async ({ page }) => {
