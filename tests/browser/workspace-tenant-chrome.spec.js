@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 const ADMIN_USER_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -43,6 +44,24 @@ function supabaseMock({
         },
         functions: { invoke: async () => ({ data: { accepted: true }, error: null }) },
         rpc: async (name, args) => {
+          if (name === 'request_ir_provisioning') {
+            globalThis.__irCalls ||= [];
+            globalThis.__irCalls.push(args);
+            globalThis.__irRequest = {
+              operation_id: '20000000-0000-4000-8000-000000000001',
+              client_id: args.p_client_id, tenant_id: args.p_client_id,
+              idempotency_key: args.p_idempotency_key, rationale: args.p_rationale,
+              state: 'requested', runtime_ready: false
+            };
+            if (globalThis.__irFailOnce) {
+              globalThis.__irFailOnce = false;
+              throw new Error('Network response lost');
+            }
+            return { data: { ...globalThis.__irRequest, replayed: globalThis.__irCalls.length > 1 }, error: null };
+          }
+          if (name === 'get_ir_provisioning_request') {
+            return { data: globalThis.__irRequest || null, error: globalThis.__irStatusError || null };
+          }
           if (name === 'provision_client') {
             globalThis.__provisionCalls.push(args);
             clients.push({
@@ -204,4 +223,114 @@ test('platform admin provisions a tenant without a director UUID and stays on pl
       p_rationale: 'Provision a new civic tenant'
     }
   ]);
+});
+
+test('IR request persists via SDK and status read without claiming readiness', async ({ page }) => {
+  const forbidden = [];
+  page.on('request', request => {
+    if (request.url().includes('/api/tenant/')) forbidden.push(request.url());
+  });
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route =>
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() }));
+  await page.goto('/workspace.html?token_hash=fresh&type=magiclink');
+  await expect(page.getByRole('button', { name: 'Request IR provisioning' })).toBeVisible();
+  await page.getByLabel('Existing client for IR request').selectOption('org_hacker_dojo');
+  await page.getByLabel('IR request rationale').fill('Request IR bridge review');
+  await page.getByRole('button', { name: 'Request IR provisioning' }).click();
+  await expect(page.locator('#irRequestStatus')).toContainText('Request recorded');
+  await expect(page.locator('#irRequestStatus')).toContainText('Runtime readiness: not established');
+  expect(await page.evaluate(() => globalThis.__irCalls)).toEqual([{
+    p_client_id: 'org_hacker_dojo', p_rationale: 'Request IR bridge review',
+    p_idempotency_key: expect.stringMatching(/^[0-9a-f-]{36}$/)
+  }]);
+  await expect(page.locator('#workspaceContent')).not.toContainText('python -c');
+  await expect(page.getByRole('button', { name: 'Clone tenant from template' })).toHaveCount(0);
+  expect(forbidden).toEqual([]);
+  const audit = await new AxeBuilder({ page }).include('#irProvisioningArea')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  expect(audit.violations).toEqual([]);
+  expect(await page.locator('#irProvisioningArea').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+});
+
+async function openIrRequests(page) {
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', route =>
+    route.fulfill({ contentType: 'application/javascript', body: supabaseMock() }));
+  await page.goto('/workspace.html?token_hash=fresh&type=magiclink');
+  await page.getByLabel('Existing client for IR request').selectOption('org_hacker_dojo');
+  await page.getByLabel('IR request rationale').fill('Request IR bridge review');
+}
+
+test('IR lost-response retry reuses key and performs readback', async ({ page }) => {
+  await openIrRequests(page);
+  await page.evaluate(() => { globalThis.__irFailOnce = true; });
+  await page.getByRole('button', { name: 'Request IR provisioning' }).click();
+  await expect(page.locator('#irRequestStatus')).toContainText('service unavailable or access denied');
+  await page.getByRole('button', { name: 'Request IR provisioning' }).click();
+  await expect(page.locator('#irRequestStatus')).toContainText('Existing request replayed');
+  const calls = await page.evaluate(() => globalThis.__irCalls);
+  expect(calls).toHaveLength(2);
+  expect(calls[0]).toEqual(calls[1]);
+});
+
+test('IR status unavailable cannot turn a successful write response into readiness', async ({ page }) => {
+  await openIrRequests(page);
+  await page.evaluate(() => { globalThis.__irStatusError = { message: '<script>private error</script>', code: 'PGRST202' }; });
+  await page.getByRole('button', { name: 'Request IR provisioning' }).click();
+  await expect(page.locator('#irRequestStatus')).toContainText('service unavailable or access denied');
+  await expect(page.locator('#irRequestStatus')).not.toContainText('Request recorded');
+  await expect(page.locator('#irRequestStatus')).not.toContainText('private error');
+  await expect(page.getByRole('button', { name: 'Request IR provisioning' })).toBeEnabled();
+});
+
+test('IR status is read-only, accessible by keyboard, and rejects foreign binding', async ({ page }) => {
+  await openIrRequests(page);
+  const check = page.getByRole('button', { name: 'Check request status' });
+  await check.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#irRequestStatus')).toContainText('No provisioning request recorded');
+  expect(await page.evaluate(() => globalThis.__irCalls || [])).toEqual([]);
+  await page.evaluate(() => { globalThis.__irRequest = {
+    client_id: 'org_foreign', tenant_id: 'org_foreign', operation_id: 'foreign',
+    idempotency_key: 'foreign', rationale: 'Request IR bridge review', state: 'requested', runtime_ready: true
+  }; });
+  await check.click();
+  await expect(page.locator('#irRequestStatus')).toContainText('service unavailable or access denied');
+  await expect(page.locator('#irRequestStatus')).not.toContainText('foreign');
+  await expect(page.locator('#irRequestStatus')).toHaveAttribute('role', 'status');
+});
+
+test('IR request explains that recording does not start an executor', async ({ page }) => {
+  await openIrRequests(page);
+  await expect(page.locator('#irProvisioningArea')).toContainText('After recording a request, explicitly persist an empty scaffold (reservation), then initialize and open a read-only workspace. This does not start runtime operations.');
+});
+
+for (const field of ['operation_id', 'idempotency_key']) {
+  test(`IR status rejects malformed ${field} rather than reporting progress`, async ({ page }) => {
+    await openIrRequests(page);
+    await page.evaluate(field => { globalThis.__irRequest = {
+      client_id: 'org_hacker_dojo', tenant_id: 'org_hacker_dojo',
+      operation_id: '20000000-0000-4000-8000-000000000001',
+      idempotency_key: '20000000-0000-4000-8000-000000000002',
+      rationale: 'Request IR bridge review', state: 'requested', runtime_ready: false,
+      [field]: 'not-a-uuid'
+    }; }, field);
+    await page.getByRole('button', { name: 'Check request status' }).click();
+    await expect(page.locator('#irRequestStatus')).toContainText('service unavailable or access denied');
+    await expect(page.locator('#irRequestStatus')).not.toContainText('Existing request found');
+  });
+}
+
+test('IR request localization uses text and never interprets client names as HTML', async ({ page }) => {
+  await openIrRequests(page);
+  await page.evaluate(async () => {
+    const { mountIrProvisioning } = await import('/workspace/ir-provisioning.js');
+    mountIrProvisioning(document.querySelector('#irProvisioningArea'), {
+      supabase: { rpc: async () => ({ data: null, error: null }) },
+      clients: [{ id: 'org_localized', display_name: '<img src=x onerror=alert(1)>', state: 'provisioning' }],
+      messages: { title: 'Solicitudes de IR', choose: 'Seleccione cliente', check: 'Consultar estado' }
+    });
+  });
+  await expect(page.getByRole('heading', { name: 'Solicitudes de IR' })).toBeVisible();
+  await expect(page.locator('#irProvisioningArea img')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Consultar estado' })).toBeVisible();
 });

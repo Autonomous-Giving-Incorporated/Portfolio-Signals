@@ -7,6 +7,17 @@ on:
       - 'services/import-api/**'
       - 'fixtures/autogive-v1/**'
       - 'scripts/synthetic/**'
+      - 'scripts/staging/test-ir-provisioning.py'
+      - 'scripts/staging/test-ir-worker-http.mjs'
+      - 'scripts/staging/ir-portable-contract.mjs'
+      - 'scripts/staging/check-ir-portable-oracle.py'
+      - 'fixtures/ir-portable/**'
+      - 'workers/portfolio-signals/**'
+      - 'workspace/ir-*'
+      - 'tests/browser/ir-*'
+      - 'wrangler.toml'
+      - 'package*.json'
+      - 'playwright.config.js'
       - 'tests/autogive-synthetic-v1.test.mjs'
       - '.github/workflows/local-supabase-tests.yml'
   push:
@@ -16,6 +27,17 @@ on:
       - 'services/import-api/**'
       - 'fixtures/autogive-v1/**'
       - 'scripts/synthetic/**'
+      - 'scripts/staging/test-ir-provisioning.py'
+      - 'scripts/staging/test-ir-worker-http.mjs'
+      - 'scripts/staging/ir-portable-contract.mjs'
+      - 'scripts/staging/check-ir-portable-oracle.py'
+      - 'fixtures/ir-portable/**'
+      - 'workers/portfolio-signals/**'
+      - 'workspace/ir-*'
+      - 'tests/browser/ir-*'
+      - 'wrangler.toml'
+      - 'package*.json'
+      - 'playwright.config.js'
       - 'tests/autogive-synthetic-v1.test.mjs'
       - '.github/workflows/local-supabase-tests.yml'
   workflow_dispatch:
@@ -112,6 +134,20 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/023_auth_email_alerts.sql
       - name: Execute privileged MFA persist checks
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/027_set_mfa_enforced.sql
+      - name: Execute IR provisioning request authorization and rollback checks
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/028_ir_provisioning_request.sql
+      - name: Execute immutable IR scaffold acceptance
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/029_ir_workspace_scaffold.sql
+      - name: Execute initialized IR workspace acceptance
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/030_ir_initialized_workspace.sql
+      - name: Execute IR portable contract and Worker unit tests
+        run: node --test workers/portfolio-signals/test/*.test.js
+      - name: Install browser acceptance dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Execute isolated IR initialization, concurrency and browser checks
+        run: FI_IR_BROWSER=1 python3 scripts/staging/test-ir-provisioning.py
       - name: Reject committed sensitive exports
         run: |
           if find . -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.csv' -o -iname '*.pdf' \) -not -path './node_modules/*' | grep -q .; then
