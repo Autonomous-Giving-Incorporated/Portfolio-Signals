@@ -1,8 +1,10 @@
-# IR targeted release — held for independent review and recovery approval
+# IR targeted release — code merged; hosted application held
 
-**No hosted write, merge, deploy, tenant activation, allocation, or financial authorization is granted by this artifact.** The compiler is offline; the only executable application harness creates its own disposable database. Parent review of this exact diff and the backup/recovery agent's result is required before any hosted application.
+**No hosted write, manual production deploy, tenant activation, allocation, or financial authorization is granted by this artifact.** The compiler is offline; the only executable application harness creates its own disposable database. Independent exact-diff review and verified backup/recovery evidence remain required before any hosted application.
 
-**Backup/recovery gate: BLOCKED.** No usable recovery point or production restore has been verified by this change. Passing rehearsal and independent code review do not authorize merge, hosted apply, or deployment.
+**Code integration:** the user separately authorized PR [#67](https://github.com/Autonomous-Giving-Incorporated/Portfolio-Signals/pull/67), superseding the earlier coordinated code-merge hold. Exact tested head `bb6ecce3965eca347d537f38856948336ea67a4e` was merged normally, without admin bypass, as `8eb7ff5bf3874563b6590cafd6e9d37460956bcc`. Repository rules required a PR and five successful acceptance checks, with zero mandatory approving reviews. This code merge is not a hosted database release.
+
+**Backup/recovery gate: BLOCKED for hosted database application and activation.** No usable production recovery point or restore has been verified. Passing rehearsal and code integration do not authorize hosted apply or manual production deployment. Push-triggered validation uses disposable databases, not hosted migrations. Automatic static publishing and credential-gated Worker deployment must be reported from exact-run logs; a green workflow or Vercel static build does not prove a deployed Worker, schema parity, or runtime readiness. Missing public Worker bindings or missing RPCs fail closed. `runtime_ready=false` and `operational=false` remain unchanged.
 
 ## Confirmed hosted finding
 
