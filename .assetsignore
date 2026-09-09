@@ -1,6 +1,11 @@
-# Fail-closed public publish: only the director portal, workspace shell, and
-# public aggregates. Mirrors .vercelignore and also drops operator/source trees
-# that must not ship on the CDN.
+# Public publish exclusions for the portal, workspace shell, and aggregates.
+# This is a denylist, not an allowlist; verify actual Wrangler discovery in CI.
+# Hidden tool/config files are private at EVERY depth, including newly generated
+# .mcp.json, .claude/, .codex/, .agents/, .dev.vars and editor/cache artifacts.
+# Only the root web-standard discovery directory is public; hidden descendants
+# remain excluded. Review any additional exception with the asset regression.
+**/.*
+!/.well-known
 
 .git
 .github

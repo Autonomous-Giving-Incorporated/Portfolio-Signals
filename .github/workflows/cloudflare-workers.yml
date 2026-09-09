@@ -39,6 +39,8 @@ jobs:
         run: npm test
       - name: Public binding and actual workerd bootstrap acceptance
         run: node --test tests/worker-public-bindings.test.mjs tests/worker-runtime.workerd.test.mjs
+      - name: Verify Wrangler static asset exclusions and public retention
+        run: node --test tests/static-assets.test.mjs
       - name: Wrangler config dry-run
         run: npx --no-install wrangler deploy --dry-run --outdir=/tmp/wrangler-dry-run
 
