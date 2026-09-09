@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Apply repository migrations to the local disposable Supabase stack.
-# For linked remote staging projects, operators should use `supabase db push`
-# after `supabase link` with credentials from a secret manager.
+# Remote application is disabled; see docs/IR-TARGETED-RELEASE.md.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -22,15 +21,9 @@ case "$MODE" in
     echo "Local migrations applied."
     ;;
   remote-linked)
-    expected_ref="utdioxwiskzatwoejgiu"
-    confirm="${PLATFORM_CONFIRM_PROJECT_REF:-${STAGING_CONFIRM_PROJECT_REF:-}}"
-    linked_ref="$(cat supabase/.temp/project-ref 2>/dev/null || true)"
-    if [[ "$confirm" != "$expected_ref" || "$linked_ref" != "$expected_ref" ]]; then
-      echo "Remote migration requires linked project $expected_ref and PLATFORM_CONFIRM_PROJECT_REF=$expected_ref" >&2
-      exit 1
-    fi
-    echo "Pushing migrations to platform project $expected_ref..."
-    supabase db push
+    # STAGING_CONFIRM_PROJECT_REF alone cannot approve history reconciliation.
+    echo "Remote push disabled: use the reviewed targeted release procedure in docs/IR-TARGETED-RELEASE.md" >&2
+    exit 1
     ;;
   *)
     echo "Usage: $0 [local|remote-linked]" >&2

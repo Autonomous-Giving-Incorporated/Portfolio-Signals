@@ -1,5 +1,5 @@
 -- Durable empty scaffold only. No runtime activation or legacy storage adoption.
-begin;
+-- The migration executor owns the transaction, including its ledger insert.
 create function public.ir_empty_policy(p_client_id text) returns text
 language sql immutable strict set search_path = public as $$
   select replace('{"format":"ir-policy-v1","policy":{"attribution":{"allowed_methods":[],"default_method":"DIRECT_RESTRICTED"},"authority":{"l3_command_types":["approve_expense","reject_expense","publish_use_of_funds_receipt","send_notification","publish_public_evidence","change_attribution_policy","correct_published_amount","reverse_expense","supersede_expense"]},"confidence":{"block_below":0.75,"recommend_high":0.95},"display_name":"TENANT","evidence":{"require_donor_visible":true,"sufficient_kinds":["invoice","receipt","accounting_ref"]},"notifications":{"default_email_topics":[],"fixture_consent_allowed":false,"require_separate_send_approval":true},"source_path":null,"tenant_id":"TENANT","version":"fi-empty-v1"}}', 'TENANT', p_client_id)
@@ -69,4 +69,3 @@ begin
 end $$;
 revoke all on function public.get_ir_workspace_scaffold(text) from public, anon, service_role;
 grant execute on function public.get_ir_workspace_scaffold(text) to authenticated;
-commit;

@@ -1,0 +1,14 @@
+{
+  "project_ref": "utdioxwiskzatwoejgiu",
+  "base_commit": "352459ae71fcf9cf37fab5221f7708937760cc68",
+  "cli_version": "2.31.8",
+  "history_count": 37,
+  "history_sha256": "1b45df1df7ccb3b9f11522625439f3c250205137f04b954b532ea50ee447d4a4",
+  "hosted_write_authorized": false,
+  "migrations": [
+    {"file":"20260815120000_am_allocation_write_roles.sql","sha256":"6f277085b55f7947bc9aa42066cb8b634bd1e95e49912d251b32aedb0bdc934a"},
+    {"file":"202609080001_ir_provisioning_request.sql","sha256":"b9ee2e3af177f267701b7626377eaa70a03c3d34e8194c05e996574aff47a3db"},
+    {"file":"202609080002_ir_workspace_scaffold.sql","sha256":"9a986331233e8653f71723e417c618e3110a6cc25ced0979cdd4790bf4ca397b"},
+    {"file":"202609080003_ir_initialized_workspace.sql","sha256":"098a8d5e4725e48b3acecc01c3a0359395d377761d1034d454eaa48036ef7856"}
+  ]
+}

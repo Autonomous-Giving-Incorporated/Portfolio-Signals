@@ -1,6 +1,6 @@
 -- Request/state only: NOT an IR policy pack, registry row, storage workspace or
 -- runtime readiness. The policy provenance/persistence bridge remains blocked.
-begin;
+-- The migration executor owns the transaction, including its ledger insert.
 create table public.ir_provisioning_requests (
   operation_id uuid primary key default gen_random_uuid(),
   client_id text not null unique references public.clients(id) on delete restrict
@@ -87,4 +87,3 @@ begin
 end $$;
 revoke all on function public.get_ir_provisioning_request(text) from public, anon, service_role;
 grant execute on function public.get_ir_provisioning_request(text) to authenticated;
-commit;

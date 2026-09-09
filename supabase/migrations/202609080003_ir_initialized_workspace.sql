@@ -1,6 +1,6 @@
 -- Read-only IR storage core. Allocation am_* is NOT an Impact Relay ledger.
 -- No command execution, publication, notifications, activation or readiness grant.
-begin;
+-- The migration executor owns the transaction, including its ledger insert.
 create schema ir_private;
 revoke all on schema ir_private from public, anon, authenticated, service_role;
 
@@ -120,4 +120,3 @@ revoke all on function public.open_ir_workspace(text) from public,anon,service_r
 revoke all on function public.initialize_ir_workspace(text,uuid) from public,anon,service_role;
 grant execute on function public.open_ir_workspace(text) to authenticated;
 grant execute on function public.initialize_ir_workspace(text,uuid) to authenticated;
-commit;
