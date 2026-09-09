@@ -82,7 +82,7 @@ MFA enrollment or live tenant state. Recovery and human approval remain unresolv
   Wrangler's transitive sharp advisory required an exact 0.35.4 override; actual
   workerd and dry-run were rerun with that locked dependency. Local npm reported
   blocked optional install scripts, but workerd execution itself succeeded.
-- Public binding + actual workerd acceptance: 47 passed, zero failed/skipped,
+- Public binding + actual workerd acceptance: 49 passed, zero failed/skipped,
   including schema/RPC absence, service-role fallback denial, Auth/RPC redirects,
   upstream network failure, sanitized errors and caller-token forwarding.
 - Existing Worker + middleware tests: 220 passed, no skips. Fixtures: 65 passed.
@@ -90,9 +90,16 @@ MFA enrollment or live tenant state. Recovery and human approval remain unresolv
   database cases skipped (not rerun against any hosted database).
 - Pinned Wrangler `deploy --dry-run --secrets-file` with synthetic public value:
   passed, asserted value absent from logs, private artifacts cleaned. No upload.
-- Independent Codex reviewer failed authentication (401), not a code/test verdict.
-  No retry or credential change. Independent Hermes review by the parent remains
-  mandatory before release; this PR must not claim independent approval.
+- The initial Codex attempt failed authentication (401), not a code/test verdict.
+  After the user restored login, a real independent Codex review completed:
+  `passed=true`, no security concerns or logic errors. Its nonblocking stale
+  Wrangler comments suggestion was fixed. Reviewer-side test execution was
+  blocked by its read-only sandbox (EROFS), not code failure; implementer and CI
+  execution evidence is separate. Parent release review remains mandatory.
+- First-head CI exposed vendor-example strings in Wrangler triggering both
+  existing credential scanners. Both now exclude installed `node_modules` while
+  preserving repository scanning; actual-scanner negative/positive regressions
+  verify vendor exclusion and first-party credential rejection.
 
 The complete continuation plan is **not done**: bootstrap deployment/readback,
 parent review, human/schema/recovery approval and activation gates remain pending.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -61,4 +61,25 @@ test('workflow gates deploy on approved manual main dispatch and validates bindi
   assert.match(workflow, /wrangler deploy --secrets-file "\$private_dir\/bindings.json"/);
   assert.match(workflow, /tests\/worker-runtime.workerd.test.mjs/);
   assert.ok(!workflow.includes('SERVICE_ROLE'));
+});
+
+
+for (const [file, indent] of [['.github/workflows/local-security-contract.yml', 10], ['scripts/acceptance/run_security_contract.sh', 0]]) test(`${file}: credential scan ignores dependencies but rejects repository credentials`, () => {
+  const workflow = readFileSync(file, 'utf8');
+  const blocks = [...workflow.matchAll(/python3 - <<'PY'\n([\s\S]*?)\n\s*PY/g)];
+  const block = blocks.find(match => match[1].includes('patterns = ['));
+  assert.ok(block, 'must exercise the actual CI scanner');
+  const script = block[1].split('\n').map(line => line.slice(indent)).join('\n');
+  const dir = mkdtempSync(join(tmpdir(), 'fi-scan-test-'));
+  try {
+    mkdirSync(join(dir, 'node_modules', 'dependency'), { recursive: true });
+    const marker = ['BEGIN', 'PRIVATE', 'KEY'].join(' ');
+    writeFileSync(join(dir, 'node_modules', 'dependency', 'fixture.js'), marker);
+    let result = spawnSync('python3', ['-c', script], { cwd: dir, encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    writeFileSync(join(dir, 'source.js'), marker);
+    result = spawnSync('python3', ['-c', script], { cwd: dir, encoding: 'utf8' });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /source.js/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

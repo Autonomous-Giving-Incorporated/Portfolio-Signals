@@ -3,9 +3,9 @@
 # (utdioxwiskzatwoejgiu). Do not treat Render / Fly / Railway as the durable host.
 # Do not add D1 as the canonical store.
 #
-# Static assets stay on this Worker. Allocation API + POST /webhooks/* + POST /import/csv run first.
-# Durable allocation state is platform Supabase am_* tables (service-role binding).
-# Live vendor pointing and named-host OBSERVED remain operator-owned.
+# Static assets stay on this Worker. Listed API routes run the bootstrap first.
+# Bootstrap denies mutations and strips privileged bindings; allocation runtime is unavailable.
+# Full allocation/vendor enablement and named-host OBSERVED remain separately gated.
 # P1 secrets (never commit): GIVEBUTTER_WEBHOOK_SECRET, DONORBOX_WEBHOOK_SECRET.
 # Do not intercept /allocation.html, /allocation-login.html, or /allocation-setup.html.
 
