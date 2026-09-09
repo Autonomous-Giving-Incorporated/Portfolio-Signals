@@ -9,6 +9,7 @@
 .vercel
 .wrangler
 node_modules
+graft
 out
 test-results
 playwright-report

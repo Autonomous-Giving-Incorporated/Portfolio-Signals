@@ -10,7 +10,9 @@
 # Do not intercept /allocation.html, /allocation-login.html, or /allocation-setup.html.
 
 name = "portfolio-signals"
-main = "workers/portfolio-signals/src/index.js"
+# Read-only bootstrap until separate reviewed database/runtime release.
+main = "workers/portfolio-signals/src/bootstrap.js"
+account_id = "315fb44b61212825452aad0ca566ea42"
 compatibility_date = "2026-08-13"
 workers_dev = true
 
