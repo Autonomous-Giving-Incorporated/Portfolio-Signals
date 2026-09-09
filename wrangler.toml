@@ -15,6 +15,10 @@ main = "workers/portfolio-signals/src/bootstrap.js"
 account_id = "315fb44b61212825452aad0ca566ea42"
 compatibility_date = "2026-08-13"
 workers_dev = true
+# Disable historical/aliased public previews without breaking the suite origin.
+# Keep rollback versions; do not re-enable their older static asset manifests.
+# https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/
+preview_urls = false
 
 [assets]
 directory = "."

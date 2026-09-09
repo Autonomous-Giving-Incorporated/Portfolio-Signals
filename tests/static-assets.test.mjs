@@ -47,6 +47,15 @@ function dryRun(directory, outdir) {
   });
 }
 
+test('Wrangler keeps production workers.dev enabled and historical previews disabled', async () => {
+  const { unstable_readConfig } = await import('wrangler');
+  const config = unstable_readConfig({ config: join(root, 'wrangler.toml') }, {});
+  assert.equal(config.name, 'portfolio-signals');
+  assert.equal(config.account_id, '315fb44b61212825452aad0ca566ea42');
+  assert.equal(config.workers_dev, true, 'suite gateway requires the production workers.dev origin');
+  assert.equal(config.preview_urls, false, 'historical versions must not be publicly routed');
+});
+
 function ignoredAssets(result) {
   // Pinned Wrangler's real buildAssetManifest logs each ignored relative path.
   return new Set(`${result.stdout}\n${result.stderr}`.split('\n')
