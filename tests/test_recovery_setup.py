@@ -46,6 +46,21 @@ class RecoverySetupTests(unittest.TestCase):
         self.assertEqual(approval["jurisdiction"], "default")
         self.assertEqual(approval["storage_class"], "Standard")
 
+    def test_target_specific_provisioning_defaults_grant_nothing(self):
+        self.assertEqual(load("approval.template.json")["provisioning_approval"], {
+            "authorized": False, "provider": None, "account_id": None,
+            "bucket_name": None, "jurisdiction": None, "allowed_actions": [],
+            "request_body_sha256_by_action": {}, "approved_by": None,
+            "approval_evidence": None, "approved_at": None, "expires_at": None,
+        })
+        doc = (ROOT / "docs/RECOVERY-SETUP.md").read_text(encoding="utf-8")
+        for requirement in ("not provisioning authorization", "Stop before provider writes",
+                            "any target mismatch", "unlisted action",
+                            "missing/mismatched hash", "unverified approver/evidence",
+                            "create_bucket", "disable_managed_domain", "set_bucket_lock",
+                            "not an approval\nvalidator or an executor"):
+            self.assertIn(requirement, doc)
+
     def test_exact_private_retention_payloads(self):
         self.assertEqual(load("bucket-create.json"), {
             "name": "<APPROVED_BUCKET_NAME>", "locationHint": "enam",
@@ -57,7 +72,7 @@ class RecoverySetupTests(unittest.TestCase):
             "condition": {"type": "Age", "maxAgeSeconds": 30 * 24 * 60 * 60},
         }]})
 
-    def test_publication_has_no_host_metadata_or_executable_blocks(self):
+    def test_publication_known_leak_patterns_and_no_fenced_blocks(self):
         doc = ROOT / "docs/RECOVERY-SETUP.md"
         paths = [doc, *TEMPLATES.iterdir()]
         for path in paths:

@@ -56,9 +56,40 @@ custodians must independently accept and repeat these checks; multiple OpenPGP
 recipients allow either key to decrypt, not a two-person quorum. No challenge
 implementation or production credential helper is shipped here.
 
+## Target-specific provisioning approval — fail closed
+
+Billing consent, R2 enrollment, a generic code-merge request and top-level proposed
+settings are **not provisioning authorization**. The separate `provisioning_approval`
+record defaults to `authorized=false`, null target/approver/evidence/timestamps,
+no allowed actions and no request-body hashes. It grants nothing as published.
+Even changing that boolean is insufficient: the authenticated operator must verify
+an explicit, unexpired human approval through the referenced evidence before any
+provider mutation. These are documentation/data templates, not an approval
+validator or an executor; no program consumes them to grant authority.
+
+Require exact literal provider, account ID, bucket name and jurisdiction matching
+the independently authenticated destination and the top-level private handoff.
+Bind each permitted action to the SHA-256 of its exact final UTF-8 request-body
+bytes (after placeholder replacement), approved by the identified authorized
+human with evidence, approval time and expiry. The only action identifiers for
+these examples are `create_bucket`, `disable_managed_domain` and `set_bucket_lock`.
+For the full example sequence, separately approve all three and their respective
+bodies; empty action lists permit nothing. No wildcard, inferred account, existing
+bucket adoption, token creation, enrollment or deletion authority is included.
+A permitted action is valid only for its bound endpoint/target and reviewed body.
+
+Stop before provider writes on absent/false authorization, null or malformed
+fields, unverified approver/evidence, expiry, any target mismatch, unlisted action,
+missing/mismatched hash or intervening body/configuration changes. Do not reuse
+approval for another bucket/account or automatically broaden it after failure.
+Obtain a newly reviewed target-specific approval when scope changes. Private
+approved copies never belong in git. Production export/migration authorization
+remains separate and false regardless of provisioning approval.
+
 ## Approved operator destination checkpoint — no executable provisioning
 
-Only after explicit destination/billing approval and enrollment may a separately
+Only after verified target-specific provisioning approval, billing consent and
+enrollment may a separately
 reviewed operator procedure use the unapproved JSON examples below.
 JSON bodies are data, not an execution barrier: lock/private-domain bodies can
 mutate a real target if passed to an authenticated API client. This package ships
