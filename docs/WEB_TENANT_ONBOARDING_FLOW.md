@@ -1,5 +1,14 @@
 # Web-Based Tenant Onboarding Process for autogive.app
 
+> **Current containment contract:** IR cloning/full onboarding described below
+> is historical design guidance, not an available or verified production flow.
+> The implementation supports private **request/status**, a separate empty-scaffold
+> **reservation**, and **initialized read-only storage** for existing clients. It
+> does not enable an operational IR workspace, financial execution or activation.
+> Do not run the legacy clone/verification snippets as a fallback. See
+> [initialized workspace](IR-INITIALIZED-WORKSPACE.md) and
+> [release gates](IR-RELEASE-REVIEW.md) for the current scope and rollout blockers.
+
 This document describes how to implement the tenant onboarding process as a web-based flow with tooltips, dropdowns, and guided steps that can be followed directly through the Portfolio Signals and Impact Relay interfaces.
 
 ## Web-Based Onboarding Flow Overview

@@ -21,6 +21,10 @@ binding = "ASSETS"
 # Not an SPA: unknown paths 404 (not_found_handling default is none).
 html_handling = "auto-trailing-slash"
 run_worker_first = [
+  "/api/ir/provisioning",
+  "/api/ir/provisioning/*",
+  "/api/ir/workspaces",
+  "/api/ir/workspaces/*",
   "/webhooks/*",
   "/healthz",
   "/readyz",

@@ -1,5 +1,14 @@
 # Unified Tenant Onboarding Process for autogive.app Suite
 
+> **Current containment contract:** IR cloning/full onboarding described below
+> is historical design guidance, not an available or verified production flow.
+> The implementation supports private **request/status**, a separate empty-scaffold
+> **reservation**, and **initialized read-only storage** for existing clients. It
+> does not enable an operational IR workspace, financial execution or activation.
+> Do not run the legacy clone/verification snippets as a fallback. See
+> [initialized workspace](IR-INITIALIZED-WORKSPACE.md) and
+> [release gates](IR-RELEASE-REVIEW.md) for the current scope and rollout blockers.
+
 This document describes the complete web-based tenant onboarding process that integrates both the Fund-Intel/Portfolio Signals (frontend/client) and Impact Relay (backend/tenant) systems.
 
 ## Overview

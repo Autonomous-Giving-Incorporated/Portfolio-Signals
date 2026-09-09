@@ -1,5 +1,14 @@
 # Suite onboarding hub
 
+> **Current containment contract:** IR cloning/full onboarding described below
+> is historical design guidance, not an available or verified production flow.
+> The implementation supports private **request/status**, a separate empty-scaffold
+> **reservation**, and **initialized read-only storage** for existing clients. It
+> does not enable an operational IR workspace, financial execution or activation.
+> Do not run the legacy clone/verification snippets as a fallback. See
+> [initialized workspace](IR-INITIALIZED-WORKSPACE.md) and
+> [release gates](IR-RELEASE-REVIEW.md) for the current scope and rollout blockers.
+
 Single entry for **finishing onboarding** across Autonomously Giving Incorporated products. Full runbooks live in linked docs; this page is the map.
 
 **Evidence source of truth:** [CURRENT-STATE.md](CURRENT-STATE.md) (`OBSERVED` / `PENDING` / `BLOCKED`).
@@ -91,7 +100,12 @@ Teams can migrate from legacy to web-based flow:
 3. **Cutover**: Adopt web-based flow as primary method once verified
 4. **Deprecate**: Legacy paths maintained for emergency/operator-only use
 
-## Quick Commands for Verification
+## Historical unsupported command examples — do not run
+
+These endpoints/headers and the placeholder Python module below are **not** the
+implemented verification contract. Use the local tests documented in
+[IR provisioning requests](IR-PROVISIONING-REQUESTS.md) instead. A client-supplied
+`X-MFA-Enforced` header grants no authority.
 
 ```bash
 # Verify web-based onboarding components

@@ -1,0 +1,20 @@
+name: Targeted IR release reconciliation
+on:
+  pull_request:
+    paths: ['scripts/staging/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/targeted-ir-release.yml']
+  push:
+    paths: ['scripts/staging/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/targeted-ir-release.yml']
+  workflow_dispatch:
+jobs:
+  disposable-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
+        with:
+          version: 2.31.8
+      - run: python3 scripts/staging/test_targeted_release.py
+      - run: python3 scripts/staging/rehearse_targeted_release.py

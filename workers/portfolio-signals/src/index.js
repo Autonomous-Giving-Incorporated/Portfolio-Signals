@@ -3,6 +3,7 @@ import {
   handleEveryOrgWebhook,
   handleGivebutterWebhook,
 } from './gift-webhook.js';
+import { handleIrProvisioning } from './ir-provisioning.js';
 import { handleAllocationApi, isAllocationApiPath } from './allocation-api.js';
 
 function jsonResponse(status, data) {
@@ -18,6 +19,10 @@ function jsonResponse(status, data) {
 
 export async function handleWorkerRequest(request, env, options = {}) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/ir/provisioning' || url.pathname.startsWith('/api/ir/provisioning/')
+    || url.pathname === '/api/ir/workspaces' || url.pathname.startsWith('/api/ir/workspaces/')) {
+    return handleIrProvisioning(request, env, options);
+  }
   if (url.pathname === '/webhooks/every-org') {
     return handleEveryOrgWebhook(request, env, options);
   }
