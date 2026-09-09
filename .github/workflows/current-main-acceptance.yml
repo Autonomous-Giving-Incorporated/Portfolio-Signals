@@ -116,6 +116,9 @@ jobs:
           assert receipt['productionImportAuthorized'] is False
           assert receipt['outreachAuthorized'] is False
 
+      - name: Verify unapproved recovery setup publication (offline)
+        run: python3 tests/test_recovery_setup.py
+
       - name: Emit commit-scoped acceptance note
         run: |
           {
@@ -123,6 +126,7 @@ jobs:
             echo
             echo "Commit: \`${GITHUB_SHA}\`"
             echo
-            echo 'This workflow validates repository structure and the staging-verdict contract only.'
+            echo 'This workflow validates repository structure, the staging-verdict contract, and recovery-template publication integrity.'
+            echo 'It does not verify R2 enrollment, human key custody, backup usability, or restore readiness.'
             echo 'It does not claim hosted deployment, Supabase parity, production import authority, or outreach authority.'
           } >> "$GITHUB_STEP_SUMMARY"

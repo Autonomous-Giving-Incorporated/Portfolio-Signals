@@ -6,6 +6,14 @@
 
 **Backup/recovery gate: BLOCKED for hosted database application and activation.** No usable production recovery point or restore has been verified. Passing rehearsal and code integration do not authorize hosted apply or manual production deployment. Push-triggered validation uses disposable databases, not hosted migrations. Automatic static publishing and credential-gated Worker deployment must be reported from exact-run logs; a green workflow or Vercel static build does not prove a deployed Worker, schema parity, or runtime readiness. Missing public Worker bindings or missing RPCs fail closed. `runtime_ready=false` and `operational=false` remain unchanged.
 
+## Recovery setup continuation
+
+Use [Organization-owned recovery setup](RECOVERY-SETUP.md) for sanitized unapproved
+approval/payload templates and the account, billing, custody and destination
+evidence ladder. R2 enrollment and independent key custody are **not done**;
+publishing or merging those templates grants no paid-resource or hosted release
+authority. Keep the recovery gate above held until actual evidence is verified.
+
 ## Confirmed hosted finding
 
 Read-only authenticated Supabase MCP discovery identified AGI project `utdioxwiskzatwoejgiu`, PostgreSQL `17.6.1.155`. Catalog reads found RLS enabled on both tables and INSERT grants to authenticated (also anon; RLS still applies):

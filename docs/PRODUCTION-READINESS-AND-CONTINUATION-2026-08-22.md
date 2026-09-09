@@ -27,6 +27,14 @@ production_money_movement: BLOCKED
 
 ---
 
+## Recovery setup follow-up
+
+[Organization-owned recovery setup](RECOVERY-SETUP.md) provides reusable unapproved
+templates for the recovery prerequisite, not a current production receipt. R2
+enrollment, billing consent and independent human key custody remain unresolved.
+Continue through its evidence ladder and [targeted release gates](IR-TARGETED-RELEASE.md)
+before any production export or hosted migration; code merge is not release approval.
+
 ## 1. Verdict
 
 The suite is a **disciplined, fail-closed hosted workbench** with a strong offline library and CI story. It is **not** production-ready as an end-to-end Autogive product.

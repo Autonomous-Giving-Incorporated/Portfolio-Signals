@@ -1,0 +1,13 @@
+{
+  "rules": [
+    {
+      "id": "recovery-all-30-days",
+      "enabled": true,
+      "prefix": "",
+      "condition": {
+        "type": "Age",
+        "maxAgeSeconds": 2592000
+      }
+    }
+  ]
+}
