@@ -1,5 +1,6 @@
 import { createWorkspaceClient, getRuntimeConfig } from './session.js';
 import { collectionMessages } from './onboarding-messages.js';
+import { resolveLocalTestMode } from './test-mode.js';
 
 const SLOT_LABELS = {
   org_legal_name_proof: 'Legal name / formation',
@@ -42,21 +43,25 @@ function statusBadge(status) {
  */
 export async function mountOnboardingPack(container, { clientId, session: workspaceSession, isMasterAdmin = false } = {}) {
   if (!clientId) throw new Error('Client id required for onboarding pack.');
-  if (!workspaceSession?.session?.access_token) throw new Error('Authentication required.');
+  const testMode = resolveLocalTestMode(getRuntimeConfig(), globalThis.location);
+  if (!workspaceSession?.session?.access_token && !testMode) throw new Error('Authentication required.');
 
   const supabase = workspaceSession.supabase || createWorkspaceClient();
   const accessToken = workspaceSession.session.access_token;
   const config = getRuntimeConfig();
   const t = collectionMessages(config.onboardingMessages);
-  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+  if ((!config.supabaseUrl || !config.supabaseAnonKey) && !testMode) {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
 
-  const functionsBase = `${config.supabaseUrl}/functions/v1`;
+  const functionsBase = testMode ? testMode.backendOrigin : `${config.supabaseUrl}/functions/v1`;
   let packView = null;
   let statusEl = null;
   let uploading = false;
   let uploadResults = [];
+  const requireWriteAuthority = () => {
+    if (testMode) throw new Error('TEST MODE has no production authority.');
+  };
 
   function renderUploadResults() {
     const list = container.querySelector('#onboardingUploadResults');
@@ -85,6 +90,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   }
 
   async function uploadFiles(fileList) {
+    requireWriteAuthority();
     const files = Array.from(fileList || []).filter(Boolean);
     if (!files.length || uploading) return;
     uploadResults = [];
@@ -152,6 +158,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   }
 
   async function confirmDocument(documentId, type) {
+    requireWriteAuthority();
     if (!type) throw new Error('Select a checklist slot before confirming.');
     const { error } = await supabase.rpc('confirm_onboarding_document', {
       p_document_id: documentId,
@@ -165,6 +172,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   }
 
   async function unconfirmDocument(documentId) {
+    requireWriteAuthority();
     const { error } = await supabase.rpc('unconfirm_onboarding_document', {
       p_document_id: documentId
     });
@@ -175,6 +183,7 @@ export async function mountOnboardingPack(container, { clientId, session: worksp
   }
 
   async function previewDocument(documentId) {
+    requireWriteAuthority();
     const response = await fetch(`${functionsBase}/onboarding-document-url`, {
       method: 'POST',
       headers: {
