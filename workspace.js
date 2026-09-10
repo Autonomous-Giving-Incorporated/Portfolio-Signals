@@ -32,6 +32,7 @@ import {
   resolveWorkspaceChrome,
   workspaceIdentityRoleLabel
 } from './workspace/tenant-chrome.js';
+import { activateTestModeUi, resolveLocalTestMode } from './workspace/test-mode.js';
 
 const root = document.getElementById('workspaceRoot');
 const gate = document.getElementById('authGate');
@@ -59,6 +60,7 @@ let renderInFlight = null;
 let loginRequestInFlight = false;
 let pendingDelegateInvitationId = new URL(window.location.href).searchParams.get('delegate_invitation');
 let activeSessionEmail = null;
+const activeTestMode = resolveLocalTestMode(getRuntimeConfig(), globalThis.location);
 const entryUrl = new URL(window.location.href);
 if (entryUrl.searchParams.has('onboarding')) clearOnboardingIntent();
 let pendingOnboardingIntent = captureOnboardingIntent(window.location.href) || readOnboardingIntent();
@@ -189,6 +191,7 @@ if (!document.getElementById('loginForm')) {
 } else {
   try {
     activeClient = createWorkspaceClient();
+    activateTestModeUi(activeTestMode);
   } catch {
     showMessage('Workspace is not configured. Set runtime public Supabase values without committing server secrets.');
     document.getElementById('loginForm').querySelector('button').disabled = true;
@@ -226,6 +229,7 @@ if (activeClient) {
   });
 
   document.getElementById('signOut').addEventListener('click', async () => {
+    if (activeTestMode) return;
     clearWorkspaceSessionCache();
     await activeClient.auth.signOut();
   });
@@ -272,7 +276,9 @@ if (activeClient) {
   });
 
   // Boot: hash tokens first, then localStorage (refresh path).
-  settleAuthFromUrl(activeClient)
+  (activeTestMode
+    ? (cleanAuthUrl(), activeClient.auth.getSession().then(result => result.data.session))
+    : settleAuthFromUrl(activeClient))
     .then(async (session) => {
       if (session) return scheduleRender(session, { allowNull: false });
       const recovered = await getRecoveredSession(activeClient);

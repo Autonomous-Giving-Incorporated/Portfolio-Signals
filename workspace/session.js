@@ -1,10 +1,14 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 import {
   MFA_ENFORCED_REQUIRED,
   privilegedMfaMissing,
   workspaceRedirectUrl
 } from './auth-consume.js';
 import { resolveSelectedWorkspaceClient } from './tenant-chrome.js';
+import {
+  createSyntheticWorkspaceClient,
+  resolveLocalTestMode,
+  syntheticWorkspaceSession
+} from './test-mode.js';
 
 export { workspaceRedirectUrl };
 
@@ -12,6 +16,12 @@ const CLIENT_STORAGE_KEY = 'agi.activeClientId';
 
 let cached = null;
 let sharedClient = null;
+let createSupabaseClient = null;
+
+const initialTestMode = resolveLocalTestMode(getRuntimeConfig(), globalThis.location);
+if (!initialTestMode) {
+  ({ createClient: createSupabaseClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm'));
+}
 
 export function getRuntimeConfig() {
   return window.AGI_PORTFOLIO_SIGNALS_CONFIG || window.AGI_FUND_INTEL_CONFIG || window.HACKER_DOJO_CONFIG || window.__HD_CONFIG__ || {};
@@ -25,6 +35,11 @@ export function createWorkspaceClient() {
   if (sharedClient) return sharedClient;
 
   const config = getRuntimeConfig();
+  const testMode = resolveLocalTestMode(config, globalThis.location);
+  if (testMode) {
+    sharedClient = createSyntheticWorkspaceClient(testMode);
+    return sharedClient;
+  }
   if (!config.supabaseUrl || !config.supabaseAnonKey) {
     throw new Error('Workspace is not configured with public Supabase values.');
   }
@@ -33,7 +48,7 @@ export function createWorkspaceClient() {
   // remain supported. detectSessionInUrl stays off to avoid init races.
   // Do not switch this client to PKCE: that would bind admin-issued links
   // to the sender's localStorage.
-  sharedClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+  sharedClient = createSupabaseClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -129,6 +144,12 @@ export async function requireWorkspaceSession(knownSession = null) {
   }
 
   const supabase = createWorkspaceClient();
+  const testMode = resolveLocalTestMode(getRuntimeConfig(), globalThis.location);
+  if (testMode) {
+    const fixture = syntheticWorkspaceSession(testMode);
+    cached = { ...fixture, supabase };
+    return cached;
+  }
   const session = knownSession || (await getRecoveredSession(supabase));
   if (!session?.access_token) {
     throw new Error('Authentication required.');
@@ -178,7 +199,9 @@ export function selectWorkspaceClient(clientId) {
   if (!cached?.clients?.some((client) => client.id === clientId)) {
     throw new Error('Selected client is not available to this account.');
   }
-  localStorage.setItem(CLIENT_STORAGE_KEY, clientId);
+  if (!resolveLocalTestMode(getRuntimeConfig(), globalThis.location)) {
+    localStorage.setItem(CLIENT_STORAGE_KEY, clientId);
+  }
   cached = null;
 }
 
