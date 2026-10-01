@@ -105,6 +105,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         if: steps.pages.outcome == 'success'
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
 
 # Provenance: Notion Sprint 001 Hub + Loop 805 Slice HD-OI-019 + Hash: abf1c1daca761b961c9b41978532ce9e904c33ac
