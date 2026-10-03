@@ -12,8 +12,8 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.54.2",
-    "miniflare": "5.20260908.0-alpha",
-    "wrangler": "4.130.0"
+    "miniflare": "5.20261001.0-alpha",
+    "wrangler": "4.147.0"
   },
   "overrides": {
     "sharp": "0.35.4"
