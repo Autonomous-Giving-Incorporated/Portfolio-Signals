@@ -10,7 +10,7 @@
     "seed:synthetic": "node scripts/synthetic/seed.mjs"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.13.0",
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.54.2",
     "miniflare": "5.20260908.0-alpha",
     "wrangler": "4.130.0"
